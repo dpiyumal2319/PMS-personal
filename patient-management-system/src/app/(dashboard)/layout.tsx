@@ -1,6 +1,5 @@
 import Sidebar from "@/app/(dashboard)/_components/Sidebar";
 import TopBar from "@/app/(dashboard)/_components/TopBar";
-import { logout} from "@/app/lib/auth";
 
 export default function DashboardLayout({
                                             children,
