@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import type {Metadata} from "next";
+import {Montserrat} from "next/font/google";
 import "./globals.css";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "Patient Management System",
-  description: "Patient Management System",
+    title: "Patient Management System",
+    description: "Patient Management System",
 };
 
 const montserrat = Montserrat({
@@ -15,16 +15,18 @@ const montserrat = Montserrat({
 });
 
 export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
+                                       children,
+                                   }: Readonly<{
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" className={montserrat.className}>
-      <body
-      >
+
+
+
+    return (
+        <html lang="en" className={montserrat.className}>
+        <body>
         {children}
-      </body>
-    </html>
-  );
+        </body>
+        </html>
+    );
 }

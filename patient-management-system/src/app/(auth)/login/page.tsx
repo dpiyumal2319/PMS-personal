@@ -1,29 +1,35 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { login } from "@/app/lib/auth";
 
 export default function LoginPage() {
-    const [role, setRole] = useState("doctor");
-    const router = useRouter();
-
-    async function handleLogin() {
-        await fetch("/api/auth/login", {
-            method: "POST",
-            body: JSON.stringify({ role }),
-        });
-        router.push("/dashboard"); // Redirect to home/dashboard
-    }
+    const [errorMessage, formAction, Pending] = useActionState(login, '');
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
+        <form action={formAction} className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-2xl mb-4">Select Your Role</h1>
-            <select value={role} onChange={(e) => setRole(e.target.value)} className="p-2 border mb-4">
+
+            {/* Role Selection */}
+            <select name="role" className="p-2 border mb-4">
                 <option value="doctor">Doctor</option>
                 <option value="nurse">Nurse</option>
             </select>
-            <button onClick={handleLogin} className="bg-primary text-white p-2 rounded">
-                Login
+
+            {/* User ID Input */}
+            <input
+                name="id"
+                placeholder="User ID"
+                className="p-2 border mb-4"
+                required
+            />
+
+            {/* Error Message Display */}
+            {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
+
+            {/* Submit Button */}
+            <button type="submit" className="bg-primary text-white p-2 rounded" disabled={Pending}>
+                {Pending ? 'Loading...' : 'Login'}
             </button>
-        </div>
+        </form>
     );
 }
