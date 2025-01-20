@@ -1,3 +1,5 @@
+'use server';
+
 import 'server-only'
 import {jwtVerify, SignJWT} from "jose";
 import {cookies} from "next/headers";
@@ -41,7 +43,7 @@ export const deleteSession = async () => {
     cookieStore.delete('session');
 }
 
-export async function getSession() {
+export async function verifySession() {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('session')?.value;
     const session = await decrypt(sessionCookie);

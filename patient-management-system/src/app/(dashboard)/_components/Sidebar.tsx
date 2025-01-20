@@ -1,7 +1,8 @@
 export default function Sidebar() {
+
     return (
-        <div>
-            <h1>This is sidebar</h1>
+        <div className={"h-screen w-80 bg-primary-500"}>
+
         </div>
     );
 }
