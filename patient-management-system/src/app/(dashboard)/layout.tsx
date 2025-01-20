@@ -15,7 +15,9 @@ export default function DashboardLayout({
                 <div className={'sticky top-0'}>
                     <TopBar/>
                 </div>
-                {children}
+                <div className="p-4">
+                    {children}
+                </div>
             </div>
         </div>
     );
