@@ -24,7 +24,7 @@ export default function RootLayout({
 
     return (
         <html lang="en" className={montserrat.className}>
-        <body>
+        <body className={'bg-background h-screen'}>
         {children}
         </body>
         </html>
