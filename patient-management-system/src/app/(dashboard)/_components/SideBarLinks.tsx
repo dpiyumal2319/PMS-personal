@@ -1,5 +1,4 @@
 'use client';
-
 import {SideBarItem, ExpandingSideBarItem} from "./SideBarItem";
 import type { SessionPayload} from "@/app/lib/definitions";
 import {DoctorLinks, NurseLinks} from "@/app/lib/sidebar_links";
@@ -7,7 +6,6 @@ import {DoctorLinks, NurseLinks} from "@/app/lib/sidebar_links";
 
 export default function SideBarLinks({session}: { session: SessionPayload }) {
 
-    console.log(session.role);
     return (
         <div className={"flex flex-col gap-2 "}>
             {session.role === "doctor" &&
