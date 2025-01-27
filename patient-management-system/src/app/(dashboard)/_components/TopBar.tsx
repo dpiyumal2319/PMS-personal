@@ -4,15 +4,15 @@ import { IoLogOutOutline } from "react-icons/io5";
 
 export default function TopBar() {
     return (
-        <div className={"h-14 bg-primary-400 flex items-center justify-between p-2"}>
-            <div className={"relative flex items-center gap-2 bg-primary-500 p-2 rounded"}>
-                <span className="animate-ping h-2 w-2 rounded-full bg-amber-600 -top-1 -right-1"></span>
-                <span className={'font-bold text-white'}> 10 </span>
-                <span className={'text-white'}>Patients</span>
+        <div className={"h-14 bg-background-50 flex items-center justify-between p-2 border-b border-primary-900/25 shadow"}>
+            <div className={"relative flex items-center gap-2 bg-primary-500 p-2 rounded text-white"}>
+                <span className="animate-ping h-2 w-2 rounded-full bg-amber-400 "></span>
+                <span className={'font-bold'}> 10 </span>
+                <span >Patients</span>
             </div>
-            <div className={"flex items-center hover:bg-primary-300 rounded p-2"}>
+            <div className={"flex items-center hover:bg-background-200 rounded-full p-2"}>
                 <button onClick={logout}>
-                    <IoLogOutOutline className={"text-white text-2xl"} />
+                    <IoLogOutOutline className={"text-2xl"} />
                 </button>
             </div>
         </div>

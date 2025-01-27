@@ -21,7 +21,7 @@ export async function decrypt(session: string | undefined = ''): Promise<Session
         return payload as SessionPayload;
     } catch (error) {
         console.error(error, 'Invalid session');
-        return null
+        return null;
     }
 }
 

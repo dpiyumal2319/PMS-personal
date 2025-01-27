@@ -8,10 +8,16 @@ export default function DashboardLayout({
 }) {
     return (
         <div className="flex">
-            <Sidebar />
+            <aside className={"h-screen sticky top-0"}>
+                <Sidebar/>
+            </aside>
             <div className="flex flex-col w-full">
-                <TopBar />
-                {children}
+                <div className={'sticky top-0'}>
+                    <TopBar/>
+                </div>
+                <div>
+                    {children}
+                </div>
             </div>
         </div>
     );
