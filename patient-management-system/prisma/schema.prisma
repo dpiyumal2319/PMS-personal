@@ -12,3 +12,63 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  DOCTOR
+  NURSE
+}
+
+enum QueueStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum VisitStatus {
+  PENDING
+  PRESCRIBED
+  COMPLETED
+}
+
+model Patient {
+  id         Int          @id @default(autoincrement())
+  telephone  String
+  name       String
+  birthDate  DateTime?
+  address    String?
+  height     Float?
+  weight     Float?
+  gender     Gender
+  NIC        String?
+  QueueEntry QueueEntry[]
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  mobile   String
+  password String
+  role     Role
+}
+
+model Queue {
+  id      Int          @id @default(autoincrement())
+  start   DateTime
+  status  QueueStatus
+  end     DateTime?
+  entries QueueEntry[]
+}
+
+model QueueEntry {
+  id        Int         @id @default(autoincrement())
+  queueId   Int
+  userId    Int
+  status    QueueStatus
+  queue     Queue       @relation(fields: [queueId], references: [id])
+  patient   Patient?    @relation(fields: [patientId], references: [id])
+  patientId Int?
+}
