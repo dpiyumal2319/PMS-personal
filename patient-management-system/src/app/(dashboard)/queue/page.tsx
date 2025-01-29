@@ -15,7 +15,7 @@ export default async function Page(props: {
     const queues = await getTotalQueueCount();
 
     return (
-        <div>
+        <div className={'flex flex-col h-full'}>
             {/* Top Bar */}
             <div
                 className="flex justify-between w-full bg-background-50 h-14 border-b border-primary-900/25 shadow items-center p-2">
@@ -24,7 +24,7 @@ export default async function Page(props: {
             </div>
 
             {/* Table Section */}
-            <div className="p-4  flex flex-col items-center">
+            <div className="p-4  flex flex-col items-center justify-between h-full">
                 <div className=" min-h-52 flex flex-col w-4/5">
                     {/*Table*/}
                     <QueueTable currentPage={currentPage} size={rowsPerPage}/>
@@ -34,8 +34,6 @@ export default async function Page(props: {
                     <Pagination queues={queues} size={rowsPerPage} />
                 </div>
             </div>
-
-
         </div>
     );
 }
