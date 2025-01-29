@@ -8,7 +8,7 @@ export default function SideBarLinks({session}: { session: SessionPayload }) {
 
     return (
         <div className={"flex flex-col gap-2 "}>
-            {session.role === "doctor" &&
+            {session.role === "DOCTOR" &&
                 DoctorLinks.map((item) => {
                     if ("links" in item) {
                         return <ExpandingSideBarItem item={item} key={item.name} />;
@@ -18,7 +18,7 @@ export default function SideBarLinks({session}: { session: SessionPayload }) {
                 })
             }
 
-            {session.role === "nurse" &&
+            {session.role === "NURSE" &&
                 NurseLinks.map((item) => {
                     if ("links" in item) {
                         return <ExpandingSideBarItem item={item} key={item.name} />;

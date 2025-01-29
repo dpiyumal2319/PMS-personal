@@ -34,14 +34,14 @@ async function main() {
     //Add doctor and nurse
     const doctor = await prisma.user.create({
      data: {
-       email: 'doctor1@srilanka.com', mobile: '0765432189', password: 'pubududoc', role: Role.DOCTOR },
+       email: 'doctor1@srilanka.com', mobile: '0765432189', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.DOCTOR, name: 'Dr. Pubudu' },
      
     
     });
 
     const nurse = await prisma.user.create({
         data: {
-            email: 'nurse1@srilanka.com', mobile: '0775671234', password: 'pubudunur', role: Role.NURSE },
+            email: 'nurse1@srilanka.com', mobile: '0775671234', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.NURSE, name: 'Pubudu Nona' },
     });
 
      // Create a Queue
@@ -74,18 +74,18 @@ async function main() {
   });
 
   //Add Prescription Data
-  const prescription = await prisma.prescription.create({
-    data: {
-      patientId: patient1.id,
-      issues: {
-        create: [
-          {
-            batchId: 1, 
-          },
-        ],
-      },
-    },
-  });
+  // const prescription = await prisma.prescription.create({
+  //   data: {
+  //     patientId: patient1.id,
+  //     issues: {
+  //       create: [
+  //         {
+  //           batchId: 1,
+  //         },
+  //       ],
+  //     },
+  //   },
+  // });
 
   // Add Report Template & Reports
   const reportTemplate = await prisma.reportTemplate.create({
