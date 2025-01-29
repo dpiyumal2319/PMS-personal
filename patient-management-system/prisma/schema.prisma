@@ -72,16 +72,15 @@ model User {
 
 model Queue {
   id      Int          @id @default(autoincrement())
-  start   DateTime
-  status  QueueStatus
+  start   DateTime     @default(now())
   end     DateTime?
+  status  QueueStatus  @default(IN_PROGRESS)
   entries QueueEntry[]
 }
 
 model QueueEntry {
   id        Int         @id @default(autoincrement())
   queueId   Int
-  userId    Int
   status    QueueStatus
   queue     Queue       @relation(fields: [queueId], references: [id])
   patient   Patient?    @relation(fields: [patientId], references: [id])
