@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from "@/app/lib/prisma";
+import {prisma} from "@/app/lib/prisma";
 import {revalidatePath} from "next/cache";
 
 export async function addQueue() {
@@ -22,4 +22,11 @@ export async function addQueue() {
 
     revalidatePath('/queue');
     return { status: 'success', message: 'Queue added successfully' }
+}
+
+export async function getQueues(offset: number, limit: number) {
+    return prisma.queue.findMany({
+        skip: offset,
+        take: limit
+    });
 }

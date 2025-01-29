@@ -13,6 +13,7 @@ function PrimaryButton({ handleClick, text }: { handleClick: () => void, text: s
           transition-colors
           disabled:opacity-50 
           disabled:cursor-not-allowed
+          shadow-md
         `}
         >
             {text}

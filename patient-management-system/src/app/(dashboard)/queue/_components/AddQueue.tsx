@@ -22,7 +22,7 @@ const QueueButton = () => {
                 },
                 {
                     position: 'bottom-right',
-                    className: 'ring ring-primary-500/25',
+                    className: 'ring ring-gray-500/25',
                 },
             )
         } catch (e) {
@@ -31,9 +31,7 @@ const QueueButton = () => {
     };
 
     return (
-        <div className={'flex justify-end py-2'}>
             <Button handleClick={handleClick} text={'Create A Queue'}/>
-        </div>
     );
 };
 
