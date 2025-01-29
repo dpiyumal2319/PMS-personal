@@ -64,6 +64,7 @@ model Patient {
 model User {
   id       Int    @id @default(autoincrement())
   email    String @unique
+  name     String
   mobile   String
   password String
   role     Role

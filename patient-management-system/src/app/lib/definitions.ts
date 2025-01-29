@@ -2,6 +2,8 @@ import { IconType } from "react-icons";
 
 export type SessionPayload = {
     id: number;
+    name: string;
+    email: string;
     role: string;
 }
 
