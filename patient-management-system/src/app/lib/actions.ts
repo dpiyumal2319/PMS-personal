@@ -27,6 +27,18 @@ export async function addQueue() {
 export async function getQueues(offset: number, limit: number) {
     return prisma.queue.findMany({
         skip: offset,
-        take: limit
+        take: limit,
+        orderBy: {
+            id: 'desc'
+        },
+        include: {
+            _count: {
+                select: { entries: true }
+            }
+        }
     });
+}
+
+export async function getTotalQueueCount() {
+    return prisma.queue.count();
 }
