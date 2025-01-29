@@ -1,33 +1,39 @@
-"use client";
-import { useState } from "react";
-import { MdLock, MdRemoveRedEye } from "react-icons/md"; // Import React Icons
+
+import { MdLock, MdLockOpen } from "react-icons/md"; 
 
 interface PasswordInputProps {
-  password: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showPassword: boolean;
+  toggleShow: () => void;
 }
 
-export const PasswordInput = ({ password }: PasswordInputProps) => {
-  const [showPassword, setShowPassword] = useState(false);
+export const PasswordInput = ({label,value,onChange, showPassword, toggleShow}:PasswordInputProps) => {
 
-  return (
-    <div className="relative mt-1">
+    return (
+    <div>
+    <label className="block text-sm font-medium text-primary-600 mb-1">{label}</label>
+    <div className="relative">
       <input
         type={showPassword ? "text" : "password"}
-        value={password}
-        readOnly
-        className="w-full p-2 pr-10 rounded-md bg-background-100 border border-background-300 font-mono"
+        value={value}
+        onChange={onChange}
+        className="w-full p-2 pr-10 rounded-md border border-background-300 bg-background-100 focus:ring-2 focus:ring-primary-500"
       />
       <button
         type="button"
-        onClick={() => setShowPassword(!showPassword)}
+        onClick={toggleShow}
         className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-500 hover:text-primary-600"
       >
         {showPassword ? (
-          <MdRemoveRedEye className="w-5 h-5" /> // Eye open icon
+          <MdLockOpen className="w-5 h-5" />
         ) : (
-          <MdLock className="w-5 h-5" /> // Lock icon
+          <MdLock className="w-5 h-5" />
         )}
       </button>
     </div>
-  );
+  </div>
+);
+  
 };

@@ -1,17 +1,13 @@
+
 import {prisma} from '@/app/lib/prisma';
 import { Card } from "../_components/Card";
 
-interface UserData {
-  id: string;
-  role: "DOCTOR" | "NURSE"  ;
-  name: string;
-  email: string;
-  telephone: string;
-  profilePic?: string;
-}
+
 
 
 export default async function AdminPage() {
+
+
   const users = await prisma.user.findMany({
     select: {
       id: true,
@@ -21,6 +17,7 @@ export default async function AdminPage() {
       mobile: true,
     }
 });
+
 
 
   const userData = users.map(user => ({
@@ -45,9 +42,11 @@ export default async function AdminPage() {
             email={user.email}
             telephone={user.telephone}
             profilePic={user.profilePic}
+
           />
-        ))}
+         ))} 
       </div>
+    
     </div>
   );
 

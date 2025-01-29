@@ -1,5 +1,7 @@
 "use client";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 
 interface CardProps {
   role: "doctor" | "nurse" ;
@@ -10,11 +12,17 @@ interface CardProps {
 }
 
 export function Card({ role, name, email,telephone, profilePic }: CardProps) {
+
+    const router = useRouter();
+
   const roleColors = {
     doctor: "border-primary-500",
     nurse: "border-primary-300",
-    admin: "border-primary-700"
   };
+
+  const red = () => {
+    router.push("/changePassword");
+  }
 
   return (
     <div className={`w-80 p-6 rounded-xl shadow-lg bg-background-50 border-l-4 ${roleColors[role]}`}>
@@ -50,7 +58,7 @@ export function Card({ role, name, email,telephone, profilePic }: CardProps) {
         </div>
         <div>
             <button
-                onClick={()=>{}} 
+                onClick={red} 
                 className="ring-1 text-primary-600 ring-primary-600 px-3 py-2 hover:bg-primary-600 hover:text-white text-sm rounded-full">
                 Change Password
             </button>
