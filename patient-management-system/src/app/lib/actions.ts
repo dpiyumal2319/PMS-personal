@@ -13,12 +13,11 @@ export async function addQueue() {
     )
 
     if (activeQueuesCount !== 0) {
-        return { status: 'error', message: 'There is already an active queue' }
+        throw new Error('There is already an active queue')
     }
 
     await prisma.queue.create({
-        data: {
-        }
+        data: {}
     })
 
     revalidatePath('/queue');
