@@ -1,4 +1,5 @@
-export default function PatientPage() {
+export default async function PatientPage() {
+
     return (
         <div>
             <h1 className="text-4xl font-bold text-primary-500">Patients</h1>

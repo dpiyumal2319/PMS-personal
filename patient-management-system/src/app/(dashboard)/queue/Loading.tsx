@@ -14,8 +14,33 @@ function Loading() {
             </svg>
             <span className="sr-only">Loading...</span>
         </div>
-
     );
 }
 
+function LoadingSingleItem() {
+    return (
+        <div role="status" className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded-full w-3/4"></div>
+            <span className="sr-only">Loading...</span>
+        </div>
+    );
+}
+
+function LoadingRow({rows, cols} : {rows: number, cols: number}) {
+    return (
+        <tbody>
+        {[...Array(rows)].map((_, i) => (
+            <tr key={i} className="bg-white border-b border-gray-200 hover:bg-gray-50">
+                {[...Array(cols)].map((_, j) => (
+                    <td key={j} className="px-6 py-4">
+                        <LoadingSingleItem />
+                    </td>
+                ))}
+            </tr>
+        ))}
+        </tbody>
+    )
+}
+
+export {LoadingRow, LoadingSingleItem};
 export default Loading;
