@@ -1,0 +1,30 @@
+import QueueTable from "@/app/(dashboard)/queue/_components/QueueTable";
+import Pagination from "@/app/(dashboard)/queue/_components/Pagination";
+import AddQueue from "@/app/(dashboard)/queue/_components/AddQueue";
+import React from "react";
+
+const rowsPerPage = 7;
+
+export default async function Page(props: {
+    searchParams?: Promise<{
+        page?: string;
+    }>;
+}) {
+    const searchParams = await props.searchParams;
+    const currentPage = Number(searchParams?.page) || 1;
+
+    return (
+        <div className="p-4  flex flex-col items-center justify-between h-full">
+            <div className=" min-h-52 flex flex-col w-4/5">
+                <div className={'flex justify-end mb-2.5'}>
+                <AddQueue/>
+                </div>
+                {/*Table*/}
+                <QueueTable currentPage={currentPage} size={rowsPerPage}/>
+            </div>
+            <div className={'mt-2.5 shadow-md'}>
+                <Pagination size={rowsPerPage}/>
+            </div>
+        </div>
+    );
+}

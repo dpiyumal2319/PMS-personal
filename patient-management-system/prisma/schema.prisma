@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  DOCTOR
+  NURSE
+}
+
+enum QueueStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum VisitStatus {
+  PENDING
+  PRESCRIBED
+  COMPLETED
+}
+
+enum DrugType {
+  Tablet
+  Syrup
+}
+
+enum BatchStatus {
+  AVAILABLE
+  EXPIRED
+  COMPLETED
+  TRASHED
+}
+
+model Patient {
+  id           Int            @id @default(autoincrement())
+  telephone    String
+  name         String
+  birthDate    DateTime?
+  address      String?
+  height       Float?
+  weight       Float?
+  gender       Gender
+  NIC          String?
+  queueEntry   QueueEntry[]
+  prescription Prescription[]
+  reports      Report[]
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  name     String
+  mobile   String
+  password String
+  role     Role
+}
+
+model Queue {
+  id      Int          @id @default(autoincrement())
+  start   DateTime     @default(now())
+  end     DateTime?
+  status  QueueStatus  @default(IN_PROGRESS)
+  entries QueueEntry[]
+}
+
+model QueueEntry {
+  id        Int         @id @default(autoincrement())
+  queueId   Int
+  status    QueueStatus
+  queue     Queue       @relation(fields: [queueId], references: [id])
+  patient   Patient?    @relation(fields: [patientId], references: [id])
+  patientId Int?
+  time      DateTime    @default(now())
+}
+
+model DrugBrand {
+  name        String  @id
+  description String?
+  drugs       Drug[]
+}
+
+model Drug {
+  name      String    @id
+  brandName String
+  brand     DrugBrand @relation(fields: [brandName], references: [name])
+  batch     Batch[]
+}
+
+model Batch {
+  id                Int         @id @default(autoincrement())
+  number            String
+  drugName          String
+  drug              Drug        @relation(fields: [drugName], references: [name])
+  type              DrugType
+  fullAmount        Float
+  expiry            DateTime
+  stockDate         DateTime    @default(now())
+  remainingQuantity Float
+  price             Float
+  status            BatchStatus
+  Issue             Issue[]
+}
+
+model Prescription {
+  id        Int      @id @default(autoincrement())
+  time      DateTime @default(now())
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  patientId Int
+  issues    Issue[]
+}
+
+model Issue {
+  id             Int          @id @default(autoincrement())
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int
+  batch          Batch        @relation(fields: [batchId], references: [id])
+  batchId        Int
+}
+
+model ReportTemplate {
+  id           Int      @id @default(autoincrement())
+  abbreviation String   @unique
+  name         String
+  parameters   Json
+  Report       Report[]
+}
+
+model Report {
+  id          Int            @id @default(autoincrement())
+  template    ReportTemplate @relation(fields: [templateId], references: [id])
+  templateId  Int
+  parameters  Json
+  generatedAt DateTime       @default(now())
+  patient     Patient        @relation(fields: [patientId], references: [id])
+  patientId   Int
+}

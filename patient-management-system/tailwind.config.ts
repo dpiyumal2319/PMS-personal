@@ -9,8 +9,46 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        primary: {
+          DEFAULT: '#2B70CF',
+          50: '#C0D5F2',
+          100: '#AFCAEE',
+          200: '#8DB3E7',
+          300: '#6B9DE0',
+          400: '#4A86D9',
+          500: '#2B70CF',
+          600: '#2157A1',
+          700: '#183E72',
+          800: '#0E2544',
+          900: '#040B15',
+          950: '#000000'
+        },
+        background: {
+          DEFAULT: '#F5F5F5',
+          50: '#FFFFFF',
+          100: '#F5F5F5',
+          200: '#D9D9D9',
+          300: '#BDBDBD',
+          400: '#A1A1A1',
+          500: '#858585',
+          600: '#696969',
+          700: '#4D4D4D',
+          800: '#313131',
+          900: '#151515',
+          950: '#070707'
+        }
+      },
+      fontFamily: {
+        montserrat: ["var(--font-montserrat)", "sans-serif"],
+      },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(-10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.2s ease-out',
       },
     },
   },
