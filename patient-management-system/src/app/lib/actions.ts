@@ -41,6 +41,26 @@ export async function getQueues(offset: number, limit: number) {
     });
 }
 
+export async function getQueue(queueId: number) {
+    return prisma.queue.findUnique({
+        where: {
+            id: queueId
+        }
+    });
+}
+
 export async function getTotalQueueCount() {
     return prisma.queue.count();
+}
+
+export async function stopQueue(id: number) {
+    const queue = await prisma.queue.findUnique(
+        {
+            where: {
+                id : id
+            }
+        }
+    )
+
+
 }

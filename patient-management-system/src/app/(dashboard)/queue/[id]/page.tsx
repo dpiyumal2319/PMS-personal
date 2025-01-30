@@ -4,7 +4,7 @@ export default async function page(
     console.log((await params).id);
 
     return (
-        <div>
+        <div className={'bg-pink-600 flex-grow'}>
             <h1 className="text-4xl font-bold text-primary-500">Queue</h1>
             <p className="text-lg">This is the queue page.</p>
         </div>
