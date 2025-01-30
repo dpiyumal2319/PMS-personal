@@ -27,7 +27,7 @@ export default function RootLayout({
         <html lang="en" className={montserrat.className}>
         <body className={'bg-background h-screen'}>
         {children}
-        <ToastContainer />
+        <ToastContainer/>
         </body>
         </html>
     );

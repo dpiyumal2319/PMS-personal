@@ -85,3 +85,45 @@ export async function changeUserPassword({
 
   return { success: true };
 }
+
+export async function addQueue() {
+    const activeQueuesCount = await prisma.queue.count(
+        {
+            where: {
+                status: 'IN_PROGRESS'
+            }
+        }
+    )
+
+    if (activeQueuesCount !== 0) {
+        throw new Error('There is already an active queue')
+    }
+
+    await prisma.queue.create({
+        data: {}
+    })
+
+    revalidatePath('/queue');
+    revalidatePath('/queue/_components/Pagination')
+    return { status: 'success', message: 'Queue added successfully' }
+}
+
+export async function getQueues(offset: number, limit: number) {
+
+    return prisma.queue.findMany({
+        skip: offset,
+        take: limit,
+        orderBy: {
+            id: 'desc'
+        },
+        include: {
+            _count: {
+                select: { entries: true }
+            }
+        }
+    });
+}
+
+export async function getTotalQueueCount() {
+    return prisma.queue.count();
+}
