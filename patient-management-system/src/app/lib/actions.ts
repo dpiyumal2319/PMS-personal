@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "./prisma";
 import { verifySession } from "./sessions";
 import bcrypt from "bcryptjs";
@@ -104,7 +105,6 @@ export async function addQueue() {
     })
 
     revalidatePath('/queue');
-    revalidatePath('/queue/_components/Pagination')
     return { status: 'success', message: 'Queue added successfully' }
 }
 
