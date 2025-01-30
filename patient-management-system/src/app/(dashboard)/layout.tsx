@@ -12,11 +12,11 @@ export default function DashboardLayout({
             <aside className={"h-screen sticky top-0"}>
                 <Sidebar/>
             </aside>
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full h-screen">
                 <div className={'sticky top-0'}>
                     <TopBar/>
                 </div>
-                <div>
+                <div className={'h-full'}>
                     {children}
                 </div>
             </div>

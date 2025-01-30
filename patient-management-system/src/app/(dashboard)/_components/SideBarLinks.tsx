@@ -5,7 +5,6 @@ import {DoctorLinks, NurseLinks} from "@/app/lib/sidebar_links";
 
 
 export default function SideBarLinks({session}: { session: SessionPayload }) {
-
     return (
         <div className={"flex flex-col gap-2 "}>
             {session.role === "DOCTOR" &&
