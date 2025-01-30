@@ -12,7 +12,7 @@ export async function changePassword({ currentPassword, newPassword, confirmPass
         where: { id: session.id }
     });
 
-    if (!session) {
+    if (!session || !user) {
         throw new Error("Unauthorized");
     }
 
@@ -34,4 +34,32 @@ export async function changePassword({ currentPassword, newPassword, confirmPass
     return { success: true };
 }
 
-// changePassword({ currentPassword, newPassword, confirmPassword }),
+// For admin changing nurse passwords
+export async function changeUserPassword({
+  userId,
+  newPassword,
+  confirmPassword
+}: {
+  userId: number,
+  newPassword: string,
+  confirmPassword: string
+}) {
+  const session = await verifySession();
+  
+  // Verify admin role
+  const admin = await prisma.user.findUnique({ 
+    where: { id: session.id },
+    select: { role: true }
+  });
+  
+  if (admin?.role !== 'DOCTOR') throw new Error("Unauthorized");
+  if (newPassword !== confirmPassword) throw new Error("Passwords do not match");
+
+  const hashedPassword = bcrypt.hashSync(newPassword, 10);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword }
+  });
+
+  return { success: true };
+}

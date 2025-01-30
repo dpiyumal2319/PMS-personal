@@ -48,6 +48,10 @@ const [userId, setUserId] = useState<string | null>(null);
               return data instanceof Error ? data.message : 'Something went wrong';
             },
           }
+        },
+        {
+          position: 'bottom-right',
+          className: 'shadow-md'
         }
       )
 
