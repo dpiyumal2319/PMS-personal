@@ -2,6 +2,8 @@
 import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation"; 
 import { PasswordInput } from "@/app/(dashboard)/_components/PasswordInput";
+import { changePassword } from "@/app/lib/actions";
+import { toast } from 'react-toastify'
 
 export function PasswordForm() {
 const [userId, setUserId] = useState<string | null>(null);
@@ -28,25 +30,6 @@ const [userId, setUserId] = useState<string | null>(null);
     return true;
   };
 
-  // Fetch session details when the component mounts
-  useEffect(() => {
-    async function fetchSession() {
-      try {
-        const res = await fetch("/api/session"); //API route to get session data
-        const data = await res.json();
-        if (data?.id) {
-          setUserId(data.id); //Store userId from session
-        } else {
-          router.push("/login"); // Redirect if no session
-        }
-      } catch (error) {
-        console.error("Failed to fetch session", error);
-      }
-    }
-    
-    fetchSession();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -55,25 +38,19 @@ const [userId, setUserId] = useState<string | null>(null);
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("/api/changePassword", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            userId,
-          currentPassword,
-          newPassword,
-        }),
-      });
+      await toast.promise(
+        changePassword({ currentPassword, newPassword, confirmPassword }),
+        {
+          pending: "Changing password...",
+          success: "Password changed successfully!",
+          error: {
+            render({ data }) {
+              return data instanceof Error ? data.message : 'Something went wrong';
+            },
+          }
+        }
+      )
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to change password");
-      }
-
-      setSuccess("Password changed successfully!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
