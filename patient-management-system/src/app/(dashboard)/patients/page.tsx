@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState } from "react";
+import { getPatients } from "@/app/lib/actions";
 
 import SearchBox from "../_components/SerchBox";
 import Dropdown from "../_components/Dropdown";
@@ -9,10 +10,13 @@ import Button from "../_components/Buton";
 export default function AllPatientsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchParam, setSearchParam] = useState("name");
-    const patients: { id: number; name: string; nic: string; tel: string }[] = [
-        { id: 1, name: "John Doe", nic: "123456789V", tel: "012-3456789" },
-        { id: 2, name: "Jane Smith", nic: "987654321V", tel: "098-7654321" },
-    ];
+    const [patients, setPatients] = useState<{ id: number; name: string; NIC: string | null; telephone: string }[]>([]);
+
+
+    useEffect(() => {
+        getPatients().then(setPatients);
+    }, []);
+
 
     const handleSearch = (query: string) => setSearchTerm(query);
     const handleParamChange = (param: string) => setSearchParam(param);
@@ -25,8 +29,8 @@ export default function AllPatientsPage() {
 
     const dropdownItems = [
         { label: "Search by Name", onClick: () => handleParamChange("name") },
-        { label: "Search by NIC", onClick: () => handleParamChange("nic") },
-        { label: "Search by Tel Number", onClick: () => handleParamChange("tel") },
+        { label: "Search by NIC", onClick: () => handleParamChange("NIC") },
+        { label: "Search by Tel Number", onClick: () => handleParamChange("telephone") },
     ];
 
     return (
@@ -55,8 +59,8 @@ export default function AllPatientsPage() {
                             <h2 className="text-xl font-montserrat font-bold text-primary-600">
                                 {patient.name}
                             </h2>
-                            <p className="text-gray-600">NIC: {patient.nic}</p>
-                            <p className="text-gray-600">Tel: {patient.tel}</p>
+                            <p className="text-gray-600">NIC: {patient.NIC}</p>
+                            <p className="text-gray-600">Tel: {patient.telephone}</p>
                         </div>
                     ))
                 ) : (

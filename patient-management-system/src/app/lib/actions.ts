@@ -44,3 +44,14 @@ export async function getQueues(offset: number, limit: number) {
 export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
+
+export async function getPatients() {
+    return await prisma.patient.findMany({
+        select: {
+            id: true,
+            name: true,
+            NIC: true,
+            telephone: true,
+        },
+    });
+}
