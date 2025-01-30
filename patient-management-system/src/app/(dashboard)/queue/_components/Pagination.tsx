@@ -1,19 +1,28 @@
 "use client";
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import {getTotalQueueCount} from "@/app/lib/actions";
 
 interface PaginationProps {
-    queues: number;
     size: number;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ queues, size }) => {
+const Pagination: React.FC<PaginationProps> = ({ size }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const currentPage = Number(searchParams.get("page")) || 1;
+    const [count, setCount] = useState(0)
+    useEffect(() => {
+        const fetchData = async () => {
+            const newCount = await getTotalQueueCount();
+            setCount(newCount);
+        }
 
-    const totalPages = Math.ceil(queues / size);
+        fetchData();
+    }, [currentPage]);
+
+    const totalPages = Math.ceil(count / size);
 
     const goToPage = (page: number) => {
         const params = new URLSearchParams(searchParams);
@@ -103,7 +112,7 @@ const Pagination: React.FC<PaginationProps> = ({ queues, size }) => {
                             {currentPage === totalPages ? totalPages * size : currentPage * size}
                         </span> of{" "}
                         <span className="font-medium">
-                            {queues}
+                            {count}
                         </span> results
                     </p>
                 </div>

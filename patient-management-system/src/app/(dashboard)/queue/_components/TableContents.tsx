@@ -29,7 +29,8 @@ async function TableContents({ currentPage, size }: { currentPage: number, size:
                     <td className="px-6 py-4">{new Date(queue.start).toLocaleDateString()}</td>
                     <td className="px-6 py-4">{queue._count.entries}</td>
                     <td className="px-6 py-4">
-                        <Link href={`#`} className="text-white bg-primary hover:bg-primary-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  focus:outline-none">
+                        <Link href={`/queue/${queue.id}`}
+                              className="text-white bg-primary hover:bg-primary-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  focus:outline-none">
                             View
                         </Link>
                     </td>

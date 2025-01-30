@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import TableContents from "@/app/(dashboard)/queue/_components/TableContents";
-import Loading from "@/app/(dashboard)/queue/Loading";
+import {LoadingRow} from "@/app/(dashboard)/queue/Loading";
 
 export default async function QueueTable({ currentPage, size }: { currentPage: number, size: number }) {
     return (
@@ -15,15 +15,7 @@ export default async function QueueTable({ currentPage, size }: { currentPage: n
                     <th scope="col" className="px-6 py-3">Action</th>
                 </tr>
                 </thead>
-                <Suspense key={currentPage} fallback={
-                    <tbody>
-                    <tr>
-                        <td colSpan={5} className="px-6 py-4 items-center text-center">
-                                <Loading />
-                        </td>
-                    </tr>
-                    </tbody>
-                }>
+                <Suspense key={currentPage} fallback={<LoadingRow rows={size} cols={5} /> }>
                     <tbody>
                     <TableContents currentPage={currentPage} size={size} />
                     </tbody>

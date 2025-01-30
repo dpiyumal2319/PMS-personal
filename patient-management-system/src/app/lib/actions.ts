@@ -21,10 +21,12 @@ export async function addQueue() {
     })
 
     revalidatePath('/queue');
+    revalidatePath('/queue/_components/Pagination')
     return { status: 'success', message: 'Queue added successfully' }
 }
 
 export async function getQueues(offset: number, limit: number) {
+
     return prisma.queue.findMany({
         skip: offset,
         take: limit,
