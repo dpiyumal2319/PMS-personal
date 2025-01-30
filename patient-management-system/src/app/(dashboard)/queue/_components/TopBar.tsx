@@ -6,6 +6,8 @@ import Link from "next/link";
 import {IoArrowBack} from "react-icons/io5";
 import {getQueue} from "@/app/lib/actions";
 import {FaStop} from "react-icons/fa";
+import {stopQueue} from "@/app/lib/actions";
+import {toast} from "react-toastify";
 
 const TopBar = () => {
     const pathname = usePathname();
@@ -37,6 +39,28 @@ const TopBar = () => {
 
         fetchData();
     }, [queueId]);
+
+
+    const handleStop = async () => {
+        await toast.promise(
+            stopQueue(parseInt(queueId)),
+            {
+                pending: 'Stopping queue...',
+                success: 'Queue stopped successfully',
+                error: {
+                    render({data}) {
+                        return data instanceof Error ? data.message : 'An error occurred';
+                    }
+                },
+            },
+            {
+                position: 'bottom-right',
+                className: 'ring ring-gray-500/25',
+            }
+        )
+
+        setStatus("COMPLETED");
+    }
 
     useEffect(() => {
         if (status === "IN_PROGRESS" && startTime) {
@@ -70,20 +94,22 @@ const TopBar = () => {
                 <p className="ml-2">{title}</p>
             </div>
 
-            <div>
-                {status === "COMPLETED" ? (
-                    <span className="text-gray-600">Queue Completed</span>
-                ) : (
-                    <div className={'flex justify-end gap-4 items-center'}>
-                        <span className="text-gray-900 font-medium">{elapsedTime}</span>
-                        <button
-                            className="p-3.5 bg-red-600 text-white font-medium rounded-full hover:bg-red-700 transition"
-                        >
-                            <FaStop/>
-                        </button>
-                    </div>
-                )}
-            </div>
+            {showBackButton &&
+                <div>
+                    {status === "COMPLETED" ? (
+                        <span className="text-gray-600">Queue Completed</span>
+                    ) : (
+                        <div className={'flex justify-end gap-4 items-center'}>
+                            <span className="text-gray-900 font-medium">{elapsedTime}</span>
+                            <button
+                                className="p-3.5 bg-red-600 text-white font-medium rounded-full hover:bg-red-700 transition"
+                                onClick={handleStop}
+                            >
+                                <FaStop/>
+                            </button>
+                        </div>
+                    )}
+                </div>}
         </div>
     );
 };

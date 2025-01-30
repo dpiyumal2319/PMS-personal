@@ -62,5 +62,22 @@ export async function stopQueue(id: number) {
         }
     )
 
+    if (!queue) {
+        throw new Error('Queue not found')
+    }
 
+    if (queue.status === 'COMPLETED') {
+        throw new Error('Queue already stopped')
+    }
+
+    await prisma.queue.update({
+        where: {
+            id: id
+        },
+        data: {
+            status: 'COMPLETED'
+        }
+    })
+
+    return {status: 'success', message: 'queue stopped successfully'}
 }
