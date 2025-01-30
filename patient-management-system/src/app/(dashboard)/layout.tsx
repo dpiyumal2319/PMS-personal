@@ -10,14 +10,14 @@ export default function DashboardLayout({
 }) {
     return (
         <div className="flex">
-            <aside className={"h-full sticky top-0"}>
+            <aside className={"sticky top-0 left-0 h-screen"}>
                 <Sidebar/>
             </aside>
-            <div className="flex flex-col w-full h-screen">
+            <div className="flex flex-col w-full">
                 <div className={'sticky top-0'}>
                     <TopBar/>
                 </div>
-                <div className={'h-full'}>
+                <div>
                     <Suspense fallback={<Loading />}>
                         {children}
                     </ Suspense>
