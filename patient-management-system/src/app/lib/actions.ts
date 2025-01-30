@@ -36,11 +36,10 @@ export async function changePassword({ currentPassword, newPassword, confirmPass
 
 // For admin changing nurse passwords
 export async function changeUserPassword({
-  userId,
+
   newPassword,
   confirmPassword
 }: {
-  userId: number,
   newPassword: string,
   confirmPassword: string
 }) {
@@ -57,7 +56,7 @@ export async function changeUserPassword({
 
   const hashedPassword = bcrypt.hashSync(newPassword, 10);
   await prisma.user.update({
-    where: { id: userId },
+    where: { id: session.id },
     data: { password: hashedPassword }
   });
 

@@ -44,3 +44,34 @@ export async function logout() {
     await deleteSession();
     redirect("/");
 }
+
+//get user details from session
+
+export async function getUsers() {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        role: true,
+        name: true,
+        email: true,
+        mobile: true,
+      },
+    });
+
+    return users.map(user => ({
+      ...user,
+      role: user.role.toLowerCase() as "doctor" | "nurse",
+      telephone: user.mobile,
+      profilePic: getDefaultAvatar(user.role)
+    }));
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+    throw new Error("Failed to fetch users");
+  }
+}
+
+// Helper function for default avatars
+  function getDefaultAvatar(role: "DOCTOR" | "NURSE") {
+    return role === "DOCTOR" ? "/doctor-avatar.jpg" : "/nurse-avatar.jpg";
+  }

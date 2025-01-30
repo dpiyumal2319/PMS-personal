@@ -1,12 +1,11 @@
 "use client";
-import { useState,useEffect } from "react";
-import { useRouter } from "next/navigation"; 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { PasswordInput } from "@/app/(dashboard)/_components/PasswordInput";
 import { changePassword } from "@/app/lib/actions";
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify";
 
 export function PasswordForm() {
-const [userId, setUserId] = useState<string | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,7 +14,7 @@ const [userId, setUserId] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  
+
   const router = useRouter();
 
   const validateForm = () => {
@@ -45,25 +44,25 @@ const [userId, setUserId] = useState<string | null>(null);
           success: "Password changed successfully!",
           error: {
             render({ data }) {
-              return data instanceof Error ? data.message : 'Something went wrong';
+              return data instanceof Error
+                ? data.message
+                : "Something went wrong";
             },
-          }
+          },
         },
         {
-          position: 'bottom-right',
-          className: 'shadow-md'
+          position: "bottom-right",
+          className: "shadow-md",
         }
-      )
+      );
 
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
 
-     
       setTimeout(() => {
-        router.push("/dashboard"); // Change this to your desired route
+        router.push("/admin");
       }, 2000);
-      
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
     }
@@ -71,11 +70,19 @@ const [userId, setUserId] = useState<string | null>(null);
 
   return (
     <div className="max-w-md mx-auto p-6 rounded-xl shadow-lg bg-background-50">
-      <h2 className="text-2xl font-bold text-primary-700 mb-6">Change Password</h2>
-      
+      <h2 className="text-2xl font-bold text-primary-700 mb-6">
+        Change Password
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && <div className="p-3 rounded-md bg-red-100 text-red-700">{error}</div>}
-        {success && <div className="p-3 rounded-md bg-green-100 text-green-700">{success}</div>}
+        {error && (
+          <div className="p-3 rounded-md bg-red-100 text-red-700">{error}</div>
+        )}
+        {success && (
+          <div className="p-3 rounded-md bg-green-100 text-green-700">
+            {success}
+          </div>
+        )}
 
         <div className="space-y-4">
           <PasswordInput
