@@ -75,3 +75,23 @@ export async function getUsers() {
   function getDefaultAvatar(role: "DOCTOR" | "NURSE") {
     return role === "DOCTOR" ? "/doctor-avatar.jpg" : "/nurse-avatar.jpg";
   }
+//To get Nurse Details
+export async function getNurses() {
+  try {
+    const nurses = await prisma.user.findMany({
+      where: {
+        role: 'NURSE' 
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true
+      }
+    });
+
+    return nurses;
+  } catch (error) {
+    console.error("Failed to fetch nurses:", error);
+    throw new Error("Failed to fetch nurses");
+  }
+}

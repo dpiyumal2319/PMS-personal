@@ -39,9 +39,14 @@ async function main() {
     
     });
 
-    const nurse = await prisma.user.create({
+    const nurse1 = await prisma.user.create({
         data: {
             email: 'nurse1@srilanka.com', mobile: '0775671234', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.NURSE, name: 'Pubudu Nona' },
+    });
+
+    const nurse2 = await prisma.user.create({
+        data: {
+            email: 'nurse2@srilanka.com', mobile: '0775677890', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.NURSE, name: 'Dasun Nona' },
     });
 
      // Create a Queue
@@ -56,7 +61,8 @@ async function main() {
   await prisma.queueEntry.createMany({
     data: [
       { queueId: queue.id, userId: doctor.id, status: QueueStatus.IN_PROGRESS, patientId: patient1.id },
-      { queueId: queue.id, userId: nurse.id, status: QueueStatus.IN_PROGRESS, patientId: patient2.id },
+      { queueId: queue.id, userId: nurse1.id, status: QueueStatus.IN_PROGRESS, patientId: patient2.id },
+      { queueId: queue.id, userId: nurse2.id, status: QueueStatus.IN_PROGRESS, patientId: patient1.id },
     ],
   });
 
