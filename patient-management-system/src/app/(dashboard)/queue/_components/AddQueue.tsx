@@ -3,12 +3,15 @@
 import { addQueue} from "@/app/lib/actions";
 import Button from "@/app/_components/PrimaryButton";
 import { toast } from 'react-toastify';
-import {useSearchParams} from "next/navigation";
+import {usePathname, useSearchParams} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // Queue Button Component
 const QueueButton = () => {
 
     const searchParams = useSearchParams();
+    const { replace } = useRouter();
+    const pathName = usePathname();
 
     const handleClick = async () => {
         try {
@@ -31,6 +34,10 @@ const QueueButton = () => {
 
             const params = new URLSearchParams(searchParams);
             params.set('page', '1');
+
+            replace(`${pathName}?${params.toString()}`);
+
+            console.log(`Queue Created Successfully, ${params.toString()}`);
         } catch (e) {
             console.error(e)
         }

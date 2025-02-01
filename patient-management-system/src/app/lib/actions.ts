@@ -20,8 +20,7 @@ export async function addQueue() {
         data: {}
     })
 
-    revalidatePath('/queue');
-    revalidatePath('/queue/_components/Pagination')
+    revalidatePath('/queues')
     return { status: 'success', message: 'Queue added successfully' }
 }
 
