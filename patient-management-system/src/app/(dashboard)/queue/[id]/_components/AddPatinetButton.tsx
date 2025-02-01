@@ -10,7 +10,7 @@ const AddPatientButton = async ({id}: { id: number }) => {
 
     return (
         <Link href={`/queue/${id}/add-patient`}>
-            <Button className={'bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-500'} disabled={disabled}>
+            <Button className={'text-white font-bold disabled:bg-gray-500'} disabled={disabled}>
                 Add Patient
             </Button>
         </Link>

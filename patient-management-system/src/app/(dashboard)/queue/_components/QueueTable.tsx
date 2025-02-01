@@ -11,15 +11,15 @@ import TableContents from "@/app/(dashboard)/queue/_components/TableContents";
 // Main Table Component
 export default function QueueTable({ currentPage, size }: { currentPage: number, size: number }) {
     return (
-        <div className="rounded-md border">
+        <div className="rounded-lg border bg-card shadow-md overflow-hidden">
             <Table>
-                <TableHeader>
+                <TableHeader className={'bg-primary-100'}>
                     <TableRow>
-                        <TableHead>Queue #</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Patients</TableHead>
-                        <TableHead>Action</TableHead>
+                        <TableHead className={'text-gray-800'}>Queue #</TableHead>
+                        <TableHead className={'text-gray-800'}>Status</TableHead>
+                        <TableHead className={'text-gray-800'}>Created</TableHead>
+                        <TableHead className={'text-gray-800'}>Patients</TableHead>
+                        <TableHead className={'text-gray-800'}>Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <Suspense key={currentPage} fallback={<LoadingRows rows={size} cols={5} />}>
