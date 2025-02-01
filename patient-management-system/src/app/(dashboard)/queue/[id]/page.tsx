@@ -1,6 +1,7 @@
 import {Suspense} from "react";
 import CardWrapper from "@/app/(dashboard)/queue/[id]/_components/CardWrapper";
 import {CardSet} from "@/app/(dashboard)/queue/[id]/_components/Skeletons";
+import AddPatinetButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
 
 export const metadata = {
     title: "Queue - Patient Management System",
@@ -25,7 +26,7 @@ export default async function page(
                     </Suspense>
                 </div>
                 <div className={'flex justify-end mt-5 w-full'}>
-
+                    <AddPatinetButton id={id} />
                 </div>
             </div>
         </div>
