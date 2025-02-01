@@ -1,26 +1,31 @@
 import React, { Suspense } from 'react';
+import {
+    Table,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { LoadingRows } from "@/app/(dashboard)/queue/Loading";
 import TableContents from "@/app/(dashboard)/queue/_components/TableContents";
-import {LoadingRow} from "@/app/(dashboard)/queue/Loading";
 
-export default async function QueueTable({ currentPage, size }: { currentPage: number, size: number }) {
+// Main Table Component
+export default function QueueTable({ currentPage, size }: { currentPage: number, size: number }) {
     return (
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-700 uppercase bg-primary-100">
-                <tr>
-                    <th scope="col" className="px-6 py-3">Queue #</th>
-                    <th scope="col" className="px-6 py-3">Status</th>
-                    <th scope="col" className="px-6 py-3">Created</th>
-                    <th scope="col" className="px-6 py-3">Patients</th>
-                    <th scope="col" className="px-6 py-3">Action</th>
-                </tr>
-                </thead>
-                <Suspense key={currentPage} fallback={<LoadingRow rows={size} cols={5} /> }>
-                    <tbody>
+        <div className="rounded-lg border bg-card shadow-md overflow-hidden">
+            <Table>
+                <TableHeader className={'bg-primary-100'}>
+                    <TableRow>
+                        <TableHead className={'text-gray-800'}>Queue #</TableHead>
+                        <TableHead className={'text-gray-800'}>Status</TableHead>
+                        <TableHead className={'text-gray-800'}>Created</TableHead>
+                        <TableHead className={'text-gray-800'}>Patients</TableHead>
+                        <TableHead className={'text-gray-800'}>Action</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <Suspense key={currentPage} fallback={<LoadingRows rows={size} cols={5} />}>
                     <TableContents currentPage={currentPage} size={size} />
-                    </tbody>
                 </Suspense>
-            </table>
+            </Table>
         </div>
     );
 }

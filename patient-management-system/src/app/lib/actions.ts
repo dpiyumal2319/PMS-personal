@@ -91,9 +91,6 @@ export async function stopQueue(id: string | null) {
 export async function getQueueStatusesCount(id: number) {
     console.log('Getting queue statuses count for queue', id);
 
-    // 2s delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
     try {
 
         const result = await prisma.queueEntry.groupBy({
