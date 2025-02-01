@@ -1,12 +1,30 @@
+import {Suspense} from "react";
+import CardWrapper from "@/app/(dashboard)/queue/[id]/_components/CardWrapper";
+import {CardSet} from "@/app/(dashboard)/queue/[id]/_components/Skeletons";
+
+export const metadata = {
+    title: "Queue - Patient Management System",
+    description: "per queue page",
+}
+
 export default async function page(
     {params}: { params: Promise<{ id: string }> }
 ) {
-    console.log((await params).id);
+    const id = parseInt((await params).id);
+
+    // Set metadata
+    metadata.title = `Queue ${id} - Patient Management System`;
+    metadata.description = `Queue ${id} page`;
 
     return (
-        <div className={'bg-pink-600 flex-grow'}>
-            <h1 className="text-4xl font-bold text-primary-500">Queue</h1>
-            <p className="text-lg">This is the queue page.</p>
+        <div className={'flex-grow p-2 flex flex-col items-center justify-between'}>
+            <div className={'w-4/5 pt-4'}>
+                <div>
+                    <Suspense fallback={<CardSet number={3} />}>
+                        <CardWrapper id={id}/>
+                    </Suspense>
+                </div>
+            </div>
         </div>
     );
 }

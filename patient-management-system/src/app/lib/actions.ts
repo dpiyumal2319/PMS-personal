@@ -21,7 +21,7 @@ export async function addQueue() {
     })
 
     revalidatePath('/queues')
-    return { status: 'success', message: 'Queue added successfully' }
+    return {status: 'success', message: 'Queue added successfully'}
 }
 
 export async function getQueues(offset: number, limit: number) {
@@ -34,7 +34,7 @@ export async function getQueues(offset: number, limit: number) {
         },
         include: {
             _count: {
-                select: { entries: true }
+                select: {entries: true}
             }
         }
     });
@@ -63,7 +63,7 @@ export async function stopQueue(id: string | null) {
     const queue = await prisma.queue.findUnique(
         {
             where: {
-                id : numberId
+                id: numberId
             }
         }
     )
@@ -86,4 +86,39 @@ export async function stopQueue(id: string | null) {
     })
 
     return {status: 'success', message: 'queue stopped successfully'}
+}
+
+export async function getQueueStatusesCount(id: number) {
+    console.log('Getting queue statuses count for queue', id);
+
+    // 2s delay
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    try {
+
+        const result = await prisma.queueEntry.groupBy({
+            by: ['status'],
+            where: {
+                queueId: id
+            },
+            _count: {
+                status: true
+            }
+        })
+
+        const statuses = {
+            PENDING: 0,
+            PRESCRIBED: 0,
+            COMPLETED: 0
+        }
+
+        result.forEach((item) => {
+            statuses[item.status] = item._count.status
+        })
+
+        return statuses;
+    } catch (e) {
+        console.error(e);
+        throw new Error('An error occurred while getting queue statuses count')
+    }
 }

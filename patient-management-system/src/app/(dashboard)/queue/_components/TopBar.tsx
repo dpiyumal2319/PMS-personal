@@ -8,6 +8,7 @@ import {getQueue} from "@/app/lib/actions";
 import {FaStop} from "react-icons/fa";
 import {stopQueue} from "@/app/lib/actions";
 import {toast} from "react-toastify";
+import { MdOutlineTimer } from "react-icons/md";
 
 const TopBar = () => {
     const pathname = usePathname();
@@ -87,10 +88,10 @@ const TopBar = () => {
 
     return (
         <div
-            className="flex justify-between w-full bg-background-50 h-14 border-b border-primary-900/25 shadow p-2 items-center text-xl font-semibold text-gray-700">
+            className="flex justify-between w-full bg-background-50 border-b border-primary-900/25 shadow py-3.5 px-3 items-center text-xl font-semibold text-gray-800">
             <div className="flex items-center">
                 {perQueuePageActive && (
-                    <Link href="/queue" className="p-2 text-primary-900 hover:bg-gray-200 rounded-md">
+                    <Link href="/queue" className="p-2 hover:bg-gray-200 rounded-md">
                         <IoArrowBack className="size-6"/>
                     </Link>
                 )}
@@ -102,10 +103,13 @@ const TopBar = () => {
                     {status === "COMPLETED" ? (
                         <span className="text-gray-600">Queue Completed</span>
                     ) : (
-                        <div className={'flex justify-end gap-4 items-center'}>
-                            <span className="text-gray-900 font-medium">{elapsedTime}</span>
+                        <div className={'flex gap-2 items-center'}>
+                            <MdOutlineTimer className="text-2xl text-gray-500 w-full"/>
+                            <div className={'flex justify-center m-auto min-w-24'}>
+                                <span className="font-medium">{elapsedTime}</span>
+                            </div>
                             <button
-                                className="p-3.5 bg-red-600 text-white font-medium rounded-full hover:bg-red-700 transition"
+                                className="p-3.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition"
                                 onClick={handleStop}
                             >
                                 <FaStop/>

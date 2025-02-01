@@ -80,9 +80,9 @@ model Queue {
 
 model QueueEntry {
   id        Int         @id @default(autoincrement())
-  queueId   Int
-  status    QueueStatus
+  status    VisitStatus @default(PENDING)
   queue     Queue       @relation(fields: [queueId], references: [id])
+  queueId   Int
   patient   Patient?    @relation(fields: [patientId], references: [id])
   patientId Int?
   time      DateTime    @default(now())

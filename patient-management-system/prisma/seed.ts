@@ -1,4 +1,4 @@
-import {PrismaClient, Gender, Role, QueueStatus} from '@prisma/client';
+import {PrismaClient, Gender, Role, QueueStatus, VisitStatus} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -64,8 +64,8 @@ async function main() {
     // Create Queue Entries
     await prisma.queueEntry.createMany({
         data: [
-            {queueId: queue.id, status: QueueStatus.IN_PROGRESS, patientId: patient1.id},
-            {queueId: queue.id, status: QueueStatus.IN_PROGRESS, patientId: patient2.id},
+            {queueId: queue.id, status: VisitStatus.PENDING, patientId: patient1.id},
+            {queueId: queue.id, status: VisitStatus.PRESCRIBED, patientId: patient2.id},
         ],
     });
 

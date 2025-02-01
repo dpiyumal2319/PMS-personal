@@ -2,6 +2,12 @@ import QueueTable from "@/app/(dashboard)/queue/_components/QueueTable";
 import Pagination from "@/app/(dashboard)/queue/_components/Pagination";
 import AddQueue from "@/app/(dashboard)/queue/_components/AddQueue";
 import React from "react";
+import type {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "All queues - Patient Management System",
+    description: "View all queues in the patient management system",
+};
 
 const rowsPerPage = 7;
 
