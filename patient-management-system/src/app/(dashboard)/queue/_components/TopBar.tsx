@@ -9,6 +9,17 @@ import {FaStop} from "react-icons/fa";
 import {stopQueue} from "@/app/lib/actions";
 import {toast} from "react-toastify";
 import { MdOutlineTimer } from "react-icons/md";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const TopBar = () => {
     const pathname = usePathname();
@@ -108,12 +119,32 @@ const TopBar = () => {
                             <div className={'flex justify-center m-auto min-w-24'}>
                                 <span className="font-medium">{elapsedTime}</span>
                             </div>
-                            <button
-                                className="p-3.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition"
-                                onClick={handleStop}
-                            >
-                                <FaStop/>
-                            </button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <button
+                                        className="p-3.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition"
+                                    >
+                                        <FaStop/>
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Stop Queue</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Are you sure you want to stop this queue? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200">Keep Running</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleStop}
+                                            className="bg-red-600 text-white hover:bg-red-700"
+                                        >
+                                            Stop Queue
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     )}
                 </div>}

@@ -1,20 +1,18 @@
 import React from 'react';
 import Link from "next/link";
 import { getQueue } from "@/app/lib/actions";
+import {Button} from "@/components/ui/button";
 
 const AddPatientButton = async ({id}: { id: number }) => {
-
     const queue = await getQueue(id);
 
-    if (!queue || queue.status === 'COMPLETED') {
-        return null;
-    }
+    const disabled = queue?.status === 'COMPLETED';
 
     return (
         <Link href={`/queue/${id}/add-patient`}>
-            <button className={'bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded'}>
+            <Button className={'bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-500'} disabled={disabled}>
                 Add Patient
-            </button>
+            </Button>
         </Link>
     );
 };
