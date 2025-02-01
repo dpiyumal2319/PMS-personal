@@ -3,9 +3,12 @@
 import { addQueue} from "@/app/lib/actions";
 import Button from "@/app/_components/PrimaryButton";
 import { toast } from 'react-toastify';
+import {useSearchParams} from "next/navigation";
 
 // Queue Button Component
 const QueueButton = () => {
+
+    const searchParams = useSearchParams();
 
     const handleClick = async () => {
         try {
@@ -25,6 +28,9 @@ const QueueButton = () => {
                     className: 'ring ring-gray-500/25',
                 },
             )
+
+            const params = new URLSearchParams(searchParams);
+            params.set('page', '1');
         } catch (e) {
             console.error(e)
         }

@@ -53,11 +53,18 @@ export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
 
-export async function stopQueue(id: number) {
+export async function stopQueue(id: string | null) {
+
+    if (!id) {
+        throw new Error('Queue ID is required')
+    }
+
+    const numberId = parseInt(id)
+
     const queue = await prisma.queue.findUnique(
         {
             where: {
-                id : id
+                id : numberId
             }
         }
     )
@@ -72,7 +79,7 @@ export async function stopQueue(id: number) {
 
     await prisma.queue.update({
         where: {
-            id: id
+            id: numberId
         },
         data: {
             status: 'COMPLETED'

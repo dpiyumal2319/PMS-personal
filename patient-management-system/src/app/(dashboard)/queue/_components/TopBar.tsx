@@ -16,19 +16,22 @@ const TopBar = () => {
     const [elapsedTime, setElapsedTime] = useState<string>("00:00:00");
 
     let title = "All Queues";
-    let showBackButton = false;
-    let queueId = "1";
+    let perQueuePageActive = false;
+    let queueId = null;
 
     if (pathname.startsWith("/queue/")) {
         queueId = pathname.split("/")[2];
         if (queueId) {
             title = `Queue ${queueId}`;
-            showBackButton = true;
+            perQueuePageActive = true;
         }
     }
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!queueId) {
+                return;
+            }
             const queueData = await getQueue(parseInt(queueId));
 
             if (queueData) {
@@ -37,13 +40,13 @@ const TopBar = () => {
             }
         };
 
-        fetchData();
+        fetchData().then(() => {});
     }, [queueId]);
 
 
     const handleStop = async () => {
         await toast.promise(
-            stopQueue(parseInt(queueId)),
+            stopQueue(queueId),
             {
                 pending: 'Stopping queue...',
                 success: 'Queue stopped successfully',
@@ -86,7 +89,7 @@ const TopBar = () => {
         <div
             className="flex justify-between w-full bg-background-50 h-14 border-b border-primary-900/25 shadow p-2 items-center text-xl font-semibold text-gray-700">
             <div className="flex items-center">
-                {showBackButton && (
+                {perQueuePageActive && (
                     <Link href="/queue" className="p-2 text-primary-900 hover:bg-gray-200 rounded-md">
                         <IoArrowBack className="size-6"/>
                     </Link>
@@ -94,7 +97,7 @@ const TopBar = () => {
                 <p className="ml-2">{title}</p>
             </div>
 
-            {showBackButton &&
+            {perQueuePageActive &&
                 <div>
                     {status === "COMPLETED" ? (
                         <span className="text-gray-600">Queue Completed</span>
