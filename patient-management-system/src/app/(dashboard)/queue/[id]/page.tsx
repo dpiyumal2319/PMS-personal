@@ -24,6 +24,9 @@ export default async function page(
                         <CardWrapper id={id}/>
                     </Suspense>
                 </div>
+                <div className={'flex justify-end mt-5 w-full'}>
+
+                </div>
             </div>
         </div>
     );
