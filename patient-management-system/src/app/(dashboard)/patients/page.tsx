@@ -1,22 +1,20 @@
 "use client";
 
-import {useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getPatients } from "@/app/lib/actions";
-
 import SearchBox from "../_components/SerchBox";
 import Dropdown from "../_components/Dropdown";
 import Button from "../_components/Buton";
+import PatientsList from "../patients/_components/PatientsList"; // Import the component
 
 export default function AllPatientsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchParam, setSearchParam] = useState("name");
     const [patients, setPatients] = useState<{ id: number; name: string; NIC: string | null; telephone: string }[]>([]);
 
-
     useEffect(() => {
         getPatients().then(setPatients);
     }, []);
-
 
     const handleSearch = (query: string) => setSearchTerm(query);
     const handleParamChange = (param: string) => setSearchParam(param);
@@ -48,25 +46,7 @@ export default function AllPatientsPage() {
             </div>
 
             {/* Patients List */}
-            <div className="space-y-4">
-                {filteredPatients.length > 0 ? (
-                    filteredPatients.map((patient) => (
-                        <div
-                            key={patient.id}
-                            className="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition cursor-pointer"
-                            onClick={() => alert(`Viewing details for ${patient.name}`)}
-                        >
-                            <h2 className="text-xl font-montserrat font-bold text-primary-600">
-                                {patient.name}
-                            </h2>
-                            <p className="text-gray-600">NIC: {patient.NIC}</p>
-                            <p className="text-gray-600">Tel: {patient.telephone}</p>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-gray-500">No patients found.</p>
-                )}
-            </div>
+            <PatientsList patients={filteredPatients} />
         </div>
     );
 }

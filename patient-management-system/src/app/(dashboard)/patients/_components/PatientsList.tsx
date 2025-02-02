@@ -1,22 +1,40 @@
-import { getPatients } from "@/app/lib/actions";
+import { AiOutlineUser, AiOutlineIdcard, AiOutlinePhone } from "react-icons/ai";
 
-export default async function PatientsList() {
-    const patients = await getPatients();
+interface Patient {
+    id: number;
+    name: string;
+    NIC: string | null;
+    telephone: string;
+}
 
+export default function PatientsList({ patients }: { patients: Patient[] }) {
     return (
         <div className="space-y-4">
             {patients.length > 0 ? (
                 patients.map((patient) => (
                     <div
                         key={patient.id}
-                        className="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition cursor-pointer"
+                        className="flex justify-between items-center bg-white shadow-md rounded-2xl p-6 hover:shadow-xl transition cursor-pointer border border-gray-200"
                     >
-                        <h2 className="text-xl font-montserrat font-bold text-primary-600">
-                            {patient.name}
-                        </h2>
-                        <p className="text-gray-600">NIC: {patient.NIC}</p>
-                        <p className="text-gray-600">Tel: {patient.telephone}</p>
+                        {/* Patient Name */}
+                        <div className="flex items-center gap-3 text-primary-600 font-semibold text-lg flex-1">
+                            <AiOutlineUser className="w-5 h-5 text-gray-500" />
+                            <span>{patient.name}</span>
+                        </div>
+
+                        {/* NIC */}
+                        <div className="flex items-center gap-3 text-gray-700 text-sm flex-1 justify-center">
+                            <AiOutlineIdcard className="w-5 h-5 text-gray-500" />
+                            <span className="font-medium tracking-wide">{patient.NIC}</span>
+                        </div>
+
+                        {/* Telephone */}
+                        <div className="flex items-center gap-3 text-gray-700 text-sm flex-1 justify-end">
+                            <AiOutlinePhone className="w-5 h-5 text-gray-500" />
+                            <span className="font-medium tracking-wide">{patient.telephone}</span>
+                        </div>
                     </div>
+
                 ))
             ) : (
                 <p className="text-gray-500">No patients found.</p>
