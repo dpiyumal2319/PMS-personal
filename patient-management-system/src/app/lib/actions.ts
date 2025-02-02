@@ -2,7 +2,6 @@
 
 import {prisma} from "@/app/lib/prisma";
 import {revalidatePath} from "next/cache";
-import type {myError} from "@/app/lib/definitions";
 
 export async function addQueue() {
     const activeQueuesCount = await prisma.queue.count(
