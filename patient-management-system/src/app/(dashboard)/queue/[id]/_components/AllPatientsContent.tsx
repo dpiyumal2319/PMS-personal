@@ -45,7 +45,7 @@ async function AllPatientsContent({id}: { id: number }) {
     );
 
     const completedPatients = patients.filter((patient) => {
-        return (patient.status === 'COMPLETED' && patient.queue.status === 'COMPLETED');
+        return (patient.status === 'COMPLETED');
     });
 
     const getSex = (sex: string) => {

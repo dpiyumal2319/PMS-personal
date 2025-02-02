@@ -7,7 +7,6 @@ import {IoArrowBack} from "react-icons/io5";
 import {getQueue} from "@/app/lib/actions";
 import {FaStop} from "react-icons/fa";
 import {stopQueue} from "@/app/lib/actions";
-import {toast} from "react-toastify";
 import {MdOutlineTimer} from "react-icons/md";
 import {
     AlertDialog,
@@ -21,6 +20,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {handleServerAction} from "@/app/lib/utils";
 
 const TopBar = () => {
     const pathname = usePathname();
@@ -59,21 +59,13 @@ const TopBar = () => {
 
 
     const handleStop = async () => {
-        await toast.promise(
-            stopQueue(queueId),
-            {
-                pending: 'Stopping queue...',
-                success: 'Queue stopped successfully',
-                error: {
-                    render({data}) {
-                        return data instanceof Error ? data.message : 'An error occurred';
-                    }
-                },
-            },
-            {
-                position: 'bottom-right'
-            }
-        )
+        const result = await handleServerAction(() => stopQueue(queueId), {
+            loadingMessage: 'Stopping Queue...'
+        })
+
+        if (!result.success) {
+            return;
+        }
 
         setStatus("COMPLETED");
     }

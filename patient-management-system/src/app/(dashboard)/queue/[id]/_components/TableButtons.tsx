@@ -17,29 +17,20 @@ import {
     TooltipContent, TooltipProvider,
     TooltipTrigger
 } from "@/components/ui/tooltip";
-import {FaStop, FaTrash, FaMedkit} from "react-icons/fa";
+import {FaTrash, FaMedkit, FaTablets} from "react-icons/fa";
 import {toast} from "react-toastify";
 import {removePatientFromQueue} from "@/app/lib/actions";
 import {IoIosMore} from "react-icons/io";
+import {handleServerAction} from "@/app/lib/utils";
 
 // Remove from Queue Button
 const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) => {
     const handleRemove = () => {
-        toast.promise(
-            removePatientFromQueue(queueId, token),
-            {
-                pending: 'Removing patient from queue...',
-                success: 'Patient removed successfully!',
-                error: {
-                    render({data}) {
-                        return data instanceof Error ? data.message : 'An error occurred';
-                    }
-                }
-            },
-            {
-                position: 'bottom-right'
-            }
-        ).catch((e) => console.error(e));
+        const result = handleServerAction(() => removePatientFromQueue(queueId, token), {
+            loadingMessage: 'Removing from Queue...'
+        })
+
+        console.log(result);
     };
 
     return (
@@ -126,7 +117,7 @@ const IssueMedicine = () => {
                         onClick={handleIssue}
                         className="p-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
                     >
-                        <FaStop/>
+                        <FaTablets/>
                     </button>
                 </TooltipTrigger>
                 <TooltipContent>
