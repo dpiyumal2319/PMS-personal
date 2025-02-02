@@ -7,10 +7,9 @@ import {Input} from "@/components/ui/input";
 import {useDebounce} from "@/hooks/useDebounce";
 import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
 import type {Patient} from "@prisma/client";
-import {calcAge} from "@/app/lib/utils";
+import {calcAge, handleServerAction} from "@/app/lib/utils";
 import {Badge} from "@/components/ui/badge";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
-import {toast} from "react-toastify";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 // Search by types
@@ -77,27 +76,18 @@ const AddPatientButton = ({id}: { id: number }) => {
     }
 
     const handleAddToQueue = async (patientId: number) => {
-        await toast.promise(
-            addPatientToQueue(id, patientId),
+        const result = await handleServerAction(
+            () => addPatientToQueue(id, patientId),
             {
-                pending: 'Adding patient to queue...',
-                success: {
-                    render() {
-                        return 'Patient added to queue successfully';
-                    }
-                },
-                error: {
-                    render({data}) {
-                        return data instanceof Error ? data.message : 'An error occurred';
-                    }
-                }
-            },
-            {
-                position: 'bottom-right'
+                loadingMessage: 'Adding Patient to Queue...'
             }
-        ).then(() => {
-            setOpen(false);
-        });
+        );
+
+        if (!result.success) {
+            return;
+        }
+
+        setOpen(false);
     }
 
     return (
