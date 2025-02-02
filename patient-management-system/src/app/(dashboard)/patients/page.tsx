@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { getPatients } from "@/app/lib/actions";
-import SearchBox from "../_components/SerchBox";
 import Dropdown from "../_components/Dropdown";
 import Button from "../_components/Buton";
 import PatientsList from "../patients/_components/PatientsList"; // Import the component
+import SearchBox from "../_components/SearchBox";
 
 export default function AllPatientsPage() {
     const [searchTerm, setSearchTerm] = useState("");
