@@ -88,6 +88,17 @@ export async function stopQueue(id: string | null) {
     return {status: 'success', message: 'queue stopped successfully'}
 }
 
+export async function getQueueStatus(id: number) {
+    return prisma.queue.findUnique({
+        where: {
+            id
+        },
+        select: {
+            status: true
+        }
+    });
+}
+
 export async function getQueueStatusesCount(id: number) {
     console.log('Getting queue statuses count for queue', id);
 
@@ -162,3 +173,19 @@ export async function removePatientFromQueue(queueId: number, token: number): Pr
     }
 }
 
+export async function searchPatients(query: string, searchBy: "name" | "telephone" | "NIC") {
+    if (!query) return [];
+
+    console.log(`Searching for patients with ${searchBy} containing ${query}`);
+
+    const results = await prisma.patient.findMany({
+        where: {
+            [searchBy]: {
+                contains: query
+            },
+        },
+        take: 10, // Limit results
+    });
+
+    return results;
+}
