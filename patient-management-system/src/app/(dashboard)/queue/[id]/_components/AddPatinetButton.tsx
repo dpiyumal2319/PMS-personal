@@ -1,33 +1,33 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button} from "@/components/ui/button";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {useDebounce} from "@/hooks/useDebounce";
-import {searchPatients} from "@/app/lib/actions";
+import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Label} from "@/components/ui/label";
 import type {Patient} from "@prisma/client";
 import {calcAge} from "@/app/lib/utils";
 import {Badge} from "@/components/ui/badge";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
+import {toast} from "react-toastify";
 
 // Search by types
-
 const AddPatientButton = ({id}: { id: number }) => {
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchBy, setSearchBy] = useState<"name" | "telephone" | "NIC">("name");
     const [results, setResults] = useState<Patient[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const isNumber = (value: string) => {
         return /^\d+$/.test(value);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (searchBy === "NIC") {
             if (searchTerm.length !== 10 && searchTerm.length !== 12) {
                 setError("NIC should be 10 or 12 characters long");
@@ -46,6 +46,14 @@ const AddPatientButton = ({id}: { id: number }) => {
                 return;
             }
         }
+
+        if (searchBy === "name") {
+            if (searchTerm.length < 3) {
+                setError("Name should be at least 3 characters long");
+                return;
+            }
+        }
+
         setError(null);
 
         const fetchData = async () => {
@@ -69,6 +77,29 @@ const AddPatientButton = ({id}: { id: number }) => {
         }
     }
 
+    const handleAddToQueue = async (patientId: number) => {
+        await toast.promise(
+            addPatientToQueue(id, patientId),
+            {
+                pending: 'Adding patient to queue...',
+                success: {
+                    render() {
+                        setOpen(false);
+                        return 'Patient added to queue successfully';
+                    }
+                },
+                error: {
+                    render({data}) {
+                        return data instanceof Error ? data.message : 'An error occurred';
+                    }
+                }
+            },
+            {
+                position: 'bottom-right'
+            }
+        );
+    }
+
     return (
         <>
             <Button
@@ -79,11 +110,10 @@ const AddPatientButton = ({id}: { id: number }) => {
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen} modal={true}>
-                <DialogContent className="max-w-5xl">
+                <DialogContent className="max-w-5xl max-h-screen flex flex-col justify-start">
                     <DialogHeader>
                         <DialogTitle>Search Patient</DialogTitle>
                     </DialogHeader>
-
                     {/* Radio Group for Search By Options */}
                     <RadioGroup
                         value={searchBy}
@@ -125,10 +155,10 @@ const AddPatientButton = ({id}: { id: number }) => {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Name</TableHead>
-                                        <TableHead>Telephone</TableHead>
                                         <TableHead>SEX</TableHead>
-                                        <TableHead>NIC</TableHead>
                                         <TableHead>Age</TableHead>
+                                        <TableHead>Telephone</TableHead>
+                                        <TableHead>NIC</TableHead>
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -139,12 +169,13 @@ const AddPatientButton = ({id}: { id: number }) => {
                                             className="cursor-pointer hover:bg-gray-50"
                                         >
                                             <TableCell>{patient.name}</TableCell>
-                                            <TableCell>{patient.telephone}</TableCell>
-                                            <TableCell>{patient.NIC || "N/A"}</TableCell>
                                             <TableCell>{getSex(patient.gender)}</TableCell>
                                             <TableCell>{patient.birthDate ? calcAge(new Date(patient.birthDate)) : "N/A"}</TableCell>
+
+                                            <TableCell>{patient.telephone}</TableCell>
+                                            <TableCell>{patient.NIC || "N/A"}</TableCell>
                                             <TableCell>
-                                                <Button onClick={() => console.log("Add patient to queue")}>
+                                                <Button onClick={() => handleAddToQueue(patient.id)}>
                                                     Add to Queue
                                                 </Button>
                                             </TableCell>
@@ -156,9 +187,7 @@ const AddPatientButton = ({id}: { id: number }) => {
                             searchTerm && <p className="p-2 text-gray-500">No results found</p>
                         )}
                     </div>
-
-
-                    <div className="flex justify-end mt-4">
+                    <div className="flex justify-start mt-4">
                         <Button onClick={() => console.log("Redirect to add new patient form")}>
                             Add New Patient
                         </Button>

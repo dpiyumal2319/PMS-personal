@@ -27,8 +27,7 @@ const QueueButton = () => {
                     }
                 },
                 {
-                    position: 'bottom-right',
-                    className: 'ring ring-gray-500/25',
+                    position: 'bottom-right'
                 },
             )
 

@@ -37,8 +37,7 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
                 }
             },
             {
-                position: 'bottom-right',
-                className: 'ring ring-gray-500/25',
+                position: 'bottom-right'
             }
         ).catch((e) => console.error(e));
     };
@@ -88,8 +87,7 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
 const PrescribeMedicine = () => {
     const handlePrescribe = () => {
         toast.success('Prescription issued successfully!', {
-            position: 'bottom-right',
-            className: 'ring ring-gray-500/25',
+            position: 'bottom-right'
         });
     };
 
@@ -116,8 +114,7 @@ const PrescribeMedicine = () => {
 const IssueMedicine = () => {
     const handleIssue = () => {
         toast.success('Medicine issued successfully!', {
-            position: 'bottom-right',
-            className: 'ring ring-gray-500/25',
+            position: 'bottom-right'
         });
     };
 

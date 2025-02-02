@@ -178,7 +178,7 @@ export async function searchPatients(query: string, searchBy: "name" | "telephon
 
     console.log(`Searching for patients with ${searchBy} containing ${query}`);
 
-    const results = await prisma.patient.findMany({
+    return prisma.patient.findMany({
         where: {
             [searchBy]: {
                 contains: query
@@ -186,6 +186,53 @@ export async function searchPatients(query: string, searchBy: "name" | "telephon
         },
         take: 10, // Limit results
     });
+}
 
-    return results;
+export async function addPatientToQueue(queueId: number, patientId: number) {
+    const queue = await prisma.queue.findUnique({
+        where: {
+            id: queueId
+        }
+    });
+
+    if (!queue) {
+        throw new Error('Queue not found')
+    }
+
+    const patient = await prisma.patient.findUnique({
+        where: {
+            id: patientId
+        }
+    });
+
+
+    if (!patient) {
+        throw new Error('Patient not found')
+    }
+
+    if (queue.status === 'COMPLETED') {
+        throw new Error('Queue is completed')
+    }
+
+    const lastToken = await prisma.queueEntry.findFirst({
+        where: {
+            queueId
+        },
+        orderBy: {
+            token: 'desc'
+        }
+    });
+
+    const token = lastToken ? lastToken.token + 1 : 1;
+
+    await prisma.queueEntry.create({
+        data: {
+            queueId,
+            patientId,
+            token
+        }
+    });
+
+    revalidatePath(`/queue/${queueId}`);
+    return {status: 'success', message: 'Patient added successfully'}
 }
