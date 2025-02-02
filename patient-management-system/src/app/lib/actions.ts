@@ -2,6 +2,7 @@
 
 import {prisma} from "@/app/lib/prisma";
 import {revalidatePath} from "next/cache";
+import type {myError} from "@/app/lib/definitions";
 
 export async function addQueue() {
     const activeQueuesCount = await prisma.queue.count(
@@ -53,7 +54,6 @@ export async function getTotalQueueCount() {
 }
 
 export async function stopQueue(id: string | null) {
-
     if (!id) {
         throw new Error('Queue ID is required')
     }
@@ -204,7 +204,6 @@ export async function addPatientToQueue(queueId: number, patientId: number) {
             id: patientId
         }
     });
-
 
     if (!patient) {
         throw new Error('Patient not found')

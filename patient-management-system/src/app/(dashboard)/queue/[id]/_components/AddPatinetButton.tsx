@@ -6,13 +6,12 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import {Input} from "@/components/ui/input";
 import {useDebounce} from "@/hooks/useDebounce";
 import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
-import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {Label} from "@/components/ui/label";
 import type {Patient} from "@prisma/client";
 import {calcAge} from "@/app/lib/utils";
 import {Badge} from "@/components/ui/badge";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
 import {toast} from "react-toastify";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 // Search by types
 const AddPatientButton = ({id}: { id: number }) => {
@@ -84,7 +83,6 @@ const AddPatientButton = ({id}: { id: number }) => {
                 pending: 'Adding patient to queue...',
                 success: {
                     render() {
-                        setOpen(false);
                         return 'Patient added to queue successfully';
                     }
                 },
@@ -97,7 +95,9 @@ const AddPatientButton = ({id}: { id: number }) => {
             {
                 position: 'bottom-right'
             }
-        );
+        ).then(() => {
+            setOpen(false);
+        });
     }
 
     return (
@@ -115,35 +115,33 @@ const AddPatientButton = ({id}: { id: number }) => {
                         <DialogTitle>Search Patient</DialogTitle>
                     </DialogHeader>
                     {/* Radio Group for Search By Options */}
-                    <RadioGroup
-                        value={searchBy}
-                        onValueChange={(value) => {
-                            setSearchBy(value as "name" | "telephone" | "NIC");
-                            setError(null);
-                            setSearchTerm("");
-                        }}
-                        className="flex space-x-4 mb-3"
-                    >
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="name" id="name"/>
-                            <Label htmlFor="name">Name</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="telephone" id="mobile"/>
-                            <Label htmlFor="telephone">Mobile</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="NIC" id="NIC"/>
-                            <Label htmlFor="NIC">NIC</Label>
-                        </div>
-                    </RadioGroup>
+                    <div className={'flex gap-2'}>
+                        <Select
+                            value={searchBy}
+                            onValueChange={(value) => {
+                                setSearchBy(value as "name" | "telephone" | "NIC");
+                                setError(null);
+                                setSearchTerm("");
+                            }}
+                        >
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Search by"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="name">Name</SelectItem>
+                                <SelectItem value="telephone">Mobile</SelectItem>
+                                <SelectItem value="NIC">NIC</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                    {/* Search Input */}
-                    <Input
-                        placeholder={`Search by ${searchBy.charAt(0).toUpperCase() + searchBy.slice(1)}`}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                        {/* Search Input */}
+                        <Input
+                            placeholder={`Search by ${searchBy.charAt(0).toUpperCase() + searchBy.slice(1)}`}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
 
                     {/*Error message*/}
                     {error && <p className="text-red-500">{error}</p>}

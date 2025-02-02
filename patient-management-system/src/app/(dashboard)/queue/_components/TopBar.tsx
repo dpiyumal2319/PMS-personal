@@ -100,7 +100,7 @@ const TopBar = () => {
 
     return (
         <div
-            className="flex justify-between w-full bg-background-50 border-b border-primary-900/25 shadow py-3.5 px-3 items-center text-xl font-semibold text-gray-800">
+            className="flex justify-between w-full bg-white border-b border-primary-900/25 shadow py-3.5 px-3 items-center text-xl font-semibold text-gray-800">
             <div className="flex items-center">
                 {perQueuePageActive && (
                     <Link href="/queue" className="p-2 hover:bg-gray-200 rounded-md">
