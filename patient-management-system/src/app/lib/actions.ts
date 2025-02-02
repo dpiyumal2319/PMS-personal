@@ -120,7 +120,7 @@ export async function getQueueStatusesCount(id: number) {
     }
 }
 
-export async function queuePatients(id :number) {
+export async function queuePatients(id: number) {
     try {
         return await prisma.queueEntry.findMany({
             where: {
@@ -139,3 +139,26 @@ export async function queuePatients(id :number) {
         throw new Error('An error occurred while getting queue patients')
     }
 }
+
+export async function removePatientFromQueue(queueId: number, token: number): Promise<{
+    status: string;
+    message: string
+}> {
+    try {
+        await prisma.queueEntry.delete({
+            where: {
+                queueId_token: {
+                    queueId,
+                    token
+                }
+            }
+        });
+
+        revalidatePath(`/queue/${queueId}`);
+        return {status: 'success', message: 'Patient removed successfully'}
+    } catch (e) {
+        console.error(e);
+        throw new Error("An error occurred while removing patient from queue")
+    }
+}
+

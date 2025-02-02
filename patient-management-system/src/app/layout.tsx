@@ -3,11 +3,13 @@ import {Montserrat} from "next/font/google";
 import "./globals.css";
 import React from "react";
 import {ToastContainer} from "react-toastify";
+import {TooltipProvider} from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
     title: "Patient Management System",
     description: "Patient Management System",
 };
+
 
 const montserrat = Montserrat({
     subsets: ["latin"],
@@ -22,11 +24,12 @@ export default function RootLayout({
 }>) {
 
 
-
     return (
         <html lang="en" className={montserrat.className}>
         <body className={'bg-background h-screen'}>
-        {children}
+        <TooltipProvider>
+            {children}
+        </TooltipProvider>
         <ToastContainer/>
         </body>
         </html>

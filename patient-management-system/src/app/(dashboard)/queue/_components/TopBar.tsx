@@ -20,6 +20,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 const TopBar = () => {
     const pathname = usePathname();
@@ -120,13 +121,18 @@ const TopBar = () => {
                                 <span className="font-medium">{elapsedTime}</span>
                             </div>
                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <button
-                                        className="p-3.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition"
-                                    >
-                                        <FaStop/>
-                                    </button>
-                                </AlertDialogTrigger>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <AlertDialogTrigger asChild>
+                                            <button className="p-3.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition">
+                                                <FaStop />
+                                            </button>
+                                        </AlertDialogTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Stop Queue</p>
+                                    </TooltipContent>
+                                </Tooltip>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Stop Queue</AlertDialogTitle>

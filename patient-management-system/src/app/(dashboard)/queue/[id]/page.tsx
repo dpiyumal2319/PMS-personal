@@ -18,6 +18,8 @@ export default async function page(
     metadata.title = `Queue ${id} - Patient Management System`;
     metadata.description = `Queue ${id} page`;
 
+    const isClient = typeof window !== "undefined";
+    console.log(isClient ? "Client-side" : "Server-side");
     return (
         <div className={'flex-grow p-2 flex flex-col items-center justify-between'}>
             <div className={'w-4/5 pt-4'}>
