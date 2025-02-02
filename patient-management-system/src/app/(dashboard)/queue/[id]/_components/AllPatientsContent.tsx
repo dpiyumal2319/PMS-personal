@@ -72,11 +72,10 @@ async function AllPatientsContent({id}: { id: number }) {
                         <TableCell>Unknown</TableCell>}
                     <TableCell>{new Date(patient.time).toLocaleTimeString()}</TableCell>
                     <TableCell className={'flex justify-center items-center gap-2'}>
-
-                        {role === 'DOCTOR' && patient.status === 'PENDING' && <PrescribeMedicine/>}
-                        {role === 'NURSE' && patient.status === 'PRESCRIBED' && <IssueMedicine/>}
-                        <RemoveFromQueue queueId={id} token={patient.token}/>
-                        <ViewProfile id={patient.id}/>
+                            {role === 'DOCTOR' && patient.status === 'PENDING' && <PrescribeMedicine/>}
+                            {role === 'NURSE' && patient.status === 'PRESCRIBED' && <IssueMedicine/>}
+                            <RemoveFromQueue queueId={id} token={patient.token}/>
+                            <ViewProfile id={patient.id}/>
                     </TableCell>
                 </TableRow>
             ))}
@@ -107,12 +106,3 @@ async function AllPatientsContent({id}: { id: number }) {
 }
 
 export default AllPatientsContent;
-
-
-// <TableHead>PatientID</TableHead>
-// <TableHead>Status</TableHead>
-// <TableHead>Name</TableHead>
-// <TableHead>Sex</TableHead>
-// <TableHead>Age</TableHead>
-// <TableHead>Arrive At</TableHead>
-// <TableHead>Actions</TableHead>

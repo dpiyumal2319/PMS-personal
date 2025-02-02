@@ -6,7 +6,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { LoadingRows } from "@/app/(dashboard)/queue/Loading";
-import AllPatientsContent from "@/app/(dashboard)/queue/[id]/AllPatientsContent";
+import AllPatientsContent from "@/app/(dashboard)/queue/[id]/_components/AllPatientsContent";
 
 // Main Table Component
 export default function AllPatientsTable({ id }: { id : number }) {

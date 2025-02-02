@@ -2,7 +2,7 @@ import {Suspense} from "react";
 import CardWrapper from "@/app/(dashboard)/queue/[id]/_components/CardWrapper";
 import {CardSet} from "@/app/(dashboard)/queue/[id]/_components/Skeletons";
 import AddPatientButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
-import AllPatientsTable from "@/app/(dashboard)/queue/[id]/AllPatientsTable";
+import AllPatientsTable from "@/app/(dashboard)/queue/[id]/_components/AllPatientsTable";
 
 export const metadata = {
     title: "Queue - Patient Management System",
@@ -18,8 +18,7 @@ export default async function page(
     metadata.title = `Queue ${id} - Patient Management System`;
     metadata.description = `Queue ${id} page`;
 
-    const isClient = typeof window !== "undefined";
-    console.log(isClient ? "Client-side" : "Server-side");
+
     return (
         <div className={'flex-grow p-2 flex flex-col items-center justify-between'}>
             <div className={'w-4/5 pt-4'}>

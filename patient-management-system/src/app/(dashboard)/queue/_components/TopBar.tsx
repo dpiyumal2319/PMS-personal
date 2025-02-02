@@ -8,7 +8,7 @@ import {getQueue} from "@/app/lib/actions";
 import {FaStop} from "react-icons/fa";
 import {stopQueue} from "@/app/lib/actions";
 import {toast} from "react-toastify";
-import { MdOutlineTimer } from "react-icons/md";
+import {MdOutlineTimer} from "react-icons/md";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,7 +20,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 const TopBar = () => {
     const pathname = usePathname();
@@ -53,7 +53,8 @@ const TopBar = () => {
             }
         };
 
-        fetchData().then(() => {});
+        fetchData().then(() => {
+        });
     }, [queueId]);
 
 
@@ -121,18 +122,21 @@ const TopBar = () => {
                                 <span className="font-medium">{elapsedTime}</span>
                             </div>
                             <AlertDialog>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <AlertDialogTrigger asChild>
-                                            <button className="p-3.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition">
-                                                <FaStop />
-                                            </button>
-                                        </AlertDialogTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Stop Queue</p>
-                                    </TooltipContent>
-                                </Tooltip>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <AlertDialogTrigger asChild>
+                                                <button
+                                                    className="p-3.5 bg-red-600 text-white text-sm rounded-full hover:bg-red-700 transition">
+                                                    <FaStop/>
+                                                </button>
+                                            </AlertDialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Stop Queue</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Stop Queue</AlertDialogTitle>
@@ -141,7 +145,8 @@ const TopBar = () => {
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200">Keep Running</AlertDialogCancel>
+                                        <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200">Keep
+                                            Running</AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={handleStop}
                                             className="bg-red-600 text-white hover:bg-red-700"

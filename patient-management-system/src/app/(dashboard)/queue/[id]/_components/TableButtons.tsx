@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
     Tooltip,
-    TooltipContent,
+    TooltipContent, TooltipProvider,
     TooltipTrigger
 } from "@/components/ui/tooltip";
 import {FaStop, FaTrash, FaMedkit} from "react-icons/fa";
@@ -45,24 +45,27 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
 
     return (
         <AlertDialog>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <AlertDialogTrigger asChild>
-                        <button className="p-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
-                            <FaTrash/>
-                        </button>
-                    </AlertDialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                    Remove from Queue
-                </TooltipContent>
-            </Tooltip>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <AlertDialogTrigger asChild>
+                            <button className="p-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
+                                <FaTrash/>
+                            </button>
+                        </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        Remove from Queue
+                    </TooltipContent>
+                </Tooltip>
+            </ TooltipProvider>
 
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Remove from the Queue</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to remove this patient from the queue? This action cannot be undone.
+                        Are you sure you want to remove this patient from the queue? This action cannot be
+                        undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -91,19 +94,21 @@ const PrescribeMedicine = () => {
     };
 
     return (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <button
-                    onClick={handlePrescribe}
-                    className="p-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
-                >
-                    <FaMedkit/>
-                </button>
-            </TooltipTrigger>
-            <TooltipContent>
-                Prescribe Medicine
-            </TooltipContent>
-        </Tooltip>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={handlePrescribe}
+                        className="p-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
+                    >
+                        <FaMedkit/>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    Prescribe Medicine
+                </TooltipContent>
+            </Tooltip>
+        </ TooltipProvider>
     );
 };
 
@@ -117,38 +122,48 @@ const IssueMedicine = () => {
     };
 
     return (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <button
-                    onClick={handleIssue}
-                    className="p-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
-                >
-                    <FaStop/>
-                </button>
-            </TooltipTrigger>
-            <TooltipContent>
-                Issue Medicine
-            </TooltipContent>
-        </Tooltip>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={handleIssue}
+                        className="p-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
+                    >
+                        <FaStop/>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    Issue Medicine
+                </TooltipContent>
+            </Tooltip>
+        </ TooltipProvider>
     );
 };
 
-const ViewProfile = ({id}: { id: number }) => {
+const ViewProfile = ({
+                         id
+                     }: {
+    id: number
+}) => {
     return (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <button className="flex items-center p-2 text-gray-500 rounded hover:bg-gray-200 transition"
-                        onClick={() => {
-                            console.log('Viewing profile of patient with ID:', id);
-                        }}>
-                    <IoIosMore className={'font-bold text-lg'}/>
-                </button>
-            </TooltipTrigger>
-            <TooltipContent>
-                View Profile
-            </TooltipContent>
-        </Tooltip>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button className="flex items-center p-2 text-gray-500 rounded hover:bg-gray-200 transition"
+                            onClick={() => {
+                                console.log('Viewing profile of patient with ID:', id);
+                            }}>
+                        <IoIosMore className={'font-bold text-lg'}/>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    View Profile
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     )
 }
 
-export {RemoveFromQueue, PrescribeMedicine, IssueMedicine, ViewProfile};
+export {
+    RemoveFromQueue, PrescribeMedicine, IssueMedicine, ViewProfile
+};
