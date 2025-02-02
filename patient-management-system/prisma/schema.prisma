@@ -80,12 +80,15 @@ model Queue {
 
 model QueueEntry {
   id        Int         @id @default(autoincrement())
+  token     Int // Token number within the queue
   status    VisitStatus @default(PENDING)
   queue     Queue       @relation(fields: [queueId], references: [id])
   queueId   Int
-  patient   Patient?    @relation(fields: [patientId], references: [id])
-  patientId Int?
+  patient   Patient     @relation(fields: [patientId], references: [id])
+  patientId Int
   time      DateTime    @default(now())
+
+  @@unique([queueId, token]) // Ensure token uniqueness within a queue
 }
 
 model DrugBrand {

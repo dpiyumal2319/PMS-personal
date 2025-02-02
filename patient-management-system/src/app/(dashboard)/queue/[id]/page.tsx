@@ -1,7 +1,8 @@
 import {Suspense} from "react";
 import CardWrapper from "@/app/(dashboard)/queue/[id]/_components/CardWrapper";
 import {CardSet} from "@/app/(dashboard)/queue/[id]/_components/Skeletons";
-import AddPatinetButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
+import AddPatientButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
+import AllPatientsTable from "@/app/(dashboard)/queue/[id]/AllPatientsTable";
 
 export const metadata = {
     title: "Queue - Patient Management System",
@@ -26,7 +27,10 @@ export default async function page(
                     </Suspense>
                 </div>
                 <div className={'flex justify-end mt-5 w-full'}>
-                    <AddPatinetButton id={id} />
+                    <AddPatientButton id={id} />
+                </div>
+                <div className={'mt-5'}>
+                    <AllPatientsTable id={id}/>
                 </div>
             </div>
         </div>

@@ -119,3 +119,23 @@ export async function getQueueStatusesCount(id: number) {
         throw new Error('An error occurred while getting queue statuses count')
     }
 }
+
+export async function queuePatients(id :number) {
+    try {
+        return await prisma.queueEntry.findMany({
+            where: {
+                queueId: id
+            },
+            include: {
+                patient: true,
+                queue: true
+            },
+            orderBy: {
+                token: 'asc'
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        throw new Error('An error occurred while getting queue patients')
+    }
+}

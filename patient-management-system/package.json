@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "studio": "npx prisma studio",
-    "seed": "npx prisma db seed"
+    "seed": "npx prisma db seed",
+    "migrate - reset": "npx prisma migrate reset"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",

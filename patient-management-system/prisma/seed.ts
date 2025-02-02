@@ -64,8 +64,8 @@ async function main() {
     // Create Queue Entries
     await prisma.queueEntry.createMany({
         data: [
-            {queueId: queue.id, status: VisitStatus.PENDING, patientId: patient1.id},
-            {queueId: queue.id, status: VisitStatus.PRESCRIBED, patientId: patient2.id},
+            {queueId: queue.id, status: VisitStatus.PENDING, patientId: patient1.id, token: 1},
+            {queueId: queue.id, status: VisitStatus.PRESCRIBED, patientId: patient2.id, token: 2},
         ],
     });
 
