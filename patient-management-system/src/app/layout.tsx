@@ -2,7 +2,7 @@ import type {Metadata} from "next";
 import {Montserrat} from "next/font/google";
 import "./globals.css";
 import React from "react";
-import {ToastContainer} from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
     title: "Patient Management System",

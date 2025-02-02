@@ -9,15 +9,15 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex">
-            <aside className={"sticky top-0 left-0 h-screen"}>
+        <div className="flex h-screen">
+            <aside className={"sticky top-0 left-0"}>
                 <Sidebar/>
             </aside>
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full overflow-y-scroll">
                 <div className={'sticky top-0'}>
                     <TopBar/>
                 </div>
-                <div>
+                <div className={'flex-grow'}>
                     <Suspense fallback={<Loading />}>
                         {children}
                     </ Suspense>
