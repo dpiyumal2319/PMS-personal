@@ -4,7 +4,6 @@ import {getQueueStatusesCount} from "@/app/lib/actions";
 
 const CardWrapper = async ({id}: { id: number }) => {
     const statuses = await getQueueStatusesCount(id);
-
     
     return (
         <div className={'flex gap-5'}>

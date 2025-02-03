@@ -59,7 +59,6 @@ async function AllPatientsContent({id}: { id: number }) {
         }
     }
 
-
     return (
         <TableBody>
             {filteredPatients.map((patient) => (
