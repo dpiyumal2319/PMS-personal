@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description: "Patient Management System",
 };
 
+
 const montserrat = Montserrat({
     subsets: ["latin"],
     weight: ["300", "400", "500", "600", "700", "800"], // Select needed weights
@@ -22,11 +23,10 @@ export default function RootLayout({
 }>) {
 
 
-
     return (
         <html lang="en" className={montserrat.className}>
         <body className={'bg-background h-screen'}>
-        {children}
+            {children}
         <ToastContainer/>
         </body>
         </html>

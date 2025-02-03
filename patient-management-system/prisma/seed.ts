@@ -1,4 +1,4 @@
-import { PrismaClient, Gender, Role, QueueStatus } from '@prisma/client';
+import {PrismaClient, Gender, Role, QueueStatus, VisitStatus} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -48,7 +48,6 @@ async function main() {
         data: {
             email: 'nurse2@srilanka.com', mobile: '0775677890', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.NURSE, name: 'Dasun Nona' },
     });
-
      // Create a Queue
   const queue = await prisma.queue.create({
     data: {

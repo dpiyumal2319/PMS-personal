@@ -2,6 +2,12 @@ import QueueTable from "@/app/(dashboard)/queue/_components/QueueTable";
 import Pagination from "@/app/(dashboard)/queue/_components/Pagination";
 import AddQueue from "@/app/(dashboard)/queue/_components/AddQueue";
 import React from "react";
+import type {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "All queues - Patient Management System",
+    description: "View all queues in the patient management system",
+};
 
 const rowsPerPage = 7;
 
@@ -14,7 +20,7 @@ export default async function Page(props: {
     const currentPage = Number(searchParams?.page) || 1;
 
     return (
-        <div className="p-4  flex flex-col items-center justify-between h-full">
+        <div className="p-4  flex flex-col items-center justify-between flex-grow">
             <div className=" min-h-52 flex flex-col w-4/5">
                 <div className={'flex justify-end mb-2.5'}>
                 <AddQueue/>

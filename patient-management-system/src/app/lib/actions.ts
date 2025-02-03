@@ -1,6 +1,8 @@
 'use server';
 
-import { revalidatePath } from "next/cache";
+import {prisma} from "@/app/lib/prisma";
+import {revalidatePath} from "next/cache";
+import type {myError} from "@/app/lib/definitions";
 import { prisma } from "./prisma";
 import { verifySession } from "./sessions";
 import bcrypt from "bcryptjs";
@@ -87,25 +89,29 @@ export async function changeUserPassword({
   return { success: true };
 }
 
-export async function addQueue() {
-    const activeQueuesCount = await prisma.queue.count(
-        {
-            where: {
-                status: 'IN_PROGRESS'
+export async function addQueue(): Promise<myError> {
+    try {
+        const activeQueuesCount = await prisma.queue.count(
+            {
+                where: {
+                    status: 'IN_PROGRESS'
+                }
             }
+        );
+
+        if (activeQueuesCount !== 0) {
+            return {success: false, message: 'There is already an active queue'}
         }
-    )
 
-    if (activeQueuesCount !== 0) {
-        throw new Error('There is already an active queue')
+        await prisma.queue.create({
+            data: {}
+        })
+        revalidatePath('/queues')
+        return {success: true, message: 'Queue created successfully'}
+    } catch (e) {
+        console.error(e)
+        return {success: false, message: 'An error occurred while creating queue'}
     }
-
-    await prisma.queue.create({
-        data: {}
-    })
-
-    revalidatePath('/queue');
-    return { status: 'success', message: 'Queue added successfully' }
 }
 
 export async function getQueues(offset: number, limit: number) {
@@ -118,12 +124,221 @@ export async function getQueues(offset: number, limit: number) {
         },
         include: {
             _count: {
-                select: { entries: true }
+                select: {entries: true}
             }
+        }
+    });
+}
+
+export async function getQueue(queueId: number) {
+    return prisma.queue.findUnique({
+        where: {
+            id: queueId
         }
     });
 }
 
 export async function getTotalQueueCount() {
     return prisma.queue.count();
+}
+
+export async function stopQueue(id: string | null): Promise<myError> {
+    try {
+
+        if (!id) {
+            return {success: false, message: 'Queue ID not provided'}
+        }
+
+        const numberId = parseInt(id)
+
+        const queue = await prisma.queue.findUnique(
+            {
+                where: {
+                    id: numberId
+                }
+            }
+        )
+
+        if (!queue) {
+            return {success: false, message: 'Queue not found'}
+        }
+
+        if (queue.status === 'COMPLETED') {
+            return {success: false, message: 'Queue is already stopped'}
+        }
+
+        const UncompletedQueueEntries = await prisma.queueEntry.findMany({
+            where: {
+                queueId: numberId,
+                status: {
+                    not: 'COMPLETED'
+                }
+            }
+        })
+
+        if (UncompletedQueueEntries.length > 0) {
+            return {success: false, message: 'Queue has uncompleted entries'}
+        }
+
+        await prisma.queue.update({
+            where: {
+                id: numberId
+            },
+            data: {
+                status: 'COMPLETED'
+            }
+        })
+        return {success: true, message: 'Queue stopped successfully'}
+    } catch (e) {
+        console.error(e)
+        return {success: false, message: 'An error occurred while stopping queue'}
+    }
+}
+
+export async function getQueueStatus(id: number) {
+    return prisma.queue.findUnique({
+        where: {
+            id
+        },
+        select: {
+            status: true
+        }
+    });
+}
+
+export async function getQueueStatusesCount(id: number) {
+    try {
+        const result = await prisma.queueEntry.groupBy({
+            by: ['status'],
+            where: {
+                queueId: id
+            },
+            _count: {
+                status: true
+            }
+        })
+
+        const statuses = {
+            PENDING: 0,
+            PRESCRIBED: 0,
+            COMPLETED: 0
+        }
+
+        result.forEach((item) => {
+            statuses[item.status] = item._count.status
+        })
+
+        return statuses;
+    } catch (e) {
+        console.error(e);
+        throw new Error('An error occurred while getting queue statuses count')
+    }
+}
+
+export async function queuePatients(id: number) {
+    try {
+        return await prisma.queueEntry.findMany({
+            where: {
+                queueId: id
+            },
+            include: {
+                patient: true,
+                queue: true
+            },
+            orderBy: {
+                token: 'asc'
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        throw new Error('An error occurred while getting queue patients')
+    }
+}
+
+export async function removePatientFromQueue(queueId: number, token: number): Promise<myError> {
+    try {
+        await prisma.queueEntry.delete({
+            where: {
+                queueId_token: {
+                    queueId,
+                    token
+                }
+            }
+        });
+
+        revalidatePath(`/queue/${queueId}`);
+        return {success: true, message: 'Patient removed successfully'}
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while removing patient from queue'}
+    }
+}
+
+export async function searchPatients(query: string, searchBy: "name" | "telephone" | "NIC") {
+    if (!query) return [];
+
+    console.log(`Searching for patients with ${searchBy} containing ${query}`);
+
+    return prisma.patient.findMany({
+        where: {
+            [searchBy]: {
+                contains: query
+            },
+        },
+        take: 10, // Limit results
+    });
+}
+
+export async function addPatientToQueue(queueId: number, patientId: number): Promise<myError> {
+
+    try {
+        const queue = await prisma.queue.findUnique({
+            where: {
+                id: queueId
+            }
+        });
+
+        if (!queue) {
+            return {success: false, message: 'Queue not found'}
+        }
+
+        const patient = await prisma.patient.findUnique({
+            where: {
+                id: patientId
+            }
+        });
+
+        if (!patient) {
+            return {success: false, message: 'Patient not found'}
+        }
+
+        if (queue.status === 'COMPLETED') {
+            return {success: false, message: 'Queue is stopped'}
+        }
+
+        const lastToken = await prisma.queueEntry.findFirst({
+            where: {
+                queueId
+            },
+            orderBy: {
+                token: 'desc'
+            }
+        });
+
+        const token = lastToken ? lastToken.token + 1 : 1;
+
+        await prisma.queueEntry.create({
+            data: {
+                queueId,
+                patientId,
+                token
+            }
+        });
+
+        revalidatePath(`/queue/${queueId}`);
+        return {success: true, message: 'Patient added to queue successfully'}
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while adding patient to queue'}
+    }
 }
