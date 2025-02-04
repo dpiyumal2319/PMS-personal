@@ -139,7 +139,7 @@ export async function getPatients() {
     });
 }
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 3;
 
 export async function getTotalPages(query = "") {
   const whereClause = query
@@ -160,7 +160,7 @@ export async function getFilteredPatients(query: string = "", page: number = 1) 
     const whereCondition = query
         ? {
               OR: [
-                  { name: { contains: query, mode: "insensitive" } },
+                  { name: { contains: query } },
                   { NIC: { contains: query } },
                   { telephone: { contains: query } },
               ],

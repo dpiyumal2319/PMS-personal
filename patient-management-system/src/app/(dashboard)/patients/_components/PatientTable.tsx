@@ -16,14 +16,14 @@ export default async function PatientTable({
   query: string;
   currentPage: number;
 }) {
-  //assign patients to the array using getFilteredPatients function
-  const filteredPatients = await getFilteredPatients(query, 2);
+
+  const filteredPatients = await getFilteredPatients(query, currentPage);
+
+  const totalPages = Math.ceil(filteredPatients.length);
 
   return (
     <div>
       <PatientsList patients={filteredPatients} />
-
-
     </div>
   );
 }
