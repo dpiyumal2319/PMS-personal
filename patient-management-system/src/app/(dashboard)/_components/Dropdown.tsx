@@ -24,7 +24,7 @@ export default function SearchDropdown({
 
   return (
     <Select onValueChange={handleSelect} value={selectedValue}>
-      <SelectTrigger className="w-48 border border-gray-300 rounded-lg px-3 py-2">
+      <SelectTrigger className="w-48">
         <SelectValue placeholder="Search by" />
       </SelectTrigger>
       <SelectContent>

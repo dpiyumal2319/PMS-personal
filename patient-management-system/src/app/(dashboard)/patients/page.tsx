@@ -5,7 +5,6 @@ import { getTotalPages } from "@/app/lib/actions";
 import Pagination from "../_components/Pagination";
 import { PatientsTableSkeleton } from "./_components/PatientsTableSkeleton";
 import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from "@/components/ui/select";
 import SearchDropdown from "../_components/Dropdown";
 
 export default async function Page({
@@ -26,7 +25,7 @@ export default async function Page({
 
   return (
     <>
-      <div className="w-full p-4 flex flex-col bg-amber-400 h-full">
+      <div className="w-full p-4 flex flex-col h-full">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">All Patients</h1>
@@ -49,14 +48,14 @@ export default async function Page({
         </div>
 
         {/* Table */}
-        <div className="bg-slate-600 flex-grow overflow-y-auto">
+        <div className="flex-grow overflow-y-auto">
           <Suspense key={query + currentPage} fallback={<PatientsTableSkeleton />}>
             <PatientTable query={query} currentPage={currentPage} filter={filter} />
           </Suspense>
         </div>
       </div>
       {/* Pagination */}
-      <div className="mt-auto flex justify-center py-4 bg-pink-600 sticky bottom-0">
+      <div className="mt-auto flex justify-center py-4 sticky bottom-0">
         <Pagination totalPages={totalPages} />
       </div>
     </>

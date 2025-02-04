@@ -13,8 +13,8 @@ export default function DashboardLayout({
             <aside className={"sticky top-0 left-0"}>
                 <Sidebar/>
             </aside>
-            <div className="flex flex-col w-full overflow-y-scroll">
-                <div className={'sticky top-0 z-100'}>
+            <div className="flex flex-col w-full overflow-y-auto">
+                <div className={'sticky top-0 z-10'}>
                     <TopBar/>
                 </div>
                 <div className={'flex-grow'}>
