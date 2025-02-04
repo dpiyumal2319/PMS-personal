@@ -23,9 +23,4 @@ export default async function AdminPage() {
       </div>
     </div>
   );
-
-  // Helper function for default avatars
-  function getDefaultAvatar(role: "DOCTOR" | "NURSE") {
-    return role === "DOCTOR" ? "/doctor-avatar.jpg" : "/nurse-avatar.jpg";
-  }
 }
