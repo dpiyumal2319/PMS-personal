@@ -21,14 +21,9 @@ export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
                 link: "/admin"
             },
             {
-                icon: MdAdminPanelSettings,
-                name: "Admins",
-                link: "/admins"
-            },
-            {
-                icon: MdAdminPanelSettings,
-                name: "Admins",
-                link: "/admins"
+                icon: TbReportSearch,
+                name: "Reports",
+                link: "/admin/reports"
             }
         ]
     },
