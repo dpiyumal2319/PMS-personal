@@ -21,7 +21,7 @@ export default async function Page({
   const params = await searchParams;
   const query = params?.query || "";
   const currentPage = Number(params?.page) || 1;
-  const filter = params?.filter || "";
+  const filter = params?.filter || "name";
   const totalPages = await getTotalPages(query);
 
   return (
