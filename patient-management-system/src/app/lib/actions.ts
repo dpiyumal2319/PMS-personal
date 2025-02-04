@@ -138,3 +138,20 @@ export async function getPatients() {
         },
     });
 }
+
+const PAGE_SIZE = 10;
+
+export async function getTotalPages(query = "") {
+  const whereClause = query
+    ? {
+        OR: [
+          { name: { contains: query, mode: "insensitive" } },
+          { NIC: { contains: query } },
+          { telephone: { contains: query } },
+        ],
+      }
+    : {};
+
+  const totalPatients = await prisma.patient.count({ where: whereClause });
+  return Math.ceil(totalPatients / PAGE_SIZE);
+}

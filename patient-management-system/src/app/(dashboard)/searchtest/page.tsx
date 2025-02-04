@@ -2,6 +2,8 @@
 import { Suspense } from "react";
 import SearchBox from "../_components/Search";
 import PatientTable from "./_components/PatientTable";
+import { getTotalPages } from "@/app/lib/actions";
+import Pagination from "./_components/Pagination";
 
 export default async function Page({
   searchParams,
@@ -15,6 +17,8 @@ export default async function Page({
   const params = await searchParams;
   const query = params?.query || '';
   const currentPage = Number(params?.page) || 1;
+  const totalPages = await getTotalPages(query);
+
 
   return (
     <div className="w-full">
@@ -27,6 +31,9 @@ export default async function Page({
       <Suspense key={query + currentPage} fallback={<div>Loading...</div>}>
         <PatientTable query={query} currentPage={currentPage} />
       </Suspense>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
+      </div>
     </div>
   );
 }
