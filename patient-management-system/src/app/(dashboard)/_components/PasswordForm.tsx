@@ -44,7 +44,7 @@ export function PasswordForm() {
 
         if (result.success) {
             setSuccess(result.message);
-            router.push("/login");
+            router.back();
         }
 
         setCurrentPassword("");
