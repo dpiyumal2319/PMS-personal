@@ -5,6 +5,7 @@ import type {myError} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
+import { DrugType } from "@prisma/client";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -402,4 +403,68 @@ export async function addPatientToQueue(queueId: number, patientId: number): Pro
         console.error(e);
         return {success: false, message: 'An error occurred while adding patient to queue'}
     }
+}
+
+//For adding drugs to the inventory
+export async function addNewItem({
+    brandName,
+    brandDescription,
+    drugName,
+    batchNumber,
+    drugType,
+    quantity,
+    expiry,
+    price}:{
+    brandName: string,
+    brandDescription: string,
+    drugName: string,
+    batchNumber: string,
+    drugType: DrugType,
+    quantity: number,
+    expiry: Date,
+    price: number,
+    }): Promise<myError> {
+        try{
+             return await prisma.$transaction(async (tx) => {
+      // 1. Create or connect drug brand
+      const brand = await tx.drugBrand.upsert({
+        where: { name: brandName },
+        update: {},
+        create: {
+          name: brandName,
+          description: brandDescription || ''
+        }
+      });
+
+      // 2. Create or connect drug
+      const drug = await tx.drug.upsert({
+        where: { name: drugName },
+        update: {},
+        create: {
+          name: drugName,
+          brandName: brand.name
+        }
+      });
+
+      // 3. Create batch
+      await tx.batch.create({
+        data: {
+          number: batchNumber,
+          drugName: drug.name,
+          type: drugType,
+          fullAmount: quantity,
+          remainingQuantity: quantity,
+          expiry,
+          price,
+          status: 'AVAILABLE'
+        }
+      });
+
+      revalidatePath('/inventory/available-stocks');
+      return { success: true, message: 'Item added successfully' };
+    });
+        }catch (e) {
+            console.error(e);
+            return { success: false, message: 'Failed to add item' };
+         }
 }
