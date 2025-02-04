@@ -7,16 +7,14 @@ import PatientsList from "./PatientsList";
 export default async function PatientTable({
   query,
   currentPage,
+  filter,
 }: {
   query: string;
   currentPage: number;
+  filter: string;
 }) {
 
-  const filteredPatients = await getFilteredPatients(query, currentPage);
-
-  //2 seconds delay
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
+  const filteredPatients = await getFilteredPatients(query, currentPage, filter);
 
   return (
     <div>

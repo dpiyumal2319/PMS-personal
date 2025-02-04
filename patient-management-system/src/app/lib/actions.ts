@@ -166,7 +166,7 @@ export async function getPatients() {
     });
 }
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 10;
 
 export async function getTotalPages(query = "") {
   const whereClause = query
@@ -183,14 +183,12 @@ export async function getTotalPages(query = "") {
   return Math.ceil(totalPatients / PAGE_SIZE);
 }
 
-export async function getFilteredPatients(query: string = "", page: number = 1) {
+export async function getFilteredPatients(query: string = "", page: number = 1, filter: string = "name") {
+
+    console.log(`Filtering patients by ${filter} containing ${query}`);
     const whereCondition = query
         ? {
-              OR: [
-                  { name: { contains: query } },
-                  { NIC: { contains: query } },
-                  { telephone: { contains: query } },
-              ],
+              [filter]: { contains: query },
           }
         : {};
 
@@ -201,8 +199,11 @@ export async function getFilteredPatients(query: string = "", page: number = 1) 
         orderBy: { name: "asc" },
     });
 
-    return patients; // Returning the filtered patient array
+    return patients;
 }
+
+
+
 export async function stopQueue(id: string | null): Promise<myError> {
     try {
 
