@@ -47,7 +47,7 @@ enum BatchStatus {
 }
 
 model Patient {
-  id           Int            @id @default(autoincrement())
+  id           Int             @id @default(autoincrement())
   telephone    String
   name         String
   birthDate    DateTime?
@@ -58,7 +58,7 @@ model Patient {
   NIC          String?
   queueEntry   QueueEntry[]
   prescription Prescription[]
-  reports      Report[]
+  reports      PatientReport[]
 }
 
 model User {
@@ -135,20 +135,40 @@ model Issue {
   batchId        Int
 }
 
-model ReportTemplate {
-  id           Int      @id @default(autoincrement())
-  abbreviation String   @unique
-  name         String
-  parameters   Json
-  Report       Report[]
+model ReportParameter {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  units        String
+  abbreviation String        @unique
+  ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id])
+  reportTypeId Int?
+  ReportValue  ReportValue[]
 }
 
-model Report {
-  id          Int            @id @default(autoincrement())
-  template    ReportTemplate @relation(fields: [templateId], references: [id])
-  templateId  Int
-  parameters  Json
-  generatedAt DateTime       @default(now())
-  patient     Patient        @relation(fields: [patientId], references: [id])
-  patientId   Int
+model ReportType {
+  id            Int               @id @default(autoincrement())
+  name          String            @unique
+  abbreviation  String            @unique
+  description   String?
+  parameters    ReportParameter[]
+  PatientReport PatientReport[]
+}
+
+model PatientReport {
+  id           Int           @id @default(autoincrement())
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  patientId    Int
+  reportType   ReportType    @relation(fields: [reportTypeId], references: [id])
+  reportTypeId Int
+  time         DateTime      @default(now())
+  parameters   ReportValue[]
+}
+
+model ReportValue {
+  id                Int             @id @default(autoincrement())
+  reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id])
+  reportParameterId Int
+  value             String
+  PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id])
+  patientReportId   Int?
 }

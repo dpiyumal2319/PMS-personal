@@ -363,3 +363,14 @@ export async function getPatientDetails(id: number) {
         }
     });
 }
+
+// export async function getReportInfo() {
+//     const report = await prisma.reportType.findUnique({
+//         where: {
+//             id: 1
+//         },
+//         include: {
+//             parameters: true
+//         }
+//     });
+// }
