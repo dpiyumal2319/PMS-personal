@@ -12,6 +12,7 @@ import { Search } from "lucide-react";
 import React, { Suspense, useState } from "react";
 import Loading from "@/app/(dashboard)/Loading";
 import { AddItemButton } from "../_components/AddButton";
+import DatePicker from "../_components/DatePicker";
 
 import { usePathname } from "next/navigation";
 
@@ -107,7 +108,7 @@ export default function InventoryLayout({
 
             {(pathName.startsWith("/inventory/cost-management") ||
               pathName.startsWith("/inventory/completed-stocks")) && (
-              <h1>Data Calendar</h1>
+              <DatePicker />
             )}
             {/* Add New Item Button */}
             {pathName.startsWith("/inventory/available-stocks") && (
