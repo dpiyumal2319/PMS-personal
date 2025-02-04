@@ -21,7 +21,7 @@ export default async function Page({
   const query = params?.query || "";
   const currentPage = Number(params?.page) || 1;
   const filter = params?.filter || "name";
-  const totalPages = await getTotalPages(query);
+  const totalPages = await getTotalPages(query, filter);
 
   return (
     <>
@@ -56,7 +56,7 @@ export default async function Page({
       </div>
       {/* Pagination */}
       <div className="mt-auto flex justify-center py-4 sticky bottom-0">
-        <Pagination totalPages={totalPages} />
+        <Pagination totalPages={totalPages} itemsPerPage={10} />
       </div>
     </>
   );

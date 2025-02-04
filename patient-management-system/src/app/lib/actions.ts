@@ -168,20 +168,16 @@ export async function getPatients() {
 
 const PAGE_SIZE = 10;
 
-export async function getTotalPages(query = "") {
-  const whereClause = query
-    ? {
-        OR: [
-          { name: { contains: query} },
-          { NIC: { contains: query } },
-          { telephone: { contains: query } },
-        ],
-      }
-    : {};
-
-  const totalPatients = await prisma.patient.count({ where: whereClause });
-  return Math.ceil(totalPatients / PAGE_SIZE);
-}
+export async function getTotalPages(query = "", filter = "name") {
+    const whereClause = query
+      ? {
+          [filter]: { contains: query },
+        }
+      : {};
+  
+    const totalPatients = await prisma.patient.count({ where: whereClause });
+    return Math.ceil(totalPatients / PAGE_SIZE);
+  }
 
 export async function getFilteredPatients(query: string = "", page: number = 1, filter: string = "name") {
 

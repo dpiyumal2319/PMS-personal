@@ -6,9 +6,10 @@ import Link from 'next/link';
 
 interface PaginationProps {
     totalPages: number;
+    itemsPerPage?: number;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
+const Pagination: React.FC<PaginationProps> = ({ totalPages, itemsPerPage = 10 }) => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const currentPage = Number(searchParams.get("page")) || 1;
@@ -97,13 +98,13 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
                 <div>
                     <p className="text-sm text-gray-700">
                         Showing <span className="font-medium">
-                            {Math.min((currentPage - 1) * 6 + 1, totalPages * 6)}
+                            {Math.min((currentPage - 1) * itemsPerPage + 1, totalPages * itemsPerPage)}
                         </span> to{" "}
                         <span className="font-medium">
-                            {Math.min(currentPage * 6, totalPages * 6)}
+                            {Math.min(currentPage * itemsPerPage, totalPages * itemsPerPage)}
                         </span> of{" "}
                         <span className="font-medium">
-                            {totalPages * 6}
+                            {totalPages * itemsPerPage}
                         </span> results
                     </p>
                 </div>
