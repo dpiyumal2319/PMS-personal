@@ -1,7 +1,8 @@
 import type {ExpandingSidebarItem, SideBarItem as SideBarItemType} from "@/app/lib/definitions";
-import {MdSpaceDashboard,MdAdminPanelSettings} from "react-icons/md";
+import {MdSpaceDashboard, MdAdminPanelSettings} from "react-icons/md";
 import {BsFillPeopleFill} from "react-icons/bs";
 import {FaClock} from "react-icons/fa";
+import { TbReportSearch } from "react-icons/tb";
 
 export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
     {
@@ -9,10 +10,27 @@ export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         name: "Dashboard",
         link: "/dashboard"
     },
-     {
+    {
         icon: MdAdminPanelSettings,
         name: "Admins",
-        link: "/admin"
+        initially_expanded: true,
+        links: [
+            {
+                icon: MdAdminPanelSettings,
+                name: "Admin",
+                link: "/admin"
+            },
+            {
+                icon: MdAdminPanelSettings,
+                name: "Admins",
+                link: "/admins"
+            },
+            {
+                icon: MdAdminPanelSettings,
+                name: "Admins",
+                link: "/admins"
+            }
+        ]
     },
     {
         icon: BsFillPeopleFill,
@@ -43,8 +61,6 @@ export const NurseLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         link: "/queue"
     }
 ];
-
-
 
 
 //You can add expanding sidebar items like this
