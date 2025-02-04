@@ -1,4 +1,4 @@
-import { PrismaClient, Gender, Role, QueueStatus } from '@prisma/client';
+import {PrismaClient, Gender, Role, QueueStatus, VisitStatus} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -32,23 +32,22 @@ async function main() {
     },
   });
     //Add doctor and nurse
-    const doctor = await prisma.user.create({
+    await prisma.user.create({
      data: {
        email: 'doctor1@srilanka.com', mobile: '0765432189', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.DOCTOR, name: 'Dr. Pubudu' },
      
     
     });
 
-    const nurse1 = await prisma.user.create({
+    await prisma.user.create({
         data: {
             email: 'nurse1@srilanka.com', mobile: '0775671234', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.NURSE, name: 'Pubudu Nona' },
     });
 
-    const nurse2 = await prisma.user.create({
+    await prisma.user.create({
         data: {
             email: 'nurse2@srilanka.com', mobile: '0775677890', password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a', role: Role.NURSE, name: 'Dasun Nona' },
     });
-
      // Create a Queue
   const queue = await prisma.queue.create({
     data: {
@@ -60,9 +59,9 @@ async function main() {
   // Create Queue Entries
   await prisma.queueEntry.createMany({
     data: [
-      { queueId: queue.id, userId: doctor.id, status: QueueStatus.IN_PROGRESS, patientId: patient1.id },
-      { queueId: queue.id, userId: nurse1.id, status: QueueStatus.IN_PROGRESS, patientId: patient2.id },
-      { queueId: queue.id, userId: nurse2.id, status: QueueStatus.IN_PROGRESS, patientId: patient1.id },
+      { queueId: queue.id,  status: VisitStatus.PENDING, patientId: patient1.id , token: 1},
+      { queueId: queue.id, status: VisitStatus.COMPLETED, patientId: patient2.id, token: 2 },
+      { queueId: queue.id, status: VisitStatus.PRESCRIBED, patientId: patient1.id, token: 3 },
     ],
   });
 

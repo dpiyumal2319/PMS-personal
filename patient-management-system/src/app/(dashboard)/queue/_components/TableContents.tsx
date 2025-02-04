@@ -1,42 +1,46 @@
-import React from 'react';
-import Link from "next/link";
 import {getQueues} from "@/app/lib/actions";
+import {TableBody, TableRow, TableCell,  } from "@/components/ui/table";
+import {Button} from "@/components/ui/button";
+import Link from "next/link";
+import {Badge} from "@/components/ui/badge";
+
 
 async function TableContents({ currentPage, size }: { currentPage: number, size: number }) {
     const queues = await getQueues((currentPage - 1) * size, size);
 
-    const getStatusColor = (status: string) => {
+    const getStatusStyle = (status: string) => {
         switch (status) {
             case 'COMPLETED':
-                return 'bg-green-200 text-green-900';
+                return 'bg-green-100 text-green-800 hover:bg-green-200';
             case 'IN_PROGRESS':
-                return 'bg-yellow-200 text-yellow-900';
+                return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
             default:
-                return 'bg-gray-200 text-gray-900';
+                return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
         }
     };
 
     return (
-        <>
-        {queues.map((queue) => (
-                <tr key={queue.id} className="bg-white border-b border-gray-200 hover:bg-gray-50">
-                    <th scope="row" className="px-6 py-4 font-medium">Queue {queue.id}</th>
-                    <td className="px-6 py-4">
-                                <span className={`px-2.5 py-0.5 rounded-md font-medium ${getStatusColor(queue.status)}`}>
-                                    {queue.status.replace('_', ' ')}
-                                </span>
-                    </td>
-                    <td className="px-6 py-4">{new Date(queue.start).toLocaleDateString()}</td>
-                    <td className="px-6 py-4">{queue._count.entries}</td>
-                    <td className="px-6 py-4">
-                        <Link href={`/queue/${queue.id}`}
-                              className="text-white bg-primary hover:bg-primary-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5  focus:outline-none">
-                            View
-                        </Link>
-                    </td>
-                </tr>
+        <TableBody>
+            {queues.map((queue) => (
+                <TableRow key={queue.id}>
+                    <TableCell className="font-medium">Queue {queue.id}</TableCell>
+                    <TableCell>
+                        <Badge className={getStatusStyle(queue.status)}>
+                            {queue.status}
+                        </Badge>
+                    </TableCell>
+                    <TableCell>{new Date(queue.start).toLocaleDateString()}</TableCell>
+                    <TableCell>{queue._count.entries}</TableCell>
+                    <TableCell>
+                        <Button asChild variant="default" size="sm">
+                            <Link href={`/queue/${queue.id}`}>
+                                View
+                            </Link>
+                        </Button>
+                    </TableCell>
+                </TableRow>
             ))}
-        </>
+        </TableBody>
     );
 }
 

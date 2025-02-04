@@ -19,3 +19,8 @@ export type ExpandingSidebarItem = {
     initially_expanded: boolean,
     links: SideBarItem[]
 }
+
+export type myError = {
+    success: boolean,
+    message: string
+}

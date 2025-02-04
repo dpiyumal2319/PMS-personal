@@ -1,0 +1,157 @@
+'use client';
+
+import React from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import {
+    Tooltip,
+    TooltipContent, TooltipProvider,
+    TooltipTrigger
+} from "@/components/ui/tooltip";
+import {FaTrash, FaMedkit, FaTablets} from "react-icons/fa";
+import {toast} from "react-toastify";
+import {removePatientFromQueue} from "@/app/lib/actions";
+import {IoIosMore} from "react-icons/io";
+import {handleServerAction} from "@/app/lib/utils";
+
+// Remove from Queue Button
+const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) => {
+    const handleRemove = () => {
+        const result = handleServerAction(() => removePatientFromQueue(queueId, token), {
+            loadingMessage: 'Removing from Queue...'
+        })
+
+        console.log(result);
+    };
+
+    return (
+        <AlertDialog>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <AlertDialogTrigger asChild>
+                            <button className="p-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
+                                <FaTrash/>
+                            </button>
+                        </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        Remove from Queue
+                    </TooltipContent>
+                </Tooltip>
+            </ TooltipProvider>
+
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Remove from the Queue</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Are you sure you want to remove this patient from the queue? This action cannot be
+                        undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-gray-100 hover:bg-gray-200">
+                        Keep in Queue
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleRemove}
+                        className="bg-red-600 text-white hover:bg-red-700"
+                    >
+                        Remove from Queue
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+};
+
+// Prescribe Button (For Doctors)
+const PrescribeMedicine = () => {
+    const handlePrescribe = () => {
+        toast.success('Prescription issued successfully!', {
+            position: 'bottom-right'
+        });
+    };
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={handlePrescribe}
+                        className="p-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
+                    >
+                        <FaMedkit/>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    Prescribe Medicine
+                </TooltipContent>
+            </Tooltip>
+        </ TooltipProvider>
+    );
+};
+
+// Issue Medicine Button (For Pharmacists)
+const IssueMedicine = () => {
+    const handleIssue = () => {
+        toast.success('Medicine issued successfully!', {
+            position: 'bottom-right'
+        });
+    };
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button
+                        onClick={handleIssue}
+                        className="p-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
+                    >
+                        <FaTablets/>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    Issue Medicine
+                </TooltipContent>
+            </Tooltip>
+        </ TooltipProvider>
+    );
+};
+
+const ViewProfile = ({
+                         id
+                     }: {
+    id: number
+}) => {
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <button className="flex items-center p-2 text-gray-500 rounded hover:bg-gray-200 transition"
+                            onClick={() => {
+                                console.log('Viewing profile of patient with ID:', id);
+                            }}>
+                        <IoIosMore className={'font-bold text-lg'}/>
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    View Profile
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    )
+}
+
+export {
+    RemoveFromQueue, PrescribeMedicine, IssueMedicine, ViewProfile
+};
