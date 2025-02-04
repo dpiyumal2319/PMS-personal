@@ -1,23 +1,29 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
 import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from "@/components/ui/select";
 
-export default function SearchDropdown({ items }: { items: { label: string; value: string }[] }) {
+export default function SearchDropdown({
+  items,
+  urlParameterName = "filter",
+}: {
+  items: { label: string; value: string }[];
+  urlParameterName?: string;
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [filter, setFilter] = useState(items[0].value);
 
   function handleSelect(value: string) {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("filter", value);
+    params.set(urlParameterName, value); // Ensure correct parameter is updated
     router.replace(`${pathname}?${params.toString()}`);
   }
 
+  const selectedValue = searchParams.get(urlParameterName) || items[0].value  // get the first one in array
+
   return (
-    <Select onValueChange={handleSelect} value={filter}>
+    <Select onValueChange={handleSelect} value={selectedValue}>
       <SelectTrigger className="w-48 border border-gray-300 rounded-lg px-3 py-2">
         <SelectValue placeholder="Search by" />
       </SelectTrigger>

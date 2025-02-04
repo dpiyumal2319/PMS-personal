@@ -25,36 +25,40 @@ export default async function Page({
   const totalPages = await getTotalPages(query);
 
   return (
-    <div className="w-full p-6 bg-white rounded-xl shadow-md">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">All Patients</h1>
-        <Button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
-          + Add Patient
-        </Button>
+    <>
+      <div className="w-full p-4 flex flex-col bg-amber-400 h-full">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold">All Patients</h1>
+          <Button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
+            + Add Patient
+          </Button>
+        </div>
+
+        {/* Search & Filters */}
+        <div className="flex items-center gap-4 mb-6">
+          <SearchBox placeholder="Search patients..." />
+          <SearchDropdown
+            items={[
+              { label: "Name", value: "name" },
+              { label: "NIC", value: "NIC" },
+              { label: "Telephone", value: "telephone" },
+            ]}
+            urlParameterName="filter"
+          />
+        </div>
+
+        {/* Table */}
+        <div className="bg-slate-600 flex-grow overflow-y-auto">
+          <Suspense key={query + currentPage} fallback={<PatientsTableSkeleton />}>
+            <PatientTable query={query} currentPage={currentPage} filter={filter} />
+          </Suspense>
+        </div>
       </div>
-
-      {/* Search & Filters */}
-      <div className="flex items-center gap-4">
-        <SearchBox placeholder="Search patients..." />
-        <SearchDropdown
-          items={[
-            { label: "Name", value: "name" },
-            { label: "NIC", value: "NIC" },
-            { label: "Telephone", value: "telephone" },
-          ]}
-        />
-      </div>
-
-      {/* Table */}
-      <Suspense key={query + currentPage} fallback={<PatientsTableSkeleton />}>
-        <PatientTable query={query} currentPage={currentPage} filter={filter} />
-      </Suspense>
-
       {/* Pagination */}
-      <div className="mt-6 flex justify-center">
+      <div className="mt-auto flex justify-center py-4 bg-pink-600 sticky bottom-0">
         <Pagination totalPages={totalPages} />
       </div>
-    </div>
+    </>
   );
 }

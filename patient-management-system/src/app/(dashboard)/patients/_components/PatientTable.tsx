@@ -19,6 +19,9 @@ export default async function PatientTable({
   return (
     <div>
       <PatientsList patients={filteredPatients} />
+      <div className="flex justify-center items-center gap-4 mt-4 bg-red-500 h-screen w-5">
+        hhh
+        </div>
     </div>
   );
 }
