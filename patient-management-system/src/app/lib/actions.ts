@@ -139,13 +139,13 @@ export async function getPatients() {
     });
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 2;
 
 export async function getTotalPages(query = "") {
   const whereClause = query
     ? {
         OR: [
-          { name: { contains: query, mode: "insensitive" } },
+          { name: { contains: query} },
           { NIC: { contains: query } },
           { telephone: { contains: query } },
         ],
@@ -154,4 +154,25 @@ export async function getTotalPages(query = "") {
 
   const totalPatients = await prisma.patient.count({ where: whereClause });
   return Math.ceil(totalPatients / PAGE_SIZE);
+}
+
+export async function getFilteredPatients(query: string = "", page: number = 1) {
+    const whereCondition = query
+        ? {
+              OR: [
+                  { name: { contains: query, mode: "insensitive" } },
+                  { NIC: { contains: query } },
+                  { telephone: { contains: query } },
+              ],
+          }
+        : {};
+
+    const patients = await prisma.patient.findMany({
+        where: whereCondition,
+        take: PAGE_SIZE,
+        skip: (page - 1) * PAGE_SIZE,
+        orderBy: { name: "asc" },
+    });
+
+    return patients; // Returning the filtered patient array
 }
