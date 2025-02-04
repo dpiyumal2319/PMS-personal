@@ -11,6 +11,7 @@ import { Search } from "lucide-react";
 
 import React, { Suspense, useState } from "react";
 import Loading from "@/app/(dashboard)/Loading";
+import { AddItemButton } from "../_components/AddButton";
 
 import { usePathname } from "next/navigation";
 
@@ -110,7 +111,7 @@ export default function InventoryLayout({
             )}
             {/* Add New Item Button */}
             {pathName.startsWith("/inventory/available-stocks") && (
-              <h1>Add Button</h1>
+              <AddItemButton />
             )}
           </div>
         </div>
