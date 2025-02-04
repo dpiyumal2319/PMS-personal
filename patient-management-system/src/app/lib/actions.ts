@@ -355,3 +355,11 @@ export async function addPatientToQueue(queueId: number, patientId: number): Pro
         return {success: false, message: 'An error occurred while adding patient to queue'}
     }
 }
+
+export async function getPatientDetails(id: number) {
+    return prisma.patient.findUnique({
+        where: {
+            id
+        }
+    });
+}
