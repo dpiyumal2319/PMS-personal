@@ -128,8 +128,8 @@ async function main() {
             description: "A liver function test is a blood test that checks your liver function.",
             parameters: {
                 create: [
-                    {name: "ALT", units: "U/L", abbreviation: "ALT"},
-                    {name: "AST", units: "U/L", abbreviation: "AST"},
+                    {name: "ALT in long form", units: "U/L", abbreviation: "ALT"},
+                    {name: "AST in long form", units: "U/L", abbreviation: "AST"},
                 ],
             },
         },

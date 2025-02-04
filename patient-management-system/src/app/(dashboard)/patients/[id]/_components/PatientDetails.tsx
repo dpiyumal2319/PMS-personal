@@ -3,7 +3,7 @@ import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {getPatientDetails} from "@/app/lib/actions";
 import {notFound} from "next/navigation";
 import {calcAge} from "@/app/lib/utils";
-import {Badge} from "@/components/ui/badge";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 const PatientDetails = async ({id}: { id: number }) => {
     const patient = await getPatientDetails(id);
@@ -53,11 +53,11 @@ const PatientDetails = async ({id}: { id: number }) => {
     const getSex = (sex: string) => {
         switch (sex) {
             case 'MALE':
-                return <Badge className={'bg-blue-100 text-blue-800 hover:bg-blue-200'}>{sex}</ Badge>;
+                return <CustomBadge text={sex} color={'blue'}/>;
             case 'FEMALE':
-                return <Badge className={'bg-pink-100 text-pink-800 hover:bg-pink-200'}>{sex}</Badge>;
+                return <CustomBadge text={sex} color={'pink'}/>;
             default:
-                return <Badge className={'bg-gray-100 text-gray-800 hover:bg-gray-200'}>UNKNOWN</Badge>;
+                return <CustomBadge text={'UNKNOWN'} color={'gray'}/>;
         }
     }
 

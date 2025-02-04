@@ -8,9 +8,9 @@ import {useDebounce} from "@/hooks/useDebounce";
 import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
 import type {Patient} from "@prisma/client";
 import {calcAge, handleServerAction} from "@/app/lib/utils";
-import {Badge} from "@/components/ui/badge";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 // Search by types
 const AddPatientButton = ({id}: { id: number }) => {
@@ -67,11 +67,11 @@ const AddPatientButton = ({id}: { id: number }) => {
     const getSex = (sex: string) => {
         switch (sex) {
             case 'MALE':
-                return <Badge className={'bg-blue-100 text-blue-800 hover:bg-blue-200'}>M</ Badge>;
+                return <CustomBadge text={'M'} color={'blue'}/>;
             case 'FEMALE':
-                return <Badge className={'bg-pink-100 text-pink-800 hover:bg-pink-200'}>F</Badge>;
+                return <CustomBadge text={'F'} color={'pink'}/>;
             default:
-                return <Badge className={'bg-gray-100 text-gray-800 hover:bg-gray-200'}>UNKNOWN</Badge>;
+                return <CustomBadge text={'UNKNOWN'} color={'gray'}/>;
         }
     }
 

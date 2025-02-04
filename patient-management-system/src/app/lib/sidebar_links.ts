@@ -13,7 +13,7 @@ export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
     {
         icon: MdAdminPanelSettings,
         name: "Admins",
-        initially_expanded: true,
+        initially_expanded: false,
         links: [
             {
                 icon: MdAdminPanelSettings,

@@ -2,7 +2,6 @@ import {queuePatients} from "@/app/lib/actions";
 import {TableBody, TableRow, TableCell} from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
-import {Badge} from "@/components/ui/badge";
 import {verifySession} from "@/app/lib/sessions";
 import React from "react";
 import {calcAge} from "@/app/lib/utils";
@@ -12,6 +11,7 @@ import {
     PrescribeMedicine,
     ViewProfile
 } from "@/app/(dashboard)/queue/[id]/_components/TableButtons";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 
 async function AllPatientsContent({id}: { id: number }) {
@@ -22,13 +22,13 @@ async function AllPatientsContent({id}: { id: number }) {
     const getStatus = (status: string) => {
         switch (status) {
             case 'COMPLETED':
-                return <Badge className={'bg-green-100 text-green-800 hover:bg-green-200'}>COMPLETED</Badge>;
+                return <CustomBadge text={'COMPLETED'} color={'green'}/>;
             case 'PENDING':
-                return <Badge className={'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}>PENDING</Badge>;
+                return <CustomBadge text={'PENDING'} color={'yellow'}/>;
             case 'PRESCRIBED':
-                return <Badge className={'bg-blue-100 text-blue-800 hover:bg-blue-200'}>PRESCRIBED</Badge>;
+                return <CustomBadge text={'PRESCRIBED'} color={'blue'}/>;
             default:
-                return <Badge className={'bg-gray-100 text-gray-800 hover:bg-gray-200'}>UNKNOWN</Badge>;
+                return <CustomBadge text={'UNKNOWN'} color={'gray'}/>;
         }
     };
 
@@ -51,11 +51,11 @@ async function AllPatientsContent({id}: { id: number }) {
     const getSex = (sex: string) => {
         switch (sex) {
             case 'MALE':
-                return <Badge className={'bg-blue-100 text-blue-800 hover:bg-blue-200'}>M</ Badge>;
+                return <CustomBadge text={'M'} color={'blue'}/>;
             case 'FEMALE':
-                return <Badge className={'bg-pink-100 text-pink-800 hover:bg-pink-200'}>F</Badge>;
+                return <CustomBadge text={'F'} color={'pink'}/>;
             default:
-                return <Badge className={'bg-gray-100 text-gray-800 hover:bg-gray-200'}>UNKNOWN</Badge>;
+                return <CustomBadge text={'UNKNOWN'} color={'gray'}/>;
         }
     }
 

@@ -2,7 +2,7 @@ import {getQueues} from "@/app/lib/actions";
 import {TableBody, TableRow, TableCell,  } from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
-import {Badge} from "@/components/ui/badge";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 
 async function TableContents({ currentPage, size }: { currentPage: number, size: number }) {
@@ -11,11 +11,11 @@ async function TableContents({ currentPage, size }: { currentPage: number, size:
     const getStatusStyle = (status: string) => {
         switch (status) {
             case 'COMPLETED':
-                return 'bg-green-100 text-green-800 hover:bg-green-200';
+                return 'green';
             case 'IN_PROGRESS':
-                return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
+                return 'yellow';
             default:
-                return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+                return 'gray';
         }
     };
 
@@ -25,9 +25,7 @@ async function TableContents({ currentPage, size }: { currentPage: number, size:
                 <TableRow key={queue.id}>
                     <TableCell className="font-medium">Queue {queue.id}</TableCell>
                     <TableCell>
-                        <Badge className={getStatusStyle(queue.status)}>
-                            {queue.status}
-                        </Badge>
+                        <CustomBadge text={queue.status} color={getStatusStyle(queue.status)} />
                     </TableCell>
                     <TableCell>{new Date(queue.start).toLocaleDateString()}</TableCell>
                     <TableCell>{queue._count.entries}</TableCell>

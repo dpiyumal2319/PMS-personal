@@ -155,17 +155,6 @@ export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
 
-export async function getPatients() {
-    return await prisma.patient.findMany({
-        select: {
-            id: true,
-            name: true,
-            NIC: true,
-            telephone: true,
-        },
-    });
-}
-
 const PAGE_SIZE = 10;
 
 export async function getTotalPages(query = "", filter = "name") {
@@ -188,14 +177,12 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
           }
         : {};
 
-    const patients = await prisma.patient.findMany({
+    return prisma.patient.findMany({
         where: whereCondition,
         take: PAGE_SIZE,
         skip: (page - 1) * PAGE_SIZE,
-        orderBy: { name: "asc" },
+        orderBy: {name: "asc"},
     });
-
-    return patients;
 }
 
 
@@ -409,13 +396,33 @@ export async function getPatientDetails(id: number) {
     });
 }
 
-// export async function getReportInfo() {
-//     const report = await prisma.reportType.findUnique({
-//         where: {
-//             id: 1
-//         },
-//         include: {
-//             parameters: true
-//         }
-//     });
-// }
+export async function getFilteredReports(pageNu: number, query: string, filter: string) {
+
+    const whereClause = query
+        ? {
+            [filter]: {contains: query},
+        }
+        : {};
+
+
+    return prisma.reportType.findMany({
+        where: whereClause,
+        take: PAGE_SIZE,
+        skip: (pageNu - 1) * PAGE_SIZE,
+        orderBy: {name: "asc"},
+        include: {
+            parameters: true
+        }
+    });
+}
+
+export async function getReportPages(query: string, filter: string) {
+    const whereClause = query
+        ? {
+            [filter]: {contains: query},
+        }
+        : {};
+
+    const totalReports = await prisma.reportType.count({where: whereClause});
+    return Math.ceil(totalReports / PAGE_SIZE);
+}

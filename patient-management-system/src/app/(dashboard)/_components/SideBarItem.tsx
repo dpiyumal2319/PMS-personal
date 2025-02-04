@@ -8,7 +8,7 @@ import {FaChevronDown} from "react-icons/fa";
 
 export function SideBarItem({item}: { item: SideBarItem }) {
     const pathname = usePathname();
-    const isActive = pathname.startsWith(item.link); // Check if path starts with item.link
+    const isActive = pathname === item.link; // Changed to exact match
 
     return (<Link href={item.link} className={`flex items-center gap-2 p-2 rounded  
             ${isActive ? "bg-primary-600" : "hover:bg-primary-400"} 
