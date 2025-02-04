@@ -2,12 +2,7 @@ import { getFilteredPatients } from "@/app/lib/actions";
 import PatientsList from "./PatientsList";
 
 
-interface Patient {
-  id: number;
-  name: string;
-  NIC: string | null;
-  telephone: string;
-}
+
 
 export default async function PatientTable({
   query,
@@ -19,7 +14,9 @@ export default async function PatientTable({
 
   const filteredPatients = await getFilteredPatients(query, currentPage);
 
-  const totalPages = Math.ceil(filteredPatients.length);
+  //2 seconds delay
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
 
   return (
     <div>

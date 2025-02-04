@@ -4,6 +4,7 @@ import SearchBox from "../_components/Search";
 import PatientTable from "./_components/PatientTable";
 import { getTotalPages } from "@/app/lib/actions";
 import Pagination from "../_components/Pagination";
+import { PatientsTableSkeleton } from "./_components/PatientsTableSkeleton";
 
 export default async function Page({
   searchParams,
@@ -28,7 +29,7 @@ export default async function Page({
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <SearchBox placeholder="Search patients..." />
       </div>
-      <Suspense key={query + currentPage} fallback={<div>Loading...</div>}>
+      <Suspense key={query + currentPage} fallback={<PatientsTableSkeleton/>}>
         <PatientTable query={query} currentPage={currentPage} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
