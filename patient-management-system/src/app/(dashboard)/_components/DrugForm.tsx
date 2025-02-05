@@ -8,62 +8,60 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { addNewItem } from "@/app/lib/actions";
-import { useToast } from "@/components/ui/use-toast";
 import { Plus } from "lucide-react";
+import { handleServerAction } from "@/app/lib/utils";
+import { AddItemButton } from "./AddButton";
+import { InventoryFormData } from "@/app/lib/definitions";
 
 // Define the type for DrugType
 type DrugType = "Tablet" | "Syrup";
 
-export function DrugForm() {
-  const { toast } = useToast();
+interface DrugFormProps {
+  setOpen: (open: boolean) => void;
+}
 
-  const [brandName, setBrandName] = useState("");
-  const [brandDescription, setBrandDescription] = useState("");
-  const [drugName, setDrugName] = useState("");
-  const [batchNumber, setBatchNumber] = useState("");
-  const [drugType, setDrugType] = useState<DrugType>("Tablet"); // Explicit type
-  const [quantity, setQuantity] = useState<number>(0);
-  const [price, setPrice] = useState<number>(0);
-  const [expiryDate, setExpiryDate] = useState<string>("");
-  const [open, setOpen] = useState(false);
+export function DrugForm({ setOpen }: DrugFormProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState<InventoryFormData>({
+    brandName: "",
+    brandDescription: "",
+    drugName: "",
+    batchNumber: "",
+    drugType: "Tablet",
+    quantity: 0,
+    expiry: new Date(),
+    price: 0,
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value);
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!expiryDate) {
-      toast({
-        title: "Error",
-        description: "Expiry date is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const result = await addNewItem({
-      brandName,
-      brandDescription,
-      drugName,
-      batchNumber,
-      drugType,
-      quantity,
-      expiry: new Date(expiryDate),
-      price,
+    const result = await handleServerAction(() => addNewItem({ formData }), {
+      loadingMessage: "Adding new item...",
     });
 
     if (result.success) {
-      toast({ title: "Success", description: result.message });
       setOpen(false);
-    } else {
-      toast({
-        title: "Error",
-        description: result.message,
-        variant: "destructive",
-      });
     }
+    setFormData({
+      brandName: "",
+      brandDescription: "",
+      drugName: "",
+      batchNumber: "",
+      drugType: "Tablet",
+      quantity: 0,
+      expiry: new Date(),
+      price: 0,
+    });
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button className="bg-primary-500 hover:bg-primary-600 text-white">
           <Plus className="w-4 h-4 mr-2" />
@@ -75,18 +73,20 @@ export function DrugForm() {
           <div>
             <label className="block text-sm font-medium mb-1">Brand Name</label>
             <Input
-              value={brandName}
-              onChange={(e) => setBrandName(e.target.value)}
+              value={formData.brandName}
+              onChange={handleChange}
               required
+              name="brandName"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Drug Name</label>
             <Input
-              value={drugName}
-              onChange={(e) => setDrugName(e.target.value)}
+              value={formData.drugName}
+              onChange={handleChange}
               required
+              name="drugNmae"
             />
           </div>
 
@@ -96,9 +96,10 @@ export function DrugForm() {
                 Batch Number
               </label>
               <Input
-                value={batchNumber}
-                onChange={(e) => setBatchNumber(e.target.value)}
+                value={formData.batchNumber}
+                onChange={handleChange}
                 required
+                name="batchNumber"
               />
             </div>
 
@@ -107,8 +108,13 @@ export function DrugForm() {
                 Drug Type
               </label>
               <select
-                value={drugType}
-                onChange={(e) => setDrugType(e.target.value as DrugType)} // Explicit type assertion
+                value={formData.drugType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    drugType: e.target.value as DrugType,
+                  })
+                } // Explicit type assertion
                 className="w-full p-2 border rounded"
               >
                 <option value="Tablet">Tablet</option>
@@ -122,8 +128,8 @@ export function DrugForm() {
               <label className="block text-sm font-medium mb-1">Quantity</label>
               <Input
                 type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
+                value={formData.quantity}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -133,8 +139,8 @@ export function DrugForm() {
               <Input
                 type="number"
                 step="0.01"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
+                value={formData.price}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -146,8 +152,8 @@ export function DrugForm() {
             </label>
             <Input
               type="date"
-              value={expiryDate}
-              onChange={(e) => setExpiryDate(e.target.value)}
+              value={formData.expiry.toISOString().split("T")[0]}
+              onChange={handleChange}
               className="w-full p-2 border rounded"
               required
             />

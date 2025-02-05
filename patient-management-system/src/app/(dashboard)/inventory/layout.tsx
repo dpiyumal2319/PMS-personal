@@ -13,6 +13,8 @@ import React, { Suspense, useState } from "react";
 import Loading from "@/app/(dashboard)/Loading";
 import { AddItemButton } from "../_components/AddButton";
 import DatePicker from "../_components/DatePicker";
+import { DrugForm } from "../_components/DrugForm";
+import SearchPanel from "../_components/Search";
 
 import { usePathname } from "next/navigation";
 
@@ -51,6 +53,7 @@ export default function InventoryLayout({
   const pathName = usePathname();
   const [selectedSearchModel, setSelectedSearchModel] = useState<string>("");
   const [selectedSort, setselectedSort] = useState<string>("");
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="flex h-screen flex-col w-full">
@@ -77,12 +80,7 @@ export default function InventoryLayout({
 
             {/* Search Input */}
             <div className="relative w-[200px]">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                className="w-full pl-8"
-                type="search"
-                placeholder="Search by name..."
-              />
+              <SearchPanel placeholder="Search by Name" />
             </div>
             {/* Dynamic Sort By Select */}
             <Select
@@ -112,7 +110,12 @@ export default function InventoryLayout({
             )}
             {/* Add New Item Button */}
             {pathName.startsWith("/inventory/available-stocks") && (
-              <AddItemButton />
+              <div>
+                <div>
+                  <DrugForm setOpen={setOpen} />{" "}
+                  {/* Pass setOpen to close on form submission */}
+                </div>
+              </div>
             )}
           </div>
         </div>

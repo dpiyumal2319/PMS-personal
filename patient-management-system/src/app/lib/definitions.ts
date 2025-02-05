@@ -23,4 +23,17 @@ export type ExpandingSidebarItem = {
 export type myError = {
     success: boolean,
     message: string
+
 }
+
+export type InventoryFormData = {
+    brandName: string,
+    brandDescription: string,
+    drugName: string,
+    batchNumber: string,
+    drugType: string,
+    quantity: number,
+    expiry: Date,
+    price: number
+};
+

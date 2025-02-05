@@ -6,6 +6,7 @@ import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import { DrugType } from "@prisma/client";
+import { InventoryFormData } from "@/app/lib/definitions";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -406,42 +407,27 @@ export async function addPatientToQueue(queueId: number, patientId: number): Pro
 }
 
 //For adding drugs to the inventory
-export async function addNewItem({
-    brandName,
-    brandDescription,
-    drugName,
-    batchNumber,
-    drugType,
-    quantity,
-    expiry,
-    price}:{
-    brandName: string,
-    brandDescription: string,
-    drugName: string,
-    batchNumber: string,
-    drugType: DrugType,
-    quantity: number,
-    expiry: Date,
-    price: number,
+export async function addNewItem(
+   {formData}:{formData: InventoryFormData
     }): Promise<myError> {
         try{
              return await prisma.$transaction(async (tx) => {
       // 1. Create or connect drug brand
       const brand = await tx.drugBrand.upsert({
-        where: { name: brandName },
+        where: { name: formData.brandName },
         update: {},
         create: {
-          name: brandName,
-          description: brandDescription || ''
+          name: formData.brandName,
+          description: formData.brandDescription || ''
         }
       });
 
       // 2. Create or connect drug
       const drug = await tx.drug.upsert({
-        where: { name: drugName },
+        where: { name: formData.drugName },
         update: {},
         create: {
-          name: drugName,
+          name: formData.drugName,
           brandName: brand.name
         }
       });
@@ -449,13 +435,13 @@ export async function addNewItem({
       // 3. Create batch
       await tx.batch.create({
         data: {
-          number: batchNumber,
+          number: formData.batchNumber,
           drugName: drug.name,
-          type: drugType,
-          fullAmount: quantity,
-          remainingQuantity: quantity,
-          expiry,
-          price,
+          type: formData.drugType as DrugType,
+          fullAmount: formData.quantity,
+          remainingQuantity: formData.quantity,
+          expiry: formData.expiry,
+          price: formData.price,
           status: 'AVAILABLE'
         }
       });
@@ -467,4 +453,11 @@ export async function addNewItem({
             console.error(e);
             return { success: false, message: 'Failed to add item' };
          }
+}
+
+export async function getDrugBrands() {
+  return prisma.drugBrand.findMany({
+    select: { name: true },
+    orderBy: { name: 'asc' }
+  });
 }
