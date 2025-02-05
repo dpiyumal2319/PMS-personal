@@ -4,7 +4,6 @@ import PatientTable from "./_components/PatientTable";
 import { getTotalPages } from "@/app/lib/actions";
 import Pagination from "../_components/Pagination";
 import { PatientsTableSkeleton } from "./_components/PatientsTableSkeleton";
-import { Button } from "@/components/ui/button";
 import SearchDropdown from "../_components/Dropdown";
 import AddPatientForm from "./_components/AddPatientForm";
 
