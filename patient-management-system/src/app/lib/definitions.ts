@@ -23,6 +23,19 @@ export type ExpandingSidebarItem = {
 export type myError = {
     success: boolean,
     message: string
+}
+
+export type PatientFormData = {
+    name: string;
+    NIC: string;
+    telephone: string;
+    birthDate: string;
+    address: string;
+    height: string;  // Keep as string since input fields return strings
+    weight: string;  // Keep as string since input fields return strings
+    gender: "MALE" | "FEMALE" | ""
+  };
+  
 
 }
 
