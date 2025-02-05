@@ -5,6 +5,8 @@ import type {myError} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
+import { PatientFormData } from "@/app/lib/definitions";
+
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -398,5 +400,48 @@ export async function addPatientToQueue(queueId: number, patientId: number): Pro
     } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while adding patient to queue'}
+    }
+}
+
+
+export async function addPatient({formData}: { formData: PatientFormData }): Promise<myError> {
+    try {
+        const floatHeight = parseFloat(formData.height);
+
+        const floatWeight = parseFloat(formData.weight);
+
+        if (formData.gender === "") {
+            return {success: false, message: 'Select a valid Gender'};
+        }
+
+        if ( !formData.name || !formData.telephone) {
+            return {success: false, message: 'Please fill all fields'};
+        }
+
+        const date = new Date(formData.birthDate);
+
+        if (isNaN(date.getTime())) {
+            return {success: false, message: 'Invalid birth date'};
+        }
+
+        await prisma.patient.create({
+            data: {
+                name: formData.name,
+                NIC: formData.NIC,
+                telephone: formData.telephone,
+                birthDate: date,
+                address: formData.address,
+                height: floatHeight,
+                weight: floatWeight,
+                gender: formData.gender
+            }
+        });
+
+        revalidatePath('/patients');
+        return {success: true, message: 'Patient added successfully'};
+    }
+    catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while adding patient'};
     }
 }
