@@ -5,6 +5,7 @@ import type {myError} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
+import {Prisma} from "@prisma/client";
 import { PatientFormData } from "@/app/lib/definitions";
 
 import { DrugType } from "@prisma/client";
@@ -61,46 +62,46 @@ export async function changeUserPassword({
 }): Promise<myError> {
 
     try {
-    if (newPassword !== confirmPassword) {
-        return {success: false, message: 'Passwords do not match'};
-    }
+        if (newPassword !== confirmPassword) {
+            return {success: false, message: 'Passwords do not match'};
+        }
 
-    const session = await verifySession();
+        const session = await verifySession();
 
-    //  Verify admin role
-    const admin = await prisma.user.findUnique({
-        where: {id: session.id},
-        select: {role: true}
-    });
+        //  Verify admin role
+        const admin = await prisma.user.findUnique({
+            where: {id: session.id},
+            select: {role: true}
+        });
 
-    if (admin?.role !== 'DOCTOR') {
-        return {success: false, message: 'Unauthorized'};
-    }
+        if (admin?.role !== 'DOCTOR') {
+            return {success: false, message: 'Unauthorized'};
+        }
 
-    // Verify target user exists and is a nurse
-    const nurse = await prisma.user.findUnique({
-        where: {id: nurseId},
-        select: {role: true}
-    });
+        // Verify target user exists and is a nurse
+        const nurse = await prisma.user.findUnique({
+            where: {id: nurseId},
+            select: {role: true}
+        });
 
-    if (!nurse) {
-        return {success: false, message: 'Nurse not found'};
-    }
+        if (!nurse) {
+            return {success: false, message: 'Nurse not found'};
+        }
 
-    if (nurse.role !== 'NURSE') {
-        return {success: false, message: 'User is not a nurse'};
-    }
+        if (nurse.role !== 'NURSE') {
+            return {success: false, message: 'User is not a nurse'};
+        }
 
 
-    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+        const hashedPassword = bcrypt.hashSync(newPassword, 10);
 
-    await prisma.user.update({
-        where: {id: nurseId},  // Use nurse ID here
-        data: {password: hashedPassword}
-    });
+        await prisma.user.update({
+            where: {id: nurseId},  // Use nurse ID here
+            data: {password: hashedPassword}
+        });
 
-    return {success: true, message: 'Password changed successfully'}; }
-    catch (e) {
+        return {success: true, message: 'Password changed successfully'};
+    } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while changing password'}
     }
@@ -159,49 +160,34 @@ export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
 
-export async function getPatients() {
-    return await prisma.patient.findMany({
-        select: {
-            id: true,
-            name: true,
-            NIC: true,
-            telephone: true,
-        },
-    });
-}
-
 const PAGE_SIZE = 10;
 
 export async function getTotalPages(query = "", filter = "name") {
     const whereClause = query
-      ? {
-          [filter]: { contains: query },
+        ? {
+            [filter]: {contains: query},
         }
-      : {};
-  
-    const totalPatients = await prisma.patient.count({ where: whereClause });
+        : {};
+
+    const totalPatients = await prisma.patient.count({where: whereClause});
     return Math.ceil(totalPatients / PAGE_SIZE);
-  }
+}
 
 export async function getFilteredPatients(query: string = "", page: number = 1, filter: string = "name") {
 
-    console.log(`Filtering patients by ${filter} containing ${query}`);
     const whereCondition = query
         ? {
-              [filter]: { contains: query },
-          }
+            [filter]: {contains: query},
+        }
         : {};
 
-    const patients = await prisma.patient.findMany({
+    return prisma.patient.findMany({
         where: whereCondition,
         take: PAGE_SIZE,
         skip: (page - 1) * PAGE_SIZE,
-        orderBy: { name: "asc" },
+        orderBy: {name: "asc"},
     });
-
-    return patients;
 }
-
 
 
 export async function stopQueue(id: string | null): Promise<myError> {
@@ -339,8 +325,6 @@ export async function removePatientFromQueue(queueId: number, token: number): Pr
 export async function searchPatients(query: string, searchBy: "name" | "telephone" | "NIC") {
     if (!query) return [];
 
-    console.log(`Searching for patients with ${searchBy} containing ${query}`);
-
     return prisma.patient.findMany({
         where: {
             [searchBy]: {
@@ -402,6 +386,200 @@ export async function addPatientToQueue(queueId: number, patientId: number): Pro
     } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while adding patient to queue'}
+    }
+}
+
+export async function getPatientDetails(id: number) {
+    return prisma.patient.findUnique({
+        where: {
+            id
+        }
+    });
+}
+
+export async function getFilteredReports(pageNu: number, query: string) {
+    return prisma.reportType.findMany({
+        where: {
+            name: {
+                contains: query
+            }
+        },
+        take: PAGE_SIZE,
+        skip: (pageNu - 1) * PAGE_SIZE,
+        orderBy: {id: "asc"},
+        include: {
+            parameters: true
+        }
+    });
+}
+
+export async function getReportPages(query: string) {
+    const totalReports = await prisma.reportType.count({where: {name: {contains: query}}});
+    return Math.ceil(totalReports / PAGE_SIZE);
+}
+
+export async function addReportType(reportForm: ReportForm): Promise<myError> {
+    try {
+        if (reportForm.parameters.length === 0) {
+            return {success: false, message: 'At least one parameter is required'};
+        }
+
+        console.log(reportForm.parameters);
+
+        await prisma.reportType.create({
+            data: {
+                name: reportForm.name,
+                description: reportForm.description,
+                parameters: {
+                    create: reportForm.parameters,
+                },
+            },
+        });
+
+        revalidatePath('/reports');
+        return {success: true, message: 'Report type added successfully'};
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            if (e.code === 'P2002') {
+                return {success: false, message: 'Report type name must be unique'};
+            }
+            if (e.code === 'P2003') {
+                return {success: false, message: 'Invalid parameter reference (foreign key constraint failed)'};
+            }
+        }
+        console.error(e);
+
+        return {success: false, message: 'An unexpected error occurred while adding report type'};
+    }
+}
+
+
+export async function getReportType(reportId: number) {
+    return prisma.reportType.findUnique({
+        where: {
+            id: reportId
+        },
+        include: {
+            parameters: true
+        }
+    });
+}
+
+interface Parameter {
+    name: string;
+    units: string;
+    id?: number;
+    isNew?: boolean;
+}
+
+interface ReportForm {
+    name: string;
+    description: string;
+    parameters: Parameter[];
+}
+
+
+export async function editReportType(reportForm: ReportForm, reportId: number): Promise<myError> {
+    try {
+        console.log(reportForm);
+
+        return await prisma.$transaction(async (tx) => {
+            const report = await tx.reportType.findUnique({
+                where: { id: reportId },
+                include: { parameters: true }
+            });
+
+            if (!report) {
+                throw new Error('Report type not found');
+            }
+
+            const newParams = reportForm.parameters.filter((param) => param.isNew);
+            const oldParams = reportForm.parameters.filter((param) => !param.isNew);
+
+            for (const params of report.parameters) {
+                if (newParams.find((param) => param.name === params.name)) {
+                    throw new Error('Cannot add an existing parameter. Do not remove and add the same parameter.');
+                }
+            }
+
+            // Delete removed parameters
+            const deletedParams = report.parameters.filter((param) => !oldParams.find((p) => p.id === param.id));
+
+            for (const param of deletedParams) {
+                const reportValues = await tx.reportValue.findMany({
+                    where: { reportParameterId: param.id }
+                });
+
+                if (reportValues.length > 0) {
+                    throw new Error(`Cannot delete parameter ${param.name} as it is in use`);
+                }
+
+                await tx.reportParameter.delete({
+                    where: { id: param.id }
+                });
+            }
+
+            // Update existing parameters
+            for (const param of oldParams) {
+                await tx.reportParameter.update({
+                    where: { id: param.id },
+                    data: {
+                        name: param.name,
+                        units: param.units
+                    }
+                });
+            }
+
+            // Add new parameters
+            for (const param of newParams) {
+                await tx.reportParameter.create({
+                    data: {
+                        name: param.name,
+                        units: param.units,
+                        reportTypeId: reportId
+                    }
+                });
+            }
+
+            // Update the report type itself
+            await tx.reportType.update({
+                where: { id: reportId },
+                data: {
+                    name: reportForm.name,
+                    description: reportForm.description
+                }
+            });
+
+            revalidatePath('/admin/reports');
+            return { success: true, message: 'Report type updated successfully' };
+        });
+    } catch (e) {
+        if (e instanceof Error) {
+            return {
+                success: false,
+                message: e.message
+            };
+        }
+        return {
+            success: false,
+            message: 'An uncaught error occurred while updating report type'
+        };
+    }
+}
+
+
+export const deleteReportType = async (reportId: number): Promise<myError> => {
+    try {
+        await prisma.reportType.delete({
+            where: {
+                id: reportId
+            }
+        });
+        revalidatePath('/admin/reports');
+        return {success: true, message: 'Report type deleted successfully'}
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while deleting report type'}
     }
 }
 

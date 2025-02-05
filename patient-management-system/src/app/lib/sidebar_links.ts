@@ -1,7 +1,8 @@
 import type {ExpandingSidebarItem, SideBarItem as SideBarItemType} from "@/app/lib/definitions";
-import {MdSpaceDashboard,MdAdminPanelSettings,MdDoneAll} from "react-icons/md";
+import {MdSpaceDashboard, MdAdminPanelSettings,MdDoneAll} from "react-icons/md";
 import {BsFillPeopleFill,BsInboxFill} from "react-icons/bs";
 import {FaClock,FaBox,FaMoneyBillWave,} from "react-icons/fa";
+import { TbReportSearch } from "react-icons/tb";
 
 export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
     {
@@ -9,10 +10,22 @@ export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         name: "Dashboard",
         link: "/dashboard"
     },
-     {
+    {
         icon: MdAdminPanelSettings,
         name: "Admins",
-        link: "/admin"
+        initially_expanded: false,
+        links: [
+            {
+                icon: MdAdminPanelSettings,
+                name: "Admin",
+                link: "/admin"
+            },
+            {
+                icon: TbReportSearch,
+                name: "Reports",
+                link: "/admin/reports"
+            }
+        ]
     },
     {
         icon: BsFillPeopleFill,
@@ -25,7 +38,7 @@ export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         link: "/queue"
     },
     {
-       
+
         icon: FaBox,
         name: " Inventory",
         initially_expanded: true,
@@ -66,7 +79,7 @@ export const NurseLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         link: "/queue"
     },
     {
-       
+
         icon: FaBox,
         name: " Inventory",
         initially_expanded: true,
@@ -88,7 +101,6 @@ export const NurseLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         }
     ]
     }
-    
 ];
 
 

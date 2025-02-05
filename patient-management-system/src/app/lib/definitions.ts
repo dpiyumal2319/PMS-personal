@@ -25,6 +25,18 @@ export type myError = {
     message: string
 }
 
+
+export interface Parameter {
+    name: string;
+    units: string;
+}
+
+export interface ReportForm {
+    name: string;
+    description: string;
+    parameters: Parameter[];
+}
+
 export type PatientFormData = {
     name: string;
     NIC: string;
@@ -35,7 +47,7 @@ export type PatientFormData = {
     weight: string;  // Keep as string since input fields return strings
     gender: "MALE" | "FEMALE" | ""
   };
-  
+
 
 
 
