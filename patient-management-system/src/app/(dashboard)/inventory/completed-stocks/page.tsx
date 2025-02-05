@@ -7,21 +7,9 @@ import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 import DatePicker from "@/app/(dashboard)/_components/DatePicker";
 
-export default async function InventoryCompleted({
-  searchParams,
-}: {
-  searchParams?: Promise<{
-    query?: string;
-    page?: string;
-    selection?: string;
-    sort?: string;
-  }>;
-  children: React.ReactNode;
-}) {
-  const params = await searchParams;
-  const query = params?.query || "";
-  const currentPage = params?.page || "1";
-  const selection = params?.selection || "model";
+export default async function InventoryCompleted() {
+
+
 
   return (
     <div className="flex h-screen flex-col w-full">

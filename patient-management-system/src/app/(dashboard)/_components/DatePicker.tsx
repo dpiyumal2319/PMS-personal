@@ -12,7 +12,7 @@ import {
 export default function DatePicker() {
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
 
-  const handleDateChange = (e: { target: { name: any; value: any } }) => {
+  const handleDateChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
     setDateRange((prev) => ({ ...prev, [name]: value }));
   };

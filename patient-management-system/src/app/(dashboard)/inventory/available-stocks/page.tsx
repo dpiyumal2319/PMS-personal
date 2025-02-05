@@ -7,21 +7,8 @@ import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 
-export default async function InventoryAvailable({
-  searchParams,
-}: {
-  searchParams?: Promise<{
-    query?: string;
-    page?: string;
-    selection?: string;
-    sort?: string;
-  }>;
-  children: React.ReactNode;
-}) {
-  const params = await searchParams;
-  const query = params?.query || "";
-  const currentPage = params?.page || "1";
-  const selection = params?.selection || "model";
+export default async function InventoryAvailable() {
+
 
   return (
     <div className="flex h-screen flex-col w-full">
