@@ -598,6 +598,10 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
             return {success: false, message: 'Please fill all fields'};
         }
 
+        if (formData.telephone.length !== 10) {
+            return {success: false, message: 'Invalid telephone number'};
+        }
+
         const date = new Date(formData.birthDate);
 
         if (isNaN(date.getTime())) {
