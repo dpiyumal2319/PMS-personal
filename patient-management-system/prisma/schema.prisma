@@ -138,8 +138,7 @@ model Issue {
 model ReportParameter {
   id           Int           @id @default(autoincrement())
   name         String        @unique
-  units        String
-  abbreviation String        @unique
+  units        String?
   ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id])
   reportTypeId Int?
   ReportValue  ReportValue[]
@@ -148,7 +147,6 @@ model ReportParameter {
 model ReportType {
   id            Int               @id @default(autoincrement())
   name          String            @unique
-  abbreviation  String            @unique
   description   String?
   parameters    ReportParameter[]
   PatientReport PatientReport[]

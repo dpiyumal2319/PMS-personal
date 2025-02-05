@@ -110,7 +110,6 @@ async function main() {
     const fbcReport = await prisma.reportType.create({
         data: {
             name: "Full Blood Count",
-            abbreviation: "FBC",
             description: "A full blood count (FBC) is a common blood test that measures the number and status of different types of blood cells.",
             parameters: {
                 create: [
@@ -124,12 +123,11 @@ async function main() {
     const lftReport = await prisma.reportType.create({
         data: {
             name: "Liver Function Test",
-            abbreviation: "LFT",
             description: "A liver function test is a blood test that checks your liver function.",
             parameters: {
                 create: [
-                    {name: "ALT in long form", units: "U/L", abbreviation: "ALT"},
-                    {name: "AST in long form", units: "U/L", abbreviation: "AST"},
+                    {name: "ALT", units: "U/L"},
+                    {name: "AST", units: "U/L"},
                 ],
             },
         },

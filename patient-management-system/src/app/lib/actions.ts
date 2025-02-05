@@ -1,7 +1,7 @@
 'use server';
 
 import {revalidatePath} from "next/cache";
-import type {myError} from "@/app/lib/definitions";
+import type {myError, ReportForm} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
@@ -57,46 +57,46 @@ export async function changeUserPassword({
 }): Promise<myError> {
 
     try {
-    if (newPassword !== confirmPassword) {
-        return {success: false, message: 'Passwords do not match'};
-    }
+        if (newPassword !== confirmPassword) {
+            return {success: false, message: 'Passwords do not match'};
+        }
 
-    const session = await verifySession();
+        const session = await verifySession();
 
-    //  Verify admin role
-    const admin = await prisma.user.findUnique({
-        where: {id: session.id},
-        select: {role: true}
-    });
+        //  Verify admin role
+        const admin = await prisma.user.findUnique({
+            where: {id: session.id},
+            select: {role: true}
+        });
 
-    if (admin?.role !== 'DOCTOR') {
-        return {success: false, message: 'Unauthorized'};
-    }
+        if (admin?.role !== 'DOCTOR') {
+            return {success: false, message: 'Unauthorized'};
+        }
 
-    // Verify target user exists and is a nurse
-    const nurse = await prisma.user.findUnique({
-        where: {id: nurseId},
-        select: {role: true}
-    });
+        // Verify target user exists and is a nurse
+        const nurse = await prisma.user.findUnique({
+            where: {id: nurseId},
+            select: {role: true}
+        });
 
-    if (!nurse) {
-        return {success: false, message: 'Nurse not found'};
-    }
+        if (!nurse) {
+            return {success: false, message: 'Nurse not found'};
+        }
 
-    if (nurse.role !== 'NURSE') {
-        return {success: false, message: 'User is not a nurse'};
-    }
+        if (nurse.role !== 'NURSE') {
+            return {success: false, message: 'User is not a nurse'};
+        }
 
 
-    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+        const hashedPassword = bcrypt.hashSync(newPassword, 10);
 
-    await prisma.user.update({
-        where: {id: nurseId},  // Use nurse ID here
-        data: {password: hashedPassword}
-    });
+        await prisma.user.update({
+            where: {id: nurseId},  // Use nurse ID here
+            data: {password: hashedPassword}
+        });
 
-    return {success: true, message: 'Password changed successfully'}; }
-    catch (e) {
+        return {success: true, message: 'Password changed successfully'};
+    } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while changing password'}
     }
@@ -159,22 +159,22 @@ const PAGE_SIZE = 10;
 
 export async function getTotalPages(query = "", filter = "name") {
     const whereClause = query
-      ? {
-          [filter]: { contains: query },
+        ? {
+            [filter]: {contains: query},
         }
-      : {};
-  
-    const totalPatients = await prisma.patient.count({ where: whereClause });
+        : {};
+
+    const totalPatients = await prisma.patient.count({where: whereClause});
     return Math.ceil(totalPatients / PAGE_SIZE);
-  }
+}
 
 export async function getFilteredPatients(query: string = "", page: number = 1, filter: string = "name") {
 
     console.log(`Filtering patients by ${filter} containing ${query}`);
     const whereCondition = query
         ? {
-              [filter]: { contains: query },
-          }
+            [filter]: {contains: query},
+        }
         : {};
 
     return prisma.patient.findMany({
@@ -184,7 +184,6 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
         orderBy: {name: "asc"},
     });
 }
-
 
 
 export async function stopQueue(id: string | null): Promise<myError> {
@@ -396,33 +395,54 @@ export async function getPatientDetails(id: number) {
     });
 }
 
-export async function getFilteredReports(pageNu: number, query: string, filter: string) {
-
-    const whereClause = query
-        ? {
-            [filter]: {contains: query},
-        }
-        : {};
-
-
+export async function getFilteredReports(pageNu: number, query: string) {
     return prisma.reportType.findMany({
-        where: whereClause,
+        where: {
+            name: {
+                contains: query
+            }
+        },
         take: PAGE_SIZE,
         skip: (pageNu - 1) * PAGE_SIZE,
-        orderBy: {name: "asc"},
+        orderBy: {id: "asc"},
         include: {
             parameters: true
         }
     });
 }
 
-export async function getReportPages(query: string, filter: string) {
-    const whereClause = query
-        ? {
-            [filter]: {contains: query},
-        }
-        : {};
-
-    const totalReports = await prisma.reportType.count({where: whereClause});
+export async function getReportPages(query: string) {
+    const totalReports = await prisma.reportType.count({where: {name: {contains: query}}});
     return Math.ceil(totalReports / PAGE_SIZE);
+}
+
+export async function addReportType(reportForm: ReportForm
+): Promise<myError> {
+    try {
+        await prisma.reportType.create({
+            data: {
+                name: reportForm.name,
+                description: reportForm.description,
+                parameters: {
+                    create: reportForm.parameters
+                }
+            }
+        });
+        revalidatePath('/reports');
+        return {success: true, message: 'Report type added successfully'}
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while adding report type'}
+    }
+}
+
+export async function getReportType(id: number) {
+    return prisma.reportType.findUnique({
+        where: {
+            id
+        },
+        include: {
+            parameters: true
+        }
+    });
 }
