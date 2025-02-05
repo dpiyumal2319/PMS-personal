@@ -10,7 +10,7 @@ import {
 import { addNewItem } from "@/app/lib/actions";
 import { Plus } from "lucide-react";
 import { handleServerAction } from "@/app/lib/utils";
-import { AddItemButton } from "./AddButton";
+import { AddItemButton } from "../../_components/AddButton";
 import { InventoryFormData } from "@/app/lib/definitions";
 
 // Define the type for DrugType
@@ -20,7 +20,7 @@ interface DrugFormProps {
   setOpen: (open: boolean) => void;
 }
 
-export function DrugForm({ setOpen }: DrugFormProps) {
+export function DrugForm() {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<InventoryFormData>({
     brandName: "",
@@ -46,7 +46,7 @@ export function DrugForm({ setOpen }: DrugFormProps) {
     });
 
     if (result.success) {
-      setOpen(false);
+      setIsOpen(false);
     }
     setFormData({
       brandName: "",

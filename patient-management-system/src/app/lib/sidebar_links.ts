@@ -33,17 +33,17 @@ export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         {
             icon: BsInboxFill,
             name: "Available Stocks",
-            link: "/inventory/available-stocks"
+            link: "/inventory/available-stocks?selection=brand"
         },
         {
             icon: FaMoneyBillWave,
             name: "Cost Managment",
-            link: "/inventory/cost-management"
+            link: "/inventory/cost-management?selection=brand"
         },
         {
             icon: MdDoneAll,
             name: "Completed Stocks",
-            link: "/inventory/completed-stocks"
+            link: "/inventory/completed-stocks?selection=brand"
         }
     ]
     }

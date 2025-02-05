@@ -2,6 +2,7 @@
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { Input } from "@/components/ui/input";
+import { Search as LucidSearch } from "lucide-react";
 
 export default function Search({ placeholder }: { placeholder: string }) {
   const searchParams = useSearchParams();
@@ -21,13 +22,16 @@ export default function Search({ placeholder }: { placeholder: string }) {
   }, 700);
 
   return (
-    <Input
-      className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-      placeholder={placeholder}
-      onChange={(e) => {
-        handleSearch(e.target.value);
-      }}
-      defaultValue={searchParams.get("query")?.toString()}
-    />
+    <div className="relative w-full">
+      <LucidSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+      <Input
+        className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
+        placeholder={placeholder}
+        onChange={(e) => {
+          handleSearch(e.target.value);
+        }}
+        defaultValue={searchParams.get("query")?.toString()}
+      />
+    </div>
   );
 }
