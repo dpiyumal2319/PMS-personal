@@ -6,9 +6,25 @@ import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
+import AvailableStockPageTable from "./_components/AvailableStockPageTable";
+import Pagination from "../../_components/Pagination";
 
-export default async function InventoryAvailable() {
-
+export default async function InventoryAvailable({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+    selection?: string;
+    sort?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const query = params?.query || "";
+  const currentPage = Number(params?.page) || 1;
+  const selection = params?.selection || "model";
+  const sort = params?.sort || "asc";
+  const totalPages = 5;
 
   return (
     <div className="flex h-screen flex-col w-full">
@@ -36,10 +52,16 @@ export default async function InventoryAvailable() {
       <div className="flex-grow overflow-auto">
         <Suspense fallback={<Loading />}>
           {" "}
-          <h1 className="text-4xl font-bold text-primary-700 font-montserrat mb-8">
-            Available Stocks
-          </h1>
+          <AvailableStockPageTable
+            query={query}
+            currentPage={currentPage}
+            selection={selection}
+            sort={sort}
+          />
         </Suspense>
+      </div>
+      <div className="mt-auto flex justify-center py-4 sticky bottom-0">
+        <Pagination totalPages={totalPages} itemsPerPage={10} />
       </div>
     </div>
   );
