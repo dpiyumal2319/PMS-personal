@@ -37,7 +37,6 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
 
     useEffect(() => {
         let isMounted = true;
-
         const fetchReport = async () => {
             if (!isOpen) return;
 
@@ -100,7 +99,7 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
     const addParameter = () => {
         setForm(prev => ({
             ...prev,
-            parameters: [...prev.parameters, { name: "", units: "", isNew: true }]
+            parameters: [...prev.parameters, { name: "", units: "", isNew: true, id: -1 }]
         }));
     };
 

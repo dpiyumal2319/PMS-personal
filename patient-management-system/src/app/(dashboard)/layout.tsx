@@ -1,3 +1,4 @@
+// DashboardLayout
 import Sidebar from "@/app/(dashboard)/_components/Sidebar";
 import TopBar from "@/app/(dashboard)/_components/TopBar";
 import React, {Suspense} from "react";
@@ -10,18 +11,18 @@ export default function DashboardLayout({
 }) {
     return (
         <div className="flex h-screen">
-            <aside className={"sticky top-0 left-0"}>
+            <aside className={"fixed top-0 left-0 h-full w-[250px] z-20"}>
                 <Sidebar/>
             </aside>
-            <div className="flex flex-col w-full overflow-y-auto">
-                <div className={'sticky top-0 z-10'}>
+            <div className="flex flex-col w-full h-full ml-[250px]">
+                <div className={'sticky top-0 z-10 w-full'}>
                     <TopBar/>
                 </div>
-                <div className={'flex-grow'}>
+                <main className={'flex-grow overflow-y-auto'}>
                     <Suspense fallback={<Loading />}>
                         {children}
-                    </ Suspense>
-                </div>
+                    </Suspense>
+                </main>
             </div>
         </div>
     );

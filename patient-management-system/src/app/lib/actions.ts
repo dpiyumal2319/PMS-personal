@@ -474,80 +474,95 @@ interface ReportForm {
     parameters: Parameter[];
 }
 
+
 export async function editReportType(reportForm: ReportForm, reportId: number): Promise<myError> {
     try {
-        await prisma.$transaction(async (tx) => {
-            // Update the report type
-            await tx.reportType.update({
-                where: {id: reportId},
-                data: {
-                    name: reportForm.name,
-                    description: reportForm.description,
-                }
+        console.log(reportForm);
+
+        return await prisma.$transaction(async (tx) => {
+            const report = await tx.reportType.findUnique({
+                where: { id: reportId },
+                include: { parameters: true }
             });
 
-            // Get existing parameters
-            const existingParams = await tx.reportParameter.findMany({
-                where: {reportTypeId: reportId}
-            });
+            if (!report) {
+                throw new Error('Report type not found');
+            }
 
-            // Create a map of existing parameter IDs
-            const existingParamIds = new Set(existingParams.map(p => p.id));
+            const newParams = reportForm.parameters.filter((param) => param.isNew);
+            const oldParams = reportForm.parameters.filter((param) => !param.isNew);
 
-            // Track which parameters we're keeping
-            const keepingParamIds = new Set<number>();
-
-            // Update or create parameters
-            for (const param of reportForm.parameters) {
-                if (param.id && existingParamIds.has(param.id)) {
-                    // Update existing parameter
-                    await tx.reportParameter.update({
-                        where: {id: param.id},
-                        data: {
-                            name: param.name,
-                            units: param.units || null,
-                        }
-                    });
-                    keepingParamIds.add(param.id);
-                } else {
-                    // Create new parameter
-                    await tx.reportParameter.create({
-                        data: {
-                            name: param.name,
-                            units: param.units || null,
-                            reportTypeId: reportId,
-                        }
-                    });
+            for (const params of report.parameters) {
+                if (newParams.find((param) => param.name === params.name)) {
+                    throw new Error('Cannot add an existing parameter. Do not remove and add the same parameter.');
                 }
             }
 
-            // Delete parameters that weren't kept
-            await tx.reportParameter.deleteMany({
-                where: {
-                    AND: [
-                        {reportTypeId: reportId},
-                        {id: {notIn: Array.from(keepingParamIds)}}
-                    ]
+            // Delete removed parameters
+            const deletedParams = report.parameters.filter((param) => !oldParams.find((p) => p.id === param.id));
+
+            for (const param of deletedParams) {
+                const reportValues = await tx.reportValue.findMany({
+                    where: { reportParameterId: param.id }
+                });
+
+                if (reportValues.length > 0) {
+                    throw new Error(`Cannot delete parameter ${param.name} as it is in use`);
+                }
+
+                await tx.reportParameter.delete({
+                    where: { id: param.id }
+                });
+            }
+
+            // Update existing parameters
+            for (const param of oldParams) {
+                await tx.reportParameter.update({
+                    where: { id: param.id },
+                    data: {
+                        name: param.name,
+                        units: param.units
+                    }
+                });
+            }
+
+            // Add new parameters
+            for (const param of newParams) {
+                await tx.reportParameter.create({
+                    data: {
+                        name: param.name,
+                        units: param.units,
+                        reportTypeId: reportId
+                    }
+                });
+            }
+
+            // Update the report type itself
+            await tx.reportType.update({
+                where: { id: reportId },
+                data: {
+                    name: reportForm.name,
+                    description: reportForm.description
                 }
             });
-        });
 
-        revalidatePath('/admin/reports');
-        return {success: true, message: 'Report type updated successfully'};
+            revalidatePath('/admin/reports');
+            return { success: true, message: 'Report type updated successfully' };
+        });
     } catch (e) {
-        console.error('Error updating report type:', e);
-        if (e instanceof Error && e.message.includes('Unique constraint')) {
+        if (e instanceof Error) {
             return {
                 success: false,
-                message: 'A report type with this name already exists'
+                message: e.message
             };
         }
         return {
             success: false,
-            message: 'An error occurred while updating report type'
+            message: 'An uncaught error occurred while updating report type'
         };
     }
 }
+
 
 export const deleteReportType = async (reportId: number): Promise<myError> => {
     try {

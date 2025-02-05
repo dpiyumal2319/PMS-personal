@@ -1,3 +1,4 @@
+// RootLayout (globals/layout.tsx)
 import type {Metadata} from "next";
 import {Montserrat} from "next/font/google";
 import "./globals.css";
@@ -9,11 +10,10 @@ export const metadata: Metadata = {
     description: "Patient Management System",
 };
 
-
 const montserrat = Montserrat({
     subsets: ["latin"],
-    weight: ["300", "400", "500", "600", "700", "800"], // Select needed weights
-    variable: "--font-montserrat", // Define a CSS variable for the font
+    weight: ["300", "400", "500", "600", "700", "800"],
+    variable: "--font-montserrat",
 });
 
 export default function RootLayout({
@@ -21,12 +21,10 @@ export default function RootLayout({
                                    }: Readonly<{
     children: React.ReactNode;
 }>) {
-
-
     return (
         <html lang="en" className={montserrat.className}>
-        <body className={'bg-background h-screen'}>
-            {children}
+        <body className={'bg-background min-h-screen'}>
+        {children}
         <ToastContainer/>
         </body>
         </html>
