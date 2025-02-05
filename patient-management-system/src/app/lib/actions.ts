@@ -480,10 +480,10 @@ export async function addNewItem(
           number: formData.batchNumber,
           drugName: drug.name,
           type: formData.drugType as DrugType,
-          fullAmount: formData.quantity,
-          remainingQuantity: formData.quantity,
-          expiry: formData.expiry,
-          price: formData.price,
+          fullAmount: parseFloat(formData.quantity.toString()),
+         remainingQuantity: parseFloat(formData.quantity.toString()),
+          expiry: new Date(formData.expiry),
+          price: parseFloat(formData.price.toString()),
           status: 'AVAILABLE'
         }
       });

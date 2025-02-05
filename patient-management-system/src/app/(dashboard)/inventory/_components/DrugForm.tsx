@@ -10,15 +10,11 @@ import {
 import { addNewItem } from "@/app/lib/actions";
 import { Plus } from "lucide-react";
 import { handleServerAction } from "@/app/lib/utils";
-import { AddItemButton } from "../../_components/AddButton";
+
 import { InventoryFormData } from "@/app/lib/definitions";
 
 // Define the type for DrugType
 type DrugType = "Tablet" | "Syrup";
-
-interface DrugFormProps {
-  setOpen: (open: boolean) => void;
-}
 
 export function DrugForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,17 +25,19 @@ export function DrugForm() {
     batchNumber: "",
     drugType: "Tablet",
     quantity: 0,
-    expiry: new Date(),
+    expiry: "",
     price: 0,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
+    console.log(`name: ${e.target.name}, value: ${e.target.value}`);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log("Form data", formData);
 
     const result = await handleServerAction(() => addNewItem({ formData }), {
       loadingMessage: "Adding new item...",
@@ -55,7 +53,7 @@ export function DrugForm() {
       batchNumber: "",
       drugType: "Tablet",
       quantity: 0,
-      expiry: new Date(),
+      expiry: "",
       price: 0,
     });
   };
@@ -86,7 +84,7 @@ export function DrugForm() {
               value={formData.drugName}
               onChange={handleChange}
               required
-              name="drugNmae"
+              name="drugName"
             />
           </div>
 
@@ -131,6 +129,7 @@ export function DrugForm() {
                 value={formData.quantity}
                 onChange={handleChange}
                 required
+                name="quantity"
               />
             </div>
 
@@ -142,6 +141,7 @@ export function DrugForm() {
                 value={formData.price}
                 onChange={handleChange}
                 required
+                name="price"
               />
             </div>
           </div>
@@ -152,10 +152,11 @@ export function DrugForm() {
             </label>
             <Input
               type="date"
-              value={formData.expiry.toISOString().split("T")[0]}
+              value={formData.expiry}
               onChange={handleChange}
               className="w-full p-2 border rounded"
               required
+              name="expiry"
             />
           </div>
 

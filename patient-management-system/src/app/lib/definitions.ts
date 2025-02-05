@@ -46,7 +46,7 @@ export type InventoryFormData = {
     batchNumber: string,
     drugType: string,
     quantity: number,
-    expiry: Date,
+    expiry: string,
     price: number
 };
 
