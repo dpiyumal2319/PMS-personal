@@ -1,0 +1,195 @@
+"use client";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { addNewItem } from "@/app/lib/actions";
+import { Plus, X } from "lucide-react";
+import { handleServerAction } from "@/app/lib/utils";
+import { InventoryFormData } from "@/app/lib/definitions";
+
+// Define the type for DrugType
+type DrugType = "Tablet" | "Syrup";
+
+export function DrugForm() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState<InventoryFormData>({
+    brandName: "",
+    brandDescription: "",
+    drugName: "",
+    batchNumber: "",
+    drugType: "Tablet",
+    quantity: 0,
+    expiry: "",
+    price: 0,
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form data", formData);
+
+    const result = await handleServerAction(() => addNewItem({ formData }), {
+      loadingMessage: "Adding new item...",
+    });
+
+    if (result.success) {
+      setIsOpen(false);
+    }
+
+    setFormData({
+      brandName: "",
+      brandDescription: "",
+      drugName: "",
+      batchNumber: "",
+      drugType: "Tablet",
+      quantity: 0,
+      expiry: "",
+      price: 0,
+    });
+  };
+
+  return (
+    <>
+      {/* Button to Open Modal */}
+      <Button
+        className="bg-primary-500 hover:bg-primary-600 text-white"
+        onClick={() => setIsOpen(true)}
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Add New Item
+      </Button>
+
+      {/* Modal (Shown Only When isOpen is True) */}
+      {isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md z-50">
+          <div className="bg-white w-[600px] p-6 rounded-lg shadow-lg relative">
+            {/* Close Button */}
+            <button
+              className="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-xl font-semibold text-center mb-4">
+              Add New Drug
+            </h2>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Brand Name
+                </label>
+                <Input
+                  value={formData.brandName}
+                  onChange={handleChange}
+                  required
+                  name="brandName"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Drug Name
+                </label>
+                <Input
+                  value={formData.drugName}
+                  onChange={handleChange}
+                  required
+                  name="drugName"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Batch Number
+                  </label>
+                  <Input
+                    value={formData.batchNumber}
+                    onChange={handleChange}
+                    required
+                    name="batchNumber"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Drug Type
+                  </label>
+                  <select
+                    value={formData.drugType}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        drugType: e.target.value as DrugType,
+                      })
+                    }
+                    className="w-full p-2 border rounded"
+                  >
+                    <option value="Tablet">Tablet</option>
+                    <option value="Syrup">Syrup</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Quantity
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.quantity}
+                    onChange={handleChange}
+                    required
+                    name="quantity"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Price
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                    name="price"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Expiry Date
+                </label>
+                <Input
+                  type="date"
+                  value={formData.expiry}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                  required
+                  name="expiry"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-primary-500 hover:bg-primary-600"
+              >
+                Add Item
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

@@ -4,8 +4,8 @@ import PatientTable from "./_components/PatientTable";
 import { getTotalPages } from "@/app/lib/actions";
 import Pagination from "../_components/Pagination";
 import { PatientsTableSkeleton } from "./_components/PatientsTableSkeleton";
-import { Button } from "@/components/ui/button";
 import SearchDropdown from "../_components/Dropdown";
+import AddPatientForm from "./_components/AddPatientForm";
 
 export default async function Page({
   searchParams,
@@ -29,9 +29,7 @@ export default async function Page({
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">All Patients</h1>
-          <Button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
-            + Add Patient
-          </Button>
+          <AddPatientForm />
         </div>
 
         {/* Search & Filters */}

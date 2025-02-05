@@ -1,7 +1,7 @@
 import type {ExpandingSidebarItem, SideBarItem as SideBarItemType} from "@/app/lib/definitions";
-import {MdSpaceDashboard, MdAdminPanelSettings} from "react-icons/md";
-import {BsFillPeopleFill} from "react-icons/bs";
-import {FaClock} from "react-icons/fa";
+import {MdSpaceDashboard, MdAdminPanelSettings,MdDoneAll} from "react-icons/md";
+import {BsFillPeopleFill,BsInboxFill} from "react-icons/bs";
+import {FaClock,FaBox,FaMoneyBillWave,} from "react-icons/fa";
 import { TbReportSearch } from "react-icons/tb";
 
 export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
@@ -36,6 +36,29 @@ export const DoctorLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         icon: FaClock,
         name: "Queue",
         link: "/queue"
+    },
+    {
+
+        icon: FaBox,
+        name: " Inventory",
+        initially_expanded: true,
+        links: [
+        {
+            icon: BsInboxFill,
+            name: "Available Stocks",
+            link: "/inventory/available-stocks?selection=model"
+        },
+        {
+            icon: FaMoneyBillWave,
+            name: "Cost Managment",
+            link: "/inventory/cost-management?selection=model"
+        },
+        {
+            icon: MdDoneAll,
+            name: "Completed Stocks",
+            link: "/inventory/completed-stocks?selection=model"
+        }
+    ]
     }
 ];
 
@@ -54,8 +77,33 @@ export const NurseLinks: (SideBarItemType | ExpandingSidebarItem)[] = [
         icon: FaClock,
         name: "Queue",
         link: "/queue"
+    },
+    {
+
+        icon: FaBox,
+        name: " Inventory",
+        initially_expanded: true,
+        links: [
+        {
+            icon: BsInboxFill,
+            name: "Available Stocks",
+            link: "/inventory/available-stocks"
+        },
+        {
+            icon: FaMoneyBillWave,
+            name: "Cost Managment",
+            link: "/inventory/cost-management"
+        },
+        {
+            icon: MdDoneAll,
+            name: "Completed Stocks",
+            link: "/inventory/completed-stocks"
+        }
+    ]
     }
 ];
+
+
 
 
 //You can add expanding sidebar items like this

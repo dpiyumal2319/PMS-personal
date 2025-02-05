@@ -6,6 +6,10 @@ import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {Prisma} from "@prisma/client";
+import { PatientFormData } from "@/app/lib/definitions";
+
+import { DrugType } from "@prisma/client";
+import { InventoryFormData } from "@/app/lib/definitions";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -577,4 +581,103 @@ export const deleteReportType = async (reportId: number): Promise<myError> => {
         console.error(e);
         return {success: false, message: 'An error occurred while deleting report type'}
     }
+}
+
+
+export async function addPatient({formData}: { formData: PatientFormData }): Promise<myError> {
+    try {
+        const floatHeight = parseFloat(formData.height);
+
+        const floatWeight = parseFloat(formData.weight);
+
+        if (formData.gender === "") {
+            return {success: false, message: 'Select a valid Gender'};
+        }
+
+        if ( !formData.name || !formData.telephone) {
+            return {success: false, message: 'Please fill all fields'};
+        }
+
+        const date = new Date(formData.birthDate);
+
+        if (isNaN(date.getTime())) {
+            return {success: false, message: 'Invalid birth date'};
+        }
+
+        await prisma.patient.create({
+            data: {
+                name: formData.name,
+                NIC: formData.NIC,
+                telephone: formData.telephone,
+                birthDate: date,
+                address: formData.address,
+                height: floatHeight,
+                weight: floatWeight,
+                gender: formData.gender
+            }
+        });
+
+        revalidatePath('/patients');
+        return {success: true, message: 'Patient added successfully'};
+    }
+    catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while adding patient'};
+    }
+}
+
+//For adding drugs to the inventory
+export async function addNewItem(
+   {formData}:{formData: InventoryFormData
+    }): Promise<myError> {
+        try{
+             return await prisma.$transaction(async (tx) => {
+      // 1. Create or connect drug brand
+      const brand = await tx.drugBrand.upsert({
+        where: { name: formData.brandName },
+        update: {},
+        create: {
+          name: formData.brandName,
+          description: formData.brandDescription || ''
+        }
+      });
+
+      // 2. Create or connect drug
+      const drug = await tx.drug.upsert({
+        where: { name: formData.drugName },
+        update: {},
+        create: {
+          name: formData.drugName,
+          brandName: brand.name
+        }
+      });
+
+      // 3. Create batch
+      await tx.batch.create({
+        data: {
+          number: formData.batchNumber,
+          drugName: drug.name,
+          type: formData.drugType as DrugType,
+          fullAmount: parseFloat(formData.quantity.toString()),
+         remainingQuantity: parseFloat(formData.quantity.toString()),
+          expiry: new Date(formData.expiry),
+          price: parseFloat(formData.price.toString()),
+          status: 'AVAILABLE'
+        }
+      });
+
+      revalidatePath('/inventory/available-stocks');
+      return { success: true, message: 'Item added successfully' };
+    });
+        }catch (e) {
+            console.error(e);
+            return { success: false, message: 'Failed to add item' };
+         }
+}
+
+export async function getDrugBrands() {
+  return prisma.drugBrand.findMany({
+    select: { name: true },
+    orderBy: { name: 'asc' }
+  });
 }
