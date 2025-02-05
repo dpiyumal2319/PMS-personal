@@ -1,10 +1,11 @@
 'use server';
 
 import {revalidatePath} from "next/cache";
-import type {myError, ReportForm} from "@/app/lib/definitions";
+import type {myError} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
+import {Prisma} from "@prisma/client";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -170,7 +171,6 @@ export async function getTotalPages(query = "", filter = "name") {
 
 export async function getFilteredPatients(query: string = "", page: number = 1, filter: string = "name") {
 
-    console.log(`Filtering patients by ${filter} containing ${query}`);
     const whereCondition = query
         ? {
             [filter]: {contains: query},
@@ -321,8 +321,6 @@ export async function removePatientFromQueue(queueId: number, token: number): Pr
 export async function searchPatients(query: string, searchBy: "name" | "telephone" | "NIC") {
     if (!query) return [];
 
-    console.log(`Searching for patients with ${searchBy} containing ${query}`);
-
     return prisma.patient.findMany({
         where: {
             [searchBy]: {
@@ -416,33 +414,152 @@ export async function getReportPages(query: string) {
     return Math.ceil(totalReports / PAGE_SIZE);
 }
 
-export async function addReportType(reportForm: ReportForm
-): Promise<myError> {
+export async function addReportType(reportForm: ReportForm): Promise<myError> {
     try {
+        if (reportForm.parameters.length === 0) {
+            return {success: false, message: 'At least one parameter is required'};
+        }
+
+        console.log(reportForm.parameters);
+
         await prisma.reportType.create({
             data: {
                 name: reportForm.name,
                 description: reportForm.description,
                 parameters: {
-                    create: reportForm.parameters
-                }
-            }
+                    create: reportForm.parameters,
+                },
+            },
         });
+
         revalidatePath('/reports');
-        return {success: true, message: 'Report type added successfully'}
+        return {success: true, message: 'Report type added successfully'};
     } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            if (e.code === 'P2002') {
+                return {success: false, message: 'Report type name must be unique'};
+            }
+            if (e.code === 'P2003') {
+                return {success: false, message: 'Invalid parameter reference (foreign key constraint failed)'};
+            }
+        }
         console.error(e);
-        return {success: false, message: 'An error occurred while adding report type'}
+
+        return {success: false, message: 'An unexpected error occurred while adding report type'};
     }
 }
 
-export async function getReportType(id: number) {
+
+export async function getReportType(reportId: number) {
     return prisma.reportType.findUnique({
         where: {
-            id
+            id: reportId
         },
         include: {
             parameters: true
         }
     });
+}
+
+interface Parameter {
+    name: string;
+    units: string;
+    id?: number;
+    isNew?: boolean;
+}
+
+interface ReportForm {
+    name: string;
+    description: string;
+    parameters: Parameter[];
+}
+
+export async function editReportType(reportForm: ReportForm, reportId: number): Promise<myError> {
+    try {
+        await prisma.$transaction(async (tx) => {
+            // Update the report type
+            await tx.reportType.update({
+                where: {id: reportId},
+                data: {
+                    name: reportForm.name,
+                    description: reportForm.description,
+                }
+            });
+
+            // Get existing parameters
+            const existingParams = await tx.reportParameter.findMany({
+                where: {reportTypeId: reportId}
+            });
+
+            // Create a map of existing parameter IDs
+            const existingParamIds = new Set(existingParams.map(p => p.id));
+
+            // Track which parameters we're keeping
+            const keepingParamIds = new Set<number>();
+
+            // Update or create parameters
+            for (const param of reportForm.parameters) {
+                if (param.id && existingParamIds.has(param.id)) {
+                    // Update existing parameter
+                    await tx.reportParameter.update({
+                        where: {id: param.id},
+                        data: {
+                            name: param.name,
+                            units: param.units || null,
+                        }
+                    });
+                    keepingParamIds.add(param.id);
+                } else {
+                    // Create new parameter
+                    await tx.reportParameter.create({
+                        data: {
+                            name: param.name,
+                            units: param.units || null,
+                            reportTypeId: reportId,
+                        }
+                    });
+                }
+            }
+
+            // Delete parameters that weren't kept
+            await tx.reportParameter.deleteMany({
+                where: {
+                    AND: [
+                        {reportTypeId: reportId},
+                        {id: {notIn: Array.from(keepingParamIds)}}
+                    ]
+                }
+            });
+        });
+
+        revalidatePath('/admin/reports');
+        return {success: true, message: 'Report type updated successfully'};
+    } catch (e) {
+        console.error('Error updating report type:', e);
+        if (e instanceof Error && e.message.includes('Unique constraint')) {
+            return {
+                success: false,
+                message: 'A report type with this name already exists'
+            };
+        }
+        return {
+            success: false,
+            message: 'An error occurred while updating report type'
+        };
+    }
+}
+
+export const deleteReportType = async (reportId: number): Promise<myError> => {
+    try {
+        await prisma.reportType.delete({
+            where: {
+                id: reportId
+            }
+        });
+        revalidatePath('/admin/reports');
+        return {success: true, message: 'Report type deleted successfully'}
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while deleting report type'}
+    }
 }

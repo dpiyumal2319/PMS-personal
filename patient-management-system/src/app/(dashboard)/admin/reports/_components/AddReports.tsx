@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { addReportType } from "@/app/lib/actions";
+import React, {useState} from "react";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {addReportType} from "@/app/lib/actions";
 import {handleServerAction} from "@/app/lib/utils";
 import {Parameter, ReportForm} from "@/app/lib/definitions";
 
@@ -16,28 +16,34 @@ const ReportFormPopup: React.FC = () => {
         description: "",
         parameters: [],
     });
-    const [errors, setErrors] = useState<{ name?: string; abbreviation?: string }>({});
+    const [error, setError] = useState<string | null>(null);
 
     const validateForm = () => {
-        const newErrors: { name?: string; abbreviation?: string } = {};
-        if (!form.name) newErrors.name = "Name is required";
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        if (!form.name) {
+            setError("Name is required");
+            return false;
+        }
+        if (form.parameters.length === 0) {
+            setError("At least one parameter is required");
+            return false;
+        }
+        setError(null);
+        return true;
     };
 
     const addParameter = () => {
-        setForm({ ...form, parameters: [...form.parameters, { name: "", units: ""}] });
+        setForm({...form, parameters: [...form.parameters, {name: "", units: ""}]});
     };
 
     const removeParameter = (index: number) => {
         const newParameters = form.parameters.filter((_, i) => i !== index);
-        setForm({ ...form, parameters: newParameters });
+        setForm({...form, parameters: newParameters});
     };
 
     const handleParameterChange = (index: number, field: keyof Parameter, value: string) => {
         const newParameters = [...form.parameters];
         newParameters[index][field] = value;
-        setForm({ ...form, parameters: newParameters });
+        setForm({...form, parameters: newParameters});
     };
 
     const handleSubmit = async () => {
@@ -48,7 +54,7 @@ const ReportFormPopup: React.FC = () => {
 
         if (result.success) {
             setIsOpen(false);
-            setForm({ name: "", description: "", parameters: [] });
+            setForm({name: "", description: "", parameters: []});
             return;
         }
     };
@@ -64,21 +70,24 @@ const ReportFormPopup: React.FC = () => {
                         <DialogTitle>Create Report Type</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
+                        {error && <p className="text-red-500 text-sm">{error}</p>}
                         <div>
                             <label className="block">Name *</label>
-                            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                            <Input value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}/>
                         </div>
                         <div>
                             <label className="block">Description</label>
-                            <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                            <Input value={form.description}
+                                   onChange={(e) => setForm({...form, description: e.target.value})}/>
                         </div>
                         <div>
                             <label className="block">Parameters</label>
                             {form.parameters.map((param, index) => (
                                 <div key={index} className="flex gap-2 mt-2 items-center">
-                                    <Input placeholder="Name" value={param.name} onChange={(e) => handleParameterChange(index, "name", e.target.value)} />
-                                    <Input placeholder="Units" value={param.units} onChange={(e) => handleParameterChange(index, "units", e.target.value)} />
+                                    <Input placeholder="Name" value={param.name}
+                                           onChange={(e) => handleParameterChange(index, "name", e.target.value)}/>
+                                    <Input placeholder="Units" value={param.units}
+                                           onChange={(e) => handleParameterChange(index, "units", e.target.value)}/>
                                     <Button variant="destructive" onClick={() => removeParameter(index)}>Remove</Button>
                                 </div>
                             ))}

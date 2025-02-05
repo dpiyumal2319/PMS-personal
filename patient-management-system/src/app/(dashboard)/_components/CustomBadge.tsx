@@ -34,7 +34,7 @@ export function CustomBadge({
                                 ...props
                             }: ParameterBadgeProps) {
 
-    console.log(`badgeColors[color]: ${badgeColors[color]} for text: ${text}`);
+
     return (
         <Badge
             {...props}

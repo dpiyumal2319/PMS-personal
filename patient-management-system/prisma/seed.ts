@@ -113,8 +113,8 @@ async function main() {
             description: "A full blood count (FBC) is a common blood test that measures the number and status of different types of blood cells.",
             parameters: {
                 create: [
-                    {name: "Hemoglobin", units: "g/dL", abbreviation: "HGB"},
-                    {name: "WBC Count", units: "cells/µL", abbreviation: "WBC"},
+                    {name: "Hemoglobin", units: "g/dL"},
+                    {name: "WBC Count", units: "cells/µL"},
                 ],
             },
         },

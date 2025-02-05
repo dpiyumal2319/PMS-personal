@@ -2,6 +2,8 @@ import React from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {getFilteredReports} from "@/app/lib/actions";
 import {badgeColorsType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import EditReport from "@/app/(dashboard)/admin/reports/_components/EditReport";
+import {DeleteReport} from "@/app/(dashboard)/admin/reports/_components/DeleteReport";
 
 let lastSelectedIndex = 0;
 
@@ -29,16 +31,30 @@ const AllReportsTable = async ({currentPage, query}: {
     query: string,
 }) => {
     const reports = await getFilteredReports(currentPage, query);
+
+    if (!reports) {
+        return <Card>
+            <CardHeader>
+                <CardTitle>No Reports</CardTitle>
+            </CardHeader>
+        </Card>
+    }
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {reports.map((report) => (
                 <Card key={report.id} className="hover:shadow-lg transition-shadow duration-200">
                     <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <CardTitle className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                    {report.name} <CustomBadge text={'# ' + report.id.toString()} color={'gray'} />
-                                </CardTitle>
+                        <div className="flex justify-between items-center">
+                            <CardTitle
+                                className="text-lg font-bold text-gray-800 flex items-center gap-2 justify-between">
+                                <div className={'flex items-center gap-2'}>
+                                    {report.name} <CustomBadge text={'# ' + report.id.toString()} color={'gray'}/>
+                                </div>
+                            </CardTitle>
+                            <div className={'flex gap-2'}>
+                                <EditReport ID={report.id}/>
+                                <DeleteReport id={report.id}/>
                             </div>
                         </div>
                     </CardHeader>
@@ -52,7 +68,8 @@ const AllReportsTable = async ({currentPage, query}: {
                             <h3 className="text-sm font-semibold text-gray-700">Parameters</h3>
                             <div className="flex flex-wrap gap-2">
                                 {report.parameters.map((param) => (
-                                    <CustomBadge key={param.id} text={`${param.name} (${param.units})`} color={getRandColor()} />
+                                    <CustomBadge key={param.id} text={`${param.name} (${param.units})`}
+                                                 color={getRandColor()}/>
                                 ))}
                             </div>
                         </div>
