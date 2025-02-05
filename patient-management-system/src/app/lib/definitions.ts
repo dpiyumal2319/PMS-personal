@@ -36,3 +36,46 @@ export type PatientFormData = {
     gender: "MALE" | "FEMALE" | ""
   };
   
+
+
+
+export type InventoryFormData = {
+    brandName: string,
+    brandDescription: string,
+    drugName: string,
+    batchNumber: string,
+    drugType: string,
+    quantity: number,
+    expiry: string,
+    price: number
+};
+
+export const searchModels = [
+    {
+      label: "By Brand",
+      value: "brand",
+      sortOptions: [
+        { label: "Alphabetically", value: "alphabetically" },
+        { label: "Lowest", value: "lowest" },
+        { label: "Highest", value: "highest" },
+      ],
+    },
+    {
+      label: "By Model",
+      value: "model",
+      sortOptions: [
+        { label: "Alphabetically", value: "alphabetically" },
+        { label: "Lowest", value: "lowest" },
+        { label: "Highest", value: "highest" },
+      ],
+    },
+    {
+      label: "By Batch",
+      value: "batch",
+      sortOptions: [
+        { label: "Expiry Date", value: "expiryDate" },
+        { label: "Newly Added", value: "newlyAdded" },
+        { label: "Alphabetically", value: "alphabetically" },
+      ],
+    },
+  ];
