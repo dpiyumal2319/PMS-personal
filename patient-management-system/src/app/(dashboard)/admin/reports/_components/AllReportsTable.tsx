@@ -32,8 +32,8 @@ const AllReportsTable = async ({currentPage, query}: {
 }) => {
     const reports = await getFilteredReports(currentPage, query);
 
-    if (!reports) {
-        return <Card>
+    if (!reports || reports.length === 0) {
+        return <Card className={'text-center'}>
             <CardHeader>
                 <CardTitle>No Reports</CardTitle>
             </CardHeader>

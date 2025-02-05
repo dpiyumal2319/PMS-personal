@@ -15,7 +15,7 @@ import {Trash} from "lucide-react";
 import {handleServerAction} from "@/app/lib/utils";
 import {deleteReportType} from "@/app/lib/actions";
 import {Button} from "@/components/ui/button";
-import React from "react";
+import React, {useState, useEffect} from "react";
 
 export function DeleteReport({id}: { id: number }) {
     const handleDelete = async () => {
@@ -24,6 +24,23 @@ export function DeleteReport({id}: { id: number }) {
         });
     }
 
+    const [countdown, setCountdown] = useState(5);
+    const [disabled, setDisabled] = useState(true);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    setDisabled(false);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000); // Changed from 3000 to 1000 for 1-second intervals
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <AlertDialog>
@@ -40,16 +57,20 @@ export function DeleteReport({id}: { id: number }) {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete report template?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the report template.
+                        This action cannot be undone. This will permanently delete the report template along with all
+                        <span className="text-red-600"> associated <span
+                            className={'font-bold'}>parameters</span> and <span
+                            className={'font-bold'}>patient reports</span></span>.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel className="bg-gray-200 text-gray-700 hover:bg-gray-300">
+                    <AlertDialogAction className="bg-red-600 text-white hover:bg-red-700" onClick={handleDelete}
+                                       disabled={disabled}>
+                        {disabled ? `Delete all data (${countdown})` : "Delete all data"}
+                    </AlertDialogAction>
+                    <AlertDialogCancel className="bg-green-600 text-white hover:bg-green-700 hover:text-white">
                         Keep
                     </AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-600 text-white hover:bg-red-700" onClick={handleDelete}>
-                        Delete
-                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
