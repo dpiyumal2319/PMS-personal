@@ -106,6 +106,57 @@ async function main() {
         },
     });
 
+    await prisma.drugBrand.create({
+        data: {
+            name: 'Ibuprofen',
+            description: 'Anti-inflammatory pain reliever',
+            drugs: {
+                create: [
+                    {
+                        name: 'Brufen',
+                        batch: {
+                            create: [{
+                                number: 'B456',
+                                type: 'Tablet',
+                                fullAmount: 200,
+                                expiry: new Date('2026-06-15'),
+                                remainingQuantity: 200,
+                                price: 80,
+                                status: 'AVAILABLE'
+                            }]
+                        }
+                    },
+                ],
+            },
+        },
+    });
+    
+    await prisma.drugBrand.create({
+        data: {
+            name: 'Amoxicillin',
+            description: 'Antibiotic for bacterial infections',
+            drugs: {
+                create: [
+                    {
+                        name: 'Amoxil',
+                        batch: {
+                            create: [{
+                                number: 'B789',
+                                type: 'Tablet',
+                                fullAmount: 150,
+                                expiry: new Date('2025-09-30'),
+                                remainingQuantity: 150,
+                                price: 120,
+                                status: 'AVAILABLE'
+                            }]
+                        }
+                    },
+                ],
+            },
+        },
+    });
+    
+
     // Add Reports
     const fbcReport = await prisma.reportType.create({
         data: {
