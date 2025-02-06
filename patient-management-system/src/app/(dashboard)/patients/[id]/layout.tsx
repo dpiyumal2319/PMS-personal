@@ -10,9 +10,11 @@ export default async function Layout({
     const id = parseInt((await params).id);
 
     return (
-        <div className={'flex flex-col p-4'}>
+        <div className={'flex flex-col p-4 min-h-full gap-4'}>
             <TopCard id={id}/>
-            {children}
+            <div className={'flex flex-col gap-4 flex-grow h-full'}>
+                {children}
+            </div>
         </div>
     )
 }

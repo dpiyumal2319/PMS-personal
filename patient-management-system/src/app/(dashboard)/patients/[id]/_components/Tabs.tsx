@@ -19,8 +19,8 @@ const PatientTabs = ({ patientId }: { patientId: number }) => {
     };
 
     return (
-        <div className="mt-6 border-t pt-4">
-            <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full h-12">
+        <div className="mt-6 border-t pt-4 h-14">
+            <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full h-full">
                 <TabsList className="grid grid-cols-4 w-full">
                     <TabsTrigger value="prescribe" className="flex items-center gap-2">
                         <Stethoscope className="h-4 w-4" />

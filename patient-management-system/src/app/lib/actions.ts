@@ -6,10 +6,10 @@ import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {Prisma} from "@prisma/client";
-import { PatientFormData } from "@/app/lib/definitions";
+import {PatientFormData} from "@/app/lib/definitions";
 
-import { DrugType } from "@prisma/client";
-import { InventoryFormData } from "@/app/lib/definitions";
+import {DrugType} from "@prisma/client";
+import {InventoryFormData} from "@/app/lib/definitions";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -485,8 +485,8 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
 
         return await prisma.$transaction(async (tx) => {
             const report = await tx.reportType.findUnique({
-                where: { id: reportId },
-                include: { parameters: true }
+                where: {id: reportId},
+                include: {parameters: true}
             });
 
             if (!report) {
@@ -507,7 +507,7 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
 
             for (const param of deletedParams) {
                 const reportValues = await tx.reportValue.findMany({
-                    where: { reportParameterId: param.id }
+                    where: {reportParameterId: param.id}
                 });
 
                 if (reportValues.length > 0) {
@@ -515,14 +515,14 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
                 }
 
                 await tx.reportParameter.delete({
-                    where: { id: param.id }
+                    where: {id: param.id}
                 });
             }
 
             // Update existing parameters
             for (const param of oldParams) {
                 await tx.reportParameter.update({
-                    where: { id: param.id },
+                    where: {id: param.id},
                     data: {
                         name: param.name,
                         units: param.units
@@ -543,7 +543,7 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
 
             // Update the report type itself
             await tx.reportType.update({
-                where: { id: reportId },
+                where: {id: reportId},
                 data: {
                     name: reportForm.name,
                     description: reportForm.description
@@ -551,7 +551,7 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
             });
 
             revalidatePath('/admin/reports');
-            return { success: true, message: 'Report type updated successfully' };
+            return {success: true, message: 'Report type updated successfully'};
         });
     } catch (e) {
         if (e instanceof Error) {
@@ -594,7 +594,7 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
             return {success: false, message: 'Select a valid Gender'};
         }
 
-        if ( !formData.name || !formData.telephone) {
+        if (!formData.name || !formData.telephone) {
             return {success: false, message: 'Please fill all fields'};
         }
 
@@ -619,8 +619,7 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
 
         revalidatePath('/patients');
         return {success: true, message: 'Patient added successfully'};
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while adding patient'};
     }
@@ -628,56 +627,131 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
 
 //For adding drugs to the inventory
 export async function addNewItem(
-   {formData}:{formData: InventoryFormData
+    {formData}: {
+        formData: InventoryFormData
     }): Promise<myError> {
-        try{
-             return await prisma.$transaction(async (tx) => {
-      // 1. Create or connect drug brand
-      const brand = await tx.drugBrand.upsert({
-        where: { name: formData.brandName },
-        update: {},
-        create: {
-          name: formData.brandName,
-          description: formData.brandDescription || ''
-        }
-      });
+    try {
+        return await prisma.$transaction(async (tx) => {
+            // 1. Create or connect drug brand
+            const brand = await tx.drugBrand.upsert({
+                where: {name: formData.brandName},
+                update: {},
+                create: {
+                    name: formData.brandName,
+                    description: formData.brandDescription || ''
+                }
+            });
 
-      // 2. Create or connect drug
-      const drug = await tx.drug.upsert({
-        where: { name: formData.drugName },
-        update: {},
-        create: {
-          name: formData.drugName,
-          brandName: brand.name
-        }
-      });
+            // 2. Create or connect drug
+            const drug = await tx.drug.upsert({
+                where: {name: formData.drugName},
+                update: {},
+                create: {
+                    name: formData.drugName,
+                    brandName: brand.name
+                }
+            });
 
-      // 3. Create batch
-      await tx.batch.create({
-        data: {
-          number: formData.batchNumber,
-          drugName: drug.name,
-          type: formData.drugType as DrugType,
-          fullAmount: parseFloat(formData.quantity.toString()),
-         remainingQuantity: parseFloat(formData.quantity.toString()),
-          expiry: new Date(formData.expiry),
-          price: parseFloat(formData.price.toString()),
-          status: 'AVAILABLE'
-        }
-      });
+            // 3. Create batch
+            await tx.batch.create({
+                data: {
+                    number: formData.batchNumber,
+                    drugName: drug.name,
+                    type: formData.drugType as DrugType,
+                    fullAmount: parseFloat(formData.quantity.toString()),
+                    remainingQuantity: parseFloat(formData.quantity.toString()),
+                    expiry: new Date(formData.expiry),
+                    price: parseFloat(formData.price.toString()),
+                    status: 'AVAILABLE'
+                }
+            });
 
-      revalidatePath('/inventory/available-stocks');
-      return { success: true, message: 'Item added successfully' };
-    });
-        }catch (e) {
-            console.error(e);
-            return { success: false, message: 'Failed to add item' };
-         }
+            revalidatePath('/inventory/available-stocks');
+            return {success: true, message: 'Item added successfully'};
+        });
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'Failed to add item'};
+    }
 }
 
 export async function getDrugBrands() {
-  return prisma.drugBrand.findMany({
-    select: { name: true },
-    orderBy: { name: 'asc' }
-  });
+    return prisma.drugBrand.findMany({
+        select: {name: true},
+        orderBy: {name: 'asc'}
+    });
+}
+
+export async function getPatientReportPages(query: string, range: string, id: number) {
+    let dateFilter = {};
+
+    if (range !== "ALL") {
+        const months = parseInt(range.replace("M", ""), 10);
+        const fromDate = new Date();
+        fromDate.setMonth(fromDate.getMonth() - months);
+
+        dateFilter = {time: {gte: fromDate}};
+    }
+
+    return prisma.patientReport.count({
+        where: {
+            patientId: id,
+            reportType: {
+                name: {contains: query},
+            },
+            ...dateFilter,
+        },
+    });
+}
+
+export async function getPatientReports(query: string, range: string, id: number, page: number) {
+    try {
+        let dateFilter = {};
+
+        if (range !== "ALL") {
+            const months = parseInt(range.replace("M", ""), 10);
+            const fromDate = new Date();
+            fromDate.setMonth(fromDate.getMonth() - months);
+
+            dateFilter = {time: {gte: fromDate}};
+        }
+
+        return prisma.patientReport.findMany({
+            where: {
+                patientId: id,
+                reportType: {
+                    name: {contains: query},
+                },
+                ...dateFilter,
+            },
+            take: PAGE_SIZE,
+            skip: (page - 1) * PAGE_SIZE,
+            orderBy: {time: "desc"},
+            include: {
+                reportType: true,
+                parameters: {
+                    select: {
+                        value: true,
+                        reportParameter: {
+                            select: {
+                                name: true,
+                                units: true,
+                            },
+                        },
+                    }
+                }
+            },
+        });
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+}
+
+export async function getAllReportCount(id: number) {
+    return prisma.patientReport.count({
+        where: {
+            patientId: id
+        }
+    });
 }
