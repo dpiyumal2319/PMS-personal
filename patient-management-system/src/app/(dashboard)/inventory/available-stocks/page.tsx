@@ -28,26 +28,22 @@ export default async function InventoryAvailable({
   const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
   return (
-    <div className="flex h-screen flex-col w-full">
-      <div className="sticky top-0">
-        <div className="p-4 bg-white border-b shadow-md">
-          <div className="flex flex-wrap gap-4">
-            <Dropdown
-              items={[
-                { label: "By Model", value: "model" },
-                { label: "By Brand", value: "brand" },
-                { label: "By Batch", value: "batch" },
-              ]}
-              urlParameterName="selection"
-            />
-            <div className="relative w-[200px]">
-              <SearchPanel placeholder="Search by Name" />
-            </div>
-            <SortingDropdown selection="selection" />
-            <div>
-              <DrugForm />
-            </div>
-          </div>
+    <div className="flex h-full flex-col w-full">
+      <div className="sticky top-0 p-4 bg-white border-b shadow-md flex flex-wrap gap-4 z-20">
+        <Dropdown
+          items={[
+            { label: "By Model", value: "model" },
+            { label: "By Brand", value: "brand" },
+            { label: "By Batch", value: "batch" },
+          ]}
+          urlParameterName="selection"
+        />
+        <div className="relative w-[200px]">
+          <SearchPanel placeholder="Search by Name" />
+        </div>
+        <SortingDropdown selection="selection" />
+        <div>
+          <DrugForm />
         </div>
       </div>
       <div className="flex-grow overflow-auto">
