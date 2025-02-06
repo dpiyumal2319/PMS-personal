@@ -21,7 +21,6 @@ export default async function AvailableStockPageTable({
     const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort);
     const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort);
     const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort);
-    console.log(filteredDrugsByBatch)
 
 
     return (
