@@ -238,6 +238,7 @@ export async function getFilteredDrugsByModel(query: string = "", page: number =
     const aggregatedDrugs = drugs
         .filter(drug => drug.batch.length > 0) // Only keep drugs with at least one available batch
         .map(drug => ({
+            id: drug.id,
             name: drug.name,
             totalRemainingQuantity: drug.batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
         }));

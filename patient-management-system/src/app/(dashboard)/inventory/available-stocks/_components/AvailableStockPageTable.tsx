@@ -1,6 +1,6 @@
 import React from 'react'
 import { getFilteredDrugsByModel } from '@/app/lib/actions'
-import DrugList from './DrugList';
+import DrugListByModel from './DrugListByModel';
 
 export default async function AvailableStockPageTable({
     query,
@@ -18,7 +18,7 @@ export default async function AvailableStockPageTable({
 
     return (
         <div >
-            <DrugList drugs={filteredDrugs} />
+            <DrugListByModel drugs={filteredDrugs} />
         </div>
     )
 }

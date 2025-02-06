@@ -1,16 +1,16 @@
 import { AiOutlineMedicineBox } from "react-icons/ai";
-import { FaPrescriptionBottle } from "react-icons/fa";
 import { MdOutlineInventory } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Drug {
+    id: number;
     name: string;
     totalRemainingQuantity: number;
 }
 
-export default function DrugList({ drugs }: { drugs: Drug[] }) {
+export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
     return (
         <div className="space-y-6 p-4">
             {drugs.length > 0 ? (
@@ -21,7 +21,7 @@ export default function DrugList({ drugs }: { drugs: Drug[] }) {
                         return (
                             <Card
                                 className="hover:shadow-lg transition-all duration-200"
-                                key={drug.name}
+                                key={drug.id}
                             >
                                 {/* Icon and Name */}
                                 <CardHeader className="flex gap-4">
@@ -47,7 +47,7 @@ export default function DrugList({ drugs }: { drugs: Drug[] }) {
                                     </div>
 
                                     {/* View Details Button */}
-                                    <Link href={`/drugs/${drug.name}`} passHref>
+                                    <Link href={`/drugs/${drug.id}`} passHref>
                                         <Button className="mt-6 w-full bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg">
                                             View Details
                                         </Button>
