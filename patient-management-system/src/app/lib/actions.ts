@@ -224,6 +224,9 @@ export async function getFilteredDrugsByModel(query: string = "", page: number =
         },
         include: {
             batch: {
+                where: {
+                    status: "AVAILABLE", // Filter batches with status "available"
+                },
                 select: {
                     remainingQuantity: true,
                 },
@@ -231,11 +234,13 @@ export async function getFilteredDrugsByModel(query: string = "", page: number =
         },
     });
 
-    // Aggregate remaining quantity for each drug
-    const aggregatedDrugs = drugs.map(drug => ({
-        name: drug.name,
-        totalRemainingQuantity: drug.batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
-    }));
+    // Filter out drugs with no available batches and aggregate remaining quantity for drugs with available batches
+    const aggregatedDrugs = drugs
+        .filter(drug => drug.batch.length > 0) // Only keep drugs with at least one available batch
+        .map(drug => ({
+            name: drug.name,
+            totalRemainingQuantity: drug.batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
+        }));
 
     // Sorting logic
     if (sort === "lowest") {
@@ -250,6 +255,8 @@ export async function getFilteredDrugsByModel(query: string = "", page: number =
 
     return paginatedDrugs;
 }
+
+
 
 
 
