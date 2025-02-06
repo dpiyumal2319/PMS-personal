@@ -9,6 +9,8 @@ import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDrop
 import AvailableStockPageTable from "./_components/AvailableStockPageTable";
 import Pagination from "../../_components/Pagination";
 import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
+import DrugListSkeleton from "./_components/DrugListSkeleton";
+
 
 export default async function InventoryAvailable({
   searchParams,
@@ -47,7 +49,7 @@ export default async function InventoryAvailable({
         </div>
       </div>
       <div className="flex-grow overflow-auto">
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<DrugListSkeleton isLoading={true} />}>
           {" "}
           <AvailableStockPageTable
             query={query}

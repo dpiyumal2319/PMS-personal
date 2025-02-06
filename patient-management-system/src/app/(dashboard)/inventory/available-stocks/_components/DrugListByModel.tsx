@@ -1,5 +1,10 @@
 import { AiOutlineMedicineBox } from "react-icons/ai";
 import { MdOutlineInventory } from "react-icons/md";
+import { FaRegBuilding } from "react-icons/fa";
+import { MdOutlineBrandingWatermark } from "react-icons/md";
+import { MdEventAvailable } from "react-icons/md";
+
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +13,7 @@ interface Drug {
     id: number;
     name: string;
     totalRemainingQuantity: number;
+    brandCount: number;
 }
 
 export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
@@ -26,24 +32,35 @@ export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
                                 {/* Icon and Name */}
                                 <CardHeader className="flex gap-4">
                                     <CardTitle className="flex items-center justify-start gap-4">
-                                    <AiOutlineMedicineBox className="size-10 text-primary-500" />
+                                        <AiOutlineMedicineBox className="size-10 text-primary-500" />
                                         <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
                                             {drug.name}
                                         </h3>
                                     </CardTitle>
                                 </CardHeader>
 
-                                {/* Remaining Stock */}
+                                {/* Stock and Brand Count Line */}
                                 <CardContent>
-                                    <div className="flex items-center gap-3 mt-4">
-                                        <MdOutlineInventory
-                                            className={`w-6 h-6 ${isLowStock ? 'text-red-500' : 'text-gray-500'}`}
-                                        />
-                                        <span
-                                            className={`text-lg font-medium ${isLowStock ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
-                                        >
-                                            {drug.totalRemainingQuantity} in stock
-                                        </span>
+                                    <div className="flex items-center justify-between mt-4">
+                                        {/* Stock */}
+                                        <div className="flex items-center gap-2">
+                                            <MdEventAvailable
+                                                className={`w-6 h-6 ${isLowStock ? 'text-red-500' : 'text-gray-500'}`}
+                                            />
+                                            <span
+                                                className={`text-lg font-medium ${isLowStock ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
+                                            >
+                                                {drug.totalRemainingQuantity} Available
+                                            </span>
+                                        </div>
+
+                                        {/* Brand Count */}
+                                        <div className="flex items-center gap-2">
+                                            <MdOutlineBrandingWatermark className="text-primary-500 w-5 h-5" />
+                                            <span className="text-lg font-medium text-gray-600 dark:text-gray-300">
+                                                {drug.brandCount} Brands
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* View Details Button */}
