@@ -755,3 +755,18 @@ export async function getAllReportCount(id: number) {
         }
     });
 }
+
+export const searchReportTypes = async (query: string) => {
+    return prisma.reportType.findMany({
+        where: {
+            name: {
+                contains: query
+            }
+        },
+        select: {
+            name: true,
+            id: true
+        },
+        take: 10
+    });
+}

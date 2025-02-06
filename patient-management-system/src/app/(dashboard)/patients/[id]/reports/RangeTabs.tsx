@@ -17,10 +17,10 @@ const PeriodTabs = ({currentTab}: {currentTab: string}) => {
     return (
         <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className={'w-1/6'}>
             <TabsList className="grid grid-cols-4 w-full bg-white">
-                <TabsTrigger value="1M" className={'data-[state=active]:bg-gray-300'}>1M</TabsTrigger>
-                <TabsTrigger value="3M" className={'data-[state=active]:bg-gray-300'}>3M</TabsTrigger>
-                <TabsTrigger value="12M" className={'data-[state=active]:bg-gray-300'}>12M</TabsTrigger>
-                <TabsTrigger value="ALL" className={'data-[state=active]:bg-gray-300'}>ALL</TabsTrigger>
+                <TabsTrigger value="1M" className={'data-[state=active]:bg-primary-100'}>1M</TabsTrigger>
+                <TabsTrigger value="3M" className={'data-[state=active]:bg-primary-100'}>3M</TabsTrigger>
+                <TabsTrigger value="12M" className={'data-[state=active]:bg-primary-100'}>12M</TabsTrigger>
+                <TabsTrigger value="ALL" className={'data-[state=active]:bg-primary-100'}>ALL</TabsTrigger>
             </TabsList>
         </Tabs>
     );
