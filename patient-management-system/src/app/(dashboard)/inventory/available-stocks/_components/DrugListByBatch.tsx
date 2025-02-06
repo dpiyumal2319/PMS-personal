@@ -4,6 +4,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AppendButton from "./AppendButton";
 
 interface Batch {
     id: number;
@@ -70,11 +71,7 @@ export default function DrugListByBatch({ batches }: { batches: Batch[] }) {
                                 </div>
 
                                 {/* View Details Button */}
-                                <Link href={`/batches/${batch.id}`} passHref>
-                                    <Button className="mt-6 w-full bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg">
-                                        View Details
-                                    </Button>
-                                </Link>
+                                <AppendButton append={`batch/${batch.id}`} />
                             </CardContent>
                         </Card>
                     ))}
