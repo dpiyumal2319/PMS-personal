@@ -760,7 +760,7 @@ export const searchReportTypes = async (query: string) => {
     return prisma.reportType.findMany({
         where: {
             name: {
-                contains: query
+                startsWith: query
             }
         },
         select: {
@@ -768,5 +768,18 @@ export const searchReportTypes = async (query: string) => {
             id: true
         },
         take: 10
+    });
+}
+
+export const getReportParams = async (id: number) => {
+    return prisma.reportParameter.findMany({
+        where: {
+            reportTypeId: id
+        },
+        select: {
+            id: true,
+            name: true,
+            units: true
+        }
     });
 }
