@@ -160,9 +160,11 @@ export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
 
-const PAGE_SIZE = 10;
 
-export async function getTotalPages(query = "", filter = "name") {
+
+const PAGE_SIZE_ALL_PATIENTS = 10;
+
+export async function getAllPatientTotalPages(query = "", filter = "name") {
     const whereClause = query
         ? {
             [filter]: {contains: query},
@@ -170,7 +172,7 @@ export async function getTotalPages(query = "", filter = "name") {
         : {};
 
     const totalPatients = await prisma.patient.count({where: whereClause});
-    return Math.ceil(totalPatients / PAGE_SIZE);
+    return Math.ceil(totalPatients / PAGE_SIZE_ALL_PATIENTS);
 }
 
 export async function getFilteredPatients(query: string = "", page: number = 1, filter: string = "name") {
@@ -183,11 +185,72 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
 
     return prisma.patient.findMany({
         where: whereCondition,
-        take: PAGE_SIZE,
-        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE_ALL_PATIENTS,
+        skip: (page - 1) * PAGE_SIZE_ALL_PATIENTS,
         orderBy: {name: "asc"},
     });
 }
+
+
+
+const PAFE_SIZE_AVAILABLE_DRUGS = 10;
+
+export async function getAvailableDrugsTotalPages(query: string = "", selection: string = "model") {
+    let totalItems = 0;
+
+    if (selection === "model") {
+        totalItems = await prisma.drug.count({
+            where: { name: { contains: query } },
+        });
+    } else if (selection === "brand") {
+        totalItems = await prisma.drugBrand.count({
+            where: { name: { contains: query } },
+        });
+    } else if (selection === "batch") {
+        totalItems = await prisma.batch.count({
+            where: { number: { contains: query } },
+        });
+    }
+
+    return Math.ceil(totalItems / PAFE_SIZE_AVAILABLE_DRUGS);
+}
+
+export async function getFilteredDrugsByModel(query: string = "", page: number = 1, sort: string = "asc") {
+    const drugs = await prisma.drug.findMany({
+        where: {
+            name: {
+                contains: query,
+            },
+        },
+        include: {
+            batch: {
+                select: {
+                    remainingQuantity: true,
+                },
+            },
+        },
+    });
+
+    // Aggregate remaining quantity for each drug
+    const aggregatedDrugs = drugs.map(drug => ({
+        name: drug.name,
+        totalRemainingQuantity: drug.batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
+    }));
+
+    // Sorting logic
+    if (sort === "lowest") {
+        aggregatedDrugs.sort((a, b) => a.totalRemainingQuantity - b.totalRemainingQuantity);
+    } else if (sort === "highest") {
+        aggregatedDrugs.sort((a, b) => b.totalRemainingQuantity - a.totalRemainingQuantity);
+    } else if (sort === "alphabetically") {
+        aggregatedDrugs.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const paginatedDrugs = aggregatedDrugs.slice((page - 1) * PAFE_SIZE_AVAILABLE_DRUGS, page * PAFE_SIZE_AVAILABLE_DRUGS);
+
+    return paginatedDrugs;
+}
+
 
 
 export async function stopQueue(id: string | null): Promise<myError> {
@@ -397,6 +460,8 @@ export async function getPatientDetails(id: number) {
     });
 }
 
+const PAGE_SIZE_REPORTS = 10;
+
 export async function getFilteredReports(pageNu: number, query: string) {
     return prisma.reportType.findMany({
         where: {
@@ -404,8 +469,8 @@ export async function getFilteredReports(pageNu: number, query: string) {
                 contains: query
             }
         },
-        take: PAGE_SIZE,
-        skip: (pageNu - 1) * PAGE_SIZE,
+        take: PAGE_SIZE_REPORTS,
+        skip: (pageNu - 1) * PAGE_SIZE_REPORTS,
         orderBy: {id: "asc"},
         include: {
             parameters: true
@@ -415,7 +480,7 @@ export async function getFilteredReports(pageNu: number, query: string) {
 
 export async function getReportPages(query: string) {
     const totalReports = await prisma.reportType.count({where: {name: {contains: query}}});
-    return Math.ceil(totalReports / PAGE_SIZE);
+    return Math.ceil(totalReports / PAGE_SIZE_REPORTS);
 }
 
 export async function addReportType(reportForm: ReportForm): Promise<myError> {

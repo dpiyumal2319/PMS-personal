@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import SearchBox from "../_components/Search";
 import PatientTable from "./_components/PatientTable";
-import { getTotalPages } from "@/app/lib/actions";
+import { getAllPatientTotalPages } from "@/app/lib/actions";
 import Pagination from "../_components/Pagination";
 import { PatientsTableSkeleton } from "./_components/PatientsTableSkeleton";
 import SearchDropdown from "../_components/Dropdown";
@@ -21,7 +21,7 @@ export default async function Page({
   const query = params?.query || "";
   const currentPage = Number(params?.page) || 1;
   const filter = params?.filter || "name";
-  const totalPages = await getTotalPages(query, filter);
+  const totalPages = await getAllPatientTotalPages(query, filter);
 
   return (
     <>

@@ -8,6 +8,7 @@ import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 import AvailableStockPageTable from "./_components/AvailableStockPageTable";
 import Pagination from "../../_components/Pagination";
+import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
 
 export default async function InventoryAvailable({
   searchParams,
@@ -23,8 +24,8 @@ export default async function InventoryAvailable({
   const query = params?.query || "";
   const currentPage = Number(params?.page) || 1;
   const selection = params?.selection || "model";
-  const sort = params?.sort || "asc";
-  const totalPages = 5;
+  const sort = params?.sort || "alphabetically";
+  const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
   return (
     <div className="flex h-screen flex-col w-full">

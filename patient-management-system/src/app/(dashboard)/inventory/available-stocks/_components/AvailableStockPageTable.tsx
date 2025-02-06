@@ -1,6 +1,7 @@
 import React from 'react'
+import { getFilteredDrugsByModel } from '@/app/lib/actions'
 
-function AvailableStockPageTable({
+export default async function AvailableStockPageTable({
     query,
     currentPage,
     selection,
@@ -12,9 +13,13 @@ function AvailableStockPageTable({
     sort: string;
 
 }) {
+    const filteredDrugs = await getFilteredDrugsByModel(query, currentPage, sort);
+
+    console.log(filteredDrugs)
+    
+
     return (
         <h1>Hii</h1>
     )
 }
 
-export default AvailableStockPageTable
