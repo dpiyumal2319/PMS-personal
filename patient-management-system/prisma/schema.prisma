@@ -139,7 +139,7 @@ model ReportParameter {
   id           Int           @id @default(autoincrement())
   name         String
   units        String?
-  ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id])
+  ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   reportTypeId Int?
   ReportValue  ReportValue[]
 }
@@ -156,7 +156,7 @@ model PatientReport {
   id           Int           @id @default(autoincrement())
   patient      Patient       @relation(fields: [patientId], references: [id])
   patientId    Int
-  reportType   ReportType    @relation(fields: [reportTypeId], references: [id])
+  reportType   ReportType    @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   reportTypeId Int
   time         DateTime      @default(now())
   parameters   ReportValue[]
@@ -164,9 +164,10 @@ model PatientReport {
 
 model ReportValue {
   id                Int             @id @default(autoincrement())
-  reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id])
+  reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id], onDelete: Cascade)
   reportParameterId Int
+  attention         Boolean         @default(false)
   value             String
-  PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id])
+  PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id], onDelete: Cascade)
   patientReportId   Int?
 }

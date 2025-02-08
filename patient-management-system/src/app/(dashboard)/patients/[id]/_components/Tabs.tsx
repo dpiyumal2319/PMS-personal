@@ -2,11 +2,16 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Stethoscope, FileText, FilePen, ClipboardEdit } from "lucide-react";
+import {ClipboardEdit, FileText, Stethoscope} from "lucide-react";
 
-const PatientTabs = ({ patientId }: { patientId: number }) => {
+const PatientTabs = ({ patientId, role }:
+                     {
+                         patientId: number
+                            role: string
+                     }) => {
     const router = useRouter();
     const pathname = usePathname();
+    const links = role === "DOCTOR" ? DoctorLinks : NurseLinks;
 
     // Extract the tab name from the URL, or default to "prescribe" if on /patients/:id
     const pathParts = pathname.split("/");
@@ -19,25 +24,15 @@ const PatientTabs = ({ patientId }: { patientId: number }) => {
     };
 
     return (
-        <div className="mt-6 border-t pt-4">
-            <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full h-12">
-                <TabsList className="grid grid-cols-4 w-full">
-                    <TabsTrigger value="prescribe" className="flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4" />
-                        Prescribe
-                    </TabsTrigger>
-                    <TabsTrigger value="prescriptions" className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        Prescriptions
-                    </TabsTrigger>
-                    <TabsTrigger value="reports" className="flex items-center gap-2">
-                        <FilePen className="h-4 w-4" />
-                        Reports
-                    </TabsTrigger>
-                    <TabsTrigger value="edit" className="flex items-center gap-2">
-                        <ClipboardEdit className="h-4 w-4" />
-                        Edit
-                    </TabsTrigger>
+        <div className="mt-6 border-t pt-4 h-14">
+            <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full h-full">
+                <TabsList className="w-full">
+                    {links.map((link, index) => (
+                        <TabsTrigger key={index} value={link.value} className="flex items-center gap-2 w-full">
+                            <link.icon className="h-4 w-4" />
+                            {link.name}
+                        </TabsTrigger>
+                    ))}
                 </TabsList>
             </Tabs>
         </div>
@@ -45,3 +40,16 @@ const PatientTabs = ({ patientId }: { patientId: number }) => {
 };
 
 export default PatientTabs;
+
+
+const DoctorLinks = [
+    {name: "Prescribe", value: "prescribe", icon: Stethoscope},
+    {name: "Prescriptions", value: "prescriptions", icon: FileText},
+    {name: "Reports", value: "reports", icon: FileText},
+    {name: "Edit", value: "edit", icon: ClipboardEdit},
+]
+
+const NurseLinks = [
+    {name: "Prescriptions", value: "prescriptions", icon: FileText},
+    {name: "Edit", value: "edit", icon: ClipboardEdit},
+]
