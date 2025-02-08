@@ -3,6 +3,7 @@ import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {formatDistanceToNow} from 'date-fns';
 import {getPatientReports} from "@/app/lib/actions";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import {DeleteReport} from "@/app/(dashboard)/patients/[id]/reports/_components/DeleteReporAlert";
 
 const AllPatientReports = async ({currentPage, query, range, id}: {
     currentPage: number;
@@ -27,8 +28,11 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
                     <CardHeader>
                         <CardTitle className="flex justify-between items-center">
                             <span>{report.reportType.name}</span>
+                            <div className="flex gap-2 items-center">
                             <span
                                 className="text-sm text-muted-foreground">{formatDistanceToNow(new Date(report.time), {addSuffix: true})}</span>
+                                <DeleteReport id={report.id} patientId={id}/>
+                            </div>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -39,7 +43,8 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
                                     {param.reportParameter.name}
                                     {param.reportParameter.units ? ` (${param.reportParameter.units})` : ''} :
                                 </span>
-                                    {param.attention ? <CustomBadge text={param.value} color={'red'} className={'text-sm'}/>
+                                    {param.attention ?
+                                        <CustomBadge text={param.value} color={'red'} className={'text-sm'}/>
                                         : <span className="font-semibold text-sm">{param.value}</span>}
 
                                 </div>

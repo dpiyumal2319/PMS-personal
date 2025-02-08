@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import { Check, ChevronsUpDown, Loader2} from "lucide-react";
+import {Check, ChevronsUpDown, Loader2} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {
     Command,
@@ -110,9 +110,7 @@ const AddReportDialog = ({id}: { id: number }) => {
 
         if (result.success) {
             setParamValues({});
-            setTimeout(() => {
-                setOpen(false);
-            }, 500);
+            setOpen(false);
         } else {
             setError(result.message);
         }
@@ -125,7 +123,7 @@ const AddReportDialog = ({id}: { id: number }) => {
                     <span>Add Report</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-screen-xl flex flex-col justify-start">
+            <DialogContent className="max-w-5xl flex flex-col justify-start">
                 <DialogHeader>
                     <DialogTitle className="text-xl font-semibold">Add Report</DialogTitle>
                 </DialogHeader>
@@ -194,35 +192,41 @@ const AddReportDialog = ({id}: { id: number }) => {
                         <div className="space-y-4">
                             <Label>Parameters</Label>
                             <ScrollArea className="h-[240px]">
-                                <div className="grid grid-cols-2 gap-4 p-4">
+                                <div className="space-y-4 p-4">
                                     {params.map((param) => (
-                                        <div key={param.id} className="flex justify-evenly items-center">
-                                            <Label className="text-sm font-medium">
-                                                {param.name}
-                                                {param.units && (
-                                                    <span className="text-gray-500 ml-1">({param.units})</span>
-                                                )}
-                                            </Label>
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex items-center">
+                                        <div
+                                            key={param.id}
+                                            className="flex items-center justify-between border-b border-gray-300 pb-4"
+                                        >
+                                            <div className="flex items-center gap-8">
+                                                <Label className="text-sm font-medium min-w-32">
+                                                    {param.name}
+                                                </Label>
+                                                <div className="flex items-center gap-2">
                                                     <Switch
                                                         checked={paramValues[param.id]?.attention || false}
                                                         onCheckedChange={() => handleAttentionToggle(param.id)}
                                                         className="data-[state=checked]:bg-red-500"
                                                     />
-                                                    <Label className="ml-2 text-sm font-medium text-gray-700">
+                                                    <Label className="text-sm text-gray-700">
                                                         Mark as danger
                                                     </Label>
                                                 </div>
                                             </div>
-                                            <Input
-                                                type="text"
-                                                value={paramValues[param.id]?.value || ""}
-                                                onChange={(e) => handleParamChange(param.id, e.target.value)}
-                                                className="h-9 w-1/4"
-                                            />
-                                        </div>
 
+                                            <div className="flex items-center gap-4">
+                                                <Input
+                                                    type="text"
+                                                    value={paramValues[param.id]?.value || ""}
+                                                    onChange={(e) => handleParamChange(param.id, e.target.value)}
+                                                    className="h-9 w-48"
+                                                />
+                                                {param.units && (
+                                                    <span
+                                                        className="text-sm text-gray-500 min-w-16">{param.units}</span>
+                                                )}
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             </ScrollArea>

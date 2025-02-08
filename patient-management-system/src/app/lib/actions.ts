@@ -704,7 +704,7 @@ export async function getPatientReportPages(query: string, range: string, id: nu
     });
 }
 
-export async function getPatientReports(query: string, range: string, id: number, page: number) {
+export async function getPatientReports(query: string, range: string, PatientId: number, page: number) {
     try {
         let dateFilter = {};
 
@@ -718,7 +718,7 @@ export async function getPatientReports(query: string, range: string, id: number
 
         return prisma.patientReport.findMany({
             where: {
-                patientId: id,
+                patientId: PatientId,
                 reportType: {
                     name: {contains: query},
                 },
@@ -823,5 +823,21 @@ export async function addPatientReport({patientID, reportTypeID, params}: {
     } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while adding report'};
+    }
+}
+
+export async function deletePatientReport(reportId: number, patientID: number): Promise<myError> {
+    try {
+        await prisma.patientReport.delete({
+            where: {
+                id: reportId
+            }
+        });
+
+        revalidatePath(`/patients/${patientID}/reports`);
+        return {success: true, message: 'Report deleted successfully'};
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while deleting report'};
     }
 }
