@@ -16,6 +16,7 @@ export type badgeColorsType = {
 interface ParameterBadgeProps extends HTMLAttributes<HTMLSpanElement> {
     text: string;
     color?: keyof badgeColorsType;
+    className?: string;
 }
 
 export const badgeColors = {
@@ -47,14 +48,15 @@ export const badgeColors = {
 export function CustomBadge({
                                 text,
                                 color,
+                                className,
                                 ...props
                             }: ParameterBadgeProps) {
 
 
     return (
         <Badge
+            className={`text-xs font-semibold ${badgeColors[color || 'gray']} ${className}`}
             {...props}
-            className={`text-xs font-semibold ${badgeColors[color || 'gray']}`}
         >
             {text}
         </Badge>

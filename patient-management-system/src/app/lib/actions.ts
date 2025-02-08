@@ -732,6 +732,7 @@ export async function getPatientReports(query: string, range: string, id: number
                 parameters: {
                     select: {
                         value: true,
+                        attention: true,
                         reportParameter: {
                             select: {
                                 name: true,
@@ -779,7 +780,7 @@ export const getReportParams = async (id: number) => {
         select: {
             id: true,
             name: true,
-            units: true
+            units: true,
         }
     });
 }

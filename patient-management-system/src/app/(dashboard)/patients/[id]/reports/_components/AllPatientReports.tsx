@@ -2,6 +2,7 @@ import React from 'react';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {formatDistanceToNow} from 'date-fns';
 import {getPatientReports} from "@/app/lib/actions";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 const AllPatientReports = async ({currentPage, query, range, id}: {
     currentPage: number;
@@ -38,7 +39,9 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
                                     {param.reportParameter.name}
                                     {param.reportParameter.units ? ` (${param.reportParameter.units})` : ''} :
                                 </span>
-                                    <span className="font-semibold text-sm">{param.value}</span>
+                                    {param.attention ? <CustomBadge text={param.value} color={'red'} className={'text-sm'}/>
+                                        : <span className="font-semibold text-sm">{param.value}</span>}
+
                                 </div>
                             ))}
                         </div>
