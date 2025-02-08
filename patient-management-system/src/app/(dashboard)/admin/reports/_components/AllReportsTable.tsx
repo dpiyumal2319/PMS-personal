@@ -5,11 +5,10 @@ import {CustomBadge, RandomColorBadge} from "@/app/(dashboard)/_components/Custo
 import EditReport from "@/app/(dashboard)/admin/reports/_components/EditReport";
 import {DeleteReport} from "@/app/(dashboard)/admin/reports/_components/DeleteReport";
 
-const AllReportsTable = async ({currentPage, query}: {
-    currentPage: number,
+const AllReportsTable = async ({query}: {
     query: string,
 }) => {
-    const reports = await getFilteredReports(currentPage, query);
+    const reports = await getFilteredReports(query);
 
     if (!reports || reports.length === 0) {
         return <Card className={'text-center'}>

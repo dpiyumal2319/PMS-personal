@@ -1,6 +1,5 @@
 import SearchBox from "@/app/(dashboard)/_components/Search";
-import {getReportPages} from "@/app/lib/actions";
-import Pagination from "@/app/(dashboard)/_components/Pagination";
+import {getTotalReportTemplateCount} from "@/app/lib/actions";
 import AllReportsTable from "@/app/(dashboard)/admin/reports/_components/AllReportsTable";
 import AddReports from "@/app/(dashboard)/admin/reports/_components/AddReports";
 import {Suspense} from "react";
@@ -17,15 +16,14 @@ export default async function Page({
     // Await the searchParams
     const params = await searchParams;
     const query = params?.query || "";
-    const currentPage = Number(params?.page) || 1;
-    const totalPages = await getReportPages(query);
+    const totalReports = await getTotalReportTemplateCount();
 
     return (
         <div className="flex flex-col h-full">
             <div className="w-full p-4 flex-grow flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-semibold">All Report Templates</h1>
+                    <h1 className="text-2xl font-semibold">All Report Templates <span className="text-gray-500">({totalReports})</span></h1>
                     <AddReports/>
                 </div>
 
@@ -37,15 +35,8 @@ export default async function Page({
                 {/* Table */}
                 <div className="flex-grow overflow-y-auto w-full">
                     <Suspense fallback={<SkeletonLoader/>}>
-                        <AllReportsTable currentPage={currentPage} query={query}/>
+                        <AllReportsTable query={query}/>
                     </Suspense>
-                </div>
-            </div>
-
-            {/* Sticky Pagination */}
-            <div className="sticky bottom-0 backdrop-blur-sm z-10 py-4">
-                <div className="container mx-auto flex justify-center">
-                    <Pagination totalPages={totalPages} itemsPerPage={10}/>
                 </div>
             </div>
         </div>

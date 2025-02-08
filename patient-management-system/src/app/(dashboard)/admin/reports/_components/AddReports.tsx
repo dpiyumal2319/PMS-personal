@@ -63,7 +63,7 @@ const ReportFormPopup: React.FC = () => {
         <>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
-                    <Button>Add Report</Button>
+                    <Button>Add Report Template</Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>

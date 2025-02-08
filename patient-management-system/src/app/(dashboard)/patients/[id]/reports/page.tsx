@@ -6,6 +6,8 @@ import AllPatientReports from "@/app/(dashboard)/patients/[id]/reports/_componen
 import Pagination from "@/app/(dashboard)/_components/Pagination";
 import CardSkeleton from "@/app/(dashboard)/patients/[id]/reports/_components/CardSkeleton";
 import AddReportDialog from "@/app/(dashboard)/patients/[id]/reports/_components/AddReportDialog.";
+import Link from "next/link";
+import {Button} from "@/components/ui/button";
 
 const Page = async ({params, searchParams}: {
     searchParams?: Promise<{
@@ -30,7 +32,12 @@ const Page = async ({params, searchParams}: {
         <div className={'flex flex-col flex-grow gap-4 h-full'}>
             <div className={'flex justify-between items-center gap-4'}>
                 <span className={'text-md'}>There are total {totalReportCount} reports</span>
-                <AddReportDialog id={id}/>
+                <div className={'flex gap-4'}>
+                    <Link href={`/admin/reports`}>
+                        <Button variant={"ghost"}><span className={'underline'}>Add new report template</span></Button>
+                    </Link>
+                    <AddReportDialog id={id}/>
+                </div>
             </div>
             <div className={'flex gap-4 items-center'}>
                 <Search placeholder={'Search Report...'}/>

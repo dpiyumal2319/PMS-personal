@@ -2,14 +2,11 @@
 
 import {revalidatePath} from "next/cache";
 import type {myError} from "@/app/lib/definitions";
+import {InventoryFormData, PatientFormData} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import {Prisma} from "@prisma/client";
-import {PatientFormData} from "@/app/lib/definitions";
-
-import {DrugType} from "@prisma/client";
-import {InventoryFormData} from "@/app/lib/definitions";
+import {DrugType, Prisma} from "@prisma/client";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -397,15 +394,13 @@ export async function getPatientDetails(id: number) {
     });
 }
 
-export async function getFilteredReports(pageNu: number, query: string) {
+export async function getFilteredReports(query: string) {
     return prisma.reportType.findMany({
         where: {
             name: {
                 contains: query
             }
         },
-        take: PAGE_SIZE,
-        skip: (pageNu - 1) * PAGE_SIZE,
         orderBy: {id: "asc"},
         include: {
             parameters: true
@@ -413,9 +408,8 @@ export async function getFilteredReports(pageNu: number, query: string) {
     });
 }
 
-export async function getReportPages(query: string) {
-    const totalReports = await prisma.reportType.count({where: {name: {contains: query}}});
-    return Math.ceil(totalReports / PAGE_SIZE);
+export async function getTotalReportTemplateCount() {
+    return prisma.reportType.count();
 }
 
 export async function addReportType(reportForm: ReportForm): Promise<myError> {
