@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import {Check, ChevronsUpDown, Loader2} from "lucide-react";
+import {AlertCircle, Check, ChevronsUpDown, Loader2} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {
     Command,
@@ -20,6 +20,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {handleServerAction} from "@/app/lib/utils";
+import {Toggle} from "@/components/ui/toggle";
 
 type Report = {
     id: number;
@@ -39,9 +40,8 @@ const AddReportDialog = ({id}: { id: number }) => {
     const [reports, setReports] = useState<Report[]>([]);
     const [params, setParams] = useState<ReportParam[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [paramValues, setParamValues] = useState<Record<number, string>>({});
+    const [paramValues, setParamValues] = useState<Record<number, { value: string, attention: boolean }>>({});
     const [error, setError] = useState<string | null>(null);
-
 
     const handleSearch = useDebouncedCallback(async (term: string) => {
         setIsSearching(true);
@@ -52,7 +52,6 @@ const AddReportDialog = ({id}: { id: number }) => {
             setIsSearching(false);
         }
     }, 700);
-
 
     useEffect(() => {
         if (open) {
@@ -78,7 +77,21 @@ const AddReportDialog = ({id}: { id: number }) => {
     const handleParamChange = (paramId: number, paramValue: string) => {
         setParamValues(prev => ({
             ...prev,
-            [paramId]: paramValue
+            [paramId]: {
+                value: paramValue,
+                attention: prev[paramId]?.attention || false
+            }
+        }));
+    };
+
+    const handleAttentionToggle = (paramId: number) => {
+        console.log(paramId);
+        setParamValues(prev => ({
+            ...prev,
+            [paramId]: {
+                value: prev[paramId]?.value || "",
+                attention: !prev[paramId]?.attention
+            }
         }));
     };
 
@@ -97,7 +110,6 @@ const AddReportDialog = ({id}: { id: number }) => {
 
         if (result.success) {
             setParamValues({});
-            // 1s delay to show success message
             setTimeout(() => {
                 setOpen(false);
             }, 1000);
@@ -176,7 +188,6 @@ const AddReportDialog = ({id}: { id: number }) => {
                         </Popover>
                     </div>
 
-                    {/*Show error*/}
                     {error && <p className="text-red-500">{error}</p>}
 
                     {(value && params && params.length > 0) && (
@@ -185,16 +196,32 @@ const AddReportDialog = ({id}: { id: number }) => {
                             <ScrollArea className="h-[240px]">
                                 <div className="grid grid-cols-2 gap-4 p-4">
                                     {params.map((param) => (
-                                        <div key={param.id} className="grid grid-cols-2 gap-4 items-center">
+                                        <div key={param.id}
+                                             className="grid grid-cols-[1fr,1fr,auto] gap-4 items-center">
                                             <Label className="text-sm font-medium">
                                                 {param.name}
                                                 {param.units && (
                                                     <span className="text-gray-500 ml-1">({param.units})</span>
                                                 )}
                                             </Label>
+                                            <Toggle
+                                                pressed={paramValues[param.id]?.attention || false}
+                                                onPressedChange={() => handleAttentionToggle(param.id)}
+                                                aria-label="Toggle attention"
+                                                className={cn(
+                                                    "h-9 hover:bg-red-100 data-[state=on]:bg-red-100 data-[state=on]:text-red-700",
+                                                    "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
+                                                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                                                    "disabled:pointer-events-none disabled:opacity-50",
+                                                    paramValues[param.id]?.attention ? "text-red-700" : "text-gray-500"
+                                                )}
+                                            >
+                                                <span className="sr-only">Toggle attention</span>
+                                                <AlertCircle className="h-4 w-4"/>
+                                            </Toggle>
                                             <Input
                                                 type="text"
-                                                value={paramValues[param.id] || ""}
+                                                value={paramValues[param.id]?.value || ""}
                                                 onChange={(e) => handleParamChange(param.id, e.target.value)}
                                                 className="h-9"
                                             />
