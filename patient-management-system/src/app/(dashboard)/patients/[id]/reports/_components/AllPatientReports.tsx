@@ -19,7 +19,6 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
         </Card>
     }
 
-
     return (
         <div className="flex flex-col gap-4">
             {reports.map((report) => (

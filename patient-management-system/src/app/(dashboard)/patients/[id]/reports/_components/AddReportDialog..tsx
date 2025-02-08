@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Check, ChevronsUpDown, Loader2} from "lucide-react";
@@ -14,11 +14,12 @@ import {
     CommandList,
 } from "@/components/ui/command";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popoverModified";
-import {getReportParams, searchReportTypes} from "@/app/lib/actions";
+import {addPatientReport, getReportParams, searchReportTypes} from "@/app/lib/actions";
 import {useDebouncedCallback} from "use-debounce";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {ScrollArea} from "@/components/ui/scroll-area";
+import {handleServerAction} from "@/app/lib/utils";
 
 type Report = {
     id: number;
@@ -39,7 +40,7 @@ const AddReportDialog = ({id}: { id: number }) => {
     const [params, setParams] = useState<ReportParam[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [paramValues, setParamValues] = useState<Record<number, string>>({});
-
+    const [error, setError] = useState<string | null>(null);
 
 
     const handleSearch = useDebouncedCallback(async (term: string) => {
@@ -52,7 +53,12 @@ const AddReportDialog = ({id}: { id: number }) => {
         }
     }, 700);
 
-    handleSearch('');
+
+    useEffect(() => {
+        if (open) {
+            handleSearch("");
+        }
+    }, [handleSearch, open]);
 
     const handleSelect = async (selectedId: number) => {
         setValue(selectedId === value ? null : selectedId);
@@ -76,9 +82,28 @@ const AddReportDialog = ({id}: { id: number }) => {
         }));
     };
 
-    const handleSubmit = () => {
-        // Handle form submission
-        setOpen(false);
+    const handleSubmit = async () => {
+        if (!value) {
+            setError("Please select a report type");
+            return;
+        }
+        const result = await handleServerAction(() => addPatientReport({
+            patientID: id,
+            reportTypeID: value,
+            params: paramValues
+        }), {
+            loadingMessage: "Adding report...",
+        });
+
+        if (result.success) {
+            setParamValues({});
+            // 1s delay to show success message
+            setTimeout(() => {
+                setOpen(false);
+            }, 1000);
+        } else {
+            setError(result.message);
+        }
     };
 
     return (
@@ -151,7 +176,10 @@ const AddReportDialog = ({id}: { id: number }) => {
                         </Popover>
                     </div>
 
-                    {value && (
+                    {/*Show error*/}
+                    {error && <p className="text-red-500">{error}</p>}
+
+                    {(value && params && params.length > 0) && (
                         <div className="space-y-4">
                             <Label>Parameters</Label>
                             <ScrollArea className="h-[240px]">

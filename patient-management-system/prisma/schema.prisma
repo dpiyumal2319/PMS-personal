@@ -166,6 +166,7 @@ model ReportValue {
   id                Int             @id @default(autoincrement())
   reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id], onDelete: Cascade)
   reportParameterId Int
+  attention         Boolean         @default(false)
   value             String
   PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id], onDelete: Cascade)
   patientReportId   Int?

@@ -1,30 +1,9 @@
 import React from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {getFilteredReports} from "@/app/lib/actions";
-import {badgeColorsType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import {CustomBadge, RandomColorBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import EditReport from "@/app/(dashboard)/admin/reports/_components/EditReport";
 import {DeleteReport} from "@/app/(dashboard)/admin/reports/_components/DeleteReport";
-
-let lastSelectedIndex = 0;
-
-const selectedColors: (keyof badgeColorsType)[] = [
-    "blue",
-    "green",
-    "red",
-    "yellow",
-    "purple",
-    "pink",
-];
-
-const getRandColor = (): keyof badgeColorsType => {
-    let randIndex = Math.floor(Math.random() * selectedColors.length);
-    if (randIndex === lastSelectedIndex) {
-        randIndex = (randIndex + 1) % selectedColors.length;
-    }
-
-    lastSelectedIndex = randIndex;
-    return selectedColors[randIndex];
-};
 
 const AllReportsTable = async ({currentPage, query}: {
     currentPage: number,
@@ -68,8 +47,7 @@ const AllReportsTable = async ({currentPage, query}: {
                             <h3 className="text-sm font-semibold text-gray-700">Parameters</h3>
                             <div className="flex flex-wrap gap-2">
                                 {report.parameters.map((param) => (
-                                    <CustomBadge key={param.id} text={`${param.name} (${param.units})`}
-                                                 color={getRandColor()}/>
+                                    <RandomColorBadge text={`${param.name} (${param.units})`} key={param.id}/>
                                 ))}
                             </div>
                         </div>

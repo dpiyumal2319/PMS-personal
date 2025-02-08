@@ -783,3 +783,42 @@ export const getReportParams = async (id: number) => {
         }
     });
 }
+
+export async function addPatientReport({patientID, reportTypeID, params}: {
+    patientID: number,
+    reportTypeID: number,
+    params: Record<number, string>
+}): Promise<myError> {
+    try {
+        const reportType = await prisma.reportType.findUnique({
+            where: {id: reportTypeID}
+        });
+
+        if (!reportType) {
+            return {success: false, message: 'Report type not found'};
+        }
+
+        // check if all params are empty
+        if (Object.values(params).every((value) => value === '')) {
+            return {success: false, message: 'Please fill at least one parameter'};
+        }
+
+        await prisma.patientReport.create({
+            data: {
+                patientId: patientID,
+                reportTypeId: reportTypeID,
+                parameters: {
+                    create: Object.entries(params).map(([key, value]) => ({
+                        reportParameterId: parseInt(key, 10),
+                        value
+                    }))
+                }
+            }
+        });
+        revalidatePath(`/patients/${patientID}/reports`);
+        return {success: true, message: 'Report added successfully'};
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while adding report'};
+    }
+}

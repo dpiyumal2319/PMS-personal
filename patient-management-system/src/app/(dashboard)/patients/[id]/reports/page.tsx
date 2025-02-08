@@ -1,7 +1,7 @@
 import React, {Suspense} from 'react';
 import {getAllReportCount, getPatientReportPages} from "@/app/lib/actions";
 import Search from "@/app/(dashboard)/_components/Search";
-import RangeTabs from "@/app/(dashboard)/patients/[id]/reports/RangeTabs";
+import RangeTabs from "@/app/(dashboard)/patients/[id]/reports/_components/RangeTabs";
 import AllPatientReports from "@/app/(dashboard)/patients/[id]/reports/_components/AllPatientReports";
 import Pagination from "@/app/(dashboard)/_components/Pagination";
 import CardSkeleton from "@/app/(dashboard)/patients/[id]/reports/_components/CardSkeleton";
