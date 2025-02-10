@@ -619,6 +619,48 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
     }
 }
 
+export async function updatePatient(formData: PatientFormData, id: number): Promise<myError> {
+    try {
+        const floatHeight = parseFloat(formData.height);
+        const floatWeight = parseFloat(formData.weight);
+
+        if (formData.gender === "") {
+            return {success: false, message: 'Select a valid Gender'};
+        }
+
+        if (!formData.name || !formData.telephone) {
+            return {success: false, message: 'Please fill all fields'};
+        }
+
+        const date = new Date(formData.birthDate);
+
+        if (isNaN(date.getTime())) {
+            return {success: false, message: 'Invalid birth date'};
+        }
+
+        await prisma.patient.update({
+            where: {id},
+            data: {
+                name: formData.name,
+                NIC: formData.NIC,
+                telephone: formData.telephone,
+                birthDate: date,
+                address: formData.address,
+                height: floatHeight,
+                weight: floatWeight,
+                gender: formData.gender,
+            }
+        });
+
+
+        revalidatePath(`/patients/${id}`);
+        return {success: true, message: 'Patient updated successfully'};
+    } catch (e) {
+        console.error(e);
+        return {success: false, message: 'An error occurred while updating patient'};
+    }
+}
+
 //For adding drugs to the inventory
 export async function addNewItem(
     {formData}: {

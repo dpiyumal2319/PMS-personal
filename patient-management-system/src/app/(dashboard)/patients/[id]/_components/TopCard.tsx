@@ -10,7 +10,7 @@ const TopCard = async ({id}: { id: number, role: string }) => {
     const session = await verifySession();
 
     return (
-        <Card>
+        <Card className={'hover:shadow-lg transition duration-300'}>
             <CardContent className={'p-4'}>
                 <Suspense fallback={<PatientDetailsSkeleton/>}>
                     <PatientDetails id={id}/>
