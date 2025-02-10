@@ -2,7 +2,7 @@ import {Calendar, Phone, MapPin, Ruler, Weight, CreditCard, LucideIcon} from "lu
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {getPatientDetails} from "@/app/lib/actions";
 import {notFound} from "next/navigation";
-import {calcAge} from "@/app/lib/utils";
+import {calcAge, getInitials} from "@/app/lib/utils";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import EditPatientForm from "@/app/(dashboard)/patients/[id]/_components/EditPatientDataForm";
 
@@ -20,14 +20,6 @@ const PatientDetails = async ({id}: { id: number }) => {
     };
 
 
-    const getInitials = (name: string) => {
-        return name
-            .split(' ')
-            .map(word => word[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
 
     const getAvatarColor = (gender: string) => {
         if (gender === 'MALE') return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
