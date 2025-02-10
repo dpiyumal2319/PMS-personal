@@ -18,7 +18,7 @@ export default async function AvailableStockPageTable({
     sort: string;
 
 }) {
-    const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort);
+    const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort, 0);
     const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort);
     const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort);
 
@@ -27,12 +27,12 @@ export default async function AvailableStockPageTable({
         // <div >
         //     <DrugListByModel drugs={filteredDrugsByModel} />
         // </div>
-        // <div >
-        //     <DrugListByBrand brands={filteredDrugsByBrand} />
-        // </div>
         <div >
-            <DrugListByBatch batches={filteredDrugsByBatch} />
+            <DrugListByBrand brands={filteredDrugsByBrand} />
         </div>
+        // <div >
+        //     <DrugListByBatch batches={filteredDrugsByBatch} />
+        // </div>
 
 
     )

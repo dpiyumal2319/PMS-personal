@@ -5,6 +5,7 @@ import { AiFillMedicineBox } from "react-icons/ai";
 
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AppendButton from "./AppendButton";
 
 interface Brand {
     id: number;
@@ -44,11 +45,8 @@ export default function BrandListCard({ brands }: { brands: Brand[] }) {
                                 </div>
 
                                 {/* View Details Button */}
-                                <Link href={`/brands/${brand.id}`} passHref>
-                                    <Button className="mt-6 w-full bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg">
-                                        View Details
-                                    </Button>
-                                </Link>
+                                <AppendButton append={`brand/${brand.id}`} />
+
                             </CardContent>
                         </Card>
                     ))}
