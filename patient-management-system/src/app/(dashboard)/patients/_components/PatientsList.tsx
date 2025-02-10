@@ -18,7 +18,7 @@ export default function PatientsList({ patients }: { patients: Patient[] }) {
         patients.map((patient) => (
             <div
                 key={patient.id}
-                className="flex justify-between items-center bg-white shadow-md rounded-2xl p-6 hover:shadow-xl transition cursor-pointer border border-gray-200"
+                className="flex justify-between items-center bg-white shadow-md rounded-2xl p-6 hover:shadow-xl transition cursor-pointer border border-gray-200 duration-300"
             >
                 {/* Clickable area for navigation */}
                 <Link
