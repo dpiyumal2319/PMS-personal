@@ -46,10 +46,9 @@ const DoctorLinks = [
     {name: "Prescribe", value: "prescribe", icon: Stethoscope},
     {name: "Prescriptions", value: "prescriptions", icon: FileText},
     {name: "Reports", value: "reports", icon: FileText},
-    {name: "Edit", value: "edit", icon: ClipboardEdit},
+    {name: "Notes", value: "notes", icon: ClipboardEdit},
 ]
 
 const NurseLinks = [
     {name: "Prescriptions", value: "prescriptions", icon: FileText},
-    {name: "Edit", value: "edit", icon: ClipboardEdit},
 ]

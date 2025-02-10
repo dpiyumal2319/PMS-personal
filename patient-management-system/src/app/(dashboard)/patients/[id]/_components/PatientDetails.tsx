@@ -4,7 +4,7 @@ import {getPatientDetails} from "@/app/lib/actions";
 import {notFound} from "next/navigation";
 import {calcAge} from "@/app/lib/utils";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
-import EditPatientForm from "@/app/(dashboard)/patients/[id]/edit/_components/EditPatientDataForm";
+import EditPatientForm from "@/app/(dashboard)/patients/[id]/_components/EditPatientDataForm";
 
 const PatientDetails = async ({id}: { id: number }) => {
     const patient = await getPatientDetails(id);
