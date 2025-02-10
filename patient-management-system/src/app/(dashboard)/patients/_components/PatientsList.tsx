@@ -3,16 +3,7 @@ import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {calcAge, getInitials} from "@/app/lib/utils";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-
-
-interface Patient {
-    id: number;
-    name: string;
-    NIC: string | null;
-    telephone: string;
-    birthDate: Date;
-    gender: string;
-}
+import type {Patient} from "@prisma/client";
 
 export default function PatientsList({patients}: { patients: Patient[] }) {
 
@@ -43,7 +34,7 @@ export default function PatientsList({patients}: { patients: Patient[] }) {
                                         {getInitials(patient.name)}
                                     </AvatarFallback>
                                 </Avatar>
-                                    <span>{patient.name} - {calcAge(patient.birthDate)} yrs</span>
+                                    <span>{patient.name}{patient.birthDate && ` - ${calcAge(patient.birthDate)} yrs`}</span>
                             </div>
 
                             {/* NIC */}
