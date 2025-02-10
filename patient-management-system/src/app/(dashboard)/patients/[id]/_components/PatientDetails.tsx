@@ -73,8 +73,8 @@ const PatientDetails = async ({id}: { id: number }) => {
                     </Avatar>
                     <div className="flex-1">
                         <div className={'flex gap-4 justify-between items-center mb-2.5'}>
-                            <div><h2 className="text-xl font-bold">{patient.name} {patient.birthDate ? `- ${calcAge(patient.birthDate)} yrs` : null}
-                            </h2>
+                            <div className={'flex gap-2 items-center'}>
+                                <h2 className="text-xl font-bold">{patient.name} {patient.birthDate ? `- ${calcAge(patient.birthDate)} yrs` : null}</h2>
                                 <span>{getSex(patient.gender)}</span></div>
                             <EditPatientForm patientData={{
                                 name: patient.name,
@@ -82,9 +82,9 @@ const PatientDetails = async ({id}: { id: number }) => {
                                 NIC: patient.NIC ? patient.NIC : '',
                                 telephone: patient.telephone,
                                 address: patient.address ? patient.address : '',
-                                birthDate: patient.birthDate ? patient.birthDate : '',
-                                height: patient.height ? patient.height : '',
-                                weight: patient.weight ? patient.weight : ''
+                                birthDate: patient.birthDate ? patient.birthDate.toISOString().split('T')[0] : '',
+                                height: patient.height ? patient.height.toString() : '',
+                                weight: patient.weight ? patient.weight.toString() : ''
                             }} id={id}/>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
