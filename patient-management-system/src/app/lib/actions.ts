@@ -260,53 +260,98 @@ export async function getFilteredDrugsByModel(query: string = "", page: number =
 }
 
 
-export async function getFilteredDrugsByBrand(query: string = "", page: number = 1, sort: string = "asc") {
-    const brands = await prisma.drugBrand.findMany({
+export async function getFilteredDrugsByBrand(
+    query: string = "",
+    page: number = 1,
+    sort: string = "asc",
+    modelId: number = 0
+  ) {
+    // Base query conditions
+    const brandWhereCondition = {
+      name: {
+        contains: query,
+      },
+    };
+  
+    // If modelId is not 0, adjust the query to filter by the specific modelId
+    if (modelId !== 0) {
+      const specificDrug = await prisma.drug.findUnique({
         where: {
-            name: {
-                contains: query,
-            },
+          id: modelId,
         },
         include: {
-            drugs: {
-                include: {
-                    batch: {
-                        where: {
-                            status: "AVAILABLE", // Only count drugs with available stock
-           
-                        },
-                        select: {
-                            remainingQuantity: true,
-                        },
-                    },
-                },
+          brand: true,
+          batch: {
+            where: {
+              status: "AVAILABLE",
             },
+            select: {
+              remainingQuantity: true,
+            },
+          },
         },
+      });
+  
+      // If the specific drug exists and has available batches, return it
+      if (specificDrug && specificDrug.batch.length > 0) {
+        return [
+          {
+            id: specificDrug.brand.id,
+            name: specificDrug.brand.name,
+            modelCount: 1, // Since we're returning a specific model
+          },
+        ];
+      } else {
+        // If the specific drug doesn't exist or has no available batches, return an empty array
+        return [];
+      }
+    }
+  
+    // If modelId is 0, proceed with the original logic
+    const brands = await prisma.drugBrand.findMany({
+      where: brandWhereCondition,
+      include: {
+        drugs: {
+          include: {
+            batch: {
+              where: {
+                status: "AVAILABLE", // Only count drugs with available stock
+              },
+              select: {
+                remainingQuantity: true,
+              },
+            },
+          },
+        },
+      },
     });
-
+  
     // Aggregate drug models with available stock per brand
     const aggregatedBrands = brands
-        .map((brand) => ({
-            id: brand.id,
-            name: brand.name,
-            modelCount: brand.drugs.filter(drug => drug.batch.length > 0).length, // Count models with stock
-        }))
-        .filter(brand => brand.modelCount > 0); // Exclude brands with no available models
-
+      .map((brand) => ({
+        id: brand.id,
+        name: brand.name,
+        modelCount: brand.drugs.filter((drug) => drug.batch.length > 0).length, // Count models with stock
+      }))
+      .filter((brand) => brand.modelCount > 0); // Exclude brands with no available models
+  
     // Sorting logic
     if (sort === "lowest") {
-        aggregatedBrands.sort((a, b) => a.modelCount - b.modelCount);
+      aggregatedBrands.sort((a, b) => a.modelCount - b.modelCount);
     } else if (sort === "highest") {
-        aggregatedBrands.sort((a, b) => b.modelCount - a.modelCount);
+      aggregatedBrands.sort((a, b) => b.modelCount - a.modelCount);
     } else if (sort === "alphabetically") {
-        aggregatedBrands.sort((a, b) => a.name.localeCompare(b.name));
+      aggregatedBrands.sort((a, b) => a.name.localeCompare(b.name));
     }
-
+  
     // Pagination
-    const paginatedBrands = aggregatedBrands.slice((page - 1) * PAFE_SIZE_AVAILABLE_DRUGS, page * PAFE_SIZE_AVAILABLE_DRUGS);
-
+    const paginatedBrands = aggregatedBrands.slice(
+      (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
+      page * PAFE_SIZE_AVAILABLE_DRUGS
+    );
+  
     return paginatedBrands;
-}
+  }
 
 
 export async function getFilteredDrugsByBatch(query: string = "", page: number = 1, sort: string = "expiryDate") {

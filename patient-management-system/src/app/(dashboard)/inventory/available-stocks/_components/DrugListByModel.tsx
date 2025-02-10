@@ -8,6 +8,7 @@ import { MdEventAvailable } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AppendButton from "./AppendButton";
 
 interface Drug {
     id: number;
@@ -64,11 +65,8 @@ export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
                                     </div>
 
                                     {/* View Details Button */}
-                                    <Link href={`/drugs/${drug.id}`} passHref>
-                                        <Button className="mt-6 w-full bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg">
-                                            View Details
-                                        </Button>
-                                    </Link>
+                                    <AppendButton append={`drug/${drug.id}`} />
+
                                 </CardContent>
                             </Card>
                         );

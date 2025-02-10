@@ -108,6 +108,31 @@ async function main() {
 
     await prisma.drugBrand.create({
         data: {
+            name: 'Penadene',
+            description: 'Pain relief tablet',
+            drugs: {
+                create: [
+                    {
+                        name: 'Paracetamol',
+                        batch: {
+                            create: [{
+                                number: 'B3456',
+                                type: 'Tablet',
+                                fullAmount: 100,
+                                expiry: new Date('2025-12-10'),
+                                remainingQuantity: 80,
+                                price: 40,
+                                status: 'AVAILABLE'
+                            }]
+                        }
+                    },
+                ],
+            },
+        },
+    });
+
+    await prisma.drugBrand.create({
+        data: {
             name: 'Ibuprofen',
             description: 'Anti-inflammatory pain reliever',
             drugs: {
