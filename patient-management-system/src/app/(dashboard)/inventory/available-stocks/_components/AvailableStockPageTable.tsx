@@ -1,10 +1,8 @@
 import React from 'react'
-import { getFilteredDrugsByModel } from '@/app/lib/actions'
-import DrugListByModel from './DrugListByModel';
-import { getFilteredDrugsByBrand } from '@/app/lib/actions';
-import DrugListByBrand from './DrugListByBrand';
-import { getFilteredDrugsByBatch } from '@/app/lib/actions';
-import DrugListByBatch from './DrugListByBatch';
+import { getFilteredDrugsByModel, getFilteredDrugsByBrand, getFilteredDrugsByBatch } from '@/app/lib/actions'
+import DrugListByModel from './DrugListByModel'
+import DrugListByBrand from './DrugListByBrand'
+import DrugListByBatch from './DrugListByBatch'
 
 export default async function AvailableStockPageTable({
     query,
@@ -16,25 +14,19 @@ export default async function AvailableStockPageTable({
     currentPage: number;
     selection: string;
     sort: string;
-
 }) {
-    const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort, 0);
-    const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort);
-    const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort);
+    let content = null;
 
+    if (selection === "brand") {
+        const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort, 0);
+        content = <DrugListByBrand brands={filteredDrugsByBrand} />;
+    } else if (selection === "model") {
+        const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort, 0);
+        content = <DrugListByModel drugs={filteredDrugsByModel} />;
+    } else if (selection === "batch") {
+        const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort);
+        content = <DrugListByBatch batches={filteredDrugsByBatch} />;
+    }
 
-    return (
-        // <div >
-        //     <DrugListByModel drugs={filteredDrugsByModel} />
-        // </div>
-        <div >
-            <DrugListByBrand brands={filteredDrugsByBrand} />
-        </div>
-        // <div >
-        //     <DrugListByBatch batches={filteredDrugsByBatch} />
-        // </div>
-
-
-    )
+    return <div>{content}</div>;
 }
-

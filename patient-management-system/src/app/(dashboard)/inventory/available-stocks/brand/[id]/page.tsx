@@ -1,19 +1,18 @@
 import React from 'react';
+import { getFilteredDrugsByModel } from '@/app/lib/actions';
+import DrugListByModel from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByModel';
 
 async function Page({ params }: {
-    params: Promise<{ id: string }>
-    query: string,
-    currentPage: number,
-    selection: string,
-    sort: string,
+    params: Promise<{ id: string, query: string, currentPage: number, selection: string, sort: string }>
 }) {
 
-    const id = (await params).id;
+    const { id, query, currentPage, selection, sort } = await params;
+    const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort, Number(id));
+
 
     return (
         <div>
-            <h1>Dynamic Page</h1>
-            <p>The ID is: {id}</p>
+            <DrugListByModel drugs={filteredDrugsByModel} />
         </div>
     );
 }
