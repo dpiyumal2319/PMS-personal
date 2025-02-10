@@ -37,8 +37,8 @@ export default function PatientsList({patients}: { patients: Patient[] }) {
                             className="flex-1 flex justify-between items-center pr-6"
                         >
                             {/* Patient Name */}
-                            <div className={`flex items-center gap-4 font-semibold text-lg flex-1 ${patient.gender === 'MALE' ? 'text-primary-600' : 'text-pink-600'}`}>
-                                <Avatar className="size-12 flex-shrink-0 shadow font-bold">
+                            <div className={`flex items-center gap-4 font-semibold text-md flex-1 ${patient.gender === 'MALE' ? 'text-primary-600' : 'text-pink-600'}`}>
+                                <Avatar className="size-10 flex-shrink-0 shadow font-bold">
                                     <AvatarFallback className={`text-sm ${getAvatarColor(patient.gender)}`}>
                                         {getInitials(patient.name)}
                                     </AvatarFallback>
