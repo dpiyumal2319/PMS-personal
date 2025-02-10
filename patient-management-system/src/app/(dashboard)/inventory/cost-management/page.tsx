@@ -1,35 +1,15 @@
 import React, { Suspense } from "react";
 import Loading from "@/app/(dashboard)/Loading";
 
-import SearchPanel from "@/app/(dashboard)/_components/Search";
-import Dropdown from "@/app/(dashboard)/_components/Dropdown";
-
-import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
-import DatePicker from "@/app/(dashboard)/_components/DatePicker";
+import TabsBar from "./_components/TabBar";
 
 export default async function InventoryCost() {
-
-
   return (
     <div className="flex h-screen flex-col w-full">
       <div className="sticky top-0">
         <div className="p-4 bg-white border-b shadow-md">
-          <div className="flex flex-wrap gap-4">
-            <Dropdown
-              items={[
-                { label: "By Model", value: "model" },
-                { label: "By Brand", value: "brand" },
-                { label: "By Batch", value: "batch" },
-              ]}
-              urlParameterName="selection"
-            />
-            <div className="relative w-[200px]">
-              <SearchPanel placeholder="Search by Name" />
-            </div>
-            <SortingDropdown selection="selection" />
-            <div>
-              <DatePicker />
-            </div>
+          <div>
+            <TabsBar />
           </div>
         </div>
       </div>
