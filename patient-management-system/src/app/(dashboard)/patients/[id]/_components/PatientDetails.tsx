@@ -4,6 +4,7 @@ import {getPatientDetails} from "@/app/lib/actions";
 import {notFound} from "next/navigation";
 import {calcAge} from "@/app/lib/utils";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import EditPatientForm from "@/app/(dashboard)/patients/[id]/edit/_components/EditPatientDataForm";
 
 const PatientDetails = async ({id}: { id: number }) => {
     const patient = await getPatientDetails(id);
@@ -71,10 +72,20 @@ const PatientDetails = async ({id}: { id: number }) => {
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                        <div className={'flex gap-4 justify-start items-center mb-2.5'}>
-                            <h2 className="text-xl font-bold">{patient.name} {patient.birthDate ? `- ${calcAge(patient.birthDate)} yrs` : null}
+                        <div className={'flex gap-4 justify-between items-center mb-2.5'}>
+                            <div><h2 className="text-xl font-bold">{patient.name} {patient.birthDate ? `- ${calcAge(patient.birthDate)} yrs` : null}
                             </h2>
-                            <span>{getSex(patient.gender)}</span>
+                                <span>{getSex(patient.gender)}</span></div>
+                            <EditPatientForm patientData={{
+                                name: patient.name,
+                                gender: patient.gender,
+                                NIC: patient.NIC ? patient.NIC : '',
+                                telephone: patient.telephone,
+                                address: patient.address ? patient.address : '',
+                                birthDate: patient.birthDate ? patient.birthDate : '',
+                                height: patient.height ? patient.height : '',
+                                weight: patient.weight ? patient.weight : ''
+                            }} id={id}/>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
                             <DetailRow

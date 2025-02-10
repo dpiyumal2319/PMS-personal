@@ -619,6 +619,17 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
     }
 }
 
+export async function getPatient(id: number) {
+    return prisma.patient.findUnique({
+        where: {id}
+    });
+}
+
+export async function updatePatient(formData: PatientFormData, id: number): Promise<myError> {
+    console.log(formData);
+    return {success: true, message: 'Patient updated successfully'};
+}
+
 //For adding drugs to the inventory
 export async function addNewItem(
     {formData}: {

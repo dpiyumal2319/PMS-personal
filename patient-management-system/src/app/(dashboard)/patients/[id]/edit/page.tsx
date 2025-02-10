@@ -1,9 +1,14 @@
 import React from 'react';
+import EditPatientDataForm from "@/app/(dashboard)/patients/[id]/edit/_components/EditPatientDataForm";
 
-const Page = () => {
+const Page = async ({params}: {
+    params: Promise<{ id: string }>
+}) => {
+    const patientId = Number((await params).id);
+
     return (
         <div>
-            Hello World hhh
+            Hello from Edit Patient Page
         </div>
     );
 };
