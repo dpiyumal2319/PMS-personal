@@ -822,7 +822,10 @@ export async function addNewItem(
                 update: {},
                 create: {
                     name: formData.drugName,
-                    brandName: brand.name
+                    // brandName: brand.name
+                     brand: {
+                    connect: { name: formData.brandName } // Assuming 'name' is a unique field in DrugBrand.
+    }
                 }
             });
 
@@ -830,7 +833,10 @@ export async function addNewItem(
             await tx.batch.create({
                 data: {
                     number: formData.batchNumber,
-                    drugName: drug.name,
+                    // drugName: drug.name,
+                    drug: {
+                        connect: { id: drug.id }, // or { name: drug.name } if 'name' is unique and defined in the relation field
+                    },
                     type: formData.drugType as DrugType,
                     fullAmount: parseFloat(formData.quantity.toString()),
                     remainingQuantity: parseFloat(formData.quantity.toString()),

@@ -92,18 +92,18 @@ model QueueEntry {
 }
 
 model DrugBrand {
-  id          Int       @id @default(autoincrement())
-  name        String  
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
   description String?
   drugs       Drug[]
 }
 
 model Drug {
-  id        Int       @id @default(autoincrement())
-  name      String    
-  brandId   Int
-  brand     DrugBrand @relation(fields: [brandId], references: [id])
-  batch     Batch[]
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  brandId Int
+  brand   DrugBrand @relation(fields: [brandId], references: [id])
+  batch   Batch[]
 }
 
 model Batch {
