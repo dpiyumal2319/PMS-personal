@@ -7,10 +7,10 @@ async function Page({ params }: {
 }) {
 
     const { brandId, currentPage } = await params;
-        const filteredDrugsByModel = await getFilteredDrugsByModel({
-            page: currentPage,
-            brandId: Number(brandId),
-        });
+    const filteredDrugsByModel = await getFilteredDrugsByModel({
+        page: currentPage,
+        brandId: Number(brandId),
+    });
 
     return (
         <div>

@@ -11,16 +11,22 @@ export default async function AvailableStockPageTable({
     currentPage,
     selection,
     sort,
+    drugId,
+    brandId
 }: {
     query: string;
     currentPage: number;
     selection: string;
     sort: string;
+    drugId?: number;
+    brandId?: number;
 }) {
 
     const totalPages = await getAvailableDrugsTotalPages(query, selection);
+    console.log(query);
 
     let content = null;
+
 
     if (selection === "brand") {
         const filteredDrugsByBrand = await getFilteredDrugsByBrand({
@@ -54,8 +60,14 @@ export default async function AvailableStockPageTable({
             </div>
         </div>;
     } else if (selection === "batch") {
-        const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort, 0, 0);
-        content = <div>
+        const filteredDrugsByBatch = await getFilteredDrugsByBatch({
+            query,
+            page: currentPage,
+            sort,
+            modelId: drugId,
+            brandId: brandId
+        });
+                content = <div>
             <div>
                 <DrugListByBatch batches={filteredDrugsByBatch} />
             </div>

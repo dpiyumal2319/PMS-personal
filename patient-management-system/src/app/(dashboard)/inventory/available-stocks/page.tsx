@@ -1,14 +1,10 @@
 import React, { Suspense } from "react";
-import Loading from "@/app/(dashboard)/Loading";
-
 import { DrugForm } from "@/app/(dashboard)/inventory/_components/DrugForm";
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 import AvailableStockPageTable from "./_components/AvailableStockPageTable";
-import Pagination from "../../_components/Pagination";
-import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
 import DrugListSkeleton from "./_components/DrugListSkeleton";
 
 
