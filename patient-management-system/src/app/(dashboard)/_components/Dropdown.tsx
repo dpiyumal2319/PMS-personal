@@ -26,8 +26,6 @@ export default function SearchDropdown({
     router.replace(`${pathname}?${params.toString()}`);
   }
 
-  console.log(items);
-
   const selectedValue = searchParams.get(urlParameterName) || items[0].value; // get the first one in array
 
   return (

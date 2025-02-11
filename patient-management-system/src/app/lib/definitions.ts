@@ -91,3 +91,35 @@ export const searchModels = [
       ],
     },
   ];
+
+  //search models for cost management
+
+  export const searchModelsCM = [
+    {
+      label: "By Brand",
+      value: "brand",
+      sortOptions: [
+        { label: "Alphabetically", value: "alphabetically" },
+        { label: "Total Cost", value: "totalcost" },
+        { label: "Cost Per Unit", value: "costperunit" },
+      ],
+    },
+    {
+      label: "By Model",
+      value: "model",
+      sortOptions: [
+        { label: "Alphabetically", value: "alphabetically" },
+        { label: "Total Cost", value: "totalcost" },
+        { label: "Cost Per Unit", value: "costperunit" },
+      ],
+    },
+    {
+      label: "By Batch",
+      value: "batch",
+      sortOptions: [
+        { label: "Total Cost", value: "totalcost" },
+        { label: "Cost Per Unit", value: "costperunit" },
+        { label: "Alphabetically", value: "alphabetically" },
+      ],
+    },
+  ];

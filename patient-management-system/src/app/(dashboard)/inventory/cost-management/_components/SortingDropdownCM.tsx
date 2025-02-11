@@ -3,13 +3,13 @@
 import React from "react";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
-import { searchModels } from "@/app/lib/definitions";
+import { searchModelsCM } from "@/app/lib/definitions";
 
-function SortingDropdown({ selection }: { selection: string }) {
+function SortingDropdownCM({ selection }: { selection: string }) {
   // const searchParams = useSearchParams();
   // const selected = searchParams.get(selection);
 
-  const selectedSort = searchModels.filter(
+  const selectedSort = searchModelsCM.filter(
     (search) => search.value === selection
   );
 
@@ -20,4 +20,4 @@ function SortingDropdown({ selection }: { selection: string }) {
   );
 }
 
-export default SortingDropdown;
+export default SortingDropdownCM;
