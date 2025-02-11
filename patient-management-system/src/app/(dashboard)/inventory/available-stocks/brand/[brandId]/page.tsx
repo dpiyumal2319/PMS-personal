@@ -3,12 +3,14 @@ import { getFilteredDrugsByModel } from '@/app/lib/actions';
 import DrugListByModel from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByModel';
 
 async function Page({ params }: {
-    params: Promise<{ drugId: string, query: string, currentPage: number, selection: string, sort: string }>
+    params: Promise<{ brandId: string, currentPage: number }>
 }) {
 
-    const { drugId, query, currentPage, selection, sort } = await params;
-    const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort, Number(drugId));
-
+    const { brandId, currentPage } = await params;
+        const filteredDrugsByModel = await getFilteredDrugsByModel({
+            page: currentPage,
+            brandId: Number(brandId),
+        });
 
     return (
         <div>
