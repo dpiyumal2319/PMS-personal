@@ -1,9 +1,9 @@
-import {AiOutlineUser, AiOutlineIdcard, AiOutlinePhone} from "react-icons/ai";
-import {Button} from "@/components/ui/button";
+import {AiOutlineIdcard, AiOutlinePhone} from "react-icons/ai";
 import Link from "next/link";
 import {calcAge, getInitials} from "@/app/lib/utils";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import type {Patient} from "@prisma/client";
+import AddToActiveQueueButton from "@/app/(dashboard)/patients/_components/AddToActiveQueueButton";
 
 export default function PatientsList({patients}: { patients: Patient[] }) {
 
@@ -52,11 +52,7 @@ export default function PatientsList({patients}: { patients: Patient[] }) {
 
                         {/* Add to Active Queue Button */}
                         <div className="ml-6">
-                            <Button
-                                className="bg-green-600 text-white px-5 py-2.5 rounded-xl shadow-md hover:bg-green-700 transition-all duration-200 flex items-center gap-2">
-                                <AiOutlineUser className="w-5 h-5 text-white"/>
-                                <span className="font-medium">Add to Queue</span>
-                            </Button>
+                            <AddToActiveQueueButton />
                         </div>
                     </div>
                 ))
