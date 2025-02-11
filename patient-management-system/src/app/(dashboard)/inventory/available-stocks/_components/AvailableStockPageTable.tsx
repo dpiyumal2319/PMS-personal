@@ -1,10 +1,10 @@
 import React from 'react'
-import { getFilteredDrugsByModel } from '@/app/lib/actions'
-import DrugListByModel from './DrugListByModel';
-import { getFilteredDrugsByBrand } from '@/app/lib/actions';
-import DrugListByBrand from './DrugListByBrand';
-import { getFilteredDrugsByBatch } from '@/app/lib/actions';
-import DrugListByBatch from './DrugListByBatch';
+import { getFilteredDrugsByModel, getFilteredDrugsByBrand, getFilteredDrugsByBatch } from '@/app/lib/actions'
+import DrugListByModel from './DrugListByModel'
+import DrugListByBrand from './DrugListByBrand'
+import DrugListByBatch from './DrugListByBatch'
+import { getAvailableDrugsTotalPages } from '@/app/lib/actions'
+import Pagination from '@/app/(dashboard)/_components/Pagination'
 
 export default async function AvailableStockPageTable({
     query,
@@ -16,25 +16,43 @@ export default async function AvailableStockPageTable({
     currentPage: number;
     selection: string;
     sort: string;
-
 }) {
-    const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort);
-    const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort);
-    const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort);
 
+    const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
-    return (
-        // <div >
-        //     <DrugListByModel drugs={filteredDrugsByModel} />
-        // </div>
-        // <div >
-        //     <DrugListByBrand brands={filteredDrugsByBrand} />
-        // </div>
-        <div >
-            <DrugListByBatch batches={filteredDrugsByBatch} />
-        </div>
+    let content = null;
 
+    if (selection === "brand") {
+        const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort, 0);
+        content = <div className="flex h-full flex-col w-full">
+            <div >
+                <DrugListByBrand brands={filteredDrugsByBrand} />
+            </div>
+            <div className="mt-auto flex justify-center py-4 sticky bottom-0">
+                <Pagination totalPages={totalPages} itemsPerPage={10} />
+            </div>
+        </div>;
+    } else if (selection === "model") {
+        const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort, 0);
+        content = <div >
+            <div>
+                <DrugListByModel drugs={filteredDrugsByModel} />
+            </div>
+            <div className="mt-auto flex justify-center py-4 sticky bottom-0">
+                <Pagination totalPages={totalPages} itemsPerPage={10} />
+            </div>
+        </div>;
+    } else if (selection === "batch") {
+        const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort);
+        content = <div>
+            <div>
+                <DrugListByBatch batches={filteredDrugsByBatch} />
+            </div>
+            <div className="mt-auto flex justify-center py-4 sticky bottom-0">
+                <Pagination totalPages={totalPages} itemsPerPage={10} />
+            </div>
+        </div>;
+    }
 
-    )
+    return <div>{content}</div>;
 }
-

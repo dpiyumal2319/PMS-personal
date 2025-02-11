@@ -93,17 +93,15 @@ model QueueEntry {
 
 model DrugBrand {
   id          Int     @id @default(autoincrement())
-  name        String  @unique
+  name        String
   description String?
-  drugs       Drug[]
+  Batch       Batch[]
 }
 
 model Drug {
-  id      Int       @id @default(autoincrement())
-  name    String    @unique
-  brandId Int
-  brand   DrugBrand @relation(fields: [brandId], references: [id])
-  batch   Batch[]
+  id    Int     @id @default(autoincrement())
+  name  String
+  batch Batch[]
 }
 
 model Batch {
@@ -111,6 +109,8 @@ model Batch {
   number            String
   drugId            Int
   drug              Drug        @relation(fields: [drugId], references: [id])
+  drugBrandId       Int
+  drugBrand         DrugBrand   @relation(fields: [drugBrandId], references: [id])
   type              DrugType
   fullAmount        Float
   expiry            DateTime

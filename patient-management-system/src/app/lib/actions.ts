@@ -215,83 +215,139 @@ export async function getAvailableDrugsTotalPages(query: string = "", selection:
     return Math.ceil(totalItems / PAFE_SIZE_AVAILABLE_DRUGS);
 }
 
-export async function getFilteredDrugsByModel(query: string = "", page: number = 1, sort: string = "asc") {
+
+export async function getFilteredDrugsByModel(
+    query: string = "",
+    page: number = 1,
+    sort: string = "alphabetically",
+    brandId: number = 0
+  ) {
     const drugs = await prisma.drug.findMany({
-        where: {
-            name: {
-                contains: query,
-            },
+      where: {
+        name: {
+          contains: query,
         },
-        include: {
-            batch: {
-                where: {
-                    status: "AVAILABLE", // Filter batches with status "available"
-                },
-                select: {
-                    remainingQuantity: true,
-                },
-            },
-            brand: true,  // Include the associated brand for each drug
+        batch: {
+          some: {
+            status: "AVAILABLE",
+            ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Filter by brandId if it's not 0
+          },
         },
+      },
+      include: {
+        batch: {
+          where: {
+            status: "AVAILABLE",
+            ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Apply brandId filter
+          },
+          select: {
+            remainingQuantity: true,
+            drugBrand: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
     });
-
-    // Filter out drugs with no available batches and aggregate remaining quantity for drugs with available batches
+  
+    // Filter out drugs with no available batches and aggregate remaining quantity
     const aggregatedDrugs = drugs
-        .filter(drug => drug.batch.length > 0) // Only keep drugs with at least one available batch
-        .map(drug => ({
-            id: drug.id,
-            name: drug.name,
-            totalRemainingQuantity: drug.batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
-            brandCount: drug.brand ? 1 : 0,  // Count the number of associated brands (if any)
-        }));
-
+      .filter((drug) => drug.batch.length > 0)
+      .map((drug) => {
+        const uniqueBrandIds = new Set(drug.batch.map((batch) => batch.drugBrand.id));
+  
+        return {
+          id: drug.id,
+          name: drug.name,
+          totalRemainingQuantity: drug.batch.reduce(
+            (sum, batch) => sum + batch.remainingQuantity,
+            0
+          ),
+          brandCount: uniqueBrandIds.size, // Count unique brands associated with batches
+        };
+      });
+  
     // Sorting logic
     if (sort === "lowest") {
-        aggregatedDrugs.sort((a, b) => a.totalRemainingQuantity - b.totalRemainingQuantity);
+      aggregatedDrugs.sort((a, b) => a.totalRemainingQuantity - b.totalRemainingQuantity);
     } else if (sort === "highest") {
-        aggregatedDrugs.sort((a, b) => b.totalRemainingQuantity - a.totalRemainingQuantity);
+      aggregatedDrugs.sort((a, b) => b.totalRemainingQuantity - a.totalRemainingQuantity);
     } else if (sort === "alphabetically") {
-        aggregatedDrugs.sort((a, b) => a.name.localeCompare(b.name));
+      aggregatedDrugs.sort((a, b) => a.name.localeCompare(b.name));
+    }
+  
+    const paginatedDrugs = aggregatedDrugs.slice(
+      (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
+      page * PAFE_SIZE_AVAILABLE_DRUGS
+    );
+  
+    return paginatedDrugs;
+  }
+  
+
+  export async function getFilteredDrugsByBrand(
+    query: string = "",
+    page: number = 1,
+    sort: string = "alphabetically",
+    modelId: number = 0
+) {
+    if (modelId !== 0) {
+        // Fetch all brands associated with the specified model
+        const batches = await prisma.batch.findMany({
+            where: {
+                drugId: modelId,
+                status: "AVAILABLE",
+            },
+            include: {
+                drugBrand: true,
+            },
+        });
+
+        const uniqueBrands = new Map();
+
+        batches.forEach(batch => {
+            uniqueBrands.set(batch.drugBrand.id, {
+                id: batch.drugBrand.id,
+                name: batch.drugBrand.name,
+                modelCount: 1, // Since it's a specific model
+            });
+        });
+
+        return Array.from(uniqueBrands.values());
     }
 
-    const paginatedDrugs = aggregatedDrugs.slice((page - 1) * PAFE_SIZE_AVAILABLE_DRUGS, page * PAFE_SIZE_AVAILABLE_DRUGS);
-
-    return paginatedDrugs;
-}
-
-
-export async function getFilteredDrugsByBrand(query: string = "", page: number = 1, sort: string = "asc") {
-    const brands = await prisma.drugBrand.findMany({
-        where: {
-            name: {
-                contains: query,
-            },
+    // Base query conditions
+    const brandWhereCondition = {
+        name: {
+            contains: query,
         },
+    };
+
+    // Fetch all drug brands with available batches
+    const brands = await prisma.drugBrand.findMany({
+        where: brandWhereCondition,
         include: {
-            drugs: {
+            Batch: {
+                where: {
+                    status: "AVAILABLE",
+                },
                 include: {
-                    batch: {
-                        where: {
-                            status: "AVAILABLE", // Only count drugs with available stock
-           
-                        },
-                        select: {
-                            remainingQuantity: true,
-                        },
-                    },
+                    drug: true,
                 },
             },
         },
     });
 
-    // Aggregate drug models with available stock per brand
+    // Aggregate brands with available models
     const aggregatedBrands = brands
         .map((brand) => ({
             id: brand.id,
             name: brand.name,
-            modelCount: brand.drugs.filter(drug => drug.batch.length > 0).length, // Count models with stock
+            modelCount: new Set(brand.Batch.map((batch) => batch.drug.id)).size, // Count unique drug models
         }))
-        .filter(brand => brand.modelCount > 0); // Exclude brands with no available models
+        .filter((brand) => brand.modelCount > 0);
 
     // Sorting logic
     if (sort === "lowest") {
@@ -303,13 +359,20 @@ export async function getFilteredDrugsByBrand(query: string = "", page: number =
     }
 
     // Pagination
-    const paginatedBrands = aggregatedBrands.slice((page - 1) * PAFE_SIZE_AVAILABLE_DRUGS, page * PAFE_SIZE_AVAILABLE_DRUGS);
+    const paginatedBrands = aggregatedBrands.slice(
+        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
+        page * PAFE_SIZE_AVAILABLE_DRUGS
+    );
 
     return paginatedBrands;
 }
 
 
-export async function getFilteredDrugsByBatch(query: string = "", page: number = 1, sort: string = "expiryDate") {
+export async function getFilteredDrugsByBatch(
+    query: string = "",
+    page: number = 1,
+    sort: string = "expiryDate"
+) {
     const batches = await prisma.batch.findMany({
         where: {
             status: "AVAILABLE",
@@ -318,18 +381,15 @@ export async function getFilteredDrugsByBatch(query: string = "", page: number =
             },
         },
         include: {
-            drug: {
-                include: {
-                    brand: true,
-                },
-            },
+            drug: true,
+            drugBrand: true,
         },
     });
 
-    const formattedBatches = batches.map(batch => ({
+    const formattedBatches = batches.map((batch) => ({
         id: batch.id,
         batchNumber: batch.number,
-        brandName: batch.drug.brand.name,
+        brandName: batch.drugBrand.name,
         modelName: batch.drug.name,
         expiryDate: batch.expiry.toISOString(),
         stockDate: batch.stockDate.toISOString(),
@@ -339,19 +399,25 @@ export async function getFilteredDrugsByBatch(query: string = "", page: number =
 
     // Sorting logic
     if (sort === "expiryDate") {
-        formattedBatches.sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
+        formattedBatches.sort(
+            (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
+        );
     } else if (sort === "newlyAdded") {
-        formattedBatches.sort((a, b) => new Date(b.stockDate).getTime() - new Date(a.stockDate).getTime());
+        formattedBatches.sort(
+            (a, b) => new Date(b.stockDate).getTime() - new Date(a.stockDate).getTime()
+        );
     } else if (sort === "alphabetically") {
         formattedBatches.sort((a, b) => a.modelName.localeCompare(b.modelName));
     }
 
     // Pagination logic
-    const paginatedBatches = formattedBatches.slice((page - 1) * PAFE_SIZE_AVAILABLE_DRUGS, page * PAFE_SIZE_AVAILABLE_DRUGS);
+    const paginatedBatches = formattedBatches.slice(
+        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
+        page * PAFE_SIZE_AVAILABLE_DRUGS
+    );
 
     return paginatedBatches;
 }
-
 
 
 
