@@ -23,8 +23,13 @@ export default async function AvailableStockPageTable({
     let content = null;
 
     if (selection === "brand") {
-        const filteredDrugsByBrand = await getFilteredDrugsByBrand(query, currentPage, sort, 0);
-        content = <div className="flex h-full flex-col w-full">
+        const filteredDrugsByBrand = await getFilteredDrugsByBrand({
+            query,
+            page: currentPage,
+            sort,
+            modelId: 0
+        });
+                content = <div className="flex h-full flex-col w-full">
             <div >
                 <DrugListByBrand brands={filteredDrugsByBrand} />
             </div>
@@ -33,7 +38,13 @@ export default async function AvailableStockPageTable({
             </div>
         </div>;
     } else if (selection === "model") {
-        const filteredDrugsByModel = await getFilteredDrugsByModel(query, currentPage, sort, 0);
+        const filteredDrugsByModel = await getFilteredDrugsByModel({
+            query,
+            page: currentPage,
+            sort,
+            brandId: 0
+        });
+        
         content = <div >
             <div>
                 <DrugListByModel drugs={filteredDrugsByModel} />

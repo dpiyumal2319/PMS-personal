@@ -216,83 +216,93 @@ export async function getAvailableDrugsTotalPages(query: string = "", selection:
 }
 
 
-export async function getFilteredDrugsByModel(
-    query: string = "",
-    page: number = 1,
-    sort: string = "alphabetically",
-    brandId: number = 0
-  ) {
+export async function getFilteredDrugsByModel({
+    query = "",
+    page = 1,
+    sort = "alphabetically",
+    brandId = 0
+}: {
+    query?: string;
+    page?: number;
+    sort?: string;
+    brandId?: number;
+}) {
     const drugs = await prisma.drug.findMany({
-      where: {
-        name: {
-          contains: query,
-        },
-        batch: {
-          some: {
-            status: "AVAILABLE",
-            ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Filter by brandId if it's not 0
-          },
-        },
-      },
-      include: {
-        batch: {
-          where: {
-            status: "AVAILABLE",
-            ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Apply brandId filter
-          },
-          select: {
-            remainingQuantity: true,
-            drugBrand: {
-              select: {
-                id: true,
-              },
+        where: {
+            name: {
+                contains: query,
             },
-          },
+            batch: {
+                some: {
+                    status: "AVAILABLE",
+                    ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Filter by brandId if it's not 0
+                },
+            },
         },
-      },
+        include: {
+            batch: {
+                where: {
+                    status: "AVAILABLE",
+                    ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Apply brandId filter
+                },
+                select: {
+                    remainingQuantity: true,
+                    drugBrand: {
+                        select: {
+                            id: true,
+                        },
+                    },
+                },
+            },
+        },
     });
-  
+
     // Filter out drugs with no available batches and aggregate remaining quantity
     const aggregatedDrugs = drugs
-      .filter((drug) => drug.batch.length > 0)
-      .map((drug) => {
-        const uniqueBrandIds = new Set(drug.batch.map((batch) => batch.drugBrand.id));
-  
-        return {
-          id: drug.id,
-          name: drug.name,
-          totalRemainingQuantity: drug.batch.reduce(
-            (sum, batch) => sum + batch.remainingQuantity,
-            0
-          ),
-          brandCount: uniqueBrandIds.size, // Count unique brands associated with batches
-        };
-      });
-  
+        .filter((drug) => drug.batch.length > 0)
+        .map((drug) => {
+            const uniqueBrandIds = new Set(drug.batch.map((batch) => batch.drugBrand.id));
+
+            return {
+                id: drug.id,
+                name: drug.name,
+                totalRemainingQuantity: drug.batch.reduce(
+                    (sum, batch) => sum + batch.remainingQuantity,
+                    0
+                ),
+                brandCount: uniqueBrandIds.size, // Count unique brands associated with batches
+            };
+        });
+
     // Sorting logic
     if (sort === "lowest") {
-      aggregatedDrugs.sort((a, b) => a.totalRemainingQuantity - b.totalRemainingQuantity);
+        aggregatedDrugs.sort((a, b) => a.totalRemainingQuantity - b.totalRemainingQuantity);
     } else if (sort === "highest") {
-      aggregatedDrugs.sort((a, b) => b.totalRemainingQuantity - a.totalRemainingQuantity);
+        aggregatedDrugs.sort((a, b) => b.totalRemainingQuantity - a.totalRemainingQuantity);
     } else if (sort === "alphabetically") {
-      aggregatedDrugs.sort((a, b) => a.name.localeCompare(b.name));
+        aggregatedDrugs.sort((a, b) => a.name.localeCompare(b.name));
     }
-  
-    const paginatedDrugs = aggregatedDrugs.slice(
-      (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
-      page * PAFE_SIZE_AVAILABLE_DRUGS
-    );
-  
-    return paginatedDrugs;
-  }
-  
 
-  export async function getFilteredDrugsByBrand(
-    query: string = "",
-    page: number = 1,
-    sort: string = "alphabetically",
-    modelId: number = 0
-) {
+    const paginatedDrugs = aggregatedDrugs.slice(
+        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
+        page * PAFE_SIZE_AVAILABLE_DRUGS
+    );
+
+    return paginatedDrugs;
+}
+
+
+export async function getFilteredDrugsByBrand({
+    query = "",
+    page = 1,
+    sort = "alphabetically",
+    modelId = 0
+}: {
+    query?: string;
+    page?: number;
+    sort?: string;
+    modelId?: number;
+}) {
     if (modelId !== 0) {
         // Fetch all brands associated with the specified model
         const batches = await prisma.batch.findMany({
