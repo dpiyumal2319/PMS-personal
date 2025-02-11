@@ -219,7 +219,7 @@ export async function getAvailableDrugsTotalPages(query: string = "", selection:
 export async function getFilteredDrugsByModel(
     query: string = "",
     page: number = 1,
-    sort: string = "asc",
+    sort: string = "alphabetically",
     brandId: number = 0
   ) {
     const drugs = await prisma.drug.findMany({
@@ -290,7 +290,7 @@ export async function getFilteredDrugsByModel(
   export async function getFilteredDrugsByBrand(
     query: string = "",
     page: number = 1,
-    sort: string = "asc",
+    sort: string = "alphabetically",
     modelId: number = 0
 ) {
     if (modelId !== 0) {

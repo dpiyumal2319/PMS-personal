@@ -27,7 +27,6 @@ export default async function InventoryAvailable({
   const currentPage = Number(params?.page) || 1;
   const selection = params?.selection || "model";
   const sort = params?.sort || "alphabetically";
-  const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
   return (
     <div className="flex h-full flex-col w-full">
@@ -59,9 +58,7 @@ export default async function InventoryAvailable({
           />
         </Suspense>
       </div>
-      <div className="mt-auto flex justify-center py-4 sticky bottom-0">
-        <Pagination totalPages={totalPages} itemsPerPage={10} />
-      </div>
+
     </div>
   );
 }
