@@ -27,11 +27,12 @@ import { PatientFormData } from "@/app/lib/definitions";
 import { handleServerAction } from "@/app/lib/utils";
 import { addPatient } from "@/app/lib/actions";
 import IconedInput from "@/app/(dashboard)/_components/IconedInput";
+import {usePathname, useRouter} from "next/navigation";
 
 type Gender = "" | "MALE" | "FEMALE";
 
-export default function AddPatientForm() {
-  const [open, setOpen] = useState(false);
+export default function AddPatientForm({modal}: {modal: boolean}) {
+  const [open, setOpen] = useState(modal);
   const [formData, setFormData] = useState<PatientFormData>({
     name: "",
     NIC: "",
@@ -73,6 +74,16 @@ export default function AddPatientForm() {
     }
   };
 
+  const pathName = usePathname();
+  const searchParams = new URLSearchParams(pathName);
+  const router = useRouter();
+
+  const handleModal = (value: boolean) => {
+    searchParams.set("model", value.toString());
+    router.replace(`${pathName}?${searchParams.toString()}`);
+    setOpen(value);
+  }
+
   const handleCancel = () => {
     setFormData({
       name: "",
@@ -84,11 +95,11 @@ export default function AddPatientForm() {
       weight: "",
       gender: "",
     });
-    setOpen(false);
-  }
+    handleModal(false);
+  };
 
   return (
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleModal}>
         <DialogTrigger asChild>
           <Button className="flex items-center space-x-2">
             <Plus className="w-5 h-5" />

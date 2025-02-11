@@ -130,7 +130,6 @@ export async function addQueue(): Promise<myError> {
 }
 
 export async function getQueues(offset: number, limit: number) {
-
     return prisma.queue.findMany({
         skip: offset,
         take: limit,
@@ -333,7 +332,6 @@ export async function searchPatients(query: string, searchBy: "name" | "telephon
 }
 
 export async function addPatientToQueue(queueId: number, patientId: number): Promise<myError> {
-
     try {
         const queue = await prisma.queue.findUnique({
             where: {
@@ -384,6 +382,14 @@ export async function addPatientToQueue(queueId: number, patientId: number): Pro
         console.error(e);
         return {success: false, message: 'An error occurred while adding patient to queue'}
     }
+}
+
+export async function getActiveQueue() {
+    return prisma.queue.findFirst({
+        where: {
+            status: 'IN_PROGRESS'
+        }
+    });
 }
 
 export async function getPatientDetails(id: number) {
