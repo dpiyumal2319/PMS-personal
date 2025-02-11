@@ -193,27 +193,105 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
 
 
 
-const PAFE_SIZE_AVAILABLE_DRUGS = 10;
+const PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL= 9; 
+const PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND = 9;
+const PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH = 6;
 
-export async function getAvailableDrugsTotalPages(query: string = "", selection: string = "model") {
-    let totalItems = 0;
+// Function to get total pages for filtered drugs by model
+export async function getTotalPagesForFilteredDrugsByModel({
+    query = "",
+    brandId = 0,
+}: {
+    query?: string;
+    brandId?: number;
+}) {
+    const totalItems = await prisma.drug.count({
+        where: {
+            name: {
+                contains: query,
+            },
+            batch: {
+                some: {
+                    status: "AVAILABLE",
+                    ...(brandId !== 0 ? { drugBrandId: brandId } : {}),
+                },
+            },
+        },
+    });
 
-    if (selection === "model") {
-        totalItems = await prisma.drug.count({
-            where: { name: { contains: query } },
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL);
+}
+
+// Function to get total pages for filtered drugs by brand
+export async function getTotalPagesForFilteredDrugsByBrand({
+    query = "",
+    modelId = 0,
+}: {
+    query?: string;
+    modelId?: number;
+}) {
+    if (modelId !== 0) {
+        const totalItems = await prisma.batch.count({
+            where: {
+                drugId: modelId,
+                status: "AVAILABLE",
+            },
         });
-    } else if (selection === "brand") {
-        totalItems = await prisma.drugBrand.count({
-            where: { name: { contains: query } },
+
+        const uniqueBrandCount = await prisma.batch.groupBy({
+            by: ['drugBrandId'],
+            where: {
+                drugId: modelId,
+                status: "AVAILABLE",
+            },
         });
-    } else if (selection === "batch") {
-        totalItems = await prisma.batch.count({
-            where: { number: { contains: query } },
-        });
+
+        return Math.ceil(uniqueBrandCount.length / PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND);
     }
 
-    return Math.ceil(totalItems / PAFE_SIZE_AVAILABLE_DRUGS);
+    const totalItems = await prisma.drugBrand.count({
+        where: {
+            name: {
+                contains: query,
+            },
+            Batch: {
+                some: {
+                    status: "AVAILABLE",
+                },
+            },
+        },
+    });
+
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND);
 }
+
+// Function to get total pages for filtered drugs by batch
+export async function getTotalPagesForFilteredDrugsByBatch({
+    query = "",
+    modelId = 0,
+    brandId = 0,
+}: {
+    query?: string;
+    modelId?: number;
+    brandId?: number;
+}) {
+    const whereCondition: any = {
+        status: "AVAILABLE",
+        number: {
+            contains: query,
+        },
+    };
+
+    if (modelId !== 0) whereCondition.drugId = Number(modelId);
+    if (brandId !== 0) whereCondition.drugBrandId = Number(brandId);
+
+    const totalItems = await prisma.batch.count({
+        where: whereCondition,
+    });
+
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
+}
+
 
 
 export async function getFilteredDrugsByModel({
@@ -284,8 +362,8 @@ export async function getFilteredDrugsByModel({
     }
 
     const paginatedDrugs = aggregatedDrugs.slice(
-        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
-        page * PAFE_SIZE_AVAILABLE_DRUGS
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL,
+        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL
     );
 
     return paginatedDrugs;
@@ -370,8 +448,8 @@ export async function getFilteredDrugsByBrand({
 
     // Pagination
     const paginatedBrands = aggregatedBrands.slice(
-        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
-        page * PAFE_SIZE_AVAILABLE_DRUGS
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND,
+        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND
     );
 
     return paginatedBrands;
@@ -437,8 +515,8 @@ export async function getFilteredDrugsByBatch({
 
     // Pagination logic
     const paginatedBatches = formattedBatches.slice(
-        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
-        page * PAFE_SIZE_AVAILABLE_DRUGS
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH,
+        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
     );
 
     return paginatedBatches;

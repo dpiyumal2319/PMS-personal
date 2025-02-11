@@ -3,7 +3,6 @@ import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import AvailableStockPageTable from "@/app/(dashboard)/inventory/available-stocks/_components/AvailableStockPageTable";
 import DrugListSkeleton from "@/app/(dashboard)/inventory/available-stocks/_components/DrugListSkeleton";
-import NextBreadcrumb from "@/app/(dashboard)/inventory/available-stocks/_components/BreadCrumb";
 
 
 export default async function Page({
