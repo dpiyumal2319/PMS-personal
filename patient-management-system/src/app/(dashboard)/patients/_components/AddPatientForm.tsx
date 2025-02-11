@@ -10,28 +10,22 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import {
   FaUser, FaIdCard, FaPhone, FaCalendarAlt, FaMapMarkerAlt,
   FaRuler, FaWeight
 } from "react-icons/fa";
-import { IoMdMale, IoMdFemale } from "react-icons/io";
 import { PatientFormData } from "@/app/lib/definitions";
 import { handleServerAction } from "@/app/lib/utils";
 import { addPatient } from "@/app/lib/actions";
 import IconedInput from "@/app/(dashboard)/_components/IconedInput";
+import {usePathname, useRouter} from "next/navigation";
+import CustomGenderSelect from "@/app/(dashboard)/patients/_components/CustomGenderSelect";
 
 type Gender = "" | "MALE" | "FEMALE";
 
-export default function AddPatientForm() {
-  const [open, setOpen] = useState(false);
+export default function AddPatientForm({modal}: {modal: boolean}) {
+  const [open, setOpen] = useState(modal);
   const [formData, setFormData] = useState<PatientFormData>({
     name: "",
     NIC: "",
@@ -73,6 +67,16 @@ export default function AddPatientForm() {
     }
   };
 
+  const pathName = usePathname();
+  const searchParams = new URLSearchParams(pathName);
+  const router = useRouter();
+
+  const handleModal = (value: boolean) => {
+    searchParams.set("model", value.toString());
+    router.replace(`${pathName}?${searchParams.toString()}`);
+    setOpen(value);
+  }
+
   const handleCancel = () => {
     setFormData({
       name: "",
@@ -84,11 +88,11 @@ export default function AddPatientForm() {
       weight: "",
       gender: "",
     });
-    setOpen(false);
-  }
+    handleModal(false);
+  };
 
   return (
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleModal}>
         <DialogTrigger asChild>
           <Button className="flex items-center space-x-2">
             <Plus className="w-5 h-5" />
@@ -119,25 +123,7 @@ export default function AddPatientForm() {
             <div className="grid grid-cols-3 gap-6">
               <IconedInput icon={<FaRuler />} name="height" type="number" value={formData.height} onChange={handleChange} placeholder="Height (cm)" />
               <IconedInput icon={<FaWeight />} name="weight" type="number" value={formData.weight} onChange={handleChange} placeholder="Weight (kg)" />
-              <Select value={formData.gender} onValueChange={handleGenderChange}>
-                <SelectTrigger className={'h-full'}>
-                  <SelectValue placeholder="Select Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MALE">
-                    <div className="flex gap-2 items-center">
-                      <IoMdMale className={'text-lg text-blue-600'}/>
-                      <span>Male</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="FEMALE">
-                    <div className="flex gap-2 items-center">
-                      <IoMdFemale className={'text-lg text-pink-600'}/>
-                      <span>Female</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <CustomGenderSelect value={formData.gender} onValueChange={handleGenderChange} />
             </div>
 
             <DialogFooter>

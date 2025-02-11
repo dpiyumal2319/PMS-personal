@@ -75,7 +75,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, itemsPerPage = 10 }
     };
 
     return (
-        <div className="flex items-center justify-between gap-5 border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-md">
+        <div className="flex items-center justify-between gap-5 border bg-white px-4 py-3 sm:px-6 rounded-md shadow-md">
             <div className="flex flex-1 justify-between sm:hidden">
                 <Link
                     href={createPageURL(currentPage - 1)}

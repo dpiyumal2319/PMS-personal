@@ -10,23 +10,16 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "@/components/ui/dialog";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { UserRoundPen } from "lucide-react";
+import { UserRoundPen} from "lucide-react";
 import {
     FaUser, FaIdCard, FaPhone, FaCalendarAlt, FaMapMarkerAlt,
     FaRuler, FaWeight
 } from "react-icons/fa";
-import { IoMdMale, IoMdFemale } from "react-icons/io";
 import { PatientFormData } from "@/app/lib/definitions";
 import { handleServerAction } from "@/app/lib/utils";
 import { updatePatient } from "@/app/lib/actions";
 import IconedInput from "@/app/(dashboard)/_components/IconedInput";
+import CustomGenderSelect from "@/app/(dashboard)/patients/_components/CustomGenderSelect";
 
 type Gender = "" | "MALE" | "FEMALE";
 
@@ -101,17 +94,20 @@ export default function EditPatientForm({ patientData, id }: { patientData: Pati
                     <IconedInput icon={<FaMapMarkerAlt />} name="address" value={formData.address} onChange={handleChange} placeholder="Address" />
 
                     <div className="grid grid-cols-3 gap-6">
-                        <IconedInput icon={<FaRuler />} name="height" type="number" value={formData.height} onChange={handleChange} placeholder="Height (cm)" />
-                        <IconedInput icon={<FaWeight />} name="weight" type="number" value={formData.weight} onChange={handleChange} placeholder="Weight (kg)" />
-                        <Select value={formData.gender} onValueChange={handleGenderChange}>
-                            <SelectTrigger className={'h-full'}>
-                                <SelectValue placeholder="Select Gender" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="MALE"><div className="flex gap-2 items-center"><IoMdMale className={'text-lg text-blue-600'}/><span>Male</span></div></SelectItem>
-                                <SelectItem value="FEMALE"><div className="flex gap-2 items-center"><IoMdFemale className={'text-lg text-pink-600'}/><span>Female</span></div></SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <IconedInput icon={<FaRuler/>} name="height" type="number" value={formData.height}
+                                     onChange={handleChange} placeholder="Height (cm)"/>
+                        <IconedInput icon={<FaWeight/>} name="weight" type="number" value={formData.weight}
+                                     onChange={handleChange} placeholder="Weight (kg)"/>
+                        {/*<Select value={formData.gender} onValueChange={handleGenderChange}>*/}
+                        {/*    <SelectTrigger className={'h-full'}>*/}
+                        {/*        <SelectValue placeholder="Select Gender" />*/}
+                        {/*    </SelectTrigger>*/}
+                        {/*    <SelectContent>*/}
+                        {/*        <SelectItem value="MALE"><div className="flex gap-2 items-center"><IoMdMale className={'text-lg text-blue-600'}/><span>Male</span></div></SelectItem>*/}
+                        {/*        <SelectItem value="FEMALE"><div className="flex gap-2 items-center"><IoMdFemale className={'text-lg text-pink-600'}/><span>Female</span></div></SelectItem>*/}
+                        {/*    </SelectContent>*/}
+                        <CustomGenderSelect value={formData.gender} onValueChange={handleGenderChange} />
+
                     </div>
 
                     <DialogFooter>

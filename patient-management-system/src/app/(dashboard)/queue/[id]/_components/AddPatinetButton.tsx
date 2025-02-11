@@ -2,7 +2,7 @@
 
 import React, {useEffect, useState} from 'react';
 import {Button} from "@/components/ui/button";
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {useDebounce} from "@/hooks/useDebounce";
 import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
@@ -11,6 +11,7 @@ import {calcAge, handleServerAction} from "@/app/lib/utils";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import Link from "next/link";
 
 // Search by types
 const AddPatientButton = ({id}: { id: number }) => {
@@ -92,14 +93,15 @@ const AddPatientButton = ({id}: { id: number }) => {
 
     return (
         <>
-            <Button
-                className='text-white font-bold disabled:bg-gray-500'
-                onClick={() => setOpen(true)}
-            >
-                Add Patient
-            </Button>
-
             <Dialog open={open} onOpenChange={setOpen} modal={true}>
+                <DialogTrigger asChild>
+                    <Button
+                        className='text-white font-bold disabled:bg-gray-500'
+                        onClick={() => setOpen(true)}
+                    >
+                        Add Patient
+                    </Button>
+                </DialogTrigger>
                 <DialogContent className="max-w-5xl max-h-screen flex flex-col justify-start">
                     <DialogHeader>
                         <DialogTitle>Search Patient</DialogTitle>
@@ -132,13 +134,11 @@ const AddPatientButton = ({id}: { id: number }) => {
                         />
                     </div>
 
-
                     {/*Error message*/}
                     {error && <p className="text-red-500">{error}</p>}
 
                     {/* Search Results */}
-                    <div className="max-h-60 overflow-y-auto mt-2 border rounded">
-                        {results.length > 0 ? (
+                    {results.length > 0 ? (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -159,7 +159,6 @@ const AddPatientButton = ({id}: { id: number }) => {
                                             <TableCell>{patient.name}</TableCell>
                                             <TableCell>{getSex(patient.gender)}</TableCell>
                                             <TableCell>{patient.birthDate ? calcAge(new Date(patient.birthDate)) : "N/A"}</TableCell>
-
                                             <TableCell>{patient.telephone}</TableCell>
                                             <TableCell>{patient.NIC || "N/A"}</TableCell>
                                             <TableCell>
@@ -172,13 +171,19 @@ const AddPatientButton = ({id}: { id: number }) => {
                                 </TableBody>
                             </Table>
                         ) : (
-                            searchTerm && <p className="p-2 text-gray-500">No results found</p>
+                        searchTerm && <p className="p-2 text-gray-500">No results found</p>
                         )}
-                    </div>
+                    {results.length > 9 && (
+                        <Link href={`/patients?query=${encodeURIComponent(searchTerm)}&filter=${encodeURIComponent(searchBy)}`} className={'text-blue-500 underline'}>
+                            Show More...
+                        </Link>
+                    )}
                     <div className="flex justify-start mt-4">
-                        <Button onClick={() => console.log("Redirect to add new patient form")}>
-                            Add New Patient
-                        </Button>
+                        <Link href={`/patients?model=true`}>
+                            <Button>
+                                Add New Patient
+                            </Button>
+                        </Link>
                     </div>
                 </DialogContent>
             </Dialog>
