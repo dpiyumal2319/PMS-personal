@@ -883,3 +883,11 @@ export async function deletePatientReport(reportId: number, patientID: number): 
         return {success: false, message: 'An error occurred while deleting report'};
     }
 }
+
+export async function getPendingPatientsCount() {
+    return prisma.queueEntry.count({
+        where: {
+            status: 'PENDING'
+        }
+    });
+}
