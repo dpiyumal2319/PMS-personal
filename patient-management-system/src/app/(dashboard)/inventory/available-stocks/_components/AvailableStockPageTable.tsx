@@ -54,7 +54,7 @@ export default async function AvailableStockPageTable({
             </div>
         </div>;
     } else if (selection === "batch") {
-        const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort);
+        const filteredDrugsByBatch = await getFilteredDrugsByBatch(query, currentPage, sort, 0, 0);
         content = <div>
             <div>
                 <DrugListByBatch batches={filteredDrugsByBatch} />

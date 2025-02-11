@@ -381,15 +381,24 @@ export async function getFilteredDrugsByBrand({
 export async function getFilteredDrugsByBatch(
     query: string = "",
     page: number = 1,
-    sort: string = "expiryDate"
+    sort: string = "expiryDate",
+    modelId: number = 0,
+    brandId: number = 0
 ) {
-    const batches = await prisma.batch.findMany({
-        where: {
-            status: "AVAILABLE",
-            number: {
-                contains: query, // Search by batch number
-            },
+    // Base where condition
+    const whereCondition: any = {
+        status: "AVAILABLE",
+        number: {
+            contains: query, // Search by batch number
         },
+    };
+
+    // Apply modelId and brandId filters if provided
+    if (modelId !== 0) whereCondition.drugId = modelId;
+    if (brandId !== 0) whereCondition.drugBrandId = brandId;
+
+    const batches = await prisma.batch.findMany({
+        where: whereCondition,
         include: {
             drug: true,
             drugBrand: true,
@@ -428,7 +437,6 @@ export async function getFilteredDrugsByBatch(
 
     return paginatedBatches;
 }
-
 
 
 
