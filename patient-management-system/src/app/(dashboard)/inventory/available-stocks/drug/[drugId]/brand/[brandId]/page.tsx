@@ -13,14 +13,14 @@ export default async function Page({
         page?: string;
         selection?: string;
         sort?: string;
-    }, 
+    },
     params: {
         drugId: number;
         brandId: number;
     }
 }) {
     const { drugId, brandId } = await params;
-    const  searchParamsAwaited  = await searchParams;
+    const searchParamsAwaited = await searchParams;
 
     const query = searchParamsAwaited?.query || "";
     const currentPage = Number(searchParamsAwaited?.page) || 1;
@@ -29,6 +29,9 @@ export default async function Page({
     return (
         <div className="flex h-full flex-col w-full">
             <div className="sticky top-0 p-4 bg-white border-b shadow-md flex flex-wrap gap-4 z-20">
+                <div className="relative w-[200px]">
+                    <SearchPanel placeholder="Search Batch..." />
+                </div>
                 <Dropdown
                     items={[
                         { label: "Expiry Date", value: "expiryDate" },
@@ -37,10 +40,7 @@ export default async function Page({
                     ]}
                     urlParameterName="sort"
                 />
-                <div className="relative w-[200px]">
-                    <SearchPanel placeholder="Search Batch..." />
 
-                </div>
             </div>
             <div className="flex-grow overflow-auto">
                 <Suspense fallback={<DrugListSkeleton isLoading={true} />}>
