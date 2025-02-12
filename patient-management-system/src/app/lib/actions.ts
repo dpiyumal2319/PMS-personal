@@ -1359,7 +1359,7 @@ export async function searchDrugBrands(query: string) {
   return prisma.drugBrand.findMany({
     where: {
       name: {
-        contains: query,
+        startsWith: query,
       },
     },
     select: {
@@ -1377,7 +1377,7 @@ export async function searchDrugModels(query: string){
     return prisma.drug.findMany({
         where: {
             name: {
-                contains: query,
+                startsWith: query,
             },
         },
         select: {

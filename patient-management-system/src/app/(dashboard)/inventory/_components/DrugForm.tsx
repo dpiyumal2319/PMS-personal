@@ -58,12 +58,22 @@ export function DrugForm() {
     const updatedValue = e.target.type === "number" ? Number(value) : value;
     setFormData((prev) => ({ ...prev, [name]: updatedValue }));
 
-    if (name === "brandName" && value.length >= 2) {
-      handleBrandSearch(value);
-      setShowBrandSuggestions(true);
-    } else if (name === "drugName" && value.length >= 2) {
-      handleDrugSearch(value);
-      setShowDrugSuggestions(true);
+    if (name === "brandName") {
+      if (value.length >= 2) {
+        handleBrandSearch(value);
+        setShowBrandSuggestions(true);
+      } else {
+        setBrandSuggestions([]);
+        setShowBrandSuggestions(false);
+      }
+    } else if (name === "drugName") {
+      if (value.length >= 2) {
+        handleDrugSearch(value);
+        setShowDrugSuggestions(true);
+      } else {
+        setDrugSuggestions([]);
+        setShowDrugSuggestions(false);
+      }
     }
   };
 
