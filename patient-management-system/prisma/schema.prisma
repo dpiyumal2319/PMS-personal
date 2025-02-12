@@ -128,19 +128,23 @@ model Batch {
 }
 
 model Prescription {
-  id        Int      @id @default(autoincrement())
-  time      DateTime @default(now())
-  patient   Patient  @relation(fields: [patientId], references: [id])
-  patientId Int
-  issues    Issue[]
+  id                 Int      @id @default(autoincrement())
+  time               DateTime @default(now())
+  presentingSymptoms String
+  bloodPressure      String?
+  pulse              String?
+  cardiovascular     String?
+  patient            Patient  @relation(fields: [patientId], references: [id])
+  patientId          Int
+  issues             Issue[]
 }
 
 model Issue {
   id               Int              @id @default(autoincrement())
   prescription     Prescription     @relation(fields: [prescriptionId], references: [id])
   prescriptionId   Int
-  batch            Batch            @relation(fields: [batchId], references: [id])
-  batchId          Int
+  batch            Batch?           @relation(fields: [batchId], references: [id])
+  batchId          Int?
   strategy         IssueingStrategy
   stratergyDetails Json
   quantity         Float
