@@ -1,23 +1,23 @@
-"use client";
-
-import React from "react";
+// SortingDropdownCM.tsx
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
-import { searchModelsCM } from "@/app/lib/definitions";
+export default function SortingDropdownCM({
+  selection,
+}: {
+  selection: string;
+}) {
+  const sortOptions = [
+    { label: "Alphabetically", value: "alphabetically" },
+    { label: "Total Price (Highest)", value: "highest" },
+    { label: "Total Price (Lowest)", value: "lowest" },
+  ];
 
-function SortingDropdownCM({ selection }: { selection: string }) {
-  // const searchParams = useSearchParams();
-  // const selected = searchParams.get(selection);
+  if (selection === "batch") {
+    sortOptions.push(
+      { label: "Cost per Unit (Highest)", value: "unit-highest" },
+      { label: "Cost per Unit (Lowest)", value: "unit-lowest" }
+    );
+  }
 
-  const selectedSort = searchModelsCM.filter(
-    (search) => search.value === selection
-  );
-
-  return (
-    <div>
-      <Dropdown items={selectedSort[0]?.sortOptions} urlParameterName="sort" />
-    </div>
-  );
+  return <Dropdown items={sortOptions} urlParameterName="sort" />;
 }
-
-export default SortingDropdownCM;

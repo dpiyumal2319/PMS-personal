@@ -1,43 +1,68 @@
-import React from "react";
+import { Suspense } from "react";
+import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
+import { SortOption } from "@/app/lib/definitions";
+import Pagination from "@/app/(dashboard)/_components/Pagination";
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import SortingDropdownCM from "@/app/(dashboard)/inventory/cost-management/_components/SortingDropdownCM";
-import DatePicker from "@/app/(dashboard)/_components/DatePicker";
-import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
+import PriceTable from "@/app/(dashboard)/inventory/cost-management/_components/PriceTable";
 
 export default async function StockPage({
   searchParams,
 }: {
-  searchParams?: Promise<{
+  searchParams?: {
     query?: string;
     page?: string;
     selection?: string;
     sort?: string;
-  }>;
+  };
 }) {
-  const params = await searchParams;
-  const query = params?.query || "";
-  // const currentPage = Number(params?.page) || 1;
-  const selection = params?.selection || "model";
+  const query = searchParams?.query || "";
+  const currentPage = Number(searchParams?.page) || 1;
+  const selection = searchParams?.selection || "model";
+  // type SortOption is now imported from "@/app/lib/actions"
+  const sort: SortOption =
+    (searchParams?.sort as SortOption) || "alphabetically";
+
   const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
   return (
-    <div className="flex flex-wrap gap-4 mt-4 justify-center">
-      <Dropdown
-        items={[
-          { label: "By Model", value: "model" },
-          { label: "By Brand", value: "brand" },
-          { label: "By Batch", value: "batch" },
-        ]}
-        urlParameterName="selection"
-      />
-      <div className="relative w-[200px]">
-        <SearchPanel placeholder="Search by Name" />
+    <div className="flex flex-col gap-4 p-4">
+      {/* Controls */}
+      <div className="flex flex-wrap gap-4 justify-center">
+        <Dropdown
+          items={[
+            { label: "By Model", value: "model" },
+            { label: "By Brand", value: "brand" },
+            { label: "By Batch", value: "batch" },
+          ]}
+          urlParameterName="selection"
+          // defaultValue="model"
+        />
+        <div className="relative w-[200px]">
+          <SearchPanel placeholder="Search by Name" />
+        </div>
+        <SortingDropdownCM selection={selection} />
       </div>
-      <SortingDropdownCM selection={selection} />
-      <div>
-        <DatePicker />
+
+      {/* Content */}
+      <div className="flex-grow overflow-y-auto mt-4">
+        <Suspense fallback={<div className="text-center">Loading...</div>}>
+          <PriceTable
+            query={query}
+            currentPage={currentPage}
+            selection={selection}
+            sort={sort}
+          />
+        </Suspense>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex justify-center">
+          <Pagination totalPages={totalPages} />
+        </div>
+      )}
     </div>
   );
 }

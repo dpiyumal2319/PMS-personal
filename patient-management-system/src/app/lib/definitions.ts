@@ -123,3 +123,19 @@ export const searchModels = [
       ],
     },
   ];
+
+export interface StockData {
+    id: number;
+    name: string;
+    totalPrice: number;
+    unitPrice?: number;
+    remainingQuantity?: number;
+}
+
+export type SortOption = "alphabetically" | "highest" | "lowest" | "unit-highest" | "unit-lowest";
+
+export interface StockQueryParams {
+    query?: string;
+    page?: number;
+    sort?: SortOption;
+}

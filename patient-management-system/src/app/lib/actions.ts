@@ -195,7 +195,7 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
 
 const PAFE_SIZE_AVAILABLE_DRUGS = 10;
 
-export async function getAvailableDrugsTotalPages(query: string = "", selection: string = "model") {
+export async function getAvailableDrugsTotalPagesCM(query: string = "", selection: string = "model") {
     let totalItems = 0;
 
     if (selection === "model") {
@@ -936,4 +936,265 @@ export async function getDrugBrands() {
         select: { name: true },
         orderBy: { name: 'asc' }
     });
+}
+
+
+
+const PAGE_SIZE = 10;
+
+// Type definitions
+type SortOption = "alphabetically" | "highest" | "lowest" | "unit-highest" | "unit-lowest";
+
+interface StockQueryParams {
+    query?: string;
+    page?: number;
+    sort?: SortOption;
+}
+
+interface StockData {
+    id: number;
+    name: string;
+    totalPrice: number;
+    unitPrice?: number;
+    remainingQuantity?: number;
+}
+
+// Helper function to apply sorting
+function applySorting(data: StockData[], sort: SortOption = "alphabetically"): StockData[] {
+    switch (sort) {
+        case "alphabetically":
+            return data.sort((a, b) => a.name.localeCompare(b.name));
+        case "highest":
+            return data.sort((a, b) => b.totalPrice - a.totalPrice);
+        case "lowest":
+            return data.sort((a, b) => a.totalPrice - b.totalPrice);
+        case "unit-highest":
+            return data.sort((a, b) => {
+                const aUnit = a.unitPrice || 0;
+                const bUnit = b.unitPrice || 0;
+                return bUnit - aUnit;
+            });
+        case "unit-lowest":
+            return data.sort((a, b) => {
+                const aUnit = a.unitPrice || 0;
+                const bUnit = b.unitPrice || 0;
+                return aUnit - bUnit;
+            });
+        default:
+            return data;
+    }
+}
+
+// Get total pages for pagination
+export async function getAvailableDrugsTotalPages(query: string, selection: string): Promise<number> {
+    let count = 0;
+
+    switch (selection) {
+        case "brand":
+            count = await prisma.drugBrand.count({
+                where: {
+                    name: { contains: query },
+                    Batch: { some: { status: "AVAILABLE" } },
+                },
+            });
+            break;
+        case "model":
+            count = await prisma.drug.count({
+                where: {
+                    name: { contains: query },
+                    batch: { some: { status: "AVAILABLE" } },
+                },
+            });
+            break;
+        case "batch":
+            count = await prisma.batch.count({
+                where: {
+                    OR: [
+                        { drug: { name: { contains: query } } },
+                        { drugBrand: { name: { contains: query } } },
+                    ],
+                    status: "AVAILABLE",
+                },
+            });
+            break;
+    }
+
+    return Math.ceil(count / PAGE_SIZE);
+}
+
+// Fetch stock grouped by brand
+export async function getStockByBrand({ 
+    query = "", 
+    page = 1, 
+    sort = "alphabetically" 
+}: StockQueryParams): Promise<StockData[]> {
+    const brands = await prisma.drugBrand.findMany({
+        where: {
+            name: { contains: query },
+            Batch: { some: { status: "AVAILABLE" } },
+        },
+        include: {
+            Batch: {
+                where: { status: "AVAILABLE" },
+                select: {
+                    price: true,
+                    remainingQuantity: true,
+                },
+            },
+        },
+    });
+
+    const stockData: StockData[] = brands.map(brand => ({
+        id: brand.id,
+        name: brand.name,
+        totalPrice: brand.Batch.reduce(
+            (sum, batch) => sum + batch.price * batch.remainingQuantity, 
+            0
+        ),
+    }));
+
+    const sortedData = applySorting(stockData, sort as SortOption);
+    return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+}
+
+// Fetch stock grouped by model
+export async function getStockByModel({ 
+    query = "", 
+    page = 1, 
+    sort = "alphabetically" 
+}: StockQueryParams): Promise<StockData[]> {
+    const drugs = await prisma.drug.findMany({
+        where: {
+            name: { contains: query },
+            batch: { some: { status: "AVAILABLE" } },
+        },
+        include: {
+            batch: {
+                where: { status: "AVAILABLE" },
+                select: {
+                    price: true,
+                    remainingQuantity: true,
+                },
+            },
+        },
+    });
+
+    const stockData: StockData[] = drugs.map(drug => ({
+        id: drug.id,
+        name: drug.name,
+        totalPrice: drug.batch.reduce(
+            (sum, batch) => sum + batch.price * batch.remainingQuantity, 
+            0
+        ),
+    }));
+
+    const sortedData = applySorting(stockData, sort as SortOption);
+    return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+}
+
+// Fetch stock grouped by batch
+export async function getStockByBatch({ 
+    query = "", 
+    page = 1, 
+    sort = "alphabetically" 
+}: StockQueryParams): Promise<StockData[]> {
+    const batches = await prisma.batch.findMany({
+        where: {
+            OR: [
+                { drug: { name: { contains: query } } },
+                { drugBrand: { name: { contains: query } } },
+            ],
+            status: "AVAILABLE",
+        },
+        include: {
+            drug: true,
+            drugBrand: true,
+        },
+    });
+
+    const stockData: StockData[] = batches.map(batch => ({
+        id: batch.id,
+        name: `${batch.drugBrand.name} - ${batch.drug.name} (Batch ${batch.number})`,
+        totalPrice: batch.price * batch.remainingQuantity,
+        unitPrice: batch.price,
+        remainingQuantity: batch.remainingQuantity,
+    }));
+
+    const sortedData = applySorting(stockData, sort as SortOption);
+    return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+}
+
+// Get detailed batch information
+export async function getBatchDetails(batchId: number) {
+    return prisma.batch.findUnique({
+        where: { id: batchId },
+        include: {
+            drug: true,
+            drugBrand: true,
+        },
+    });
+}
+
+// Get low stock alerts
+export async function getLowStockAlerts(threshold: number = 10) {
+    return prisma.batch.findMany({
+        where: {
+            status: "AVAILABLE",
+            remainingQuantity: { lte: threshold },
+        },
+        include: {
+            drug: true,
+            drugBrand: true,
+        },
+        orderBy: {
+            remainingQuantity: 'asc',
+        },
+    });
+}
+
+// Get expiring stock alerts
+export async function getExpiringStockAlerts(daysThreshold: number = 30) {
+    const thresholdDate = new Date();
+    thresholdDate.setDate(thresholdDate.getDate() + daysThreshold);
+
+    return prisma.batch.findMany({
+        where: {
+            status: "AVAILABLE",
+            expiry: {
+                lte: thresholdDate,
+            },
+        },
+        include: {
+            drug: true,
+            drugBrand: true,
+        },
+        orderBy: {
+            expiry: 'asc',
+        },
+    });
+}
+
+// Get stock value summary
+export async function getStockValueSummary() {
+    const batches = await prisma.batch.findMany({
+        where: {
+            status: "AVAILABLE",
+        },
+        select: {
+            price: true,
+            remainingQuantity: true,
+        },
+    });
+
+    return {
+        totalValue: batches.reduce(
+            (sum, batch) => sum + batch.price * batch.remainingQuantity, 
+            0
+        ),
+        totalItems: batches.reduce(
+            (sum, batch) => sum + batch.remainingQuantity, 
+            0
+        ),
+        batchCount: batches.length,
+    };
 }
