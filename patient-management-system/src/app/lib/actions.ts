@@ -7,6 +7,7 @@ import { verifySession } from "./sessions";
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import { PatientFormData } from "@/app/lib/definitions";
+import { StockAnalysis, DateRange, BatchAnalysisData } from "@/app/lib/definitions";
 
 import { DrugType } from "@prisma/client";
 import  {InventoryFormData}  from "@/app/lib/definitions";
@@ -1198,4 +1199,63 @@ export async function getStockValueSummary() {
         ),
         batchCount: batches.length,
     };
+    
+}
+
+export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnalysis> {
+  try {
+    const batches = await prisma.batch.findMany({
+      where: {
+        stockDate: {
+          gte: dateRange.startDate,
+          lte: dateRange.endDate,
+        },
+      },
+      include: {
+        Issue: true,
+      },
+    });
+
+    const analysis: StockAnalysis = {
+      available: 0,
+      sold: 0,
+      expired: 0,
+      trashed: 0,
+      errors: 0,
+    };
+
+    batches.forEach((batch) => {
+      const soldQuantity = batch.fullAmount - batch.remainingQuantity;
+      const pricePerUnit = batch.price;
+      
+      // Calculate values based on price
+      const remainingValue = batch.remainingQuantity * pricePerUnit;
+      const soldValue = soldQuantity * pricePerUnit;
+
+      switch (batch.status) {
+        case "AVAILABLE":
+          analysis.available += remainingValue;
+          analysis.sold += soldValue;
+          break;
+        case "EXPIRED":
+          analysis.expired += remainingValue;
+          analysis.sold += soldValue;
+          break;
+        case "COMPLETED":
+          analysis.sold += batch.fullAmount * pricePerUnit;
+          break;
+        case "TRASHED":
+          analysis.trashed += remainingValue;
+          analysis.sold += soldValue;
+          break;
+        default:
+          analysis.errors += batch.fullAmount * pricePerUnit;
+      }
+    });
+
+    return analysis;
+  } catch (error) {
+    console.error("Error fetching stock analysis:", error);
+    throw new Error("Failed to fetch stock analysis");
+  }
 }

@@ -1,14 +1,10 @@
 import React from "react";
-import DatePicker from "@/app/(dashboard)/_components/DatePicker";
+import CardofPieChart from "../_components/CardPieChart";
 
-export default function StockChartComponent() {
+export default function StockAnalysisPage() {
   return (
-    <div className="flex items-center justify-center gap-4 mt-4">
-      <h3 className="text-lg font-semibold  text-primary-700 font-montserrat">
-        Select the duration
-      </h3>
-
-      <DatePicker />
+    <div className="container mx-auto p-4">
+      <CardofPieChart />
     </div>
   );
 }

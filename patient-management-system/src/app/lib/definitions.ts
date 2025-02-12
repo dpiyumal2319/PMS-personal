@@ -150,3 +150,34 @@ export interface StockQueryParams {
     page?: number;
     sort?: SortOption;
 }
+
+// types for inventory cost analysis
+
+export interface StockAnalysis {
+  available: number;  // Total value of available drugs
+  sold: number;      // Total value of sold drugs
+  expired: number;   // Total value of expired drugs
+  trashed: number;   // Total value of trashed drugs
+  errors: number;    // Total value of drugs with errors
+}
+
+export interface DateRange {
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface BatchAnalysisData {
+  id: number;
+  status: string;
+  price: number;
+  fullAmount: number;
+  remainingQuantity: number;
+  stockDate: Date;
+  expiry: Date;
+}
+
+export interface PieChartData {
+  name: string;
+  value: number;
+  color: string;
+}
