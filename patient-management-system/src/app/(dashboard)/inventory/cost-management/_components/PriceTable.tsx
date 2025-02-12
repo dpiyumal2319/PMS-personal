@@ -38,6 +38,7 @@ export default async function PriceTable({
         return <p className="text-gray-500">Invalid selection type</p>;
     }
   } catch (error) {
+    console.error(error);
     return (
       <p className="text-red-500">Error loading data. Please try again.</p>
     );

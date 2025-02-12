@@ -2,15 +2,11 @@
 
 import {revalidatePath} from "next/cache";
 import type {myError} from "@/app/lib/definitions";
+import {DateRange, InventoryFormData, PatientFormData, StockAnalysis} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import { Prisma } from "@prisma/client";
-import { PatientFormData } from "@/app/lib/definitions";
-import { StockAnalysis, DateRange, BatchAnalysisData } from "@/app/lib/definitions";
-
-import { DrugType } from "@prisma/client";
-import  {InventoryFormData}  from "@/app/lib/definitions";
+import {DrugType, Prisma} from "@prisma/client";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -161,8 +157,6 @@ export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
 
-const PAGE_SIZE = 10;
-
 export async function getTotalPages(query = "", filter = "name") {
     const whereClause = query
         ? {
@@ -190,30 +184,7 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
     });
 }
 
-
-
-const PAFE_SIZE_AVAILABLE_DRUGS = 10;
-
-export async function getAvailableDrugsTotalPagesCM(query: string = "", selection: string = "model") {
-    let totalItems = 0;
-
-    if (selection === "model") {
-        totalItems = await prisma.drug.count({
-            where: { name: { contains: query } },
-        });
-    } else if (selection === "brand") {
-        totalItems = await prisma.drugBrand.count({
-            where: { name: { contains: query } },
-        });
-    } else if (selection === "batch") {
-        totalItems = await prisma.batch.count({
-            where: { number: { contains: query } },
-        });
-    }
-
-    return Math.ceil(totalItems / PAFE_SIZE_AVAILABLE_DRUGS);
-}
-
+const PAGE_SIZE_AVAILABLE_DRUGS = 10;
 
 export async function getFilteredDrugsByModel({
     query = "",
@@ -282,12 +253,10 @@ export async function getFilteredDrugsByModel({
         aggregatedDrugs.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    const paginatedDrugs = aggregatedDrugs.slice(
-        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
-        page * PAFE_SIZE_AVAILABLE_DRUGS
+    return aggregatedDrugs.slice(
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
+        page * PAGE_SIZE_AVAILABLE_DRUGS
     );
-
-    return paginatedDrugs;
 }
 
 
@@ -368,12 +337,10 @@ export async function getFilteredDrugsByBrand({
     }
 
     // Pagination
-    const paginatedBrands = aggregatedBrands.slice(
-        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
-        page * PAFE_SIZE_AVAILABLE_DRUGS
+    return aggregatedBrands.slice(
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
+        page * PAGE_SIZE_AVAILABLE_DRUGS
     );
-
-    return paginatedBrands;
 }
 
 
@@ -420,12 +387,10 @@ export async function getFilteredDrugsByBatch(
     }
 
     // Pagination logic
-    const paginatedBatches = formattedBatches.slice(
-        (page - 1) * PAFE_SIZE_AVAILABLE_DRUGS,
-        page * PAFE_SIZE_AVAILABLE_DRUGS
+    return formattedBatches.slice(
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
+        page * PAGE_SIZE_AVAILABLE_DRUGS
     );
-
-    return paginatedBatches;
 }
 
 
@@ -647,17 +612,13 @@ export async function getPatientDetails(id: number) {
     });
 }
 
-const PAGE_SIZE_REPORTS = 10;
-
-export async function getFilteredReports(pageNu: number, query: string) {
+export async function getFilteredReports(query: string) {
     return prisma.reportType.findMany({
         where: {
             name: {
                 contains: query
             }
         },
-        take: PAGE_SIZE_REPORTS,
-        skip: (pageNu - 1) * PAGE_SIZE_REPORTS,
         orderBy: { id: "asc" },
         include: {
             parameters: true
@@ -976,19 +937,6 @@ export async function addNewItem(
         console.error(e);
         return { success: false, message: 'Failed to add item' };
     }
-}
-
-export async function searchDrugModal(term: string) {
-    return prisma.drug.findMany({
-        where: {
-            name: {
-                startsWith: term
-            }
-        },
-        select: {
-            name: true
-        }
-    })
 }
 
 export async function getPatientReportPages(query: string, range: string, id: number) {
@@ -1343,82 +1291,6 @@ export async function getStockByBatch({
 
     const sortedData = applySorting(stockData, sort as SortOption);
     return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-}
-
-// Get detailed batch information
-export async function getBatchDetails(batchId: number) {
-    return prisma.batch.findUnique({
-        where: { id: batchId },
-        include: {
-            drug: true,
-            drugBrand: true,
-        },
-    });
-}
-
-// Get low stock alerts
-export async function getLowStockAlerts(threshold: number = 10) {
-    return prisma.batch.findMany({
-        where: {
-            status: "AVAILABLE",
-            remainingQuantity: { lte: threshold },
-        },
-        include: {
-            drug: true,
-            drugBrand: true,
-        },
-        orderBy: {
-            remainingQuantity: 'asc',
-        },
-    });
-}
-
-// Get expiring stock alerts
-export async function getExpiringStockAlerts(daysThreshold: number = 30) {
-    const thresholdDate = new Date();
-    thresholdDate.setDate(thresholdDate.getDate() + daysThreshold);
-
-    return prisma.batch.findMany({
-        where: {
-            status: "AVAILABLE",
-            expiry: {
-                lte: thresholdDate,
-            },
-        },
-        include: {
-            drug: true,
-            drugBrand: true,
-        },
-        orderBy: {
-            expiry: 'asc',
-        },
-    });
-}
-
-// Get stock value summary
-export async function getStockValueSummary() {
-    const batches = await prisma.batch.findMany({
-        where: {
-            status: "AVAILABLE",
-        },
-        select: {
-            price: true,
-            remainingQuantity: true,
-        },
-    });
-
-    return {
-        totalValue: batches.reduce(
-            (sum, batch) => sum + batch.price * batch.remainingQuantity,
-            0
-        ),
-        totalItems: batches.reduce(
-            (sum, batch) => sum + batch.remainingQuantity,
-            0
-        ),
-        batchCount: batches.length,
-    };
-
 }
 
 export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnalysis> {

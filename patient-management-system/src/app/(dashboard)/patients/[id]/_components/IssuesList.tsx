@@ -8,7 +8,6 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
 import {Toggle} from "@/components/ui/toggle";
-import PopOverSelect from "@/app/(dashboard)/_components/PopOverSelect";
 
 
 const IssuesList = () => {

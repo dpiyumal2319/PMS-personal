@@ -6,8 +6,6 @@ import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 import AvailableStockPageTable from "./_components/AvailableStockPageTable";
-import Pagination from "../../_components/Pagination";
-import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
 import DrugListSkeleton from "./_components/DrugListSkeleton";
 
 export default async function InventoryAvailable({

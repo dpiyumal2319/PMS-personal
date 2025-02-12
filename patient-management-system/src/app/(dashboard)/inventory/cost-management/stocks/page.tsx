@@ -10,19 +10,21 @@ import PriceTable from "@/app/(dashboard)/inventory/cost-management/_components/
 export default async function StockPage({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     query?: string;
     page?: string;
     selection?: string;
     sort?: string;
-  };
+  }>;
 }) {
-  const query = searchParams?.query || "";
-  const currentPage = Number(searchParams?.page) || 1;
-  const selection = searchParams?.selection || "model";
+    const searchParamsResolved = await searchParams;
+
+  const query = searchParamsResolved?.query || "";
+  const currentPage = Number(searchParamsResolved?.page) || 1;
+  const selection = searchParamsResolved?.selection || "model";
   // type SortOption is now imported from "@/app/lib/actions"
   const sort: SortOption =
-    (searchParams?.sort as SortOption) || "alphabetically";
+    (searchParamsResolved?.sort as SortOption) || "alphabetically";
 
   const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
@@ -58,7 +60,7 @@ export default async function StockPage({
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages > 0 && (
         <div className="mt-4 flex justify-center">
           <Pagination totalPages={totalPages} />
         </div>

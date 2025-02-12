@@ -15,13 +15,13 @@ import { DateRange } from "@/app/lib/definitions";
 interface DatePickerProps {
   startDate: Date;
   endDate: Date;
-  onChange: (dateRange: DateRange) => void;
+  action: (dateRange: DateRange) => void;
 }
 
 export default function DatePicker({
   startDate,
   endDate,
-  onChange,
+  action,
 }: DatePickerProps) {
   const formatDateForInput = (date: Date) => {
     return date.toISOString().split("T")[0];
@@ -31,7 +31,7 @@ export default function DatePicker({
     const { name, value } = e.target;
     const newDate = new Date(value);
 
-    onChange({
+    action({
       startDate: name === "from" ? newDate : startDate,
       endDate: name === "to" ? newDate : endDate,
     });

@@ -18,7 +18,7 @@ export default function TabsBar() {
   }, [pathname]);
 
   return (
-    <Tabs defaultValue={activeTab} className="w-full">
+    <Tabs defaultValue={activeTab} className="w-full h-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="stock" asChild>
           <Link href="/inventory/cost-management/stocks">Stock</Link>
