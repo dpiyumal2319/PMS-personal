@@ -1023,3 +1023,47 @@ export async function getDrugBrands() {
         orderBy: { name: 'asc' }
     });
 }
+
+export async function getBatchData(batchId: number) {
+    try {
+      const batchData = await prisma.batch.findUnique({
+        where: {
+          id: batchId,
+        },
+        include: {
+          drug: {
+            select: {
+              name: true,
+            },
+          },
+          drugBrand: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+  
+      if (!batchData) {
+        throw new Error('Batch not found');
+      }
+  
+      return {
+        number: batchData.number,
+        drugName: batchData.drug.name,
+        drugBrandName: batchData.drugBrand.name,
+        drugType: batchData.type,
+        fullAmount: batchData.fullAmount,
+        remainingQuantity: batchData.remainingQuantity,
+        expiryDate: batchData.expiry.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
+        stockDate: batchData.stockDate.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
+        price: batchData.price,
+        status: batchData.status,
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      await prisma.$disconnect();
+    }
+  }
