@@ -6,6 +6,7 @@ import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import SortingDropdownCM from "@/app/(dashboard)/inventory/cost-management/_components/SortingDropdownCM";
 import PriceTable from "@/app/(dashboard)/inventory/cost-management/_components/PriceTable";
+import { PriceTableSkeleton } from "../_components/PriceTableSkeleton";
 
 export default async function StockPage({
   searchParams,
@@ -17,7 +18,7 @@ export default async function StockPage({
     sort?: string;
   }>;
 }) {
-    const searchParamsResolved = await searchParams;
+  const searchParamsResolved = await searchParams;
 
   const query = searchParamsResolved?.query || "";
   const currentPage = Number(searchParamsResolved?.page) || 1;
@@ -49,7 +50,14 @@ export default async function StockPage({
 
       {/* Content */}
       <div className="flex-grow overflow-y-auto mt-4">
-        <Suspense fallback={<div className="text-center">Loading...</div>}>
+        <Suspense
+          fallback={
+            <div className="text-center">
+              {" "}
+              <PriceTableSkeleton />
+            </div>
+          }
+        >
           <PriceTable
             query={query}
             currentPage={currentPage}

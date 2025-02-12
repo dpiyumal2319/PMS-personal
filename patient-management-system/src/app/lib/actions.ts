@@ -1367,7 +1367,7 @@ export async function searchDrugBrands(query: string) {
       name: true,
       description: true,
     },
-    take: 5,
+    take: 8,
   });
 }
 
@@ -1384,6 +1384,6 @@ export async function searchDrugModels(query: string){
             id: true,
             name: true,
         },
-        take: 5,
+        take: 8,
     });
 }

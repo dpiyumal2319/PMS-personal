@@ -25,9 +25,9 @@ interface InventoryFormData {
   drugName: string;
   batchNumber: string;
   drugType: DrugType;
-  quantity: number;
+  quantity: string;
   expiry: string;
-  price: number;
+  price: string;
 }
 
 export function DrugForm() {
@@ -37,9 +37,9 @@ export function DrugForm() {
     drugName: "",
     batchNumber: "",
     drugType: "Tablet",
-    quantity: 0,
+    quantity: "",
     expiry: "",
-    price: 0,
+    price: "",
   });
 
   const [brandSuggestions, setBrandSuggestions] = useState<
@@ -127,13 +127,12 @@ export function DrugForm() {
         setIsOpen(false);
         setFormData({
           brandName: "",
-
           drugName: "",
           batchNumber: "",
           drugType: "Tablet",
-          quantity: 0,
+          quantity: "",
           expiry: "",
-          price: 0,
+          price: "",
         });
       }
     } catch (error) {
