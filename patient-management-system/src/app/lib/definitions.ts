@@ -1,38 +1,6 @@
 import { IconType } from "react-icons";
 import { IssueingStrategy } from "@prisma/client";
-
-export type MealStrategy = {
-    breakfast: boolean;
-    lunch: boolean;
-    dinner: boolean;
-    quantity: number;
-    beforeAfterMeal: boolean;
-    minutesBeforeAfterMeal: number;
-};
-
-export type WhenNeededStrategy = {
-    quantity: number;
-};
-
-export type PeriodicStrategy = {
-    interval: number;
-    quantity: number;
-};
-
-export type OffRecordStrategy = {
-    details: string;
-    quantity: number;
-};
-
-export type OtherStrategy = {
-    details: string;
-    quantity: number;
-};
-
-export type StrategyJson = {
-    name: IssueingStrategy;
-    strategy: MealStrategy | WhenNeededStrategy | PeriodicStrategy | OffRecordStrategy | OtherStrategy;
-}
+import { z } from "zod";
 
 export type SessionPayload = {
     id: number;
@@ -215,3 +183,55 @@ export interface PieChartData {
   value: number;
   color: string;
 }
+
+const MealStrategySchema = z.object({
+    breakfast: z.object({
+        active: z.boolean(),
+        quantity: z.number(),
+    }),
+    lunch: z.object({
+        active: z.boolean(),
+        quantity: z.number(),
+    }),
+    dinner: z.object({
+        active: z.boolean(),
+        quantity: z.number(),
+    }),
+    afterMeal: z.boolean(),
+    minutesBeforeAfterMeal: z.number(),
+});
+
+
+const WhenNeededStrategySchema = z.object({
+    quantity: z.number(),
+});
+
+const PeriodicStrategySchema = z.object({
+    interval: z.number(),
+    quantity: z.number(),
+});
+
+const OffRecordStrategySchema = z.object({
+    details: z.string(),
+    quantity: z.number(),
+});
+
+const OtherStrategySchema = z.object({
+    details: z.string(),
+    quantity: z.number(),
+});
+
+export const StrategyJsonSchema = z.discriminatedUnion("name", [
+    z.object({ name: z.literal("MEAL"), strategy: MealStrategySchema }),
+    z.object({ name: z.literal("WHEN_NEEDED"), strategy: WhenNeededStrategySchema }),
+    z.object({ name: z.literal("PERIODIC"), strategy: PeriodicStrategySchema }),
+    z.object({ name: z.literal("OFF_RECORD"), strategy: OffRecordStrategySchema }),
+    z.object({ name: z.literal("OTHER"), strategy: OtherStrategySchema }),
+]);
+
+export type StrategyJson = z.infer<typeof StrategyJsonSchema>;
+export type MealStrategy = z.infer<typeof MealStrategySchema>;
+export type WhenNeededStrategy = z.infer<typeof WhenNeededStrategySchema>;
+export type PeriodicStrategy = z.infer<typeof PeriodicStrategySchema>;
+export type OffRecordStrategy = z.infer<typeof OffRecordStrategySchema>;
+export type OtherStrategy = z.infer<typeof OtherStrategySchema>;

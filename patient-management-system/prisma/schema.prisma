@@ -104,6 +104,7 @@ model DrugBrand {
   name        String
   description String?
   Batch       Batch[]
+  Issue       Issue[]
 }
 
 model Drug {
@@ -111,6 +112,7 @@ model Drug {
   name         String
   batch        Batch[]
   IssueHistory IssueHistory[]
+  Issue        Issue[]
 }
 
 model Batch {
@@ -143,15 +145,19 @@ model Prescription {
 }
 
 model Issue {
-  id               Int              @id @default(autoincrement())
-  prescription     Prescription     @relation(fields: [prescriptionId], references: [id])
-  prescriptionId   Int
-  batch            Batch?           @relation(fields: [batchId], references: [id])
-  batchId          Int?
-  strategy         IssueingStrategy
-  stratergyDetails Json
-  quantity         Float
-  IssueHistory     IssueHistory[]
+  id              Int              @id @default(autoincrement())
+  prescription    Prescription     @relation(fields: [prescriptionId], references: [id])
+  prescriptionId  Int
+  batch           Batch?           @relation(fields: [batchId], references: [id])
+  batchId         Int?
+  drug            Drug             @relation(fields: [drugId], references: [id])
+  drugId          Int
+  brand           DrugBrand        @relation(fields: [brandId], references: [id])
+  brandId         Int
+  strategy        IssueingStrategy
+  strategyDetails Json
+  quantity        Float
+  IssueHistory    IssueHistory[]
 }
 
 model ReportParameter {
