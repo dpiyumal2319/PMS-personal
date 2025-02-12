@@ -38,6 +38,7 @@ const MEALS_CONFIG: mealConfig[] = [
 const MealCards = ({
                        globalQuantity,
                        strategy,
+                          setStrategy,
                        handleIndividualQuantityChange,
                        handleGlobalQuantityChange,
                        isLocked,
@@ -45,11 +46,24 @@ const MealCards = ({
                    }: {
     globalQuantity: number;
     strategy: MealStrategy;
+    setStrategy: (value: React.SetStateAction<MealStrategy>) => void;
     handleIndividualQuantityChange: (meal: keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal'>, value: string) => void;
     handleGlobalQuantityChange: (value: string) => void;
     isLocked: boolean;
     setIsLocked: (value: boolean) => void;
 }) => {
+
+    const onCheck = (checked: boolean | string, id: string) => {
+        const meal = id as keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal'>;
+        setStrategy((prev) => ({
+            ...prev,
+            [meal]: {
+                ...prev[meal],
+                active: !!checked, // ensure boolean value
+            },
+        }));
+    };
+
     return (
         <div className="space-y-4">
             {/* Global Quantity Input */}
@@ -89,7 +103,7 @@ const MealCards = ({
                     className="bg-slate-50 p-4 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-between"
                 >
                     <div className="flex items-center space-x-4">
-                        <Checkbox id={id} className="h-6 w-6 rounded-md border-2" defaultChecked/>
+                        <Checkbox id={id} className="h-6 w-6 rounded-md border-2" checked={strategy[id].active} onCheckedChange={(checked) => onCheck(checked, id)}/>
                         <Label htmlFor={id} className="flex items-center space-x-3 text-lg">
                             <Icon className={`h-5 w-5 ${iconColor}`}/>
                             <span>{label}</span>

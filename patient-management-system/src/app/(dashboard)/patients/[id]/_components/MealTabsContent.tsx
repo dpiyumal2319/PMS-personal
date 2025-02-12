@@ -17,9 +17,6 @@ const MealTabsContent = ({strategy, setStrategy}: MealTabsContentProps) => {
     const [isLocked, setIsLocked] = useState(true);
     const [globalQuantity, setGlobalQuantity] = useState(0);
 
-
-    const [isBeforeMeal, setIsBeforeMeal] = useState(true);
-
     const handleGlobalQuantityChange = (value: string) => {
         const quantity = Number(value);
         if (!isNaN(quantity)) {
@@ -66,6 +63,7 @@ const MealTabsContent = ({strategy, setStrategy}: MealTabsContentProps) => {
                     <MealCards
                         globalQuantity={globalQuantity}
                         strategy={strategy}
+                        setStrategy={setStrategy}
                         handleIndividualQuantityChange={handleIndividualQuantityChange}
                         isLocked={isLocked}
                         handleGlobalQuantityChange={handleGlobalQuantityChange}
@@ -78,22 +76,22 @@ const MealTabsContent = ({strategy, setStrategy}: MealTabsContentProps) => {
                     {/* Before/After Meal Switch */}
                     <Card className="bg-slate-50 p-4 rounded-lg">
                         <Label className="text-lg mb-4 block">Timing</Label>
-                        <div className="flex items-center justify-center space-x-4">
+                        <div className="flex items-center justify-center space-x-4 transition-colors">
                             <span
-                                className={`text-sm font-medium transition-colors ${isBeforeMeal ? 'text-blue-600' : 'text-slate-500'}`}>
+                                className={`text-sm font-medium transition-colors ${!strategy.afterMeal ? 'text-blue-600' : 'text-slate-500'}`}>
                                 Before
                             </span>
                             <Switch
-                                checked={!isBeforeMeal}
-                                onCheckedChange={() => setIsBeforeMeal(!isBeforeMeal)}
+                                checked={strategy.afterMeal}
+                                onCheckedChange={(checked) => setStrategy(prev => ({...prev, afterMeal: checked}))}
                                 className={`${
-                                    !isBeforeMeal
+                                    strategy.afterMeal
                                         ? 'bg-green-600 data-[state=checked]:bg-green-600'
                                         : 'bg-blue-600 data-[state=unchecked]:bg-blue-600'
                                 }`}
                             />
                             <span className={`text-sm font-medium transition-colors ${
-                                !isBeforeMeal ? 'text-green-600' : 'text-slate-500'
+                                strategy.afterMeal ? 'text-green-600' : 'text-slate-500'
                             }`}>
                                 After
                             </span>
@@ -103,7 +101,7 @@ const MealTabsContent = ({strategy, setStrategy}: MealTabsContentProps) => {
                     {/* Minutes Input */}
                     <Card className="bg-slate-50 p-4 rounded-lg">
                         <Label htmlFor="minutes" className="text-sm text-slate-500 mb-2 block">
-                            Minutes {isBeforeMeal ? 'before' : 'after'} meal
+                            Minutes {!strategy.afterMeal ? 'before' : 'after'} meal
                         </Label>
                         <div className="relative">
                             <Input

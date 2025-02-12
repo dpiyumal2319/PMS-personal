@@ -68,6 +68,9 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue, existingIssues}) => 
     };
 
     const handleStrategyChange = (newStrategy: IssueingStrategy, newStrategyData: StrategyJson) => {
+        console.log('newStrategy:', newStrategy);
+        console.log('newStrategyData:', newStrategyData);
+
         setStrategy(newStrategy);
         setStrategyData(newStrategyData);
     };

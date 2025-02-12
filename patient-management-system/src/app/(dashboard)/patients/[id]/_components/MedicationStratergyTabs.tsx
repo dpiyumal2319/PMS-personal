@@ -28,18 +28,18 @@ interface MedicationStrategyTabsProps {
 const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps) => {
     const [mealStrategy, setMealStrategy] = useState<MealStrategy>({
         dinner: {
-            active: false,
+            active: true,
             quantity: 0
         },
         breakfast: {
-            active: false,
+            active: true,
             quantity: 0
         },
         lunch: {
-            active: false,
+            active: true,
             quantity: 0
         },
-        afterMeal: false,
+        afterMeal: true,
         minutesBeforeAfterMeal: 0
     });
 
@@ -89,7 +89,7 @@ const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps)
                     strategy: offRecordStrategy
                 });
                 break;
-            case IssueingStrategy.ORTHER:
+            case IssueingStrategy.OTHER:
                 onStrategyChange(strategy, {
                     name: IssueingStrategy.OTHER,
                     strategy: otherStrategy
@@ -114,7 +114,7 @@ const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps)
                     <TabsTrigger value={IssueingStrategy.OFF_RECORD} className="flex items-center space-x-2">
                         <FileX className="w-4 h-4"/> <span>Off Record</span>
                     </TabsTrigger>
-                    <TabsTrigger value={IssueingStrategy.ORTHER} className="flex items-center space-x-2">
+                    <TabsTrigger value={IssueingStrategy.OTHER} className="flex items-center space-x-2">
                         <MoreHorizontal className="w-4 h-4"/> <span>Other</span>
                     </TabsTrigger>
                 </TabsList>
