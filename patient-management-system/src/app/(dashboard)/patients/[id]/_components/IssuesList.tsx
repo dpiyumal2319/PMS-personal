@@ -47,8 +47,8 @@ const IssuesList = () => {
         }, 700);
 
         const handleDrugSelect = async (selectedID: number) => {
-            setSelectedDrug(selectedID);
             if (selectedID !== selectedDrug) {
+                setSelectedDrug(selectedID);
                 setIsBrandSearching(true);
                 try {
                     const brands = await searchBrandByDrug({drugID: selectedID});
@@ -75,14 +75,16 @@ const IssuesList = () => {
                         <div className="flex items-center space-x-4">
                             <DrugCombobox options={drugs} onChange={(selectedID) => handleDrugSelect(Number(selectedID))}
                                           onSearch={handleDrugSearch} isSearching={isDrugSearching}
-                                          placeholder={"Select drug"}
+                                          placeholder={"Select drug"} value={selectedDrug}
                                           searchPlaceholder={"Search drug"} noOptionsMessage={"No drugs found"}
                                           className={selectedDrug ? "border-primary-500 shadow-sm" : "border-gray-300 hover:border-gray-400"}/>
                             <BrandCombobox options={brands} onChange={(selectedID) => setSelectedBrand(Number(selectedID))}
                                            onSearch={() => {
                                            }} isSearching={isBrandSearching} noOptionsMessage={"No brands found"}
+                                           value={selectedBrand}
                                            placeholder={"Select brand"} searchPlaceholder={"Search brand"}
-                                           className={selectedBrand ? "border-primary-500 shadow-sm" : "border-gray-300 hover:border-gray-400"} disabled={!selectedDrug}/>
+                                           className={selectedBrand ? "border-primary-500 shadow-sm" : "border-gray-300 hover:border-gray-400"}
+                                           disabled={!selectedDrug}/>
                         </div>
                         <Tabs defaultValue="MEAL">
                             <TabsList>
