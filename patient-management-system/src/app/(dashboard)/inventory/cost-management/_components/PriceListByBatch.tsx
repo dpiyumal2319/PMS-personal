@@ -6,11 +6,8 @@ interface StockData {
   unitPrice?: number;
   remainingQuantity?: number;
 }
-import {
-  AiOutlineBarcode,
-  AiOutlineDollar,
-  AiOutlineNumber,
-} from "react-icons/ai";
+import { LucidePackagePlus } from "lucide-react";
+import { AiOutlineDollar, AiOutlineNumber } from "react-icons/ai";
 
 export default function PriceListByBatch({ items }: { items: StockData[] }) {
   return (
@@ -24,7 +21,7 @@ export default function PriceListByBatch({ items }: { items: StockData[] }) {
             <div className="flex-1 flex justify-between items-center">
               {/* Batch Info */}
               <div className="flex items-center gap-3 text-primary-600 font-semibold text-lg flex-1">
-                <AiOutlineBarcode className="w-5 h-5 text-gray-500" />
+                <LucidePackagePlus className="w-5 h-5 text-gray-500" />
                 <span>{item.name}</span>
               </div>
 

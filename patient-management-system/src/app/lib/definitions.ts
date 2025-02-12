@@ -183,6 +183,8 @@ export interface StockQueryParams {
     query?: string;
     page?: number;
     sort?: SortOption;
+     startDate?: Date;
+    endDate?: Date;
 }
 
 // types for inventory cost analysis

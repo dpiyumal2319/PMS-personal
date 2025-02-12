@@ -1,59 +1,66 @@
 import { Suspense } from "react";
 import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
-import { SortOption } from "@/app/lib/definitions";
+import { SortOption, DateRange } from "@/app/lib/definitions";
 import Pagination from "@/app/(dashboard)/_components/Pagination";
-import SearchPanel from "@/app/(dashboard)/_components/Search";
-import Dropdown from "@/app/(dashboard)/_components/Dropdown";
-import SortingDropdownCM from "@/app/(dashboard)/inventory/cost-management/_components/SortingDropdownCM";
 import PriceTable from "@/app/(dashboard)/inventory/cost-management/_components/PriceTable";
 import { PriceTableSkeleton } from "../_components/PriceTableSkeleton";
+import StockTopbar from "../_components/StockTopBar";
 
 export default async function StockPage({
   searchParams,
 }: {
-  searchParams?: Promise<{
+  searchParams: Promise<{
     query?: string;
     page?: string;
     selection?: string;
     sort?: string;
+    startDate?: string;
+    endDate?: string;
   }>;
 }) {
-  const searchParamsResolved = await searchParams;
+  //Await for the search
+  const resolvedSearchParams = await searchParams;
 
-  const query = searchParamsResolved?.query || "";
-  const currentPage = Number(searchParamsResolved?.page) || 1;
-  const selection = searchParamsResolved?.selection || "model";
-  // type SortOption is now imported from "@/app/lib/actions"
+  const query = resolvedSearchParams?.query || "";
+  const currentPage = Number(resolvedSearchParams?.page) || 1;
+  const selection = resolvedSearchParams?.selection || "model";
   const sort: SortOption =
-    (searchParamsResolved?.sort as SortOption) || "alphabetically";
+    (resolvedSearchParams?.sort as SortOption) || "alphabetically";
+
+  // Default to last 30 days if no dates are provided
+  const defaultStartDate = new Date();
+  defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+
+  const startDate = resolvedSearchParams?.startDate
+    ? new Date(resolvedSearchParams.startDate)
+    : defaultStartDate;
+  const endDate = resolvedSearchParams?.endDate
+    ? new Date(resolvedSearchParams.endDate)
+    : new Date();
 
   const totalPages = await getAvailableDrugsTotalPages(query, selection);
+  const handleDateChange = (newDateRange: DateRange) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set(
+      "startDate",
+      newDateRange.startDate.toISOString().split("T")[0]
+    );
+    searchParams.set(
+      "endDate",
+      newDateRange.endDate.toISOString().split("T")[0]
+    );
+    window.location.search = searchParams.toString();
+  };
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      {/* Controls */}
-      <div className="flex flex-wrap gap-4 justify-center">
-        <Dropdown
-          items={[
-            { label: "By Model", value: "model" },
-            { label: "By Brand", value: "brand" },
-            { label: "By Batch", value: "batch" },
-          ]}
-          urlParameterName="selection"
-          // defaultValue="model"
-        />
-        <div className="relative w-[200px]">
-          <SearchPanel placeholder="Search by Name" />
-        </div>
-        <SortingDropdownCM selection={selection} />
-      </div>
-
+      {/* Top Bar */}
+      <StockTopbar />
       {/* Content */}
       <div className="flex-grow overflow-y-auto mt-4">
         <Suspense
           fallback={
             <div className="text-center">
-              {" "}
               <PriceTableSkeleton />
             </div>
           }
@@ -63,6 +70,8 @@ export default async function StockPage({
             currentPage={currentPage}
             selection={selection}
             sort={sort}
+            startDate={startDate}
+            endDate={endDate}
           />
         </Suspense>
       </div>

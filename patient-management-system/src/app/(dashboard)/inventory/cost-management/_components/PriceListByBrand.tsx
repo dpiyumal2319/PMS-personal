@@ -7,7 +7,8 @@ interface StockData {
 }
 
 // PriceListByBrand.tsx
-import { AiOutlineShop, AiOutlineDollar } from "react-icons/ai";
+import { AiOutlineDollar } from "react-icons/ai";
+import { MdOutlineBrandingWatermark } from "react-icons/md";
 
 export default function PriceListByBrand({ items }: { items: StockData[] }) {
   return (
@@ -21,7 +22,7 @@ export default function PriceListByBrand({ items }: { items: StockData[] }) {
             <div className="flex-1 flex justify-between items-center">
               {/* Brand Name */}
               <div className="flex items-center gap-3 text-primary-600 font-semibold text-lg flex-1">
-                <AiOutlineShop className="w-5 h-5 text-gray-500" />
+                <MdOutlineBrandingWatermark className="w-5 h-5 text-gray-500" />
                 <span>{item.name}</span>
               </div>
 

@@ -7,6 +7,7 @@ import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {DrugType, Prisma} from "@prisma/client";
+import { StockData, StockQueryParams, SortOption } from "@/app/lib/definitions";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -1111,22 +1112,7 @@ export async function getPendingPatientsCount() {
 
 const PAGE_SIZE = 10;
 
-// Type definitions
-type SortOption = "alphabetically" | "highest" | "lowest" | "unit-highest" | "unit-lowest";
 
-interface StockQueryParams {
-    query?: string;
-    page?: number;
-    sort?: SortOption;
-}
-
-interface StockData {
-    id: number;
-    name: string;
-    totalPrice: number;
-    unitPrice?: number;
-    remainingQuantity?: number;
-}
 
 // Helper function to apply sorting
 function applySorting(data: StockData[], sort: SortOption = "alphabetically"): StockData[] {
@@ -1191,55 +1177,39 @@ export async function getAvailableDrugsTotalPages(query: string, selection: stri
     return Math.ceil(count / PAGE_SIZE);
 }
 
-// Fetch stock grouped by brand
-export async function getStockByBrand({
-    query = "",
-    page = 1,
-    sort = "alphabetically"
-}: StockQueryParams): Promise<StockData[]> {
-    const brands = await prisma.drugBrand.findMany({
-        where: {
-            name: { contains: query },
-            Batch: { some: { status: "AVAILABLE" } },
-        },
-        include: {
-            Batch: {
-                where: { status: "AVAILABLE" },
-                select: {
-                    price: true,
-                    remainingQuantity: true,
-                },
-            },
-        },
-    });
-
-    const stockData: StockData[] = brands.map(brand => ({
-        id: brand.id,
-        name: brand.name,
-        totalPrice: brand.Batch.reduce(
-            (sum, batch) => sum + batch.price * batch.remainingQuantity,
-            0
-        ),
-    }));
-
-    const sortedData = applySorting(stockData, sort as SortOption);
-    return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-}
-
-// Fetch stock grouped by model
-export async function getStockByModel({
-    query = "",
-    page = 1,
-    sort = "alphabetically"
+export async function getStockByModel({ 
+    query = "", 
+    page = 1, 
+    sort = "alphabetically", 
+    startDate, 
+    endDate 
 }: StockQueryParams): Promise<StockData[]> {
     const drugs = await prisma.drug.findMany({
         where: {
             name: { contains: query },
-            batch: { some: { status: "AVAILABLE" } },
+            batch: {
+                some: {
+                    status: "AVAILABLE",
+                    ...(startDate && endDate ? {
+                        stockDate: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    } : {})
+                }
+            },
         },
         include: {
             batch: {
-                where: { status: "AVAILABLE" },
+                where: {
+                    status: "AVAILABLE",
+                    ...(startDate && endDate ? {
+                        stockDate: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    } : {})
+                },
                 select: {
                     price: true,
                     remainingQuantity: true,
@@ -1252,7 +1222,8 @@ export async function getStockByModel({
         id: drug.id,
         name: drug.name,
         totalPrice: drug.batch.reduce(
-            (sum, batch) => sum + batch.price * batch.remainingQuantity,
+            (sum: number, batch: { price: number; remainingQuantity: number }) => 
+                sum + batch.price * batch.remainingQuantity,
             0
         ),
     }));
@@ -1261,11 +1232,12 @@ export async function getStockByModel({
     return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
 
-// Fetch stock grouped by batch
 export async function getStockByBatch({
     query = "",
     page = 1,
-    sort = "alphabetically"
+    sort = "alphabetically",
+    startDate,
+    endDate,
 }: StockQueryParams): Promise<StockData[]> {
     const batches = await prisma.batch.findMany({
         where: {
@@ -1274,6 +1246,12 @@ export async function getStockByBatch({
                 { drugBrand: { name: { contains: query } } },
             ],
             status: "AVAILABLE",
+            ...(startDate && endDate ? {
+                stockDate: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            } : {})
         },
         include: {
             drug: true,
@@ -1287,6 +1265,61 @@ export async function getStockByBatch({
         totalPrice: batch.price * batch.remainingQuantity,
         unitPrice: batch.price,
         remainingQuantity: batch.remainingQuantity,
+    }));
+
+    const sortedData = applySorting(stockData, sort as SortOption);
+    return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+}
+
+export async function getStockByBrand({
+    query = "",
+    page = 1,
+    sort = "alphabetically",
+    startDate,
+    endDate,
+}: StockQueryParams): Promise<StockData[]> {
+    const brands = await prisma.drugBrand.findMany({
+        where: {
+            name: { contains: query },
+            Batch: { 
+                some: {
+                    status: "AVAILABLE",
+                    ...(startDate && endDate ? {
+                        stockDate: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    } : {})
+                } 
+            },
+        },
+        include: {
+            Batch: {
+                where: { 
+                    status: "AVAILABLE",
+                    ...(startDate && endDate ? {
+                        stockDate: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    } : {})
+                },
+                select: {
+                    price: true,
+                    remainingQuantity: true,
+                },
+            },
+        },
+    });
+
+    const stockData: StockData[] = brands.map(brand => ({
+        id: brand.id,
+        name: brand.name,
+        totalPrice: brand.Batch.reduce(
+            (sum: number, batch: { price: number; remainingQuantity: number }) => 
+                sum + batch.price * batch.remainingQuantity,
+            0
+        ),
     }));
 
     const sortedData = applySorting(stockData, sort as SortOption);
