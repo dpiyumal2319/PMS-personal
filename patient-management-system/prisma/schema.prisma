@@ -46,6 +46,14 @@ enum BatchStatus {
   TRASHED
 }
 
+enum IssueingStrategy {
+  MEAL
+  WHEN_NEEDED
+  PERIODIC
+  OFF_RECORD
+  ORTHER
+}
+
 model Patient {
   id           Int             @id @default(autoincrement())
   telephone    String
@@ -128,11 +136,14 @@ model Prescription {
 }
 
 model Issue {
-  id             Int          @id @default(autoincrement())
-  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  id             Int              @id @default(autoincrement())
+  prescription   Prescription     @relation(fields: [prescriptionId], references: [id])
   prescriptionId Int
-  batch          Batch        @relation(fields: [batchId], references: [id])
+  batch          Batch            @relation(fields: [batchId], references: [id])
   batchId        Int
+  strategy       IssueingStrategy
+  stratergyDetails Json
+  quantity       Float
 }
 
 model ReportParameter {
