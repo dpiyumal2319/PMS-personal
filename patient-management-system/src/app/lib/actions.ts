@@ -1350,3 +1350,40 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
     throw new Error("Failed to fetch stock analysis");
   }
 }
+
+//Suggest the name when adding the drugs
+
+export async function searchDrugBrands(query: string) {
+  if (!query || query.length < 2) return [];
+  
+  return prisma.drugBrand.findMany({
+    where: {
+      name: {
+        contains: query,
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+    },
+    take: 5,
+  });
+}
+
+export async function searchDrugModels(query: string){
+    if(!query || query.length < 2) return [];
+
+    return prisma.drug.findMany({
+        where: {
+            name: {
+                contains: query,
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+        },
+        take: 5,
+    });
+}

@@ -215,3 +215,14 @@ export interface PieChartData {
   value: number;
   color: string;
 }
+
+export interface DrugBrandSuggestion {
+  id: number;
+  name: string;
+ 
+}
+
+export interface DrugModelSuggestion {
+  id: number;
+  name: string;
+}
