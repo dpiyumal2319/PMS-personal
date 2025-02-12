@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
-import { useDebouncedCallback } from "use-debounce";
-import { searchAvailableDrugs, searchBrandByDrug } from "@/app/lib/actions";
+import React, {useState} from 'react';
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Card} from "@/components/ui/card";
+import {useDebouncedCallback} from "use-debounce";
+import {searchAvailableDrugs, searchBrandByDrug} from "@/app/lib/actions";
 import DrugCombobox from "./DrugCombobox";
 import BrandCombobox from "./BrandCombobox";
 import MedicationStrategyTabs from "./MedicationStratergyTabs";
-import { Button } from "@/components/ui/button";
-import type { StrategyJson } from "@/app/lib/definitions";
-import { StrategyJsonSchema } from "@/app/lib/definitions";
+import {Button} from "@/components/ui/button";
+import type {StrategyJson} from "@/app/lib/definitions";
+import {StrategyJsonSchema} from "@/app/lib/definitions";
 import {Issue, IssueingStrategy} from "@prisma/client";
 
 interface IssuesListProps {
@@ -32,7 +32,7 @@ export interface BrandOption {
     farthestExpiry: Date;
 }
 
-const IssuesList: React.FC<IssuesListProps> = ({ onAddIssue, existingIssues }) => {
+const IssuesList: React.FC<IssuesListProps> = ({onAddIssue, existingIssues}) => {
     const [open, setOpen] = useState(false);
     const [isDrugSearching, setIsDrugSearching] = useState(false);
     const [isBrandSearching, setIsBrandSearching] = useState(false);
@@ -41,7 +41,7 @@ const IssuesList: React.FC<IssuesListProps> = ({ onAddIssue, existingIssues }) =
     const [brands, setBrands] = useState<BrandOption[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
     const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
-    const [strategyData, setStrategyData] = useState<StrategyJson| null>(null);
+    const [strategyData, setStrategyData] = useState<StrategyJson | null>(null);
 
 
     const handleDrugSearch = useDebouncedCallback(async (term: string) => {
@@ -59,7 +59,7 @@ const IssuesList: React.FC<IssuesListProps> = ({ onAddIssue, existingIssues }) =
             setSelectedDrug(selectedID);
             setIsBrandSearching(true);
             try {
-                const brands = await searchBrandByDrug({ drugID: selectedID });
+                const brands = await searchBrandByDrug({drugID: selectedID});
                 setBrands(brands);
             } finally {
                 setIsBrandSearching(false);
@@ -67,7 +67,7 @@ const IssuesList: React.FC<IssuesListProps> = ({ onAddIssue, existingIssues }) =
         }
     };
 
-    const handleStrategyChange = (newStrategyData: StrategyJson, newStrategy: IssueingStrategy ) => {
+    const handleStrategyChange = (newStrategy: IssueingStrategy, newStrategyData: StrategyJson) => {
         setStrategy(newStrategy);
         setStrategyData(newStrategyData);
     };
@@ -127,7 +127,8 @@ const IssuesList: React.FC<IssuesListProps> = ({ onAddIssue, existingIssues }) =
                         <BrandCombobox
                             options={brands}
                             onChange={(selectedID) => setSelectedBrand(Number(selectedID))}
-                            onSearch={() => {}}
+                            onSearch={() => {
+                            }}
                             isSearching={isBrandSearching}
                             value={selectedBrand}
                             placeholder="Select brand"
@@ -138,7 +139,6 @@ const IssuesList: React.FC<IssuesListProps> = ({ onAddIssue, existingIssues }) =
                     </div>
                     <MedicationStrategyTabs
                         onStrategyChange={handleStrategyChange}
-                        strategy={strategyData}
                     />
                 </div>
                 <DialogFooter>

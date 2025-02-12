@@ -51,7 +51,7 @@ enum IssueingStrategy {
   WHEN_NEEDED
   PERIODIC
   OFF_RECORD
-  ORTHER
+  OTHER
 }
 
 model Patient {

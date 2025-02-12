@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {
     FileX,
@@ -12,37 +12,115 @@ import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import MealTabsContent from "@/app/(dashboard)/patients/[id]/_components/MealTabsContent";
 import {IssueingStrategy} from "@prisma/client";
-import {StrategyJson} from "@/app/lib/definitions";
+import type {
+    MealStrategy,
+    StrategyJson,
+    OtherStrategy,
+    WhenNeededStrategy,
+    PeriodicStrategy,
+    OffRecordStrategy
+} from "@/app/lib/definitions";
 
 interface MedicationStrategyTabsProps {
     onStrategyChange: (strategy: IssueingStrategy, newStrategyData: StrategyJson) => void;
-    strategy: string;
 }
 
-const MedicationStrategyTabs = ({onStrategyChange, strategy}: MedicationStrategyTabsProps ) => {
+const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps) => {
+    const [mealStrategy, setMealStrategy] = useState<MealStrategy>({
+        dinner: {
+            active: false,
+            quantity: 0
+        },
+        breakfast: {
+            active: false,
+            quantity: 0
+        },
+        lunch: {
+            active: false,
+            quantity: 0
+        },
+        afterMeal: false,
+        minutesBeforeAfterMeal: 0
+    });
+
+    const [whenNeededStrategy, setWhenNeededStrategy] = useState<WhenNeededStrategy>({
+        quantity: 0
+    });
+
+    const [periodicStrategy, setPeriodicStrategy] = useState<PeriodicStrategy>({
+        interval: 0,
+        quantity: 0
+    });
+
+    const [offRecordStrategy, setOffRecordStrategy] = useState<OffRecordStrategy>({
+        details: "",
+        quantity: 0
+    });
+
+    const [otherStrategy, setOtherStrategy] = useState<OtherStrategy>({
+        details: "",
+        quantity: 0
+    });
+
+    const handleTabChange = (strategy: IssueingStrategy) => {
+        switch (strategy) {
+            case IssueingStrategy.MEAL:
+                onStrategyChange(strategy,
+                    {
+                        name: IssueingStrategy.MEAL,
+                        strategy: mealStrategy
+                    });
+                break;
+            case IssueingStrategy.WHEN_NEEDED:
+                onStrategyChange(strategy, {
+                    name: IssueingStrategy.WHEN_NEEDED,
+                    strategy: whenNeededStrategy
+                });
+                break;
+            case IssueingStrategy.PERIODIC:
+                onStrategyChange(strategy, {
+                    name: IssueingStrategy.PERIODIC,
+                    strategy: periodicStrategy
+                });
+                break;
+            case IssueingStrategy.OFF_RECORD:
+                onStrategyChange(strategy, {
+                    name: IssueingStrategy.OFF_RECORD,
+                    strategy: offRecordStrategy
+                });
+                break;
+            case IssueingStrategy.ORTHER:
+                onStrategyChange(strategy, {
+                    name: IssueingStrategy.OTHER,
+                    strategy: otherStrategy
+                });
+                break;
+        }
+    }
+
     return (
-        <Tabs defaultValue="MEAL" className="w-full max-w-3xl mx-auto">
+        <Tabs defaultValue="MEAL" className="w-full max-w-3xl mx-auto" onValueChange={(value) => handleTabChange(value as IssueingStrategy)}>
             <div className="h-10 mb-6">
                 <TabsList className="w-full">
-                    <TabsTrigger value="MEAL" className="flex items-center space-x-2">
+                    <TabsTrigger value={IssueingStrategy.MEAL} className="flex items-center space-x-2">
                         <Utensils className="w-4 h-4"/> <span>Meal</span>
                     </TabsTrigger>
-                    <TabsTrigger value="WHEN_NEEDED" className="flex items-center space-x-2">
+                    <TabsTrigger value={IssueingStrategy.WHEN_NEEDED} className="flex items-center space-x-2">
                         <ShieldAlert className="w-4 h-4"/> <span>When Needed</span>
                     </TabsTrigger>
-                    <TabsTrigger value="PERIODIC" className="flex items-center space-x-2">
+                    <TabsTrigger value={IssueingStrategy.PERIODIC} className="flex items-center space-x-2">
                         <Hourglass className="w-4 h-4"/> <span>Periodically</span>
                     </TabsTrigger>
-                    <TabsTrigger value="OFF_RECORD" className="flex items-center space-x-2">
+                    <TabsTrigger value={IssueingStrategy.OFF_RECORD} className="flex items-center space-x-2">
                         <FileX className="w-4 h-4"/> <span>Off Record</span>
                     </TabsTrigger>
-                    <TabsTrigger value="OTHER" className="flex items-center space-x-2">
+                    <TabsTrigger value={IssueingStrategy.ORTHER} className="flex items-center space-x-2">
                         <MoreHorizontal className="w-4 h-4"/> <span>Other</span>
                     </TabsTrigger>
                 </TabsList>
             </div>
 
-            <MealTabsContent/>
+            <MealTabsContent strategy={mealStrategy} setStrategy={setMealStrategy}/>
 
             <TabsContent value="WHEN_NEEDED">
                 <Card className="p-6">

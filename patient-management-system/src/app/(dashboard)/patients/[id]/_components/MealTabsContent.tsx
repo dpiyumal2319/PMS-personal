@@ -8,33 +8,55 @@ import {TabsContent} from "@/components/ui/tabs";
 import MealCards from "@/app/(dashboard)/patients/[id]/_components/MealCards";
 import type {MealStrategy} from "@/app/lib/definitions";
 
-const MealTabsContent = () => {
+interface MealTabsContentProps {
+    strategy: MealStrategy;
+    setStrategy: React.Dispatch<React.SetStateAction<MealStrategy>>;
+}
+
+const MealTabsContent = ({strategy, setStrategy}: MealTabsContentProps) => {
     const [isLocked, setIsLocked] = useState(true);
-    const [quantities, setQuantities] = useState({
-        global: "",
-        breakfast: "",
-        lunch: "",
-        dinner: ""
-    });
+    const [globalQuantity, setGlobalQuantity] = useState(0);
+
+
     const [isBeforeMeal, setIsBeforeMeal] = useState(true);
 
     const handleGlobalQuantityChange = (value: string) => {
-        setQuantities({
-            global: value,
-            breakfast: value,
-            lunch: value,
-            dinner: value
-        });
-    };
-
-    const handleIndividualQuantityChange = (meal: string, value: string) => {
-        if (!isLocked) {
-            setQuantities(prev => ({
+        const quantity = Number(value);
+        if (!isNaN(quantity)) {
+            setGlobalQuantity(quantity);
+            setStrategy(prev => ({
                 ...prev,
-                [meal]: value
-            }));
+                breakfast: {
+                    ...prev.breakfast,
+                    quantity
+                },
+                lunch: {
+                    ...prev.lunch,
+                    quantity
+                },
+                dinner: {
+                    ...prev.dinner,
+                    quantity
+                }
+            }))
         }
     };
+
+    const handleIndividualQuantityChange = (meal: keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal'>, value: string) => {
+        if (!isLocked) {
+            const quantity = Number(value);
+            if (!isNaN(quantity)) {
+                setStrategy(prev => ({
+                    ...prev,
+                    [meal]: {
+                        ...prev[meal],
+                        quantity
+                    }
+                }));
+            }
+        }
+    };
+
 
     return (
         <TabsContent value="MEAL">
@@ -42,7 +64,8 @@ const MealTabsContent = () => {
                 {/* Left Column - Meal Selection + Global Input */}
                 <Card className="p-4 space-y-4 bg-slate-50">
                     <MealCards
-                        quantities={quantities}
+                        globalQuantity={globalQuantity}
+                        strategy={strategy}
                         handleIndividualQuantityChange={handleIndividualQuantityChange}
                         isLocked={isLocked}
                         handleGlobalQuantityChange={handleGlobalQuantityChange}
