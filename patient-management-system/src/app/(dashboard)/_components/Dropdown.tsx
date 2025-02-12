@@ -1,7 +1,13 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+  SelectContent,
+} from "@/components/ui/select";
 
 export default function SearchDropdown({
   items,
@@ -20,7 +26,7 @@ export default function SearchDropdown({
     router.replace(`${pathname}?${params.toString()}`);
   }
 
-  const selectedValue = searchParams.get(urlParameterName) || items[0].value  // get the first one in array
+  const selectedValue = searchParams.get(urlParameterName) || items[0].value; // get the first one in array
 
   return (
     <Select onValueChange={handleSelect} value={selectedValue}>

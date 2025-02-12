@@ -100,23 +100,25 @@ model QueueEntry {
 }
 
 model DrugBrand {
-  name        String  @id
+  id          Int     @id @default(autoincrement())
+  name        String
   description String?
-  drugs       Drug[]
+  Batch       Batch[]
 }
 
 model Drug {
-  name      String    @id
-  brandName String
-  brand     DrugBrand @relation(fields: [brandName], references: [name])
-  batch     Batch[]
+  id    Int     @id @default(autoincrement())
+  name  String
+  batch Batch[]
 }
 
 model Batch {
   id                Int         @id @default(autoincrement())
   number            String
-  drugName          String
-  drug              Drug        @relation(fields: [drugName], references: [name])
+  drugId            Int
+  drug              Drug        @relation(fields: [drugId], references: [id])
+  drugBrandId       Int
+  drugBrand         DrugBrand   @relation(fields: [drugBrandId], references: [id])
   type              DrugType
   fullAmount        Float
   expiry            DateTime
@@ -128,19 +130,23 @@ model Batch {
 }
 
 model Prescription {
-  id        Int      @id @default(autoincrement())
-  time      DateTime @default(now())
-  patient   Patient  @relation(fields: [patientId], references: [id])
-  patientId Int
-  issues    Issue[]
+  id                 Int      @id @default(autoincrement())
+  time               DateTime @default(now())
+  presentingSymptoms String
+  bloodPressure      String?
+  pulse              String?
+  cardiovascular     String?
+  patient            Patient  @relation(fields: [patientId], references: [id])
+  patientId          Int
+  issues             Issue[]
 }
 
 model Issue {
   id               Int              @id @default(autoincrement())
   prescription     Prescription     @relation(fields: [prescriptionId], references: [id])
   prescriptionId   Int
-  batch            Batch            @relation(fields: [batchId], references: [id])
-  batchId          Int
+  batch            Batch?           @relation(fields: [batchId], references: [id])
+  batchId          Int?
   strategy         IssueingStrategy
   stratergyDetails Json
   quantity         Float

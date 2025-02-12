@@ -85,26 +85,86 @@ async function main() {
         data: {
             name: 'Panadol',
             description: 'Pain relief tablet',
-            drugs: {
-                create: [
-                    {
-                        name: 'Paracetamol',
-                        batch: {
-                            create: [{
-                                number: 'B123',
-                                type: 'Tablet',
-                                fullAmount: 100,
-                                expiry: new Date('2025-12-01'),
-                                remainingQuantity: 100,
-                                price: 50,
-                                status: 'AVAILABLE'
-                            }]
-                        }
-                    },
-                ],
-            },
-        },
+            Batch: {
+                create: [{
+                    number: 'B123',
+                    type: 'Tablet',
+                    fullAmount: 100,
+                    expiry: new Date('2025-12-01'),
+                    remainingQuantity: 100,
+                    price: 50,
+                    status: 'AVAILABLE',
+                    drug: {
+                        create: { name: 'Paracetamol' }
+                    }
+                }]
+            }
+        }
     });
+    
+    await prisma.drugBrand.create({
+        data: {
+            name: 'Penadene',
+            description: 'Pain relief tablet',
+            Batch: {
+                create: [{
+                    number: 'B3456',
+                    type: 'Tablet',
+                    fullAmount: 100,
+                    expiry: new Date('2025-12-10'),
+                    remainingQuantity: 80,
+                    price: 40,
+                    status: 'AVAILABLE',
+                    drug: {
+                        create: { name: 'Paracetamol' }
+                    }
+                }]
+            }
+        }
+    });
+    
+    await prisma.drugBrand.create({
+        data: {
+            name: 'Ibuprofen',
+            description: 'Anti-inflammatory pain reliever',
+            Batch: {
+                create: [{
+                    number: 'B456',
+                    type: 'Tablet',
+                    fullAmount: 200,
+                    expiry: new Date('2026-06-15'),
+                    remainingQuantity: 200,
+                    price: 80,
+                    status: 'AVAILABLE',
+                    drug: {
+                        create: { name: 'Brufen' }
+                    }
+                }]
+            }
+        }
+    });
+    
+    await prisma.drugBrand.create({
+        data: {
+            name: 'Amoxicillin',
+            description: 'Antibiotic for bacterial infections',
+            Batch: {
+                create: [{
+                    number: 'B789',
+                    type: 'Tablet',
+                    fullAmount: 150,
+                    expiry: new Date('2025-09-30'),
+                    remainingQuantity: 150,
+                    price: 120,
+                    status: 'AVAILABLE',
+                    drug: {
+                        create: { name: 'Amoxil' }
+                    }
+                }]
+            }
+        }
+    });
+    
 
     // Add Reports
     const fbcReport = await prisma.reportType.create({
