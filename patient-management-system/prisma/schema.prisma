@@ -136,14 +136,14 @@ model Prescription {
 }
 
 model Issue {
-  id             Int              @id @default(autoincrement())
-  prescription   Prescription     @relation(fields: [prescriptionId], references: [id])
-  prescriptionId Int
-  batch          Batch            @relation(fields: [batchId], references: [id])
-  batchId        Int
-  strategy       IssueingStrategy
+  id               Int              @id @default(autoincrement())
+  prescription     Prescription     @relation(fields: [prescriptionId], references: [id])
+  prescriptionId   Int
+  batch            Batch            @relation(fields: [batchId], references: [id])
+  batchId          Int
+  strategy         IssueingStrategy
   stratergyDetails Json
-  quantity       Float
+  quantity         Float
 }
 
 model ReportParameter {
