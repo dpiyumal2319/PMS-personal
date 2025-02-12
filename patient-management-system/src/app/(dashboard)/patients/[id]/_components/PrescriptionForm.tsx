@@ -14,6 +14,7 @@ const PrescriptionForm = () => {
         cardiovascular: ''
     });
 
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
@@ -46,7 +47,6 @@ const PrescriptionForm = () => {
             </div>
 
             <IssuesList />
-
             <Button type="submit" className="w-full">Submit</Button>
         </form>
     );

@@ -107,9 +107,10 @@ model DrugBrand {
 }
 
 model Drug {
-  id    Int     @id @default(autoincrement())
-  name  String
-  batch Batch[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  batch        Batch[]
+  IssueHistory IssueHistory[]
 }
 
 model Batch {
@@ -150,6 +151,7 @@ model Issue {
   strategy         IssueingStrategy
   stratergyDetails Json
   quantity         Float
+  IssueHistory     IssueHistory[]
 }
 
 model ReportParameter {
@@ -187,4 +189,12 @@ model ReportValue {
   value             String
   PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id], onDelete: Cascade)
   patientReportId   Int?
+}
+
+model IssueHistory {
+  id      Int    @id @default(autoincrement())
+  drug    Drug   @relation(fields: [drugId], references: [id])
+  drugId  Int
+  issue   Issue? @relation(fields: [issueId], references: [id])
+  issueId Int?
 }
