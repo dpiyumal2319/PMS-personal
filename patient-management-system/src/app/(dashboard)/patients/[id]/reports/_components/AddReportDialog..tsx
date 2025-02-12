@@ -1,46 +1,39 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter} from "@/components/ui/dialog";
-import {Button} from "@/components/ui/button";
-import {Check, ChevronsUpDown, Loader2} from "lucide-react";
-import {cn} from "@/lib/utils";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popoverModified";
-import {addPatientReport, getReportParams, searchReportTypes} from "@/app/lib/actions";
-import {useDebouncedCallback} from "use-debounce";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {handleServerAction} from "@/app/lib/utils";
-import {Switch} from "@/components/ui/switch";
+import React, { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
+import { addPatientReport, getReportParams, searchReportTypes } from "@/app/lib/actions";
+import { useDebouncedCallback } from "use-debounce";
+import { handleServerAction } from "@/app/lib/utils";
+import PopoverSelect from "@/app/(dashboard)/_components/PopOverSelect";
 
-type Report = {
+interface Report {
     id: number;
     name: string;
-};
+}
 
-type ReportParam = {
+interface ReportParam {
     id: number;
     name: string;
     units: string | null;
-};
+}
 
-const AddReportDialog = ({id}: { id: number }) => {
+interface AddReportDialogProps {
+    id: number;
+}
+
+const AddReportDialog = ({ id }: AddReportDialogProps) => {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<number | null>(null);
-    const [popoverOpen, setPopoverOpen] = useState(false);
     const [reports, setReports] = useState<Report[]>([]);
     const [params, setParams] = useState<ReportParam[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [paramValues, setParamValues] = useState<Record<number, { value: string, attention: boolean }>>({});
+    const [paramValues, setParamValues] = useState<Record<number, { value: string; attention: boolean }>>({});
     const [error, setError] = useState<string | null>(null);
 
     const handleSearch = useDebouncedCallback(async (term: string) => {
@@ -61,7 +54,6 @@ const AddReportDialog = ({id}: { id: number }) => {
 
     const handleSelect = async (selectedId: number) => {
         setValue(selectedId === value ? null : selectedId);
-        setPopoverOpen(false);
         if (selectedId !== value) {
             setIsSearching(true);
             try {
@@ -85,7 +77,6 @@ const AddReportDialog = ({id}: { id: number }) => {
     };
 
     const handleAttentionToggle = (paramId: number) => {
-        console.log(paramId);
         setParamValues(prev => ({
             ...prev,
             [paramId]: {
@@ -105,7 +96,7 @@ const AddReportDialog = ({id}: { id: number }) => {
             reportTypeID: value,
             params: paramValues
         }), {
-            loadingMessage: "Adding report...",
+            loadingMessage: "Adding report..."
         });
 
         if (result.success) {
@@ -131,59 +122,17 @@ const AddReportDialog = ({id}: { id: number }) => {
                 <div className="py-6 space-y-6">
                     <div className="space-y-2">
                         <Label>Report Type</Label>
-                        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={popoverOpen}
-                                    className={`w-full justify-between h-10 rounded-lg border-2 transition-all duration-200 ${
-                                        value ? "border-primary-500 shadow-sm" : "border-gray-300 hover:border-gray-400"
-                                    }`}
-                                >
-                                    {value ? reports.find((report) => report.id === value)?.name : "Select report type..."}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                                <Command shouldFilter={false}>
-                                    <CommandInput
-                                        placeholder="Search reports..."
-                                        onValueChange={handleSearch}
-                                    />
-                                    <CommandList>
-                                        <CommandEmpty className="p-4 text-center">
-                                            {isSearching ? (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <Loader2 className="h-4 w-4 animate-spin"/>
-                                                    <span>Searching...</span>
-                                                </div>
-                                            ) : (
-                                                "No reports found."
-                                            )}
-                                        </CommandEmpty>
-                                        <CommandGroup>
-                                            {reports.map((report) => (
-                                                <CommandItem
-                                                    key={report.id}
-                                                    value={String(report.id)}
-                                                    onSelect={() => handleSelect(report.id)}
-                                                    className="flex items-center justify-between"
-                                                >
-                                                    <span>{report.name}</span>
-                                                    <Check
-                                                        className={cn(
-                                                            "ml-auto h-4 w-4",
-                                                            value === report.id ? "opacity-100" : "opacity-0"
-                                                        )}
-                                                    />
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
+                        <PopoverSelect
+                            options={reports}
+                            value={value}
+                            onChange={(selectedId) => handleSelect(Number(selectedId))}
+                            onSearch={handleSearch}
+                            isSearching={isSearching}
+                            placeholder="Select report type..."
+                            searchPlaceholder="Search reports..."
+                            noOptionsMessage="No reports found."
+                            className={value ? "border-primary-500 shadow-sm" : "border-gray-300 hover:border-gray-400"}
+                        />
                     </div>
 
                     {error && <p className="text-red-500">{error}</p>}
@@ -222,8 +171,7 @@ const AddReportDialog = ({id}: { id: number }) => {
                                                     className="h-9 w-48"
                                                 />
                                                 {param.units && (
-                                                    <span
-                                                        className="text-sm text-gray-500 min-w-16">{param.units}</span>
+                                                    <span className="text-sm text-gray-500 min-w-16">{param.units}</span>
                                                 )}
                                             </div>
                                         </div>

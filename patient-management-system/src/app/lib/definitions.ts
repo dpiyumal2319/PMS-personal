@@ -1,4 +1,38 @@
 import { IconType } from "react-icons";
+import { IssueingStrategy } from "@prisma/client";
+
+export type MealStrategy = {
+    breakfast: boolean;
+    lunch: boolean;
+    dinner: boolean;
+    quantity: number;
+    beforeAfterMeal: boolean;
+    minutesBeforeAfterMeal: number;
+};
+
+export type WhenNeededStrategy = {
+    quantity: number;
+};
+
+export type PeriodicStrategy = {
+    interval: number;
+    quantity: number;
+};
+
+export type OffRecordStrategy = {
+    details: string;
+    quantity: number;
+};
+
+export type OtherStrategy = {
+    details: string;
+    quantity: number;
+};
+
+export type StrategyJson = {
+    name: IssueingStrategy;
+    strategy: MealStrategy | WhenNeededStrategy | PeriodicStrategy | OffRecordStrategy | OtherStrategy;
+}
 
 export type SessionPayload = {
     id: number;

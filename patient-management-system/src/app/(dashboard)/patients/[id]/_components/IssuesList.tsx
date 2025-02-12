@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react';
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Card} from "@/components/ui/card";
@@ -6,36 +8,12 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
 import {Toggle} from "@/components/ui/toggle";
+import PopOverSelect from "@/app/(dashboard)/_components/PopOverSelect";
 
-export type MealStrategy = {
-    breakfast: boolean;
-    lunch: boolean;
-    dinner: boolean;
-    quantity: number;
-    beforeAfterMeal: boolean;
-    minutesBeforeAfterMeal: number;
-}
-
-export type WhenNeededStrategy = {
-    quantity: number;
-}
-
-export type PeriodicStrategy = {
-    interval: number;
-    quantity: number;
-}
-
-export type OffRecordStrategy = {
-    details: string;
-    quantity: number;
-}
-
-export type OtherStrategy = {
-    details: string;
-    quantity: number;
-}
 
 const IssuesList = () => {
+
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -48,7 +26,6 @@ const IssuesList = () => {
                     <DialogTitle>Add Issue</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                    <Input type="text" placeholder="Drug" />
                     <Input type="text" placeholder="Brand" />
                     <Tabs defaultValue="MEAL">
                         <TabsList>

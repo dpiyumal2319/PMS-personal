@@ -717,11 +717,17 @@ export async function addNewItem(
     }
 }
 
-export async function getDrugBrands() {
-    return prisma.drugBrand.findMany({
-        select: {name: true},
-        orderBy: {name: 'asc'}
-    });
+export async function searchDrugModal(term: string) {
+    return prisma.drug.findMany({
+        where: {
+            name: {
+                startsWith: term
+            }
+        },
+        select: {
+            name: true
+        }
+    })
 }
 
 export async function getPatientReportPages(query: string, range: string, id: number) {
