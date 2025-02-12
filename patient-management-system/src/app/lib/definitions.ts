@@ -48,19 +48,30 @@ export type PatientFormData = {
     gender: "MALE" | "FEMALE" | ""
   };
 
+export type InventoryFormData= {
+    drugName: string;
+    brandName: string;
+    brandDescription?: string;
+    batchNumber: string;
+    drugType: string;
+    quantity: number | string;
+    expiry: string;
+    price: number | string;
+    brandId?: number; // Add brandId property
+    drugId?: number;  // Add drugId property
+}
 
 
-
-export type InventoryFormData = {
-    brandName: string,
-    brandDescription: string,
-    drugName: string,
-    batchNumber: string,
-    drugType: string,
-    quantity: number,
-    expiry: string,
-    price: number
-};
+// export type InventoryFormData = {
+//     brandName: string,
+//     brandDescription: string,
+//     drugName: string,
+//     batchNumber: string,
+//     drugType: string,
+//     quantity: number,
+//     expiry: string,
+//     price: number
+// };
 
 export const searchModels = [
     {

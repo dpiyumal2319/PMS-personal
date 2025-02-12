@@ -9,7 +9,7 @@ import { Prisma } from "@prisma/client";
 import { PatientFormData } from "@/app/lib/definitions";
 
 import { DrugType } from "@prisma/client";
-import { InventoryFormData } from "@/app/lib/definitions";
+import  {InventoryFormData}  from "@/app/lib/definitions";
 
 export async function changePassword({ currentPassword, newPassword, confirmPassword }: {
     currentPassword: string,
@@ -876,6 +876,8 @@ export async function addPatient({ formData }: { formData: PatientFormData }): P
 }
 
 //For adding drugs to the inventory
+
+
 export async function addNewItem(
     { formData }: {
         formData: InventoryFormData
@@ -884,41 +886,40 @@ export async function addNewItem(
         return await prisma.$transaction(async (tx) => {
             // 1. Create or connect drug brand
             const brand = await tx.drugBrand.upsert({
-                where: { name: formData.brandName },
+                where: { id: formData.brandId ?? 0},
                 update: {},
                 create: {
                     name: formData.brandName,
-                    description: formData.brandDescription || ''
+                    description: formData.brandDescription || null
                 }
             });
 
             // 2. Create or connect drug
             const drug = await tx.drug.upsert({
-                where: { name: formData.drugName },
+                where: { id: formData.drugId ?? 0},
                 update: {},
                 create: {
-                    name: formData.drugName,
-                    // brandName: brand.name
-                     brand: {
-                    connect: { name: formData.brandName } // Assuming 'name' is a unique field in DrugBrand.
-    }
+                    name: formData.drugName
+                   
                 }
             });
 
-            // 3. Create batch
+            // 3. Create batch with both drug and brand relationships
             await tx.batch.create({
                 data: {
                     number: formData.batchNumber,
-                    // drugName: drug.name,
                     drug: {
-                        connect: { id: drug.id }, // or { name: drug.name } if 'name' is unique and defined in the relation field
+                        connect: { id: drug.id }
+                    },
+                    drugBrand: {
+                        connect: { id: brand.id }
                     },
                     type: formData.drugType as DrugType,
                     fullAmount: parseFloat(formData.quantity.toString()),
                     remainingQuantity: parseFloat(formData.quantity.toString()),
                     expiry: new Date(formData.expiry),
                     price: parseFloat(formData.price.toString()),
-                    status: 'AVAILABLE'
+                    status: 'AVAILABLE' 
                 }
             });
 
