@@ -74,7 +74,7 @@ export function DrugForm() {
               <X className="w-5 h-5" />
             </button>
 
-            <h2 className="text-xl font-semibold text-center mb-4">
+            <h2 className="text-2xl font-semibold text-center text-primary-600 mb-4">
               Add New Drug
             </h2>
 
@@ -153,7 +153,7 @@ export function DrugForm() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Price
+                    Price per Tablet
                   </label>
                   <Input
                     type="number"
