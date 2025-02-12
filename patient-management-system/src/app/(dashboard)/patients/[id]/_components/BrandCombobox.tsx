@@ -108,17 +108,16 @@ const BrandCombobox = ({
                             {options.map((option) => (
                                 <CommandItem
                                     key={option.id}
-                                    value={String(option.id)}
+                                    value={option.name}
                                     onSelect={() => handleSelect(String(option.id))}
-                                    className="flex flex-col space-y-1 rounded-md hover:bg-gray-100 transition"
+                                    className="flex space-y-1 rounded-md hover:bg-gray-100 transition"
                                 >
-                                    <div className="flex items-center justify-between w-full">
+                                    <div className="flex items-center min-w-24">
                                         <span className="font-medium">{option.name}</span>
-                                        <span className={'text-gray-500'}>{option.batchCount} batches</span>
                                     </div>
-
                                     <div
-                                        className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600 bg-pink-500">
+                                        className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
+                                        <CustomBadge text={option.batchCount > 1 ? `${option.batchCount} batches` : "1 batch"} color={"gray"}/>
                                         <CustomBadge text={`Total: ${option.totalRemainingQuantity}`}
                                                      color={option.totalRemainingQuantity > 0 ? "green" : "red"}/>
                                         <CustomBadge
@@ -133,7 +132,7 @@ const BrandCombobox = ({
 
                                     <Check
                                         className={cn(
-                                            "ml-auto h-4 w-4 text-primary",
+                                            "ml-auto h-4 w-4 text-primary bg-rose-600",
                                             value === option.id ? "opacity-100" : "opacity-0"
                                         )}
                                     />
