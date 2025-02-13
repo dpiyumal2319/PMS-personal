@@ -39,23 +39,15 @@ export default async function StockPage({
     : new Date();
 
   const totalPages = await getAvailableDrugsTotalPages(query, selection);
-  const handleDateChange = (newDateRange: DateRange) => {
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set(
-      "startDate",
-      newDateRange.startDate.toISOString().split("T")[0]
-    );
-    searchParams.set(
-      "endDate",
-      newDateRange.endDate.toISOString().split("T")[0]
-    );
-    window.location.search = searchParams.toString();
-  };
 
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* Top Bar */}
-      <StockTopbar />
+      <StockTopbar
+        defaultStartDate={startDate}
+        defaultEndDate={endDate}
+        defaultSelection={selection}
+      />
       {/* Content */}
       <div className="flex-grow overflow-y-auto mt-4">
         <Suspense

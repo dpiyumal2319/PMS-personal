@@ -1270,7 +1270,6 @@ export async function getStockByBatch({
     const sortedData = applySorting(stockData, sort as SortOption);
     return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
-
 export async function getStockByBrand({
     query = "",
     page = 1,
@@ -1278,31 +1277,39 @@ export async function getStockByBrand({
     startDate,
     endDate,
 }: StockQueryParams): Promise<StockData[]> {
+    // Ensure dates are properly formatted for Prisma
+    const formattedStartDate = startDate ? new Date(startDate) : undefined;
+    const formattedEndDate = endDate ? new Date(endDate) : undefined;
+
     const brands = await prisma.drugBrand.findMany({
         where: {
             name: { contains: query },
-            Batch: { 
+            Batch: {
                 some: {
-                    status: "AVAILABLE",
-                    ...(startDate && endDate ? {
-                        stockDate: {
-                            gte: startDate,
-                            lte: endDate
-                        }
-                    } : {})
-                } 
+                    AND: [
+                        { status: "AVAILABLE" },
+                        {
+                            stockDate: {
+                                gte: formattedStartDate,
+                                lte: formattedEndDate,
+                            },
+                        },
+                    ],
+                },
             },
         },
         include: {
             Batch: {
-                where: { 
-                    status: "AVAILABLE",
-                    ...(startDate && endDate ? {
-                        stockDate: {
-                            gte: startDate,
-                            lte: endDate
-                        }
-                    } : {})
+                where: {
+                    AND: [
+                        { status: "AVAILABLE" },
+                        {
+                            stockDate: {
+                                gte: formattedStartDate,
+                                lte: formattedEndDate,
+                            },
+                        },
+                    ],
                 },
                 select: {
                     price: true,
@@ -1312,15 +1319,17 @@ export async function getStockByBrand({
         },
     });
 
-    const stockData: StockData[] = brands.map(brand => ({
-        id: brand.id,
-        name: brand.name,
-        totalPrice: brand.Batch.reduce(
-            (sum: number, batch: { price: number; remainingQuantity: number }) => 
-                sum + batch.price * batch.remainingQuantity,
-            0
-        ),
-    }));
+    // Transform and sort the data
+    const stockData: StockData[] = brands
+        .filter(brand => brand.Batch.length > 0) // Only include brands with matching batches
+        .map(brand => ({
+            id: brand.id,
+            name: brand.name,
+            totalPrice: brand.Batch.reduce(
+                (sum, batch) => sum + batch.price * batch.remainingQuantity,
+                0
+            ),
+        }));
 
     const sortedData = applySorting(stockData, sort as SortOption);
     return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

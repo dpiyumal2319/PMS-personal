@@ -1,4 +1,3 @@
-// PriceListByBatch.tsx
 interface StockData {
   id: number;
   name: string;
