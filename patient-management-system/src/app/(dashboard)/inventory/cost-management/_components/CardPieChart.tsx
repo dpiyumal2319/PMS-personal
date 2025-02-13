@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useState, useEffect } from "react";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import DatePicker from "@/app/(dashboard)/inventory/cost-management/_components/DatePickerCM";
 import StockPieChart from "@/app/(dashboard)/inventory/cost-management/_components/StockPieChart";
 import { getStockAnalysis } from "@/app/lib/actions";
@@ -9,10 +10,25 @@ import { StockAnalysis, PieChartData, DateRange } from "@/app/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function CardOfPieChart() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  // Get dates from URL or use defaults
+  const defaultStartDate = new Date(
+    new Date().setMonth(new Date().getMonth() - 1)
+  );
+  const defaultEndDate = new Date();
+
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-    endDate: new Date(),
+    startDate: searchParams.get("startDate")
+      ? new Date(searchParams.get("startDate")!)
+      : defaultStartDate,
+    endDate: searchParams.get("endDate")
+      ? new Date(searchParams.get("endDate")!)
+      : defaultEndDate,
   });
+
   const [analysisData, setAnalysisData] = useState<StockAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +44,7 @@ export default function CardOfPieChart() {
       setLoading(false);
     };
 
-    fetchData().then();
+    fetchData();
   }, [dateRange]);
 
   const formatCurrency = (value: number) => {
@@ -53,6 +69,11 @@ export default function CardOfPieChart() {
   };
 
   const handleDateChange = (newDateRange: DateRange) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("startDate", newDateRange.startDate.toISOString().split("T")[0]);
+    params.set("endDate", newDateRange.endDate.toISOString().split("T")[0]);
+    replace(`${pathname}?${params.toString()}`);
+
     setDateRange(newDateRange);
   };
 

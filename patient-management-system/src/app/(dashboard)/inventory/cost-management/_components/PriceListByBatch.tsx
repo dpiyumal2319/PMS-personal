@@ -1,6 +1,7 @@
 import { LucidePackagePlus } from "lucide-react";
-import { AiOutlineDollar, AiOutlineNumber } from "react-icons/ai";
+import { AiOutlineNumber } from "react-icons/ai";
 import { Card } from "@/components/ui/card";
+import { FaCoins } from "react-icons/fa";
 
 interface StockData {
   id: number;
@@ -35,7 +36,7 @@ export default function PriceListByBatch({ items }: { items: StockData[] }) {
 
             {/* Total Price */}
             <div className="flex items-center gap-3 text-gray-700 text-md justify-end flex-1">
-              <AiOutlineDollar className="w-5 h-5 text-gray-500" />
+              <FaCoins className="w-5 h-5 text-gray-500" />
               <span className="font-medium">
                 Rs. {item.totalPrice.toFixed(2)}
               </span>

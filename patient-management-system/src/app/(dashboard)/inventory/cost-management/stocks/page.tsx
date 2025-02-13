@@ -43,17 +43,12 @@ export default async function StockPage({
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* Top Bar */}
-      <div
-        className={
-          "h-14 bg-white flex items-center justify-between py-3 px-4 border-b border-primary-900/25 shadow sticky top-0 z-50"
-        }
-      >
-        <StockTopbar
-          defaultStartDate={startDate}
-          defaultEndDate={endDate}
-          defaultSelection={selection}
-        />
-      </div>
+
+      <StockTopbar
+        defaultStartDate={startDate}
+        defaultEndDate={endDate}
+        defaultSelection={selection}
+      />
 
       {/* Content */}
       <div className="flex-grow overflow-y-auto mt-4">

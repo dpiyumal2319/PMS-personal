@@ -43,8 +43,8 @@ export default function StockTopbar({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <div className="flex flex-wrap gap-4 justify-center">
+    <div className="flex h-full flex-col w-full ">
+      <div className="sticky top-0 p-4 bg-white z-20 border-b shadow-md flex gap-4">
         <Dropdown
           items={[
             { label: "By Model", value: "model" },
