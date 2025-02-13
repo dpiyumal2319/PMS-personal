@@ -45,6 +45,13 @@ export default function StockTopbar({
   return (
     <div className="flex h-full flex-col w-full ">
       <div className="sticky top-0 p-4 bg-white z-20 border-b shadow-md flex gap-4">
+        <div className="relative w-[200px]">
+          <SearchPanel
+            placeholder="Search by Name"
+            //   defaultValue={query}
+          />
+        </div>
+
         <Dropdown
           items={[
             { label: "By Model", value: "model" },
@@ -54,12 +61,7 @@ export default function StockTopbar({
           urlParameterName="selection"
           //   defaultValue={selection}
         />
-        <div className="relative w-[200px]">
-          <SearchPanel
-            placeholder="Search by Name"
-            //   defaultValue={query}
-          />
-        </div>
+
         <SortingDropdownCM
           selection={selection}
           // defaultValue={sort}
