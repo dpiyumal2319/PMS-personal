@@ -1084,3 +1084,43 @@ export async function handleConfirmationOfBatchStatusChange(batchId: number, act
         console.error("Error updating batch status:", error);
     }
 };
+
+// Fetch functions for brand, drug, and batch data
+export async function getBrandName(id: number): Promise<string> {
+    try {
+      const brand = await prisma.drugBrand.findUnique({
+        where: { id },
+        select: { name: true }
+      });
+      return brand?.name || `Brand-${id}`;
+    } catch (error) {
+      console.error('Error fetching brand name:', error);
+      return `Brand-${id}`;
+    }
+  }
+  
+  export async function getDrugName(id: number): Promise<string> {
+    try {
+      const drug = await prisma.drug.findUnique({
+        where: { id },
+        select: { name: true }
+      });
+      return drug?.name || `Drug-${id}`;
+    } catch (error) {
+      console.error('Error fetching drug name:', error);
+      return `Drug-${id}`;
+    }
+  }
+  
+  export async function getBatchNumber(id: number): Promise<string> {
+    try {
+      const batch = await prisma.batch.findUnique({
+        where: { id },
+        select: { number: true }
+      });
+      return batch?.number || `Batch-${id}`;
+    } catch (error) {
+      console.error('Error fetching batch number:', error);
+      return `Batch-${id}`;
+    }
+  }
