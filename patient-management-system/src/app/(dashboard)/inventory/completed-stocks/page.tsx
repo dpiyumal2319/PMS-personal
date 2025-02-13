@@ -111,6 +111,7 @@ export default async function InventoryAvailable({
             currentPage={currentPage}
             selection={selection}
             sort={sort}
+            status={status}
           />
         </Suspense>
       </div>
