@@ -10,7 +10,7 @@ import {IssueingStrategy} from "@prisma/client";
 import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/AddOffRecordDrugs";
 import {Card} from "@/components/ui/card";
 import {handleServerAction} from "@/app/lib/utils";
-import {addPrescription} from "@/app/lib/actions";
+import { addPrescription } from "@/app/lib/actions";
 
 export interface IssueInForm {
     drugId: number;
