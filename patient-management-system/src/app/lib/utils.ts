@@ -7,6 +7,15 @@ export function calcAge(birthDate: Date): number {
     return Math.abs(age_dt.getUTCFullYear() - 1970);
 }
 
+export const getInitials = (name: string) => {
+    return name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+};
+
 type ServerActionResult = { success: boolean; message: string };
 
 // Now the server action is just a function that returns a Promise<ServerActionResult>

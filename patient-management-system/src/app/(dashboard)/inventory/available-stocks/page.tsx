@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+
 import { DrugForm } from "@/app/(dashboard)/inventory/_components/DrugForm";
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
@@ -6,7 +7,6 @@ import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 import AvailableStockPageTable from "./_components/AvailableStockPageTable";
 import DrugListSkeleton from "./_components/DrugListSkeleton";
-
 
 export default async function InventoryAvailable({
   searchParams,

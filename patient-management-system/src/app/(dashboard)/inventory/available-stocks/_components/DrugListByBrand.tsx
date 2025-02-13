@@ -1,9 +1,5 @@
 import { MdOutlineBrandingWatermark } from "react-icons/md";
-import { FaCubes } from "react-icons/fa";
-import { Button } from "@/components/ui/button";
 import { AiFillMedicineBox } from "react-icons/ai";
-
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AppendButton from "./AppendButton";
 

@@ -46,6 +46,14 @@ enum BatchStatus {
   TRASHED
 }
 
+enum IssueingStrategy {
+  MEAL
+  WHEN_NEEDED
+  PERIODIC
+  OFF_RECORD
+  ORTHER
+}
+
 model Patient {
   id           Int             @id @default(autoincrement())
   telephone    String
@@ -122,26 +130,33 @@ model Batch {
 }
 
 model Prescription {
-  id        Int      @id @default(autoincrement())
-  time      DateTime @default(now())
-  patient   Patient  @relation(fields: [patientId], references: [id])
-  patientId Int
-  issues    Issue[]
+  id                 Int      @id @default(autoincrement())
+  time               DateTime @default(now())
+  presentingSymptoms String
+  bloodPressure      String?
+  pulse              String?
+  cardiovascular     String?
+  patient            Patient  @relation(fields: [patientId], references: [id])
+  patientId          Int
+  issues             Issue[]
 }
 
 model Issue {
-  id             Int          @id @default(autoincrement())
-  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
-  prescriptionId Int
-  batch          Batch        @relation(fields: [batchId], references: [id])
-  batchId        Int
+  id               Int              @id @default(autoincrement())
+  prescription     Prescription     @relation(fields: [prescriptionId], references: [id])
+  prescriptionId   Int
+  batch            Batch?           @relation(fields: [batchId], references: [id])
+  batchId          Int?
+  strategy         IssueingStrategy
+  stratergyDetails Json
+  quantity         Float
 }
 
 model ReportParameter {
   id           Int           @id @default(autoincrement())
   name         String
   units        String?
-  ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id])
+  ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   reportTypeId Int?
   ReportValue  ReportValue[]
 }
@@ -158,7 +173,7 @@ model PatientReport {
   id           Int           @id @default(autoincrement())
   patient      Patient       @relation(fields: [patientId], references: [id])
   patientId    Int
-  reportType   ReportType    @relation(fields: [reportTypeId], references: [id])
+  reportType   ReportType    @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   reportTypeId Int
   time         DateTime      @default(now())
   parameters   ReportValue[]
@@ -166,9 +181,10 @@ model PatientReport {
 
 model ReportValue {
   id                Int             @id @default(autoincrement())
-  reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id])
+  reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id], onDelete: Cascade)
   reportParameterId Int
+  attention         Boolean         @default(false)
   value             String
-  PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id])
+  PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id], onDelete: Cascade)
   patientReportId   Int?
 }

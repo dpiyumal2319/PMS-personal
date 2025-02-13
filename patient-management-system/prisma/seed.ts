@@ -1,4 +1,5 @@
 import {PrismaClient, Gender, Role, QueueStatus, VisitStatus} from '@prisma/client';
+import {faker} from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
@@ -31,6 +32,23 @@ async function main() {
             NIC: '198578954V',
         },
     });
+
+    // Generate 50 random patients
+    const patients = Array.from({length: 50}).map(() => ({
+        telephone: faker.phone.number({
+            style: 'national',
+        }),
+        name: faker.person.fullName(),
+        birthDate: faker.date.birthdate({min: 18, max: 80, mode: 'age'}),
+        address: `${faker.location.city()}, Sri Lanka`,
+        height: faker.number.int({min: 150, max: 190}),
+        weight: faker.number.int({min: 50, max: 100}),
+        gender: faker.helpers.arrayElement([Gender.MALE, Gender.FEMALE]),
+        NIC: `${faker.number.int({min: 190000000, max: 209999999})}V`,
+    }));
+
+    // Insert the random patients into the database
+    await prisma.patient.createMany({data: patients});
 
     //Add doctor and nurse
     await prisma.user.create({
@@ -95,13 +113,13 @@ async function main() {
                     price: 50,
                     status: 'AVAILABLE',
                     drug: {
-                        create: { name: 'Paracetamol' }
+                        create: {name: 'Paracetamol'}
                     }
                 }]
             }
         }
     });
-    
+
     await prisma.drugBrand.create({
         data: {
             name: 'Penadene',
@@ -116,13 +134,13 @@ async function main() {
                     price: 40,
                     status: 'AVAILABLE',
                     drug: {
-                        create: { name: 'Paracetamol' }
+                        create: {name: 'Paracetamol'}
                     }
                 }]
             }
         }
     });
-    
+
     await prisma.drugBrand.create({
         data: {
             name: 'Ibuprofen',
@@ -137,13 +155,13 @@ async function main() {
                     price: 80,
                     status: 'AVAILABLE',
                     drug: {
-                        create: { name: 'Brufen' }
+                        create: {name: 'Brufen'}
                     }
                 }]
             }
         }
     });
-    
+
     await prisma.drugBrand.create({
         data: {
             name: 'Amoxicillin',
@@ -158,13 +176,13 @@ async function main() {
                     price: 120,
                     status: 'AVAILABLE',
                     drug: {
-                        create: { name: 'Amoxil' }
+                        create: {name: 'Amoxil'}
                     }
                 }]
             }
         }
     });
-    
+
 
     // Add Reports
     const fbcReport = await prisma.reportType.create({
