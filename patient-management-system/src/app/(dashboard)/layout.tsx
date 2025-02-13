@@ -11,7 +11,7 @@ export default function DashboardLayout({
 }) {
     return (
         <div className="flex h-screen">
-            <aside className={"fixed top-0 left-0 h-full w-[250px] z-20"}>
+            <aside className={"fixed top-0 left-0 h-full w-[250px] z-50"}>
                 <Sidebar/>
             </aside>
             <div className="flex flex-col w-full h-full ml-[250px]">
