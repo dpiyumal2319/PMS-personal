@@ -3,8 +3,8 @@ import TopCard from "@/app/(dashboard)/patients/[id]/_components/TopCard";
 import {verifySession} from "@/app/lib/sessions";
 
 export default async function Layout({
-                                         children, params
-                                     }: {
+    children, params
+}: {
     children: React.ReactNode,
     params: Promise<{ id: string }>
 }) {

@@ -13,7 +13,7 @@ async function Page({ params }: {
     
 
     return (
-        <div>
+        <div className="flex h-full flex-col w-full">
             <DrugListByBrand brands={filteredDrugsByBrand} />
         </div>
     );

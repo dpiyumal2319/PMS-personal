@@ -1,6 +1,6 @@
 // ParameterBadge.tsx
-import {Badge} from "@/components/ui/badge";
-import {HTMLAttributes} from "react";
+import { Badge } from "@/components/ui/badge";
+import { HTMLAttributes } from "react";
 
 
 export type badgeColorsType = {
