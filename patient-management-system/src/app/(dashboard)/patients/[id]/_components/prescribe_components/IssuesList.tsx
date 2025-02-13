@@ -48,7 +48,6 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [brands, setBrands] = useState<BrandOption[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
     const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
-    const [strategyData, setStrategyData] = useState<StrategyJson | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const [mealStrategy, setMealStrategy] = useState<MealStrategy>({
@@ -119,7 +118,6 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
             times: 0
         });
         setStrategy(null);
-        setStrategyData(null);
     }
 
 
@@ -128,7 +126,6 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
         setSelectedBrand(null);
         setError(null);
         setStrategy(null);
-        setStrategyData(null);
     };
 
 
@@ -155,8 +152,6 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         setSelectedBrand(cachedBrand.brandId);
                         setStrategy(cachedBrand.issue.strategy);
                         const parsedData = StrategyJsonSchema.parse(cachedBrand.issue.strategyDetails);
-                        setStrategyData(parsedData);
-                        console.log(parsedData);
                         switch (cachedBrand.issue.strategy) {
                             case IssueingStrategy.MEAL:
                                 setMealStrategy(parsedData.strategy as MealStrategy);
@@ -188,45 +183,48 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-    const handleAddIssue = () => {
+    const handleAddIssue = async () => {
         if (!selectedDrug || !selectedBrand || !strategy) {
             const missingFields = [];
             if (!selectedDrug) missingFields.push("Drug");
             if (!selectedBrand) missingFields.push("Brand");
             if (!strategy) missingFields.push("Strategy");
-            if (!strategyData) missingFields.push("Strategy Data");
             setError(`Please fill all the fields, missing: ${missingFields.join(", ")}`);
             return;
         }
 
+        let newStrategy: StrategyJson;
+
         switch (strategy) {
             case IssueingStrategy.MEAL:
-                setStrategyData({
+                newStrategy = {
                     name: IssueingStrategy.MEAL,
                     strategy: mealStrategy
-                })
+                }
                 break;
             case IssueingStrategy.WHEN_NEEDED:
-                setStrategyData({
+                newStrategy = {
                     name: IssueingStrategy.WHEN_NEEDED,
                     strategy: whenNeededStrategy
-                })
+                }
                 break;
             case IssueingStrategy.PERIODIC:
-                setStrategyData({
+                newStrategy = {
                     name: IssueingStrategy.PERIODIC,
                     strategy: periodicStrategy
-                })
+                }
                 break;
             case IssueingStrategy.OTHER:
-                setStrategyData({
+                newStrategy = {
                     name: IssueingStrategy.OTHER,
                     strategy: otherStrategy
-                })
+                }
                 break;
+            default:
+                throw new Error("Invalid strategy");
         }
 
-        const parsedData = StrategyJsonSchema.parse(strategyData);
+        const parsedData = StrategyJsonSchema.parse(newStrategy);
         const quantity = calculateQuantity(parsedData);
         const newIssue: IssueInForm = {
             drugId: selectedDrug,
@@ -236,7 +234,6 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
             quantity: quantity
         };
 
-        console.log(newIssue);
         onAddIssue(newIssue);
         setOpen(false);
         resetForm();
