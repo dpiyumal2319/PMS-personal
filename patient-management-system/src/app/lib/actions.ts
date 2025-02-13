@@ -1571,6 +1571,7 @@ const stats = {
             stats.errors.quantity += batch.fullAmount;
         }
   });
+ 
   return stats;
 
 }catch (error) {

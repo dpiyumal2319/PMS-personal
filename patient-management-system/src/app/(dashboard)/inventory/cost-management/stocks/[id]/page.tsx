@@ -8,6 +8,7 @@ interface DrugModelStats {
   sold: { quantity: number; value: number };
   expired: { quantity: number; value: number };
   trashed: { quantity: number; value: number };
+  errors: { quantity: number; value: number };
 }
 
 export default async function DrugDetailByModel({
@@ -50,6 +51,12 @@ export default async function DrugDetailByModel({
           quantity={stats.trashed.quantity}
           value={stats.trashed.value}
           className="bg-red-500"
+        />
+        <StatCard
+          title="Errors"
+          quantity={stats.errors.quantity}
+          value={stats.errors.value}
+          className="bg-gray-400"
         />
       </div>
     </div>
