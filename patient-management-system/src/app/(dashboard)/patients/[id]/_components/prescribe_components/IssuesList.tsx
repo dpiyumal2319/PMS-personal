@@ -11,11 +11,11 @@ import MedicationStrategyTabs from "./MedicationStratergyTabs";
 import {Button} from "@/components/ui/button";
 import type {StrategyJson} from "@/app/lib/definitions";
 import {StrategyJsonSchema} from "@/app/lib/definitions";
-import {Issue, IssueingStrategy} from "@prisma/client";
+import {IssueingStrategy} from "@prisma/client";
+import type { IssueInForm} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
 
 interface IssuesListProps {
-    onAddIssue: (issue: Issue) => void;
-    existingIssues: Issue[];
+    onAddIssue: (issue: IssueInForm) => void;
 }
 
 export type drug = {
@@ -32,7 +32,7 @@ export interface BrandOption {
     farthestExpiry: Date;
 }
 
-const IssuesList: React.FC<IssuesListProps> = ({onAddIssue, existingIssues}) => {
+const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [open, setOpen] = useState(false);
     const [isDrugSearching, setIsDrugSearching] = useState(false);
     const [isBrandSearching, setIsBrandSearching] = useState(false);
@@ -81,9 +81,7 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue, existingIssues}) => 
         }
 
         const parsedData = StrategyJsonSchema.parse(strategyData);
-        const newIssue: Issue = {
-            id: Date.now(), // temporary ID for client-side
-            prescriptionId: 1, // temporary prescription ID
+        const newIssue: IssueInForm = {
             batchId: null,
             drugId: selectedDrug,
             brandId: selectedBrand,

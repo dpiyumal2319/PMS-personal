@@ -5,16 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import IssuesList from "./IssuesList";
+import {StrategyJson} from "@/app/lib/definitions";
+import {IssueingStrategy} from "@prisma/client";
 
-// Define the form state types
-interface Issue {
-    id: number;
+export interface IssueInForm {
+    batchId: number | null;
     drugId: number;
     brandId: number;
-    strategy: {
-        name: 'MEAL' | 'WHEN_NEEDED' | 'PERIODIC' | 'OFF_RECORD' | 'OTHER';
-        strategy: any; // Will be typed according to the specific strategy
-    };
+    strategy: IssueingStrategy;
+    strategyDetails: StrategyJson;
     quantity: number;
 }
 
@@ -23,7 +22,7 @@ interface PrescriptionFormData {
     bloodPressure: string;
     pulse: string;
     cardiovascular: string;
-    issues: Issue[];
+    issues: IssueInForm[];
 }
 
 const PrescriptionForm = () => {
@@ -43,19 +42,19 @@ const PrescriptionForm = () => {
         }));
     };
 
-    const handleAddIssue = (issue: Issue) => {
+    const handleAddIssue = (issue: IssueInForm) => {
         setFormData((prevData) => ({
             ...prevData,
             issues: [...prevData.issues, issue]
         }));
     };
-
-    const handleRemoveIssue = (issueId: number) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            issues: prevData.issues.filter(issue => issue.id !== issueId)
-        }));
-    };
+    //
+    // const handleRemoveIssue = (issueId: number) => {
+    //     setFormData((prevData) => ({
+    //         ...prevData,
+    //         issues: prevData.issues.filter(issue => issue.id !== issueId)
+    //     }));
+    // };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -112,25 +111,8 @@ const PrescriptionForm = () => {
             </div>
 
             <div className="space-y-4">
-                {formData.issues.map((issue) => (
-                    <div key={issue.id} className="flex items-center justify-between p-4 border rounded">
-                        <div>
-                            {/* Display issue details */}
-                            <p>Strategy: {issue.strategy.name}</p>
-                            <p>Quantity: {issue.quantity}</p>
-                        </div>
-                        <Button
-                            variant="destructive"
-                            onClick={() => handleRemoveIssue(issue.id)}
-                        >
-                            Remove
-                        </Button>
-                    </div>
-                ))}
-
                 <IssuesList
                     onAddIssue={handleAddIssue}
-                    existingIssues={formData.issues}
                 />
             </div>
 
