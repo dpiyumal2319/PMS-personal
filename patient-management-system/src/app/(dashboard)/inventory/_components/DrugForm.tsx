@@ -2,58 +2,146 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { addNewItem } from "@/app/lib/actions";
+import {
+  addNewItem,
+  searchDrugBrands,
+  searchDrugModels,
+} from "@/app/lib/actions";
 import { Plus, X } from "lucide-react";
 import { handleServerAction } from "@/app/lib/utils";
-import { InventoryFormData } from "@/app/lib/definitions";
+import {
+  DrugBrandSuggestion,
+  DrugModelSuggestion,
+} from "@/app/lib/definitions";
+import { DrugSuggestionBox } from "@/app/(dashboard)/inventory/_components/DrugSuggestionBox";
 
-// Define the type for DrugType
 type DrugType = "Tablet" | "Syrup";
+
+interface InventoryFormData {
+  brandId?: number;
+  brandName: string;
+
+  drugId?: number;
+  drugName: string;
+  batchNumber: string;
+  drugType: DrugType;
+  quantity: string;
+  expiry: string;
+  price: string;
+}
 
 export function DrugForm() {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState<InventoryFormData>({
     brandName: "",
-    brandDescription: "",
     drugName: "",
     batchNumber: "",
     drugType: "Tablet",
-    quantity: 0,
+    quantity: "",
     expiry: "",
-    price: 0,
+    price: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const [brandSuggestions, setBrandSuggestions] = useState<
+    DrugBrandSuggestion[]
+  >([]);
+  const [drugSuggestions, setDrugSuggestions] = useState<DrugModelSuggestion[]>(
+    []
+  );
+  const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
+  const [showDrugSuggestions, setShowDrugSuggestions] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    const updatedValue = e.target.type === "number" ? Number(value) : value;
+    setFormData((prev) => ({ ...prev, [name]: updatedValue }));
+
+    if (name === "brandName") {
+      if (value.length >= 2) {
+        handleBrandSearch(value);
+        setShowBrandSuggestions(true);
+      } else {
+        setBrandSuggestions([]);
+        setShowBrandSuggestions(false);
+      }
+    } else if (name === "drugName") {
+      if (value.length >= 2) {
+        handleDrugSearch(value);
+        setShowDrugSuggestions(true);
+      } else {
+        setDrugSuggestions([]);
+        setShowDrugSuggestions(false);
+      }
+    }
+  };
+
+  const handleBrandSearch = async (query: string) => {
+    try {
+      const results = await searchDrugBrands(query);
+      setBrandSuggestions(results);
+    } catch (error) {
+      console.error("Error searching brands:", error);
+      setBrandSuggestions([]);
+    }
+  };
+
+  const handleDrugSearch = async (query: string) => {
+    try {
+      const results = await searchDrugModels(query);
+      setDrugSuggestions(results);
+    } catch (error) {
+      console.error("Error searching drugs:", error);
+      setDrugSuggestions([]);
+    }
+  };
+
+  const handleBrandSelect = (suggestion: DrugBrandSuggestion) => {
+    setFormData((prev) => ({
+      ...prev,
+      brandId: suggestion.id,
+      brandName: suggestion.name,
+    }));
+    setShowBrandSuggestions(false);
+  };
+
+  const handleDrugSelect = (suggestion: DrugModelSuggestion) => {
+    setFormData((prev) => ({
+      ...prev,
+      drugId: suggestion.id,
+      drugName: suggestion.name,
+    }));
+    setShowDrugSuggestions(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form data", formData);
 
-    const result = await handleServerAction(() => addNewItem({ formData }), {
-      loadingMessage: "Adding new item...",
-    });
+    try {
+      const result = await handleServerAction(() => addNewItem({ formData }), {
+        loadingMessage: "Adding new item...",
+      });
 
-    if (result.success) {
-      setIsOpen(false);
+      if (result.success) {
+        setIsOpen(false);
+        setFormData({
+          brandName: "",
+          drugName: "",
+          batchNumber: "",
+          drugType: "Tablet",
+          quantity: "",
+          expiry: "",
+          price: "",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
     }
-
-    setFormData({
-      brandName: "",
-      brandDescription: "",
-      drugName: "",
-      batchNumber: "",
-      drugType: "Tablet",
-      quantity: 0,
-      expiry: "",
-      price: 0,
-    });
   };
 
   return (
     <>
-      {/* Button to Open Modal */}
       <Button
         className="bg-primary-500 hover:bg-primary-600 text-white"
         onClick={() => setIsOpen(true)}
@@ -62,54 +150,76 @@ export function DrugForm() {
         Add New Item
       </Button>
 
-      {/* Modal (Shown Only When isOpen is True) */}
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md z-50">
           <div className="bg-white w-[600px] p-6 rounded-lg shadow-lg relative">
-            {/* Close Button */}
             <button
               className="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
               onClick={() => setIsOpen(false)}
+              type="button"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h2 className="text-xl font-semibold text-center mb-4">
+            <h2 className="text-xl font-semibold text-center mb-4 text-primary-600">
               Add New Drug
             </h2>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
+              <div className="relative">
+                <label
+                  htmlFor="brandName"
+                  className="block text-sm font-medium mb-1"
+                >
                   Brand Name
                 </label>
                 <Input
+                  id="brandName"
                   value={formData.brandName}
                   onChange={handleChange}
                   required
                   name="brandName"
+                  autoComplete="off"
+                />
+                <DrugSuggestionBox
+                  suggestions={brandSuggestions}
+                  onSelect={handleBrandSelect}
+                  visible={showBrandSuggestions}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
+              <div className="relative">
+                <label
+                  htmlFor="drugName"
+                  className="block text-sm font-medium mb-1"
+                >
                   Drug Name
                 </label>
                 <Input
+                  id="drugName"
                   value={formData.drugName}
                   onChange={handleChange}
                   required
                   name="drugName"
+                  autoComplete="off"
+                />
+                <DrugSuggestionBox
+                  suggestions={drugSuggestions}
+                  onSelect={handleDrugSelect}
+                  visible={showDrugSuggestions}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label
+                    htmlFor="batchNumber"
+                    className="block text-sm font-medium mb-1"
+                  >
                     Batch Number
                   </label>
                   <Input
+                    id="batchNumber"
                     value={formData.batchNumber}
                     onChange={handleChange}
                     required
@@ -118,17 +228,17 @@ export function DrugForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label
+                    htmlFor="drugType"
+                    className="block text-sm font-medium mb-1"
+                  >
                     Drug Type
                   </label>
                   <select
+                    id="drugType"
                     value={formData.drugType}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        drugType: e.target.value as DrugType,
-                      })
-                    }
+                    onChange={handleChange}
+                    name="drugType"
                     className="w-full p-2 border rounded"
                   >
                     <option value="Tablet">Tablet</option>
@@ -139,42 +249,55 @@ export function DrugForm() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label
+                    htmlFor="quantity"
+                    className="block text-sm font-medium mb-1"
+                  >
                     Quantity
                   </label>
                   <Input
+                    id="quantity"
                     type="number"
                     value={formData.quantity}
                     onChange={handleChange}
                     required
                     name="quantity"
+                    min="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Price
+                  <label
+                    htmlFor="price"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Price per Unit
                   </label>
                   <Input
+                    id="price"
                     type="number"
                     step="0.01"
                     value={formData.price}
                     onChange={handleChange}
                     required
                     name="price"
+                    min="0"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label
+                  htmlFor="expiry"
+                  className="block text-sm font-medium mb-1"
+                >
                   Expiry Date
                 </label>
                 <Input
+                  id="expiry"
                   type="date"
                   value={formData.expiry}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
                   required
                   name="expiry"
                 />

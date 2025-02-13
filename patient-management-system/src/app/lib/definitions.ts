@@ -150,6 +150,8 @@ export interface StockQueryParams {
     query?: string;
     page?: number;
     sort?: SortOption;
+     startDate?: Date;
+    endDate?: Date;
 }
 
 // types for inventory cost analysis
@@ -182,6 +184,18 @@ export interface PieChartData {
   value: number;
   color: string;
 }
+
+export interface DrugBrandSuggestion {
+  id: number;
+  name: string;
+
+}
+
+export interface DrugModelSuggestion {
+  id: number;
+  name: string;
+}
+
 
 const MealStrategySchema = z.object({
     breakfast: z.object({
