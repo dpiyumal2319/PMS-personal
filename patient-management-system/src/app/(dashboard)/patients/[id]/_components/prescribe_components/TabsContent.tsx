@@ -8,11 +8,11 @@ import {TabsContent} from "@/components/ui/tabs";
 import MealCards from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/MealCards";
 import type {
     MealStrategy,
-    OffRecordStrategy,
     OtherStrategy,
     PeriodicStrategy,
     WhenNeededStrategy
 } from "@/app/lib/definitions";
+import {Textarea} from "@/components/ui/textarea";
 
 interface MealTabsContentProps {
     strategy: MealStrategy;
@@ -149,31 +149,37 @@ interface WhenNeededContentProps {
 
 // When Needed Tab
 const WhenNeededContent = ({strategy, setStrategy}: WhenNeededContentProps) => {
-    const handleQuantityChange = (value: string) => {
-        const quantity = Number(value);
-        if (!isNaN(quantity)) {
-            setStrategy(prev => ({
-                ...prev,
-                quantity
-            }));
-        }
-    }
-
-
     return (
         <TabsContent value="WHEN_NEEDED">
-            <Card className="p-6">
+            <Card className="p-6 space-y-4">
                 <div className="space-y-2">
-                    <Label className="text-sm text-slate-500">Quantity</Label>
+                    <Label className="text-sm text-slate-500">Dose</Label>
                     <div className="relative">
                         <Input
+                            id={'dose'}
                             type="number"
-                            value={strategy.quantity}
-                            onChange={(e) => handleQuantityChange(e.target.value)}
+                            value={strategy.dose}
+                            onChange={(e) => setStrategy(prev => ({...prev, dose: Number(e.target.value)}))}
                             className="text-lg pl-10"
                             placeholder="Enter quantity"
                         />
                         <AlertCircle
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-sm text-slate-500">For times</Label>
+                    <div className="relative">
+                        <Input
+                            type="number"
+                            value={strategy.times}
+                            onChange={(e) => setStrategy(prev => ({...prev, times: Number(e.target.value)}))}
+                            className="text-lg pl-10"
+                            placeholder="Enter for how many times"
+                        />
+                        <Calendar
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
                         />
                     </div>
@@ -188,7 +194,7 @@ interface PeriodicTabsContentProps {
     setStrategy: React.Dispatch<React.SetStateAction<PeriodicStrategy>>;
 }
 
-const PeriodicTabsContent = ({ strategy, setStrategy }: PeriodicTabsContentProps) => {
+const PeriodicTabsContent = ({strategy, setStrategy}: PeriodicTabsContentProps) => {
     const handleChange = (field: keyof PeriodicStrategy) => (value: string) => {
         const numValue = Number(value);
         if (!isNaN(numValue)) {
@@ -203,14 +209,14 @@ const PeriodicTabsContent = ({ strategy, setStrategy }: PeriodicTabsContentProps
         <TabsContent value="PERIODIC">
             <Card className="p-6 space-y-4">
                 <div className="space-y-2">
-                    <Label className="text-sm text-slate-500">Interval</Label>
+                    <Label className="text-sm text-slate-500">Interval(Hours)</Label>
                     <div className="relative">
                         <Input
                             type="number"
                             value={strategy.interval}
                             onChange={(e) => handleChange('interval')(e.target.value)}
                             className="text-lg pl-10"
-                            placeholder="Enter interval"
+                            placeholder="Enter interval in hours"
                         />
                         <Clock
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
@@ -225,7 +231,7 @@ const PeriodicTabsContent = ({ strategy, setStrategy }: PeriodicTabsContentProps
                             value={strategy.dose}
                             onChange={(e) => handleChange('dose')(e.target.value)}
                             className="text-lg pl-10"
-                            placeholder="Enter quantity"
+                            placeholder="Enter dose"
                         />
                         <AlertCircle
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
@@ -240,7 +246,7 @@ const PeriodicTabsContent = ({ strategy, setStrategy }: PeriodicTabsContentProps
                             value={strategy.forDays}
                             onChange={(e) => handleChange('forDays')(e.target.value)}
                             className="text-lg pl-10"
-                            placeholder="Enter for days"
+                            placeholder="Enter for how many days"
                         />
                         <Calendar
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
@@ -252,61 +258,12 @@ const PeriodicTabsContent = ({ strategy, setStrategy }: PeriodicTabsContentProps
     );
 };
 
-interface OffRecordTabsContentProps {
-    strategy: OffRecordStrategy;
-    setStrategy: React.Dispatch<React.SetStateAction<OffRecordStrategy>>;
-}
-
-const OffRecordTabsContent = ({strategy, setStrategy}: OffRecordTabsContentProps) => {
-    const handleQuantityChange = (value: string) => {
-        const quantity = Number(value);
-        if (!isNaN(quantity)) {
-            setStrategy(prev => ({
-                ...prev,
-                quantity
-            }));
-        }
-    };
-
-    return (
-        <TabsContent value="OFF_RECORD">
-            <Card className="p-6 space-y-4">
-                <div className="space-y-2">
-                    <Label className="text-sm text-slate-500">Quantity</Label>
-                    <div className="relative">
-                        <Input
-                            type="number"
-                            value={strategy.quantity}
-                            onChange={(e) => handleQuantityChange(e.target.value)}
-                            className="text-lg pl-10"
-                            placeholder="Enter quantity"
-                        />
-                        <AlertCircle
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
-                        />
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <Label className="text-sm text-slate-500">Details</Label>
-                    <Input
-                        type="text"
-                        value={strategy.details}
-                        onChange={(e) => setStrategy(prev => ({ ...prev, details: e.target.value }))}
-                        className="text-lg"
-                        placeholder="Enter details"
-                    />
-                </div>
-            </Card>
-        </TabsContent>
-    );
-};
-
 interface OtherTabsContentProps {
     strategy: OtherStrategy;
     setStrategy: React.Dispatch<React.SetStateAction<OtherStrategy>>;
 }
 
-const OtherTabsContent = ({ strategy, setStrategy }: OtherTabsContentProps) => {
+const OtherTabsContent = ({strategy, setStrategy}: OtherTabsContentProps) => {
     const handleQuantityChange = (value: string) => {
         const quantity = Number(value);
         if (!isNaN(quantity)) {
@@ -321,33 +278,51 @@ const OtherTabsContent = ({ strategy, setStrategy }: OtherTabsContentProps) => {
         <TabsContent value="OTHER">
             <Card className="p-6 space-y-4">
                 <div className="space-y-2">
-                    <Label className="text-sm text-slate-500">Quantity</Label>
+                    <Label className="text-sm text-slate-500">Dose</Label>
                     <div className="relative">
                         <Input
                             type="number"
-                            value={strategy.quantity}
+                            value={strategy.dose}
                             onChange={(e) => handleQuantityChange(e.target.value)}
                             className="text-lg pl-10"
-                            placeholder="Enter quantity"
+                            placeholder="Enter dosage"
                         />
                         <AlertCircle
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
                         />
                     </div>
                 </div>
+
+                <div className="space-y-2">
+                    <Label className="text-sm text-slate-500">How many times</Label>
+                    <div className="relative">
+                        <Input
+                            type="number"
+                            value={strategy.times}
+                            onChange={(e) => handleQuantityChange(e.target.value)}
+                            className="text-lg pl-10"
+                            placeholder="Enter how many times"
+                        />
+                        <AlertCircle
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
+                        />
+                    </div>
+                </div>
+
                 <div className="space-y-2">
                     <Label className="text-sm text-slate-500">Details</Label>
-                    <Input
-                        type="text"
-                        value={strategy.details}
-                        onChange={(e) => setStrategy(prev => ({ ...prev, details: e.target.value }))}
-                        className="text-lg"
-                        placeholder="Enter details"
-                    />
+                    <div className="relative">
+                        <Textarea
+                            value={strategy.details}
+                            onChange={(e) => setStrategy(prev => ({...prev, details: e.target.value}))}
+                            className="pl-10"
+                            placeholder="Enter details"
+                        />
+                    </div>
                 </div>
             </Card>
         </TabsContent>
     );
 };
 
-export {MealTabsContent, WhenNeededContent, PeriodicTabsContent, OffRecordTabsContent, OtherTabsContent};
+export {MealTabsContent, WhenNeededContent, PeriodicTabsContent, OtherTabsContent};

@@ -8,6 +8,7 @@ import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {DrugType, Prisma} from "@prisma/client";
 import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
+import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -1385,7 +1386,7 @@ export async function searchAvailableDrugs(term: string) {
 }
 
 
-export async function searchBrandByDrug({ drugID }: {
+export async function searchBrandByDrug({drugID}: {
     drugID: number;
 }): Promise<BrandOption[]> {
     return prisma.drugBrand.findMany({
@@ -1430,4 +1431,114 @@ export async function searchBrandByDrug({ drugID }: {
             };
         })
     );
+}
+
+
+export async function addPrescription({
+                                          prescriptionForm,
+                                          patientID
+                                      }: {
+    prescriptionForm: PrescriptionFormData;
+    patientID: number;
+}): Promise<myError> {
+    try {
+        // Basic validation checks
+        if (prescriptionForm.issues.length === 0 && prescriptionForm.offRecordMeds.length === 0) {
+            return {success: false, message: 'At least one prescription is required'};
+        }
+
+        // Create prescription with all related records in a transaction
+        await prisma.$transaction(async (tx) => {
+            // Create the main prescription and store its result to get issue IDs
+            const prescription = await tx.prescription.create({
+                data: {
+                    patientId: patientID,
+                    presentingSymptoms: prescriptionForm.presentingSymptoms,
+                    bloodPressure: prescriptionForm.bloodPressure,
+                    pulse: prescriptionForm.pulse,
+                    cardiovascular: prescriptionForm.cardiovascular,
+                    // Create issues
+                    issues: {
+                        create: prescriptionForm.issues.map(issue => ({
+                            drugId: issue.drugId,
+                            brandId: issue.brandId,
+                            strategy: issue.strategy,
+                            strategyDetails: issue.strategyDetails,
+                            quantity: issue.quantity
+                        }))
+                    },
+                    // Create off-record medications
+                    OffRecordMeds: {
+                        create: prescriptionForm.offRecordMeds.map(med => ({
+                            name: med.name,
+                            description: med.description
+                        }))
+                    }
+                },
+                // Include the created issues in the return value
+                include: {
+                    issues: true
+                }
+            });
+
+            // Update strategy history for each issue
+            for (let i = 0; i < prescriptionForm.issues.length; i++) {
+                const issue = prescriptionForm.issues[i];
+                const createdIssue = prescription.issues[i]; // Get the corresponding created issue
+
+                // Try to find existing history
+                const existingHistory = await tx.stratergyHistory.findUnique({
+                    where: {
+                        drugId: issue.drugId
+                    }
+                });
+
+                if (existingHistory) {
+                    // Update existing history with new brand and issue
+                    await tx.stratergyHistory.update({
+                        where: {
+                            drugId: issue.drugId
+                        },
+                        data: {
+                            brandId: issue.brandId,
+                            issueId: createdIssue.id
+                        }
+                    });
+                } else {
+                    // Create new history entry
+                    await tx.stratergyHistory.create({
+                        data: {
+                            drugId: issue.drugId,
+                            brandId: issue.brandId,
+                            issueId: createdIssue.id
+                        }
+                    });
+                }
+            }
+        });
+
+        return {
+            success: true,
+            message: 'Prescription created successfully'
+        };
+    } catch (e) {
+        console.error('Error adding prescription:', e);
+        return {
+            success: false,
+            message: e instanceof Error ? e.message : 'An error occurred while adding prescription'
+        };
+    }
+}
+
+export async function getCachedStrategy(drugID: number) {
+    return prisma.stratergyHistory.findUnique({
+        where: {
+            drugId: drugID
+        },
+        select: {
+            issueId: true,
+            brandId: true,
+            issue: true
+        }
+    });
 }

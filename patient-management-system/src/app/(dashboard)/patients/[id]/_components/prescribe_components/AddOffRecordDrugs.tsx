@@ -26,6 +26,8 @@ const AddOffRecordDrugs = ({addRecord}: AddRecordProps) => {
             return
         }
 
+        setIsDialogOpen(false);
+        setOffRecordMed({name: "", description: ""})
         addRecord(offRecordMed)
     }
 

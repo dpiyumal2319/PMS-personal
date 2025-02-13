@@ -4,15 +4,22 @@ import React, {useState} from 'react';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Card} from "@/components/ui/card";
 import {useDebouncedCallback} from "use-debounce";
-import {searchAvailableDrugs, searchBrandByDrug} from "@/app/lib/actions";
+import {getCachedStrategy, searchAvailableDrugs, searchBrandByDrug} from "@/app/lib/actions";
 import DrugCombobox from "./DrugCombobox";
 import BrandCombobox from "./BrandCombobox";
 import MedicationStrategyTabs from "./MedicationStratergyTabs";
 import {Button} from "@/components/ui/button";
-import type {StrategyJson} from "@/app/lib/definitions";
+import type {
+    MealStrategy,
+    StrategyJson,
+    WhenNeededStrategy,
+    PeriodicStrategy,
+    OtherStrategy
+} from "@/app/lib/definitions";
 import {StrategyJsonSchema} from "@/app/lib/definitions";
 import {IssueingStrategy} from "@prisma/client";
-import type { IssueInForm} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
+import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
+import {calculateQuantity} from "@/app/lib/utils";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
@@ -40,9 +47,89 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
     const [brands, setBrands] = useState<BrandOption[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
-    const [strategy, setStrategy] = useState<IssueingStrategy | null>('MEAL');
+    const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
     const [strategyData, setStrategyData] = useState<StrategyJson | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    const [mealStrategy, setMealStrategy] = useState<MealStrategy>({
+        dinner: {
+            active: true,
+            dose: 0
+        },
+        breakfast: {
+            active: true,
+            dose: 0
+        },
+        lunch: {
+            active: true,
+            dose: 0
+        },
+        forDays: 0,
+        afterMeal: true,
+        minutesBeforeAfterMeal: 0
+    });
+
+    const [whenNeededStrategy, setWhenNeededStrategy] = useState<WhenNeededStrategy>({
+        dose: 0,
+        times: 0
+    });
+
+    const [periodicStrategy, setPeriodicStrategy] = useState<PeriodicStrategy>({
+        interval: 0,
+        dose: 0,
+        forDays: 0
+    });
+
+    const [otherStrategy, setOtherStrategy] = useState<OtherStrategy>({
+        details: "",
+        dose: 0,
+        times: 0
+    });
+
+    const resetStrategies = () => {
+        setMealStrategy({
+            dinner: {
+                active: true,
+                dose: 0
+            },
+            breakfast: {
+                active: true,
+                dose: 0
+            },
+            lunch: {
+                active: true,
+                dose: 0
+            },
+            forDays: 0,
+            afterMeal: true,
+            minutesBeforeAfterMeal: 0
+        });
+        setWhenNeededStrategy({
+            dose: 0,
+            times: 0
+        });
+        setPeriodicStrategy({
+            interval: 0,
+            dose: 0,
+            forDays: 0
+        });
+        setOtherStrategy({
+            details: "",
+            dose: 0,
+            times: 0
+        });
+        setStrategy(null);
+        setStrategyData(null);
+    }
+
+
+    const resetForm = () => {
+        setSelectedDrug(null);
+        setSelectedBrand(null);
+        setError(null);
+        setStrategy(null);
+        setStrategyData(null);
+    };
 
 
     const handleDrugSearch = useDebouncedCallback(async (term: string) => {
@@ -62,19 +149,47 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
             try {
                 const brands = await searchBrandByDrug({drugID: selectedID});
                 setBrands(brands);
+                const cachedBrand = await getCachedStrategy(selectedID);
+                if (cachedBrand && cachedBrand.brandId in brands) {
+                    if (cachedBrand.brandId in brands) {
+                        setSelectedBrand(cachedBrand.brandId);
+                        setStrategy(cachedBrand.issue.strategy);
+                        const parsedData = StrategyJsonSchema.parse(cachedBrand.issue.strategyDetails);
+                        setStrategyData(parsedData);
+                        console.log(parsedData);
+                        switch (cachedBrand.issue.strategy) {
+                            case IssueingStrategy.MEAL:
+                                setMealStrategy(parsedData.strategy as MealStrategy);
+                                setStrategy(IssueingStrategy.MEAL);
+                                break;
+                            case IssueingStrategy.WHEN_NEEDED:
+                                setWhenNeededStrategy(parsedData.strategy as WhenNeededStrategy);
+                                setStrategy(IssueingStrategy.WHEN_NEEDED);
+                                break;
+                            case IssueingStrategy.PERIODIC:
+                                setPeriodicStrategy(parsedData.strategy as PeriodicStrategy);
+                                setStrategy(IssueingStrategy.PERIODIC);
+                                break;
+                            case IssueingStrategy.OTHER:
+                                setOtherStrategy(parsedData.strategy as OtherStrategy);
+                                setStrategy(IssueingStrategy.OTHER);
+                                break;
+                        }
+                    }
+                } else {
+                    resetStrategies();
+                }
+            } catch (e) {
+                console.error(e);
+                setError("Error fetching brands");
             } finally {
                 setIsBrandSearching(false);
             }
         }
     };
 
-    const handleStrategyChange = (newStrategy: IssueingStrategy, newStrategyData: StrategyJson) => {
-        setStrategy(newStrategy);
-        setStrategyData(newStrategyData);
-    };
-
     const handleAddIssue = () => {
-        if (!selectedDrug || !selectedBrand || !strategy || !strategyData) {
+        if (!selectedDrug || !selectedBrand || !strategy) {
             const missingFields = [];
             if (!selectedDrug) missingFields.push("Drug");
             if (!selectedBrand) missingFields.push("Brand");
@@ -84,25 +199,47 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
             return;
         }
 
+        switch (strategy) {
+            case IssueingStrategy.MEAL:
+                setStrategyData({
+                    name: IssueingStrategy.MEAL,
+                    strategy: mealStrategy
+                })
+                break;
+            case IssueingStrategy.WHEN_NEEDED:
+                setStrategyData({
+                    name: IssueingStrategy.WHEN_NEEDED,
+                    strategy: whenNeededStrategy
+                })
+                break;
+            case IssueingStrategy.PERIODIC:
+                setStrategyData({
+                    name: IssueingStrategy.PERIODIC,
+                    strategy: periodicStrategy
+                })
+                break;
+            case IssueingStrategy.OTHER:
+                setStrategyData({
+                    name: IssueingStrategy.OTHER,
+                    strategy: otherStrategy
+                })
+                break;
+        }
+
         const parsedData = StrategyJsonSchema.parse(strategyData);
+        const quantity = calculateQuantity(parsedData);
         const newIssue: IssueInForm = {
-            batchId: null,
             drugId: selectedDrug,
             brandId: selectedBrand,
             strategy: strategy,
             strategyDetails: parsedData,
-            quantity: 10,
+            quantity: quantity
         };
 
+        console.log(newIssue);
         onAddIssue(newIssue);
         setOpen(false);
         resetForm();
-    };
-
-    const resetForm = () => {
-        setSelectedDrug(null);
-        setSelectedBrand(null);
-        setStrategy(null);
     };
 
     return (
@@ -147,7 +284,11 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     </div>
 
                     <MedicationStrategyTabs
-                        onStrategyChange={handleStrategyChange}
+                        mealStrategy={{mealStrategy, setMealStrategy}}
+                        whenNeededStrategy={{whenNeededStrategy, setWhenNeededStrategy}}
+                        periodicStrategy={{periodicStrategy, setPeriodicStrategy}}
+                        otherStrategy={{otherStrategy, setOtherStrategy}}
+                        selectedStrategy={{selectedStrategy: strategy, setSelectedStrategy: setStrategy}}
                     />
                 </div>
                 <DialogFooter>

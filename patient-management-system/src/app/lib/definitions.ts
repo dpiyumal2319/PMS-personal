@@ -1,5 +1,4 @@
 import { IconType } from "react-icons";
-import { IssueingStrategy } from "@prisma/client";
 import { z } from "zod";
 
 export type SessionPayload = {
@@ -204,30 +203,26 @@ const MealStrategySchema = z.object({
 
 
 const WhenNeededStrategySchema = z.object({
-    quantity: z.number(),
+    dose: z.number(),
+    times: z.number(),
 });
 
 const PeriodicStrategySchema = z.object({
-    interval: z.number(),
+    interval: z.number(), // in hours
     dose: z.number(),
     forDays: z.number(),
 });
 
-const OffRecordStrategySchema = z.object({
-    details: z.string(),
-    quantity: z.number(),
-});
-
 const OtherStrategySchema = z.object({
     details: z.string(),
-    quantity: z.number(),
+    dose: z.number(),
+    times: z.number(),
 });
 
 export const StrategyJsonSchema = z.discriminatedUnion("name", [
     z.object({ name: z.literal("MEAL"), strategy: MealStrategySchema }),
     z.object({ name: z.literal("WHEN_NEEDED"), strategy: WhenNeededStrategySchema }),
     z.object({ name: z.literal("PERIODIC"), strategy: PeriodicStrategySchema }),
-    z.object({ name: z.literal("OFF_RECORD"), strategy: OffRecordStrategySchema }),
     z.object({ name: z.literal("OTHER"), strategy: OtherStrategySchema }),
 ]);
 
@@ -235,5 +230,4 @@ export type StrategyJson = z.infer<typeof StrategyJsonSchema>;
 export type MealStrategy = z.infer<typeof MealStrategySchema>;
 export type WhenNeededStrategy = z.infer<typeof WhenNeededStrategySchema>;
 export type PeriodicStrategy = z.infer<typeof PeriodicStrategySchema>;
-export type OffRecordStrategy = z.infer<typeof OffRecordStrategySchema>;
 export type OtherStrategy = z.infer<typeof OtherStrategySchema>;
