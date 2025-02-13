@@ -9,7 +9,6 @@ export default function Layout({
     return (
         <div className={'flex flex-col h-full w-full'}>
             <BatchTopBar
-            batchId= {5}
             />
             {children}
         </div>

@@ -222,12 +222,7 @@ export async function getTotalPagesForFilteredDrugsByBrand({
     modelId?: number;
 }) {
     if (modelId !== 0) {
-        const totalItems = await prisma.batch.count({
-            where: {
-                drugId: modelId,
-                status: "AVAILABLE",
-            },
-        });
+
 
         const uniqueBrandCount = await prisma.batch.groupBy({
             by: ['drugBrandId'],
@@ -284,7 +279,6 @@ export async function getTotalPagesForFilteredDrugsByBatch({
 }
 
 
-const PAGE_SIZE_AVAILABLE_DRUGS = 10;
 
 export async function getFilteredDrugsByModel({
     query = "",

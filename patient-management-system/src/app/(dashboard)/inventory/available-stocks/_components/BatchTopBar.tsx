@@ -4,11 +4,9 @@ import { useRouter, usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {  FileText, LucidePackagePlus } from "lucide-react";
 
-interface BatchTabsProps {
-  batchId: number;
-}
 
-const PatientTabs = ({ batchId }: BatchTabsProps) => {
+
+const PatientTabs = () => {
   const router = useRouter();
   const pathname = usePathname();
 

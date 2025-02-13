@@ -28,26 +28,26 @@ const AddPatientButton = ({id}: { id: number }) => {
 
     useEffect(() => {
         if (searchBy === "NIC") {
-            if (searchTerm.length !== 10 && searchTerm.length !== 12) {
+            if (debouncedSearchTerm.length !== 10 && debouncedSearchTerm.length !== 12) {
                 setError("NIC should be 10 or 12 characters long");
                 return;
             }
         }
 
         if (searchBy === "telephone") {
-            if (!isNumber(searchTerm)) {
+            if (!isNumber(debouncedSearchTerm)) {
                 setError("Telephone should be a number");
                 return;
             }
 
-            if (searchTerm.length !== 10) {
+            if (debouncedSearchTerm.length !== 10) {
                 setError("Telephone should be 10 characters long");
                 return;
             }
         }
 
         if (searchBy === "name") {
-            if (searchTerm.length < 3) {
+            if (debouncedSearchTerm.length < 3) {
                 setError("Name should be at least 3 characters long");
                 return;
             }
@@ -63,7 +63,7 @@ const AddPatientButton = ({id}: { id: number }) => {
         fetchData().then(() => {
             console.log("Search results fetched");
         });
-    }, [debouncedSearchTerm, searchBy, searchTerm]);
+    }, [debouncedSearchTerm, searchBy]);
 
     const getSex = (sex: string) => {
         switch (sex) {
