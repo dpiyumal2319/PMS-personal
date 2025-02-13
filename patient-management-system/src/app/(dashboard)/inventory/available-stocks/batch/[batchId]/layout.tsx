@@ -7,7 +7,7 @@ export default function Layout({
     children: React.ReactNode;
 }) {
     return (
-        <div className={'flex flex-col h-full'}>
+        <div className={'flex flex-col h-full w-full'}>
             <BatchTopBar
             batchId= {5}
             />

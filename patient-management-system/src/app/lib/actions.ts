@@ -193,7 +193,7 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
 
 
 
-const PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL= 9; 
+const PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL = 9;
 const PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND = 9;
 const PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH = 6;
 
@@ -1026,44 +1026,61 @@ export async function getDrugBrands() {
 
 export async function getBatchData(batchId: number) {
     try {
-      const batchData = await prisma.batch.findUnique({
-        where: {
-          id: batchId,
-        },
-        include: {
-          drug: {
-            select: {
-              name: true,
+        const batchData = await prisma.batch.findUnique({
+            where: {
+                id: batchId,
             },
-          },
-          drugBrand: {
-            select: {
-              name: true,
+            include: {
+                drug: {
+                    select: {
+                        name: true,
+                    },
+                },
+                drugBrand: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
-          },
-        },
-      });
-  
-      if (!batchData) {
-        throw new Error('Batch not found');
-      }
-  
-      return {
-        number: batchData.number,
-        drugName: batchData.drug.name,
-        drugBrandName: batchData.drugBrand.name,
-        drugType: batchData.type,
-        fullAmount: batchData.fullAmount,
-        remainingQuantity: batchData.remainingQuantity,
-        expiryDate: batchData.expiry.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
-        stockDate: batchData.stockDate.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
-        price: batchData.price,
-        status: batchData.status,
-      };
+        });
+
+        if (!batchData) {
+            throw new Error('Batch not found');
+        }
+
+        return {
+            number: batchData.number,
+            drugName: batchData.drug.name,
+            drugBrandName: batchData.drugBrand.name,
+            drugType: batchData.type,
+            fullAmount: batchData.fullAmount,
+            remainingQuantity: batchData.remainingQuantity,
+            expiryDate: batchData.expiry.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
+            stockDate: batchData.stockDate.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
+            price: batchData.price,
+            status: batchData.status,
+        };
     } catch (error) {
-      console.error(error);
-      throw error;
+        console.error(error);
+        throw error;
     } finally {
-      await prisma.$disconnect();
+        await prisma.$disconnect();
     }
-  }
+}
+
+export async function handleConfirmationOfBatchStatusChange(batchId: number, action: "completed" | "trashed"): Promise<void> {
+    if (!batchId) return;
+
+    const newStatus = action === "completed" ? "COMPLETED" : "TRASHED";
+
+    try {
+        await prisma.batch.update({
+            where: { id: batchId },
+            data: { status: newStatus },
+        });
+
+        console.log(`Batch ${batchId} updated to ${newStatus}.`);
+    } catch (error) {
+        console.error("Error updating batch status:", error);
+    }
+};

@@ -34,32 +34,30 @@ const NextBreadcrumb = ({
     }, [] as { type: string; id: string }[]);
 
     return (
-        <div>
-            <ul className={containerClasses}>
-                <li className={listClasses}>
-                    <Link href="/inventory/available-stocks?selection=model">Available-Stock</Link>
-                </li>
-                {filteredSegments.length > 0 && separator}
-                {filteredSegments.map((segment, index) => {
-                    const href = `/inventory/available-stocks/${segment.type}/${segment.id}`;
-                    const itemClasses =
-                        pathname.includes(href) && index === filteredSegments.length - 1
-                            ? `${listClasses} ${activeClasses}`
-                            : listClasses;
-                    const itemLink = capitalizeLinks
-                        ? `${segment.type[0].toUpperCase()}${segment.type.slice(1)}-${segment.id}`
-                        : `${segment.type}-${segment.id}`;
-                    return (
-                        <React.Fragment key={index}>
-                            <li className={itemClasses}>
-                                <Link href={href}>{itemLink}</Link>
-                            </li>
-                            {index < filteredSegments.length - 1 && separator}
-                        </React.Fragment>
-                    );
-                })}
-            </ul>
-        </div>
+        <ul className={containerClasses}>
+            <li className={listClasses}>
+                <Link href="/inventory/available-stocks?selection=model">Available-Stock</Link>
+            </li>
+            {filteredSegments.length > 0 && separator}
+            {filteredSegments.map((segment, index) => {
+                const href = `/inventory/available-stocks/${segment.type}/${segment.id}`;
+                const itemClasses =
+                    pathname.includes(href) && index === filteredSegments.length - 1
+                        ? `${listClasses} ${activeClasses}`
+                        : listClasses;
+                const itemLink = capitalizeLinks
+                    ? `${segment.type[0].toUpperCase()}${segment.type.slice(1)}-${segment.id}`
+                    : `${segment.type}-${segment.id}`;
+                return (
+                    <React.Fragment key={index}>
+                        <li className={itemClasses}>
+                            <Link href={href}>{itemLink}</Link>
+                        </li>
+                        {index < filteredSegments.length - 1 && separator}
+                    </React.Fragment>
+                );
+            })}
+        </ul>
     );
 };
 

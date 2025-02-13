@@ -38,7 +38,7 @@ const PatientTabs = ({ batchId }: BatchTabsProps) => {
   };
 
   return (
-    <div className="mt-6 border-t pt-4">
+    <div className="px-4 py-2 bg-white shadow border-b">
       <Tabs onValueChange={handleTabChange} className="w-full h-12">
         <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="details" className="flex items-center gap-2">
