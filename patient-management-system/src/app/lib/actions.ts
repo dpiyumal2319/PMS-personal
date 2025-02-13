@@ -6,11 +6,10 @@ import {DateRange, InventoryFormData, PatientFormData, StockAnalysis} from "@/ap
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import {DrugType, Prisma} from "@prisma/client";
-import { StockData, StockQueryParams, SortOption } from "@/app/lib/definitions";
+import {StockData, StockQueryParams, SortOption} from "@/app/lib/definitions";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
-import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -194,9 +193,9 @@ const PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH = 6;
 
 // Function to get total pages for filtered drugs by model
 export async function getTotalPagesForFilteredDrugsByModel({
-    query = "",
-    brandId = 0,
-}: {
+                                                               query = "",
+                                                               brandId = 0,
+                                                           }: {
     query?: string;
     brandId?: number;
 }) {
@@ -208,7 +207,7 @@ export async function getTotalPagesForFilteredDrugsByModel({
             batch: {
                 some: {
                     status: "AVAILABLE",
-                    ...(brandId !== 0 ? { drugBrandId: brandId } : {}),
+                    ...(brandId !== 0 ? {drugBrandId: brandId} : {}),
                 },
             },
         },
@@ -219,9 +218,9 @@ export async function getTotalPagesForFilteredDrugsByModel({
 
 // Function to get total pages for filtered drugs by brand
 export async function getTotalPagesForFilteredDrugsByBrand({
-    query = "",
-    modelId = 0,
-}: {
+                                                               query = "",
+                                                               modelId = 0,
+                                                           }: {
     query?: string;
     modelId?: number;
 }) {
@@ -266,10 +265,10 @@ interface whereCondition {
 
 // Function to get total pages for filtered drugs by batch
 export async function getTotalPagesForFilteredDrugsByBatch({
-    query = "",
-    modelId = 0,
-    brandId = 0,
-}: {
+                                                               query = "",
+                                                               modelId = 0,
+                                                               brandId = 0,
+                                                           }: {
     query?: string;
     modelId?: number;
     brandId?: number;
@@ -292,11 +291,11 @@ export async function getTotalPagesForFilteredDrugsByBatch({
 }
 
 export async function getFilteredDrugsByModel({
-    query = "",
-    page = 1,
-    sort = "alphabetically",
-    brandId = 0
-}: {
+                                                  query = "",
+                                                  page = 1,
+                                                  sort = "alphabetically",
+                                                  brandId = 0
+                                              }: {
     query?: string;
     page?: number;
     sort?: string;
@@ -310,7 +309,7 @@ export async function getFilteredDrugsByModel({
             batch: {
                 some: {
                     status: "AVAILABLE",
-                    ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Filter by brandId if it's not 0
+                    ...(brandId !== 0 ? {drugBrandId: brandId} : {}), // Filter by brandId if it's not 0
                 },
             },
         },
@@ -318,7 +317,7 @@ export async function getFilteredDrugsByModel({
             batch: {
                 where: {
                     status: "AVAILABLE",
-                    ...(brandId !== 0 ? { drugBrandId: brandId } : {}), // Apply brandId filter
+                    ...(brandId !== 0 ? {drugBrandId: brandId} : {}), // Apply brandId filter
                 },
                 select: {
                     remainingQuantity: true,
@@ -366,11 +365,11 @@ export async function getFilteredDrugsByModel({
 
 
 export async function getFilteredDrugsByBrand({
-    query = "",
-    page = 1,
-    sort = "alphabetically",
-    modelId = 0
-}: {
+                                                  query = "",
+                                                  page = 1,
+                                                  sort = "alphabetically",
+                                                  modelId = 0
+                                              }: {
     query?: string;
     page?: number;
     sort?: string;
@@ -450,12 +449,12 @@ export async function getFilteredDrugsByBrand({
 
 
 export async function getFilteredDrugsByBatch({
-    query = "",
-    page = 1,
-    sort = "expiryDate",
-    modelId = 0,
-    brandId = 0
-}: {
+                                                  query = "",
+                                                  page = 1,
+                                                  sort = "expiryDate",
+                                                  modelId = 0,
+                                                  brandId = 0
+                                              }: {
     query?: string;
     page?: number;
     sort?: string;
@@ -512,9 +511,6 @@ export async function getFilteredDrugsByBatch({
         page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
     );
 }
-
-
-
 
 
 export async function stopQueue(id: string | null): Promise<myError> {
@@ -739,7 +735,7 @@ export async function getFilteredReports(query: string) {
                 contains: query
             }
         },
-        orderBy: { id: "asc" },
+        orderBy: {id: "asc"},
         include: {
             parameters: true
         }
@@ -817,8 +813,8 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
 
         return await prisma.$transaction(async (tx) => {
             const report = await tx.reportType.findUnique({
-                where: { id: reportId },
-                include: { parameters: true }
+                where: {id: reportId},
+                include: {parameters: true}
             });
 
             if (!report) {
@@ -839,7 +835,7 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
 
             for (const param of deletedParams) {
                 const reportValues = await tx.reportValue.findMany({
-                    where: { reportParameterId: param.id }
+                    where: {reportParameterId: param.id}
                 });
 
                 if (reportValues.length > 0) {
@@ -847,14 +843,14 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
                 }
 
                 await tx.reportParameter.delete({
-                    where: { id: param.id }
+                    where: {id: param.id}
                 });
             }
 
             // Update existing parameters
             for (const param of oldParams) {
                 await tx.reportParameter.update({
-                    where: { id: param.id },
+                    where: {id: param.id},
                     data: {
                         name: param.name,
                         units: param.units
@@ -875,7 +871,7 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
 
             // Update the report type itself
             await tx.reportType.update({
-                where: { id: reportId },
+                where: {id: reportId},
                 data: {
                     name: reportForm.name,
                     description: reportForm.description
@@ -883,7 +879,7 @@ export async function editReportType(reportForm: ReportForm, reportId: number): 
             });
 
             revalidatePath('/admin/reports');
-            return { success: true, message: 'Report type updated successfully' };
+            return {success: true, message: 'Report type updated successfully'};
         });
     } catch (e) {
         if (e instanceof Error) {
@@ -931,7 +927,7 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
         }
 
         if (formData.telephone.length !== 10) {
-            return { success: false, message: 'Invalid telephone number' };
+            return {success: false, message: 'Invalid telephone number'};
         }
 
         const date = new Date(formData.birthDate);
@@ -955,8 +951,7 @@ export async function addPatient({formData}: { formData: PatientFormData }): Pro
 
         revalidatePath('/patients');
         return {success: true, message: 'Patient added successfully'};
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while adding patient'};
     }
@@ -1006,14 +1001,14 @@ export async function updatePatient(formData: PatientFormData, id: number): Prom
 
 //For adding drugs to the inventory
 export async function addNewItem(
-    { formData }: {
+    {formData}: {
         formData: InventoryFormData
     }): Promise<myError> {
     try {
         return await prisma.$transaction(async (tx) => {
             // 1. Create or connect drug brand
             const brand = await tx.drugBrand.upsert({
-                where: { id: formData.brandId ?? 0},
+                where: {id: formData.brandId ?? 0},
                 update: {},
                 create: {
                     name: formData.brandName,
@@ -1023,7 +1018,7 @@ export async function addNewItem(
 
             // 2. Create or connect drug
             const drug = await tx.drug.upsert({
-                where: { id: formData.drugId ?? 0},
+                where: {id: formData.drugId ?? 0},
                 update: {},
                 create: {
                     name: formData.drugName
@@ -1036,10 +1031,10 @@ export async function addNewItem(
                 data: {
                     number: formData.batchNumber,
                     drug: {
-                        connect: { id: drug.id }
+                        connect: {id: drug.id}
                     },
                     drugBrand: {
-                        connect: { id: brand.id }
+                        connect: {id: brand.id}
                     },
                     type: formData.drugType as DrugType,
                     fullAmount: parseFloat(formData.quantity.toString()),
@@ -1051,11 +1046,11 @@ export async function addNewItem(
             });
 
             revalidatePath('/inventory/available-stocks');
-            return { success: true, message: 'Item added successfully' };
+            return {success: true, message: 'Item added successfully'};
         });
     } catch (e) {
         console.error(e);
-        return { success: false, message: 'Failed to add item' };
+        return {success: false, message: 'Failed to add item'};
     }
 }
 
@@ -1110,8 +1105,8 @@ export async function handleConfirmationOfBatchStatusChange(batchId: number, act
 
     try {
         await prisma.batch.update({
-            where: { id: batchId },
-            data: { status: newStatus },
+            where: {id: batchId},
+            data: {status: newStatus},
         });
 
         console.log(`Batch ${batchId} updated to ${newStatus}.`);
@@ -1123,42 +1118,43 @@ export async function handleConfirmationOfBatchStatusChange(batchId: number, act
 // Fetch functions for brand, drug, and batch data
 export async function getBrandName(id: number): Promise<string> {
     try {
-      const brand = await prisma.drugBrand.findUnique({
-        where: { id },
-        select: { name: true }
-      });
-      return brand?.name || `Brand-${id}`;
+        const brand = await prisma.drugBrand.findUnique({
+            where: {id},
+            select: {name: true}
+        });
+        return brand?.name || `Brand-${id}`;
     } catch (error) {
-      console.error('Error fetching brand name:', error);
-      return `Brand-${id}`;
+        console.error('Error fetching brand name:', error);
+        return `Brand-${id}`;
     }
-  }
+}
 
-  export async function getDrugName(id: number): Promise<string> {
+export async function getDrugName(id: number): Promise<string> {
     try {
-      const drug = await prisma.drug.findUnique({
-        where: { id },
-        select: { name: true }
-      });
-      return drug?.name || `Drug-${id}`;
+        const drug = await prisma.drug.findUnique({
+            where: {id},
+            select: {name: true}
+        });
+        return drug?.name || `Drug-${id}`;
     } catch (error) {
-      console.error('Error fetching drug name:', error);
-      return `Drug-${id}`;
+        console.error('Error fetching drug name:', error);
+        return `Drug-${id}`;
     }
-  }
+}
 
-  export async function getBatchNumber(id: number): Promise<string> {
+export async function getBatchNumber(id: number): Promise<string> {
     try {
-      const batch = await prisma.batch.findUnique({
-        where: { id },
-        select: { number: true }
-      });
-      return batch?.number || `Batch-${id}`;
+        const batch = await prisma.batch.findUnique({
+            where: {id},
+            select: {number: true}
+        });
+        return batch?.number || `Batch-${id}`;
     } catch (error) {
-      console.error('Error fetching batch number:', error);
-      return `Batch-${id}`;
+        console.error('Error fetching batch number:', error);
+        return `Batch-${id}`;
     }
-  }
+}
+
 export async function getPatientReportPages(query: string, range: string, id: number) {
     let dateFilter = {};
 
@@ -1327,26 +1323,7 @@ export async function getPendingPatientsCount() {
     });
 }
 
-
-
 const PAGE_SIZE = 10;
-
-// Type definitions
-type SortOption = "alphabetically" | "highest" | "lowest" | "unit-highest" | "unit-lowest";
-
-interface StockQueryParams {
-    query?: string;
-    page?: number;
-    sort?: SortOption;
-}
-
-interface StockData {
-    id: number;
-    name: string;
-    totalPrice: number;
-    unitPrice?: number;
-    remainingQuantity?: number;
-}
 
 // Helper function to apply sorting
 function applySorting(data: StockData[], sort: SortOption = "alphabetically"): StockData[] {
@@ -1382,16 +1359,16 @@ export async function getAvailableDrugsTotalPages(query: string, selection: stri
         case "brand":
             count = await prisma.drugBrand.count({
                 where: {
-                    name: { contains: query },
-                    Batch: { some: { status: "AVAILABLE" } },
+                    name: {contains: query},
+                    Batch: {some: {status: "AVAILABLE"}},
                 },
             });
             break;
         case "model":
             count = await prisma.drug.count({
                 where: {
-                    name: { contains: query },
-                    batch: { some: { status: "AVAILABLE" } },
+                    name: {contains: query},
+                    batch: {some: {status: "AVAILABLE"}},
                 },
             });
             break;
@@ -1399,8 +1376,8 @@ export async function getAvailableDrugsTotalPages(query: string, selection: stri
             count = await prisma.batch.count({
                 where: {
                     OR: [
-                        { drug: { name: { contains: query } } },
-                        { drugBrand: { name: { contains: query } } },
+                        {drug: {name: {contains: query}}},
+                        {drugBrand: {name: {contains: query}}},
                     ],
                     // status: "AVAILABLE",
                 },
@@ -1412,15 +1389,15 @@ export async function getAvailableDrugsTotalPages(query: string, selection: stri
 }
 
 export async function getStockByModel({
-    query = "",
-    page = 1,
-    sort = "alphabetically",
-    startDate,
-    endDate
-}: StockQueryParams): Promise<StockData[]> {
+                                          query = "",
+                                          page = 1,
+                                          sort = "alphabetically",
+                                          startDate,
+                                          endDate
+                                      }: StockQueryParams): Promise<StockData[]> {
     const drugs = await prisma.drug.findMany({
         where: {
-            name: { contains: query },
+            name: {contains: query},
             batch: {
                 some: {
                     // status: "AVAILABLE",
@@ -1467,17 +1444,17 @@ export async function getStockByModel({
 }
 
 export async function getStockByBatch({
-    query = "",
-    page = 1,
-    sort = "alphabetically",
-    startDate,
-    endDate,
-}: StockQueryParams): Promise<StockData[]> {
+                                          query = "",
+                                          page = 1,
+                                          sort = "alphabetically",
+                                          startDate,
+                                          endDate,
+                                      }: StockQueryParams): Promise<StockData[]> {
     const batches = await prisma.batch.findMany({
         where: {
             OR: [
-                { drug: { name: { contains: query } } },
-                { drugBrand: { name: { contains: query } } },
+                {drug: {name: {contains: query}}},
+                {drugBrand: {name: {contains: query}}},
             ],
             // status: "AVAILABLE",
             ...(startDate && endDate ? {
@@ -1504,20 +1481,21 @@ export async function getStockByBatch({
     const sortedData = applySorting(stockData, sort as SortOption);
     return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
+
 export async function getStockByBrand({
-    query = "",
-    page = 1,
-    sort = "alphabetically",
-    startDate,
-    endDate,
-}: StockQueryParams): Promise<StockData[]> {
+                                          query = "",
+                                          page = 1,
+                                          sort = "alphabetically",
+                                          startDate,
+                                          endDate,
+                                      }: StockQueryParams): Promise<StockData[]> {
     // Ensure dates are properly formatted for Prisma
     const formattedStartDate = startDate ? new Date(startDate) : undefined;
     const formattedEndDate = endDate ? new Date(endDate) : undefined;
 
     const brands = await prisma.drugBrand.findMany({
         where: {
-            name: { contains: query },
+            name: {contains: query},
             Batch: {
                 some: {
                     AND: [
@@ -1570,105 +1548,106 @@ export async function getStockByBrand({
 }
 
 export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnalysis> {
-  try {
-    const batches = await prisma.batch.findMany({
-      where: {
-        stockDate: {
-          gte: dateRange.startDate,
-          lte: dateRange.endDate,
-        },
-      },
-      include: {
-        Issue: true,
-      },
-    });
+    try {
+        const batches = await prisma.batch.findMany({
+            where: {
+                stockDate: {
+                    gte: dateRange.startDate,
+                    lte: dateRange.endDate,
+                },
+            },
+            include: {
+                Issue: true,
+            },
+        });
 
-    const analysis: StockAnalysis = {
-      available: 0,    // Will store available quantity value
-      sold: 0,        // Will store sold quantity value
-      expired: 0,     // Will store expired quantity value
-      trashed: 0,     // Will store trashed quantity value
-      errors: 0,      // Will store error quantity value
-    };
+        const analysis: StockAnalysis = {
+            available: 0,    // Will store available quantity value
+            sold: 0,        // Will store sold quantity value
+            expired: 0,     // Will store expired quantity value
+            trashed: 0,     // Will store trashed quantity value
+            errors: 0,      // Will store error quantity value
+        };
 
-    batches.forEach((batch) => {
-      const pricePerUnit = batch.price;
+        batches.forEach((batch) => {
+            const pricePerUnit = batch.price;
 
-      switch (batch.status) {
-        case "AVAILABLE":
-          // For available status:
-          // - available = remainingQuantity * price
-          // - sold = (fullAmount - remainingQuantity) * price
-          analysis.available += batch.remainingQuantity * pricePerUnit;
-          if (batch.fullAmount > batch.remainingQuantity) {
-            analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
-          }
-          break;
+            switch (batch.status) {
+                case "AVAILABLE":
+                    // For available status:
+                    // - available = remainingQuantity * price
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    analysis.available += batch.remainingQuantity * pricePerUnit;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    }
+                    break;
 
-        case "EXPIRED":
-          // For expired status:
-          // - expired = remainingQuantity * price
-          // - sold = (fullAmount - remainingQuantity) * price
-          analysis.expired += batch.remainingQuantity * pricePerUnit;
-          if (batch.fullAmount > batch.remainingQuantity) {
-            analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
-          }
-          break;
+                case "EXPIRED":
+                    // For expired status:
+                    // - expired = remainingQuantity * price
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    analysis.expired += batch.remainingQuantity * pricePerUnit;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    }
+                    break;
 
-        case "COMPLETED":
-          // For completed status:
-          // - If there's remaining quantity, it's an error
-          // - sold = (fullAmount - remainingQuantity) * price
-          if (batch.remainingQuantity > 0) {
-            analysis.errors += batch.remainingQuantity * pricePerUnit;
-          }
-          analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
-          break;
+                case "COMPLETED":
+                    // For completed status:
+                    // - If there's remaining quantity, it's an error
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    if (batch.remainingQuantity > 0) {
+                        analysis.errors += batch.remainingQuantity * pricePerUnit;
+                    }
+                    analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    break;
 
-        case "TRASHED":
-          // For trashed status:
-          // - trashed = remainingQuantity * price
-          // - sold = (fullAmount - remainingQuantity) * price
-          analysis.trashed += batch.remainingQuantity * pricePerUnit;
-          if (batch.fullAmount > batch.remainingQuantity) {
-            analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
-          }
-          break;
+                case "TRASHED":
+                    // For trashed status:
+                    // - trashed = remainingQuantity * price
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    analysis.trashed += batch.remainingQuantity * pricePerUnit;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    }
+                    break;
 
-        default:
-          // Any unknown status, count as error
-          analysis.errors += batch.fullAmount * pricePerUnit;
-      }
-    });
+                default:
+                    // Any unknown status, count as error
+                    analysis.errors += batch.fullAmount * pricePerUnit;
+            }
+        });
 
-    return analysis;
-  } catch (error) {
-    console.error("Error fetching stock analysis:", error);
-    throw new Error("Failed to fetch stock analysis");
-  }
+        return analysis;
+    } catch (error) {
+        console.error("Error fetching stock analysis:", error);
+        throw new Error("Failed to fetch stock analysis");
+    }
 }
+
 //Suggest the name when adding the drugs
 
 export async function searchDrugBrands(query: string) {
-  if (!query || query.length < 2) return [];
+    if (!query || query.length < 2) return [];
 
-  return prisma.drugBrand.findMany({
-    where: {
-      name: {
-        startsWith: query,
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-    },
-    take: 8,
-  });
+    return prisma.drugBrand.findMany({
+        where: {
+            name: {
+                startsWith: query,
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+            description: true,
+        },
+        take: 8,
+    });
 }
 
-export async function searchDrugModels(query: string){
-    if(!query || query.length < 2) return [];
+export async function searchDrugModels(query: string) {
+    if (!query || query.length < 2) return [];
 
     return prisma.drug.findMany({
         where: {
@@ -1683,7 +1662,6 @@ export async function searchDrugModels(query: string){
         take: 8,
     });
 }
-
 
 
 // export async function getPriceOfDrugModel({
@@ -1739,79 +1717,271 @@ export async function searchDrugModels(query: string){
 
 
 //show the info of one drug model
-export async function getDrugModelStats(drugId: number){
+export async function getDrugModelStats(drugId: number) {
 
-try {
-const batches =  await prisma.batch.findMany({
-    where: {
-      drugId: drugId,
-    },
-    select: {
-      status: true,
-      remainingQuantity: true,
-      price: true,
-      fullAmount: true,
-    },
-});
+    try {
+        const batches = await prisma.batch.findMany({
+            where: {
+                drugId: drugId,
+            },
+            select: {
+                status: true,
+                remainingQuantity: true,
+                price: true,
+                fullAmount: true,
+            },
+        });
 
-const stats = {
-    available: { quantity: 0, value: 0 },
-    sold: { quantity: 0, value: 0 },
-    expired: { quantity: 0, value: 0 },
-    trashed: { quantity: 0, value: 0 },
-    errors: { quantity: 0, value: 0},
+        const stats = {
+            available: {quantity: 0, value: 0},
+            sold: {quantity: 0, value: 0},
+            expired: {quantity: 0, value: 0},
+            trashed: {quantity: 0, value: 0},
+            errors: {quantity: 0, value: 0},
 
-  };
+        };
 
-  batches.forEach(batch =>{
-        switch(batch.status){
-            case 'AVAILABLE':
-                stats.available.quantity += batch.remainingQuantity;
-                stats.available.value += batch.price * batch.remainingQuantity;
-                if (batch.fullAmount > batch.remainingQuantity) {
+        batches.forEach(batch => {
+            switch (batch.status) {
+                case 'AVAILABLE':
+                    stats.available.quantity += batch.remainingQuantity;
+                    stats.available.value += batch.price * batch.remainingQuantity;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                    }
+                    break;
+
+                case 'EXPIRED':
+                    stats.expired.quantity += batch.remainingQuantity;
+                    stats.expired.value += batch.price * batch.remainingQuantity;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                    }
+                    break;
+
+                case 'COMPLETED':
+                    if (batch.remainingQuantity > 0) {
+                        stats.errors.quantity += batch.remainingQuantity;
+                        stats.errors.value += batch.remainingQuantity * batch.price;
+                    }
                     stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
                     stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
-                }
-                break;
+                    break;
+                case 'TRASHED':
+                    stats.trashed.quantity += batch.remainingQuantity;
+                    stats.trashed.value += batch.remainingQuantity * batch.price;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                        stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                    }
+                    break;
+                default:
+                    // Any unknown status, count as error
+                    stats.errors.value += batch.fullAmount * batch.price;
+                    stats.errors.quantity += batch.fullAmount;
+            }
+        });
 
-            case 'EXPIRED':
-                stats.expired.quantity += batch.remainingQuantity;
-                stats.expired.value += batch.price * batch.remainingQuantity;
-                if (batch.fullAmount > batch.remainingQuantity) {
-                    stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity) ;
-                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity)*batch.price ;
-                     }
-                 break;
+        return stats;
 
-            case 'COMPLETED':
-                if (batch.remainingQuantity > 0) {
-                    stats.errors.quantity += batch.remainingQuantity ;
-                    stats.errors.value += batch.remainingQuantity *batch.price ;
-                 }
-                 stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
-                 stats.sold.value += (batch.fullAmount - batch.remainingQuantity)*batch.price ;
-                 break;
-            case 'TRASHED':
-               stats.trashed.quantity += batch.remainingQuantity;
-               stats.trashed.value += batch.remainingQuantity *batch.price ;
-                if (batch.fullAmount > batch.remainingQuantity) {
-                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price ;
-                    stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
-                }
-                break;
-            default:
-            // Any unknown status, count as error
-            stats.errors.value += batch.fullAmount *batch.price;
-            stats.errors.quantity += batch.fullAmount;
-        }
-  });
-
-  return stats;
-
-}catch (error) {
-    console.error("Error fetching stock analysis:", error);
-    throw new Error("Failed to fetch stock analysis");
-  }
-
+    } catch (error) {
+        console.error("Error fetching stock analysis:", error);
+        throw new Error("Failed to fetch stock analysis");
+    }
 }
 
+export async function addPrescription({
+                                          prescriptionForm,
+                                          patientID
+                                      }: {
+    prescriptionForm: PrescriptionFormData;
+    patientID: number;
+}): Promise<myError> {
+    try {
+        // Basic validation checks
+        if (prescriptionForm.issues.length === 0 && prescriptionForm.offRecordMeds.length === 0) {
+            return {success: false, message: 'At least one prescription is required'};
+        }
+
+        // Create prescription with all related records in a transaction
+        await prisma.$transaction(async (tx) => {
+            // Create the main prescription and store its result to get issue IDs
+            const prescription = await tx.prescription.create({
+                data: {
+                    patientId: patientID,
+                    presentingSymptoms: prescriptionForm.presentingSymptoms,
+                    bloodPressure: prescriptionForm.bloodPressure,
+                    pulse: prescriptionForm.pulse,
+                    cardiovascular: prescriptionForm.cardiovascular,
+                    // Create issues
+                    issues: {
+                        create: prescriptionForm.issues.map(issue => ({
+                            drugId: issue.drugId,
+                            brandId: issue.brandId,
+                            strategy: issue.strategy,
+                            strategyDetails: issue.strategyDetails,
+                            quantity: issue.quantity
+                        }))
+                    },
+                    // Create off-record medications
+                    OffRecordMeds: {
+                        create: prescriptionForm.offRecordMeds.map(med => ({
+                            name: med.name,
+                            description: med.description
+                        }))
+                    }
+                },
+                // Include the created issues in the return value
+                include: {
+                    issues: true
+                }
+            });
+
+            // Update strategy history for each issue
+            for (let i = 0; i < prescriptionForm.issues.length; i++) {
+                const issue = prescriptionForm.issues[i];
+                const createdIssue = prescription.issues[i]; // Get the corresponding created issue
+
+                // Try to find existing history
+                const existingHistory = await tx.stratergyHistory.findUnique({
+                    where: {
+                        drugId: issue.drugId
+                    }
+                });
+
+                if (existingHistory) {
+                    // Update existing history with new brand and issue
+                    await tx.stratergyHistory.update({
+                        where: {
+                            drugId: issue.drugId
+                        },
+                        data: {
+                            brandId: issue.brandId,
+                            issueId: createdIssue.id
+                        }
+                    });
+                } else {
+                    // Create new history entry
+                    await tx.stratergyHistory.create({
+                        data: {
+                            drugId: issue.drugId,
+                            brandId: issue.brandId,
+                            issueId: createdIssue.id
+                        }
+                    });
+                }
+            }
+        });
+
+        return {
+            success: true,
+            message: 'Prescription created successfully'
+        };
+    } catch (e) {
+        console.error('Error adding prescription:', e);
+        return {
+            success: false,
+            message: e instanceof Error ? e.message : 'An error occurred while adding prescription'
+        };
+    }
+}
+
+export async function getCachedStrategy(drugID: number) {
+    return prisma.stratergyHistory.findUnique({
+        where: {
+            drugId: drugID
+        },
+        select: {
+            issueId: true,
+            brandId: true,
+            issue: true
+        }
+    });
+}
+
+
+export async function searchAvailableDrugs(term: string) {
+    return prisma.drug.findMany({
+        where: {
+            name: {
+                startsWith: term
+            },
+            batch: {
+                some: {
+                    status: "AVAILABLE"
+                }
+            }
+        },
+        take: 10,
+        select: {
+            id: true,
+            name: true,
+            _count: {
+                select: {
+                    batch: true // Counts the number of related batches
+                }
+            },
+            batch: {
+                distinct: ["drugBrandId"], // Get unique brands from batches
+                select: {
+                    drugBrandId: true
+                }
+            }
+        }
+    }).then((drugs) =>
+        drugs.map((drug) => ({
+            id: drug.id,
+            name: drug.name,
+            brandCount: drug.batch.length // Count unique brands
+        }))
+    );
+}
+
+export async function searchBrandByDrug({drugID}: {
+    drugID: number;
+}): Promise<BrandOption[]> {
+    return prisma.drugBrand.findMany({
+        where: {
+            Batch: {
+                some: {
+                    status: "AVAILABLE",
+                    drugId: drugID
+                }
+            }
+        },
+        select: {
+            id: true,
+            name: true,
+            Batch: {
+                where: {
+                    status: "AVAILABLE",
+                    drugId: drugID
+                },
+                select: {
+                    remainingQuantity: true,
+                    expiry: true
+                }
+            }
+        }
+    }).then((brands) =>
+        brands.map((brand) => {
+            const batchCount = brand.Batch.length;
+            const totalRemainingQuantity = brand.Batch.reduce(
+                (sum, batch) => sum + batch.remainingQuantity, 0
+            );
+            const farthestExpiry = brand.Batch.reduce(
+                (maxDate, batch) => (batch.expiry > maxDate ? batch.expiry : maxDate),
+                new Date(0) // Initialize with the oldest possible date
+            );
+            return {
+                id: brand.id,
+                name: brand.name,
+                batchCount,
+                totalRemainingQuantity,
+                farthestExpiry
+            };
+        })
+    );
+}
