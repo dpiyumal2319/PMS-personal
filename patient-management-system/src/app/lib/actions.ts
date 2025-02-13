@@ -1350,38 +1350,59 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
     });
 
     const analysis: StockAnalysis = {
-      available: 0,
-      sold: 0,
-      expired: 0,
-      trashed: 0,
-      errors: 0,
+      available: 0,    // Will store available quantity value
+      sold: 0,        // Will store sold quantity value
+      expired: 0,     // Will store expired quantity value
+      trashed: 0,     // Will store trashed quantity value
+      errors: 0,      // Will store error quantity value
     };
 
     batches.forEach((batch) => {
-      const soldQuantity = batch.fullAmount - batch.remainingQuantity;
       const pricePerUnit = batch.price;
-
-      // Calculate values based on price
-      const remainingValue = batch.remainingQuantity * pricePerUnit;
-      const soldValue = soldQuantity * pricePerUnit;
 
       switch (batch.status) {
         case "AVAILABLE":
-          analysis.available += remainingValue;
-          analysis.sold += soldValue;
+          // For available status:
+          // - available = remainingQuantity * price
+          // - sold = (fullAmount - remainingQuantity) * price
+          analysis.available += batch.remainingQuantity * pricePerUnit;
+          if (batch.fullAmount > batch.remainingQuantity) {
+            analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+          }
           break;
+
         case "EXPIRED":
-          analysis.expired += remainingValue;
-          analysis.sold += soldValue;
+          // For expired status:
+          // - expired = remainingQuantity * price
+          // - sold = (fullAmount - remainingQuantity) * price
+          analysis.expired += batch.remainingQuantity * pricePerUnit;
+          if (batch.fullAmount > batch.remainingQuantity) {
+            analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+          }
           break;
+
         case "COMPLETED":
-          analysis.sold += batch.fullAmount * pricePerUnit;
+          // For completed status:
+          // - If there's remaining quantity, it's an error
+          // - sold = (fullAmount - remainingQuantity) * price
+          if (batch.remainingQuantity > 0) {
+            analysis.errors += batch.remainingQuantity * pricePerUnit;
+          }
+          analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
           break;
+
         case "TRASHED":
-          analysis.trashed += remainingValue;
-          analysis.sold += soldValue;
+          // For trashed status:
+          // - trashed = remainingQuantity * price
+          // - sold = (fullAmount - remainingQuantity) * price
+          analysis.trashed += batch.remainingQuantity * pricePerUnit;
+          if (batch.fullAmount > batch.remainingQuantity) {
+            analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+          }
           break;
+
         default:
+          // Any unknown status, count as error
           analysis.errors += batch.fullAmount * pricePerUnit;
       }
     });
@@ -1392,7 +1413,6 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
     throw new Error("Failed to fetch stock analysis");
   }
 }
-
 //Suggest the name when adding the drugs
 
 export async function searchDrugBrands(query: string) {
@@ -1487,6 +1507,7 @@ export async function searchDrugModels(query: string){
 //show the info of one drug model
 export async function getDrugModelStats(drugId: number){
 
+try {
 const batches =  await prisma.batch.findMany({
     where: {
       drugId: drugId,
@@ -1495,6 +1516,7 @@ const batches =  await prisma.batch.findMany({
       status: true,
       remainingQuantity: true,
       price: true,
+      fullAmount: true,
     },
 });
 
@@ -1503,7 +1525,8 @@ const stats = {
     sold: { quantity: 0, value: 0 },
     expired: { quantity: 0, value: 0 },
     trashed: { quantity: 0, value: 0 },
-
+    errors: { quantity: 0, value: 0},
+    
   };
 
   batches.forEach(batch =>{
@@ -1511,20 +1534,49 @@ const stats = {
             case 'AVAILABLE':
                 stats.available.quantity += batch.remainingQuantity;
                 stats.available.value += batch.price * batch.remainingQuantity;
+                if (batch.fullAmount > batch.remainingQuantity) {
+                    stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                }
                 break;
-             case 'COMPLETED':
-                stats.sold.quantity += batch.remainingQuantity;
-                stats.sold.value += batch.price * batch.remainingQuantity;
-                break;
+             
             case 'EXPIRED':
                 stats.expired.quantity += batch.remainingQuantity;
                 stats.expired.value += batch.price * batch.remainingQuantity;
+                if (batch.fullAmount > batch.remainingQuantity) {
+                    stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity) ;
+                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity)*batch.price ;
+                     }
+                 break;
+
+            case 'COMPLETED':
+                if (batch.remainingQuantity > 0) {
+                    stats.errors.quantity += batch.remainingQuantity ;
+                    stats.errors.value += batch.remainingQuantity *batch.price ;
+                 }
+                 stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                 stats.sold.value += (batch.fullAmount - batch.remainingQuantity)*batch.price ;
                  break;
             case 'TRASHED':
-                stats.trashed.quantity += batch.remainingQuantity;
-                stats.trashed.value += batch.price * batch.remainingQuantity;
+               stats.trashed.quantity += batch.remainingQuantity;
+               stats.trashed.value += batch.remainingQuantity *batch.price ;
+                if (batch.fullAmount > batch.remainingQuantity) {
+                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price ;
+                    stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                }
                 break;
+            default:
+            // Any unknown status, count as error
+            stats.errors.value += batch.fullAmount *batch.price;
+            stats.errors.quantity += batch.fullAmount;
         }
   });
   return stats;
+
+}catch (error) {
+    console.error("Error fetching stock analysis:", error);
+    throw new Error("Failed to fetch stock analysis");
+  }
+
 }
+
