@@ -1429,3 +1429,102 @@ export async function searchDrugModels(query: string){
         take: 8,
     });
 }
+
+
+
+// export async function getPriceOfDrugModel({
+//     query,
+//     page = 1,
+//     startDate,
+//     endDate,
+// }: StockQueryParams){
+//     const take = 10;
+//     const skip = (page - 1) * take;
+
+//     const drugs = await prisma.drug.findMany({
+//         where: {
+//             name: {
+//                 contains: query,
+//             },
+//             batch: {
+//                 some: {
+//                     stockDate:{
+//                         gte: startDate,
+//                         lte: endDate,
+//                     },
+//                 },
+//             },
+//         },
+
+//         select: {
+//       id: true,
+//       name: true,
+//       batch: {
+//         where: {
+//           status: 'AVAILABLE',
+//         },
+//         select: {
+//           remainingQuantity: true,
+//           price: true,
+//         },
+//       },
+//     },
+//     skip,
+//     take,
+// });
+
+//     return drugs.map(drug => ({
+//     id: drug.id,
+//     name: drug.name,
+//     totalPrice: drug.batch.reduce((sum, batch) => 
+//       sum + (batch.price * batch.remainingQuantity), 0),
+//     remainingQuantity: drug.batch.reduce((sum, batch) => 
+//       sum + batch.remainingQuantity, 0),
+//   }));
+// }
+
+
+//show the info of one drug model
+export async function getDrugModelStats(drugId: number){
+
+const batches =  await prisma.batch.findMany({
+    where: {
+      drugId: drugId,
+    },
+    select: {
+      status: true,
+      remainingQuantity: true,
+      price: true,
+    },
+});
+
+const stats = {
+    available: { quantity: 0, value: 0 },
+    sold: { quantity: 0, value: 0 },
+    expired: { quantity: 0, value: 0 },
+    trashed: { quantity: 0, value: 0 },
+    
+  };
+
+  batches.forEach(batch =>{
+        switch(batch.status){
+            case 'AVAILABLE':
+                stats.available.quantity += batch.remainingQuantity;
+                stats.available.value += batch.price * batch.remainingQuantity;
+                break;
+             case 'COMPLETED':
+                stats.sold.quantity += batch.remainingQuantity;
+                stats.sold.value += batch.price * batch.remainingQuantity;
+                break;
+            case 'EXPIRED':
+                stats.expired.quantity += batch.remainingQuantity;
+                stats.expired.value += batch.price * batch.remainingQuantity;
+                 break;
+            case 'TRASHED':
+                stats.trashed.quantity += batch.remainingQuantity;
+                stats.trashed.value += batch.price * batch.remainingQuantity;
+                break;
+        }
+  });
+  return stats;
+}

@@ -22,7 +22,7 @@ export default function PriceListByModel({ items }: { items: StockData[] }) {
           >
             {/* Clickable area for navigation */}
             <Link
-              href={`/inventory/cost-management/model/${item.id}`}
+              href={`/inventory/cost-management/stocks/${item.id}`}
               className="flex-1 flex justify-between items-center pr-6"
             >
               {/* Model Name */}
