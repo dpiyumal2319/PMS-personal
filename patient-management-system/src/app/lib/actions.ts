@@ -353,12 +353,9 @@ export async function getFilteredDrugsByModel({
         aggregatedDrugs.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    const paginatedDrugs = aggregatedDrugs.slice(
+    return aggregatedDrugs.slice(
         (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL,
         page * PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL
-    return aggregatedDrugs.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
-        page * PAGE_SIZE_AVAILABLE_DRUGS
     );
 }
 
@@ -440,12 +437,9 @@ export async function getFilteredDrugsByBrand({
     }
 
     // Pagination
-    const paginatedBrands = aggregatedBrands.slice(
+    return aggregatedBrands.slice(
         (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND,
         page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND
-    return aggregatedBrands.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
-        page * PAGE_SIZE_AVAILABLE_DRUGS
     );
 }
 
@@ -508,12 +502,9 @@ export async function getFilteredDrugsByBatch({
     }
 
     // Pagination logic
-    const paginatedBatches = formattedBatches.slice(
+    return formattedBatches.slice(
         (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH,
         page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
-    return formattedBatches.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
-        page * PAGE_SIZE_AVAILABLE_DRUGS
     );
 }
 
