@@ -1057,13 +1057,6 @@ export async function addNewItem(
     }
 }
 
-export async function getDrugBrands() {
-    return prisma.drugBrand.findMany({
-        select: { name: true },
-        orderBy: { name: 'asc' }
-    });
-}
-
 export async function getBatchData(batchId: number) {
     try {
         const batchData = await prisma.batch.findUnique({
@@ -1123,7 +1116,7 @@ export async function handleConfirmationOfBatchStatusChange(batchId: number, act
     } catch (error) {
         console.error("Error updating batch status:", error);
     }
-};
+}
 
 // Fetch functions for brand, drug, and batch data
 export async function getBrandName(id: number): Promise<string> {
