@@ -6,7 +6,7 @@ import {DateRange, InventoryFormData, PatientFormData, StockAnalysis} from "@/ap
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import {DrugType, Prisma} from "@prisma/client";
+import {BatchStatus, DrugType, Prisma} from "@prisma/client";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -251,6 +251,15 @@ export async function getTotalPagesForFilteredDrugsByBrand({
     return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND);
 }
 
+interface whereCondition {
+    status: BatchStatus
+    number: {
+        contains: string;
+    };
+    drugId?: number;
+    drugBrandId?: number;
+}
+
 // Function to get total pages for filtered drugs by batch
 export async function getTotalPagesForFilteredDrugsByBatch({
     query = "",
@@ -261,7 +270,7 @@ export async function getTotalPagesForFilteredDrugsByBatch({
     modelId?: number;
     brandId?: number;
 }) {
-    const whereCondition: any = {
+    const whereCondition: whereCondition = {
         status: "AVAILABLE",
         number: {
             contains: query,
@@ -277,8 +286,6 @@ export async function getTotalPagesForFilteredDrugsByBatch({
 
     return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
 }
-
-
 
 export async function getFilteredDrugsByModel({
     query = "",
@@ -452,7 +459,7 @@ export async function getFilteredDrugsByBatch({
     brandId?: number;
 }) {
     // Base where condition
-    const whereCondition: any = {
+    const whereCondition: whereCondition = {
         status: "AVAILABLE",
         number: {
             contains: query, // Search by batch number

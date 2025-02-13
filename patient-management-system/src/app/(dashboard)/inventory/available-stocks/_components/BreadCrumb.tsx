@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { getBrandName, getDrugName, getBatchNumber } from '@/app/lib/actions';
@@ -21,19 +21,21 @@ const NextBreadcrumb = ({
   capitalizeLinks,
 }: TBreadCrumbProps) => {
   const pathname = usePathname();
-  const pathSegments = pathname.split('/').filter((segment) => segment);
   const [names, setNames] = useState<{ [key: string]: string }>({});
 
-  // Filter to include only 'brand', 'drug', and 'batch' with their IDs
-  const filteredSegments = pathSegments.reduce((acc, segment, index) => {
-    if (['brand', 'drug', 'batch'].includes(segment)) {
-      const id = pathSegments[index + 1];
-      if (id) {
-        acc.push({ type: segment, id });
+  // Memoize the filtered segments calculation
+  const filteredSegments = useMemo(() => {
+    const pathSegments = pathname.split('/').filter((segment) => segment);
+    return pathSegments.reduce((acc, segment, index) => {
+      if (['brand', 'drug', 'batch'].includes(segment)) {
+        const id = pathSegments[index + 1];
+        if (id) {
+          acc.push({ type: segment, id });
+        }
       }
-    }
-    return acc;
-  }, [] as { type: string; id: string }[]);
+      return acc;
+    }, [] as { type: string; id: string }[]);
+  }, [pathname]);
 
   useEffect(() => {
     const fetchNames = async () => {
@@ -60,7 +62,7 @@ const NextBreadcrumb = ({
     };
 
     fetchNames();
-  }, [pathname]);
+  }, [filteredSegments]); // Now safe to include filteredSegments
 
   return (
     <ul className={containerClasses}>

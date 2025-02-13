@@ -8,16 +8,16 @@ import DrugListSkeleton from "@/app/(dashboard)/inventory/available-stocks/_comp
 export default async function Page({
     searchParams, params
 }: {
-    searchParams: {
+    searchParams: Promise<{
         query?: string;
         page?: string;
         selection?: string;
         sort?: string;
-    },
-    params: {
+    }>,
+    params: Promise<{
         drugId: number;
         brandId: number;
-    }
+    }>
 }) {
     const { drugId, brandId } = await params;
     const searchParamsAwaited = await searchParams;
