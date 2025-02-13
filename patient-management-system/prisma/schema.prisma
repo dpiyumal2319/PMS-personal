@@ -133,15 +133,24 @@ model Batch {
 }
 
 model Prescription {
-  id                 Int      @id @default(autoincrement())
-  time               DateTime @default(now())
+  id                 Int             @id @default(autoincrement())
+  time               DateTime        @default(now())
   presentingSymptoms String
   bloodPressure      String?
   pulse              String?
   cardiovascular     String?
-  patient            Patient  @relation(fields: [patientId], references: [id])
+  patient            Patient         @relation(fields: [patientId], references: [id])
   patientId          Int
   issues             Issue[]
+  OffRecordMeds      OffRecordMeds[]
+}
+
+model OffRecordMeds {
+  id             Int           @id @default(autoincrement())
+  name           String
+  description    String?
+  Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int?
 }
 
 model Issue {

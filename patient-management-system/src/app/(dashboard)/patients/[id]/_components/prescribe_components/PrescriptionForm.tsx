@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import IssuesList from "./IssuesList";
-import {StrategyJson} from "@/app/lib/definitions";
-import {IssueingStrategy} from "@prisma/client";
+import { StrategyJson } from "@/app/lib/definitions";
+import { IssueingStrategy } from "@prisma/client";
+import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/AddOffRecordDrugs";
 
 export interface IssueInForm {
     batchId: number | null;
@@ -17,12 +18,18 @@ export interface IssueInForm {
     quantity: number;
 }
 
-interface PrescriptionFormData {
+export interface OffRecordMeds {
+    name: string;
+    description: string;
+}
+
+export interface PrescriptionFormData {
     presentingSymptoms: string;
     bloodPressure: string;
     pulse: string;
     cardiovascular: string;
     issues: IssueInForm[];
+    offRecordMeds: OffRecordMeds[];
 }
 
 const PrescriptionForm = () => {
@@ -31,7 +38,8 @@ const PrescriptionForm = () => {
         bloodPressure: '',
         pulse: '',
         cardiovascular: '',
-        issues: []
+        issues: [],
+        offRecordMeds: []
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,24 +56,19 @@ const PrescriptionForm = () => {
             issues: [...prevData.issues, issue]
         }));
     };
-    //
-    // const handleRemoveIssue = (issueId: number) => {
-    //     setFormData((prevData) => ({
-    //         ...prevData,
-    //         issues: prevData.issues.filter(issue => issue.id !== issueId)
-    //     }));
-    // };
+
+    const handleAddOffRecordMed = (offRecordMed: OffRecordMeds) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            offRecordMeds: [...prevData.offRecordMeds, offRecordMed]
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         try {
-            // Validate form data
             console.log('Form data:', formData);
-
-            // Handle success (e.g., show success message, redirect, etc.)
         } catch (error) {
-            // Handle error (e.g., show error message)
             console.error('Error submitting prescription:', error);
         }
     };
@@ -74,46 +77,34 @@ const PrescriptionForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
             <div className="flex items-center space-x-4">
                 <Label className="w-1/3">Presenting Symptoms</Label>
-                <Input
-                    type="text"
-                    name="presentingSymptoms"
-                    value={formData.presentingSymptoms}
-                    onChange={handleChange}
-                    required
-                />
+                <Input type="text" name="presentingSymptoms" value={formData.presentingSymptoms} onChange={handleChange} required />
             </div>
             <div className="flex items-center space-x-4">
                 <Label className="w-1/3">Blood Pressure</Label>
-                <Input
-                    type="text"
-                    name="bloodPressure"
-                    value={formData.bloodPressure}
-                    onChange={handleChange}
-                />
+                <Input type="text" name="bloodPressure" value={formData.bloodPressure} onChange={handleChange} />
             </div>
             <div className="flex items-center space-x-4">
                 <Label className="w-1/3">Pulse</Label>
-                <Input
-                    type="text"
-                    name="pulse"
-                    value={formData.pulse}
-                    onChange={handleChange}
-                />
+                <Input type="text" name="pulse" value={formData.pulse} onChange={handleChange} />
             </div>
             <div className="flex items-center space-x-4">
                 <Label className="w-1/3">Cardiovascular</Label>
-                <Input
-                    type="text"
-                    name="cardiovascular"
-                    value={formData.cardiovascular}
-                    onChange={handleChange}
-                />
+                <Input type="text" name="cardiovascular" value={formData.cardiovascular} onChange={handleChange} />
             </div>
 
-            <div className="space-y-4">
-                <IssuesList
-                    onAddIssue={handleAddIssue}
-                />
+            <div className="space-y-4 border-t pt-4">
+                <IssuesList onAddIssue={handleAddIssue} />
+            </div>
+
+            <div className="space-y-4 border-t pt-4">
+                <h3>Off-Record Medications</h3>
+                {formData.offRecordMeds.map((med, index) => (
+                    <div key={index} className="flex items-center space-x-4">
+                        <span>{med.name}</span>
+                        <span>{med.description}</span>
+                    </div>
+                ))}
+                <AddOffRecordDrugs addRecord={handleAddOffRecordMed}/>
             </div>
 
             <Button type="submit" className="w-full">Submit Prescription</Button>

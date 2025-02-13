@@ -40,8 +40,9 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
     const [brands, setBrands] = useState<BrandOption[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
-    const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
+    const [strategy, setStrategy] = useState<IssueingStrategy | null>('MEAL');
     const [strategyData, setStrategyData] = useState<StrategyJson | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
 
     const handleDrugSearch = useDebouncedCallback(async (term: string) => {
@@ -68,15 +69,18 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     };
 
     const handleStrategyChange = (newStrategy: IssueingStrategy, newStrategyData: StrategyJson) => {
-        console.log('newStrategy:', newStrategy);
-        console.log('newStrategyData:', newStrategyData);
-
         setStrategy(newStrategy);
         setStrategyData(newStrategyData);
     };
 
     const handleAddIssue = () => {
         if (!selectedDrug || !selectedBrand || !strategy || !strategyData) {
+            const missingFields = [];
+            if (!selectedDrug) missingFields.push("Drug");
+            if (!selectedBrand) missingFields.push("Brand");
+            if (!strategy) missingFields.push("Strategy");
+            if (!strategyData) missingFields.push("Strategy Data");
+            setError(`Please fill all the fields, missing: ${missingFields.join(", ")}`);
             return;
         }
 
@@ -137,6 +141,11 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             disabled={!selectedDrug}
                         />
                     </div>
+
+                    <div>
+                        <span className="text-red-500">{error}</span>
+                    </div>
+
                     <MedicationStrategyTabs
                         onStrategyChange={handleStrategyChange}
                     />
