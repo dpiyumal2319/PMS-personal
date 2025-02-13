@@ -147,29 +147,29 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 const brands = await searchBrandByDrug({drugID: selectedID});
                 setBrands(brands);
                 const cachedBrand = await getCachedStrategy(selectedID);
-                if (cachedBrand && cachedBrand.brandId in brands) {
-                    if (cachedBrand.brandId in brands) {
-                        setSelectedBrand(cachedBrand.brandId);
-                        setStrategy(cachedBrand.issue.strategy);
-                        const parsedData = StrategyJsonSchema.parse(cachedBrand.issue.strategyDetails);
-                        switch (cachedBrand.issue.strategy) {
-                            case IssueingStrategy.MEAL:
-                                setMealStrategy(parsedData.strategy as MealStrategy);
-                                setStrategy(IssueingStrategy.MEAL);
-                                break;
-                            case IssueingStrategy.WHEN_NEEDED:
-                                setWhenNeededStrategy(parsedData.strategy as WhenNeededStrategy);
-                                setStrategy(IssueingStrategy.WHEN_NEEDED);
-                                break;
-                            case IssueingStrategy.PERIODIC:
-                                setPeriodicStrategy(parsedData.strategy as PeriodicStrategy);
-                                setStrategy(IssueingStrategy.PERIODIC);
-                                break;
-                            case IssueingStrategy.OTHER:
-                                setOtherStrategy(parsedData.strategy as OtherStrategy);
-                                setStrategy(IssueingStrategy.OTHER);
-                                break;
-                        }
+                const availableBrandIDs = brands.map(brand => brand.id);
+                if (cachedBrand && cachedBrand.brandId === availableBrandIDs[0]) {
+                    console.log(cachedBrand);
+                    setSelectedBrand(cachedBrand.brandId);
+                    setStrategy(cachedBrand.issue.strategy);
+                    const parsedData = StrategyJsonSchema.parse(cachedBrand.issue.strategyDetails);
+                    switch (cachedBrand.issue.strategy) {
+                        case IssueingStrategy.MEAL:
+                            setMealStrategy(parsedData.strategy as MealStrategy);
+                            setStrategy(IssueingStrategy.MEAL);
+                            break;
+                        case IssueingStrategy.WHEN_NEEDED:
+                            setWhenNeededStrategy(parsedData.strategy as WhenNeededStrategy);
+                            setStrategy(IssueingStrategy.WHEN_NEEDED);
+                            break;
+                        case IssueingStrategy.PERIODIC:
+                            setPeriodicStrategy(parsedData.strategy as PeriodicStrategy);
+                            setStrategy(IssueingStrategy.PERIODIC);
+                            break;
+                        case IssueingStrategy.OTHER:
+                            setOtherStrategy(parsedData.strategy as OtherStrategy);
+                            setStrategy(IssueingStrategy.OTHER);
+                            break;
                     }
                 } else {
                     resetStrategies();
