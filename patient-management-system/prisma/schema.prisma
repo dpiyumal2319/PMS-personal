@@ -51,7 +51,7 @@ enum IssueingStrategy {
   WHEN_NEEDED
   PERIODIC
   OFF_RECORD
-  ORTHER
+  OTHER
 }
 
 model Patient {
@@ -100,56 +100,77 @@ model QueueEntry {
 }
 
 model DrugBrand {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String?
-  Batch       Batch[]
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String?
+  Batch            Batch[]
+  Issue            Issue[]
+  StratergyHistory StratergyHistory[]
+  BatchHistory     BatchHistory[]
 }
 
 model Drug {
-  id    Int     @id @default(autoincrement())
-  name  String
-  batch Batch[]
+  id               Int                @id @default(autoincrement())
+  name             String
+  batch            Batch[]
+  stratergyHistory StratergyHistory[]
+  Issue            Issue[]
+  BatchHistory     BatchHistory[]
 }
 
 model Batch {
-  id                Int         @id @default(autoincrement())
+  id                Int            @id @default(autoincrement())
   number            String
   drugId            Int
-  drug              Drug        @relation(fields: [drugId], references: [id])
+  drug              Drug           @relation(fields: [drugId], references: [id])
   drugBrandId       Int
-  drugBrand         DrugBrand   @relation(fields: [drugBrandId], references: [id])
+  drugBrand         DrugBrand      @relation(fields: [drugBrandId], references: [id])
   type              DrugType
   fullAmount        Float
   expiry            DateTime
-  stockDate         DateTime    @default(now())
+  stockDate         DateTime       @default(now())
   remainingQuantity Float
   price             Float
   status            BatchStatus
   Issue             Issue[]
+  BatchHistory      BatchHistory[]
 }
 
 model Prescription {
-  id                 Int      @id @default(autoincrement())
-  time               DateTime @default(now())
+  id                 Int             @id @default(autoincrement())
+  time               DateTime        @default(now())
   presentingSymptoms String
   bloodPressure      String?
   pulse              String?
   cardiovascular     String?
-  patient            Patient  @relation(fields: [patientId], references: [id])
+  patient            Patient         @relation(fields: [patientId], references: [id])
   patientId          Int
   issues             Issue[]
+  OffRecordMeds      OffRecordMeds[]
+}
+
+model OffRecordMeds {
+  id             Int           @id @default(autoincrement())
+  name           String
+  description    String?
+  Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int?
 }
 
 model Issue {
-  id               Int              @id @default(autoincrement())
-  prescription     Prescription     @relation(fields: [prescriptionId], references: [id])
+  id               Int                @id @default(autoincrement())
+  prescription     Prescription       @relation(fields: [prescriptionId], references: [id])
   prescriptionId   Int
-  batch            Batch?           @relation(fields: [batchId], references: [id])
+  batch            Batch?             @relation(fields: [batchId], references: [id])
   batchId          Int?
+  drug             Drug               @relation(fields: [drugId], references: [id])
+  drugId           Int
+  brand            DrugBrand          @relation(fields: [brandId], references: [id])
+  brandId          Int
   strategy         IssueingStrategy
-  stratergyDetails Json
+  strategyDetails  Json
   quantity         Float
+  stratergyHistory StratergyHistory[]
 }
 
 model ReportParameter {
@@ -187,4 +208,26 @@ model ReportValue {
   value             String
   PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id], onDelete: Cascade)
   patientReportId   Int?
+}
+
+model StratergyHistory {
+  id      Int       @id @default(autoincrement())
+  drug    Drug      @relation(fields: [drugId], references: [id])
+  drugId  Int       @unique
+  brand   DrugBrand @relation(fields: [brandId], references: [id])
+  brandId Int
+  issue   Issue     @relation(fields: [issueId], references: [id])
+  issueId Int
+}
+
+model BatchHistory {
+  id          Int       @id @default(autoincrement())
+  drug        Drug      @relation(fields: [drugId], references: [id])
+  brand       DrugBrand @relation(fields: [drugBrandId], references: [id])
+  drugId      Int
+  drugBrandId Int
+  batchId     Int
+  batch       Batch     @relation(fields: [batchId], references: [id])
+
+  @@unique([drugId, drugBrandId])
 }

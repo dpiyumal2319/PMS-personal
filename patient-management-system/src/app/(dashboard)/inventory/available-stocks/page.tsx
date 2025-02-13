@@ -26,7 +26,7 @@ export default async function InventoryAvailable({
 
   return (
     <div className="flex h-full flex-col w-full">
-      <div className="sticky top-0 p-4 bg-white border-b shadow-md flex flex-wrap gap-4 z-20">
+      <div className="sticky top-0 p-4 bg-white border-b shadow-md flex gap-4 z-20">
         <Dropdown
           items={[
             { label: "By Model", value: "model" },

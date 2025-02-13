@@ -1,10 +1,16 @@
 import React from 'react';
-import PrescriptionForm from "@/app/(dashboard)/patients/[id]/_components/PrescriptionForm";
+import PrescriptionForm from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
 
-const Page = () => {
+const Page = async ({
+                        params
+                    }: {
+    params: Promise<{ id: string }>;
+}) => {
+    const {id} = await params;
+
     return (
         <div>
-            <PrescriptionForm />
+            <PrescriptionForm patientID={Number(id)}/>
         </div>
     );
 };

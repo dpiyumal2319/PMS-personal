@@ -8,6 +8,9 @@ import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {DrugType, Prisma} from "@prisma/client";
 import { StockData, StockQueryParams, SortOption } from "@/app/lib/definitions";
+import {BatchStatus, DrugType, Prisma} from "@prisma/client";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
+import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -185,7 +188,108 @@ export async function getFilteredPatients(query: string = "", page: number = 1, 
     });
 }
 
-const PAGE_SIZE_AVAILABLE_DRUGS = 10;
+const PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL = 9;
+const PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND = 9;
+const PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH = 6;
+
+// Function to get total pages for filtered drugs by model
+export async function getTotalPagesForFilteredDrugsByModel({
+    query = "",
+    brandId = 0,
+}: {
+    query?: string;
+    brandId?: number;
+}) {
+    const totalItems = await prisma.drug.count({
+        where: {
+            name: {
+                contains: query,
+            },
+            batch: {
+                some: {
+                    status: "AVAILABLE",
+                    ...(brandId !== 0 ? { drugBrandId: brandId } : {}),
+                },
+            },
+        },
+    });
+
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL);
+}
+
+// Function to get total pages for filtered drugs by brand
+export async function getTotalPagesForFilteredDrugsByBrand({
+    query = "",
+    modelId = 0,
+}: {
+    query?: string;
+    modelId?: number;
+}) {
+    if (modelId !== 0) {
+
+
+        const uniqueBrandCount = await prisma.batch.groupBy({
+            by: ['drugBrandId'],
+            where: {
+                drugId: modelId,
+                status: "AVAILABLE",
+            },
+        });
+
+        return Math.ceil(uniqueBrandCount.length / PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND);
+    }
+
+    const totalItems = await prisma.drugBrand.count({
+        where: {
+            name: {
+                contains: query,
+            },
+            Batch: {
+                some: {
+                    status: "AVAILABLE",
+                },
+            },
+        },
+    });
+
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND);
+}
+
+interface whereCondition {
+    status: BatchStatus
+    number: {
+        contains: string;
+    };
+    drugId?: number;
+    drugBrandId?: number;
+}
+
+// Function to get total pages for filtered drugs by batch
+export async function getTotalPagesForFilteredDrugsByBatch({
+    query = "",
+    modelId = 0,
+    brandId = 0,
+}: {
+    query?: string;
+    modelId?: number;
+    brandId?: number;
+}) {
+    const whereCondition: whereCondition = {
+        status: "AVAILABLE",
+        number: {
+            contains: query,
+        },
+    };
+
+    if (modelId !== 0) whereCondition.drugId = Number(modelId);
+    if (brandId !== 0) whereCondition.drugBrandId = Number(brandId);
+
+    const totalItems = await prisma.batch.count({
+        where: whereCondition,
+    });
+
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
+}
 
 export async function getFilteredDrugsByModel({
     query = "",
@@ -255,8 +359,8 @@ export async function getFilteredDrugsByModel({
     }
 
     return aggregatedDrugs.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
-        page * PAGE_SIZE_AVAILABLE_DRUGS
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL,
+        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_MODEL
     );
 }
 
@@ -339,24 +443,39 @@ export async function getFilteredDrugsByBrand({
 
     // Pagination
     return aggregatedBrands.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
-        page * PAGE_SIZE_AVAILABLE_DRUGS
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND,
+        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BRAND
     );
 }
 
 
-export async function getFilteredDrugsByBatch(
-    query: string = "",
-    page: number = 1,
-    sort: string = "expiryDate"
-) {
-    const batches = await prisma.batch.findMany({
-        where: {
-            status: "AVAILABLE",
-            number: {
-                contains: query, // Search by batch number
-            },
+export async function getFilteredDrugsByBatch({
+    query = "",
+    page = 1,
+    sort = "expiryDate",
+    modelId = 0,
+    brandId = 0
+}: {
+    query?: string;
+    page?: number;
+    sort?: string;
+    modelId?: number;
+    brandId?: number;
+}) {
+    // Base where condition
+    const whereCondition: whereCondition = {
+        status: "AVAILABLE",
+        number: {
+            contains: query, // Search by batch number
         },
+    };
+
+    // Apply modelId and brandId filters if provided
+    if (modelId !== 0) whereCondition.drugId = Number(modelId);
+    if (brandId !== 0) whereCondition.drugBrandId = Number(brandId);
+
+    const batches = await prisma.batch.findMany({
+        where: whereCondition,
         include: {
             drug: true,
             drugBrand: true,
@@ -389,8 +508,8 @@ export async function getFilteredDrugsByBatch(
 
     // Pagination logic
     return formattedBatches.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS,
-        page * PAGE_SIZE_AVAILABLE_DRUGS
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH,
+        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
     );
 }
 
@@ -940,6 +1059,106 @@ export async function addNewItem(
     }
 }
 
+export async function getBatchData(batchId: number) {
+    try {
+        const batchData = await prisma.batch.findUnique({
+            where: {
+                id: batchId,
+            },
+            include: {
+                drug: {
+                    select: {
+                        name: true,
+                    },
+                },
+                drugBrand: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
+
+        if (!batchData) {
+            throw new Error('Batch not found');
+        }
+
+        return {
+            number: batchData.number,
+            drugName: batchData.drug.name,
+            drugBrandName: batchData.drugBrand.name,
+            drugType: batchData.type,
+            fullAmount: batchData.fullAmount,
+            remainingQuantity: batchData.remainingQuantity,
+            expiryDate: batchData.expiry.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
+            stockDate: batchData.stockDate.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
+            price: batchData.price,
+            status: batchData.status,
+        };
+    } catch (error) {
+        console.error(error);
+        throw error;
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+export async function handleConfirmationOfBatchStatusChange(batchId: number, action: "completed" | "trashed"): Promise<void> {
+    if (!batchId) return;
+
+    const newStatus = action === "completed" ? "COMPLETED" : "TRASHED";
+
+    try {
+        await prisma.batch.update({
+            where: { id: batchId },
+            data: { status: newStatus },
+        });
+
+        console.log(`Batch ${batchId} updated to ${newStatus}.`);
+    } catch (error) {
+        console.error("Error updating batch status:", error);
+    }
+}
+
+// Fetch functions for brand, drug, and batch data
+export async function getBrandName(id: number): Promise<string> {
+    try {
+      const brand = await prisma.drugBrand.findUnique({
+        where: { id },
+        select: { name: true }
+      });
+      return brand?.name || `Brand-${id}`;
+    } catch (error) {
+      console.error('Error fetching brand name:', error);
+      return `Brand-${id}`;
+    }
+  }
+
+  export async function getDrugName(id: number): Promise<string> {
+    try {
+      const drug = await prisma.drug.findUnique({
+        where: { id },
+        select: { name: true }
+      });
+      return drug?.name || `Drug-${id}`;
+    } catch (error) {
+      console.error('Error fetching drug name:', error);
+      return `Drug-${id}`;
+    }
+  }
+
+  export async function getBatchNumber(id: number): Promise<string> {
+    try {
+      const batch = await prisma.batch.findUnique({
+        where: { id },
+        select: { number: true }
+      });
+      return batch?.number || `Batch-${id}`;
+    } catch (error) {
+      console.error('Error fetching batch number:', error);
+      return `Batch-${id}`;
+    }
+  }
 export async function getPatientReportPages(query: string, range: string, id: number) {
     let dateFilter = {};
 
@@ -1112,7 +1331,22 @@ export async function getPendingPatientsCount() {
 
 const PAGE_SIZE = 10;
 
+// Type definitions
+type SortOption = "alphabetically" | "highest" | "lowest" | "unit-highest" | "unit-lowest";
 
+interface StockQueryParams {
+    query?: string;
+    page?: number;
+    sort?: SortOption;
+}
+
+interface StockData {
+    id: number;
+    name: string;
+    totalPrice: number;
+    unitPrice?: number;
+    remainingQuantity?: number;
+}
 
 // Helper function to apply sorting
 function applySorting(data: StockData[], sort: SortOption = "alphabetically"): StockData[] {
@@ -1177,12 +1411,12 @@ export async function getAvailableDrugsTotalPages(query: string, selection: stri
     return Math.ceil(count / PAGE_SIZE);
 }
 
-export async function getStockByModel({ 
-    query = "", 
-    page = 1, 
-    sort = "alphabetically", 
-    startDate, 
-    endDate 
+export async function getStockByModel({
+    query = "",
+    page = 1,
+    sort = "alphabetically",
+    startDate,
+    endDate
 }: StockQueryParams): Promise<StockData[]> {
     const drugs = await prisma.drug.findMany({
         where: {
@@ -1222,7 +1456,7 @@ export async function getStockByModel({
         id: drug.id,
         name: drug.name,
         totalPrice: drug.batch.reduce(
-            (sum: number, batch: { price: number; remainingQuantity: number }) => 
+            (sum: number, batch: { price: number; remainingQuantity: number }) =>
                 sum + batch.price * batch.remainingQuantity,
             0
         ),
@@ -1417,7 +1651,7 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
 
 export async function searchDrugBrands(query: string) {
   if (!query || query.length < 2) return [];
-  
+
   return prisma.drugBrand.findMany({
     where: {
       name: {
@@ -1496,9 +1730,9 @@ export async function searchDrugModels(query: string){
 //     return drugs.map(drug => ({
 //     id: drug.id,
 //     name: drug.name,
-//     totalPrice: drug.batch.reduce((sum, batch) => 
+//     totalPrice: drug.batch.reduce((sum, batch) =>
 //       sum + (batch.price * batch.remainingQuantity), 0),
-//     remainingQuantity: drug.batch.reduce((sum, batch) => 
+//     remainingQuantity: drug.batch.reduce((sum, batch) =>
 //       sum + batch.remainingQuantity, 0),
 //   }));
 // }
@@ -1526,7 +1760,7 @@ const stats = {
     expired: { quantity: 0, value: 0 },
     trashed: { quantity: 0, value: 0 },
     errors: { quantity: 0, value: 0},
-    
+
   };
 
   batches.forEach(batch =>{
@@ -1539,7 +1773,7 @@ const stats = {
                     stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
                 }
                 break;
-             
+
             case 'EXPIRED':
                 stats.expired.quantity += batch.remainingQuantity;
                 stats.expired.value += batch.price * batch.remainingQuantity;
@@ -1571,7 +1805,7 @@ const stats = {
             stats.errors.quantity += batch.fullAmount;
         }
   });
- 
+
   return stats;
 
 }catch (error) {
