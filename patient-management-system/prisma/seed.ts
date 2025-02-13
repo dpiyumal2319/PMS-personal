@@ -98,10 +98,18 @@ async function main() {
         ],
     });
 
+    await prisma.drug.createMany({
+        data: [
+            {name: 'Paracetamol'},
+            {name: 'Brufen'},
+            {name: 'Amoxil'},
+        ]
+    })
+
     // Add Drugs
     await prisma.drugBrand.create({
         data: {
-            name: 'Panadol',
+            name: 'Penadol',
             description: 'Pain relief tablet',
             Batch: {
                 create: [{
@@ -112,9 +120,7 @@ async function main() {
                     remainingQuantity: 100,
                     price: 50,
                     status: 'AVAILABLE',
-                    drug: {
-                        create: {name: 'Paracetamol'}
-                    }
+                    drugId: 1
                 }]
             }
         }
@@ -133,9 +139,7 @@ async function main() {
                     remainingQuantity: 80,
                     price: 40,
                     status: 'AVAILABLE',
-                    drug: {
-                        create: {name: 'Paracetamol'}
-                    }
+                    drugId: 1
                 }]
             }
         }
@@ -154,9 +158,7 @@ async function main() {
                     remainingQuantity: 200,
                     price: 80,
                     status: 'AVAILABLE',
-                    drug: {
-                        create: {name: 'Brufen'}
-                    }
+                    drugId: 2
                 }]
             }
         }
@@ -175,9 +177,7 @@ async function main() {
                     remainingQuantity: 150,
                     price: 120,
                     status: 'AVAILABLE',
-                    drug: {
-                        create: {name: 'Amoxil'}
-                    }
+                    drugId: 3
                 }]
             }
         }
