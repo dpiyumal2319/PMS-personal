@@ -7,7 +7,7 @@ import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {DrugType, Prisma} from "@prisma/client";
-import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/IssuesList";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,

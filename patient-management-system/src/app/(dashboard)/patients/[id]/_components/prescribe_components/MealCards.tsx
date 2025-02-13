@@ -7,7 +7,7 @@ import {Button} from "@/components/ui/button";
 import type {MealStrategy} from "@/app/lib/definitions";
 
 interface mealConfig {
-    id: keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal'>;
+    id: keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal' | 'forDays'>;
     label: string;
     icon: LucideIcon;
     iconColor: string;
@@ -47,14 +47,14 @@ const MealCards = ({
     globalQuantity: number;
     strategy: MealStrategy;
     setStrategy: (value: React.SetStateAction<MealStrategy>) => void;
-    handleIndividualQuantityChange: (meal: keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal'>, value: string) => void;
+    handleIndividualQuantityChange: (meal: keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal' | 'forDays'>, value: string) => void;
     handleGlobalQuantityChange: (value: string) => void;
     isLocked: boolean;
     setIsLocked: (value: boolean) => void;
 }) => {
 
     const onCheck = (checked: boolean | string, id: string) => {
-        const meal = id as keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal'>;
+        const meal = id as keyof Omit<MealStrategy, 'afterMeal' | 'minutesBeforeAfterMeal' | 'forDays'>;
         setStrategy((prev) => ({
             ...prev,
             [meal]: {
@@ -69,14 +69,14 @@ const MealCards = ({
             {/* Global Quantity Input */}
             <div>
                 <Label htmlFor="global-quantity" className="text-sm text-slate-500 mb-2 block">
-                    Quantity per meal
+                    Dosage per meal
                 </Label>
                 <div className="relative">
                     <Input
                         id="global-quantity"
                         type="number"
                         className="text-lg pr-12"
-                        placeholder="Set quantity for all meals"
+                        placeholder="Set dosage for all meals"
                         value={globalQuantity}
                         onChange={(e) => handleGlobalQuantityChange(e.target.value)}
                         disabled={!isLocked}
@@ -112,8 +112,8 @@ const MealCards = ({
                     <Input
                         type="number"
                         className="w-24 text-lg"
-                        placeholder="Qty"
-                        value={strategy[id].quantity}
+                        placeholder="Dose"
+                        value={strategy[id].dose}
                         onChange={(e) => handleIndividualQuantityChange(id, e.target.value)}
                         disabled={isLocked}
                     />

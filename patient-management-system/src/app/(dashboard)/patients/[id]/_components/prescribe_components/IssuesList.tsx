@@ -81,7 +81,6 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue, existingIssues}) => 
         }
 
         const parsedData = StrategyJsonSchema.parse(strategyData);
-
         const newIssue: Issue = {
             id: Date.now(), // temporary ID for client-side
             prescriptionId: 1, // temporary prescription ID

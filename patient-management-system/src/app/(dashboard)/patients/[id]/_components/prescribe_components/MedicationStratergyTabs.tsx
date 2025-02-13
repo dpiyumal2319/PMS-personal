@@ -1,16 +1,12 @@
 import React, {useState} from 'react';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {Tabs,TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {
-    FileX,
     Hourglass,
     MoreHorizontal,
     ShieldAlert,
     Utensils,
 } from "lucide-react";
-import {Card} from "@/components/ui/card";
-import {Label} from "@/components/ui/label";
-import {Input} from "@/components/ui/input";
-import MealTabsContent from "@/app/(dashboard)/patients/[id]/_components/MealTabsContent";
+import {MealTabsContent, WhenNeededContent, OtherTabsContent, PeriodicTabsContent} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/TabsContent";
 import {IssueingStrategy} from "@prisma/client";
 import type {
     MealStrategy,
@@ -18,7 +14,6 @@ import type {
     OtherStrategy,
     WhenNeededStrategy,
     PeriodicStrategy,
-    OffRecordStrategy
 } from "@/app/lib/definitions";
 
 interface MedicationStrategyTabsProps {
@@ -29,16 +24,17 @@ const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps)
     const [mealStrategy, setMealStrategy] = useState<MealStrategy>({
         dinner: {
             active: true,
-            quantity: 0
+            dose: 0
         },
         breakfast: {
             active: true,
-            quantity: 0
+            dose: 0
         },
         lunch: {
             active: true,
-            quantity: 0
+            dose: 0
         },
+        forDays: 0,
         afterMeal: true,
         minutesBeforeAfterMeal: 0
     });
@@ -49,12 +45,8 @@ const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps)
 
     const [periodicStrategy, setPeriodicStrategy] = useState<PeriodicStrategy>({
         interval: 0,
-        quantity: 0
-    });
-
-    const [offRecordStrategy, setOffRecordStrategy] = useState<OffRecordStrategy>({
-        details: "",
-        quantity: 0
+        dose: 0,
+        forDays: 0
     });
 
     const [otherStrategy, setOtherStrategy] = useState<OtherStrategy>({
@@ -83,12 +75,6 @@ const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps)
                     strategy: periodicStrategy
                 });
                 break;
-            case IssueingStrategy.OFF_RECORD:
-                onStrategyChange(strategy, {
-                    name: IssueingStrategy.OFF_RECORD,
-                    strategy: offRecordStrategy
-                });
-                break;
             case IssueingStrategy.OTHER:
                 onStrategyChange(strategy, {
                     name: IssueingStrategy.OTHER,
@@ -111,9 +97,6 @@ const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps)
                     <TabsTrigger value={IssueingStrategy.PERIODIC} className="flex items-center space-x-2">
                         <Hourglass className="w-4 h-4"/> <span>Periodically</span>
                     </TabsTrigger>
-                    <TabsTrigger value={IssueingStrategy.OFF_RECORD} className="flex items-center space-x-2">
-                        <FileX className="w-4 h-4"/> <span>Off Record</span>
-                    </TabsTrigger>
                     <TabsTrigger value={IssueingStrategy.OTHER} className="flex items-center space-x-2">
                         <MoreHorizontal className="w-4 h-4"/> <span>Other</span>
                     </TabsTrigger>
@@ -121,64 +104,9 @@ const MedicationStrategyTabs = ({onStrategyChange}: MedicationStrategyTabsProps)
             </div>
 
             <MealTabsContent strategy={mealStrategy} setStrategy={setMealStrategy}/>
-
-            <TabsContent value="WHEN_NEEDED">
-                <Card className="p-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="when-needed" className="text-sm text-slate-500">Specify when needed
-                            conditions</Label>
-                        <Input
-                            id="when-needed"
-                            type="text"
-                            className="text-lg"
-                            placeholder="When needed details"
-                        />
-                    </div>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="PERIODIC">
-                <Card className="p-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="periodic" className="text-sm text-slate-500">Specify periodic schedule</Label>
-                        <Input
-                            id="periodic"
-                            type="text"
-                            className="text-lg"
-                            placeholder="Periodic details"
-                        />
-                    </div>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="OFF_RECORD">
-                <Card className="p-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="off-record" className="text-sm text-slate-500">Off record medication
-                            details</Label>
-                        <Input
-                            id="off-record"
-                            type="text"
-                            className="text-lg"
-                            placeholder="Off record details"
-                        />
-                    </div>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="OTHER">
-                <Card className="p-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="other" className="text-sm text-slate-500">Other medication details</Label>
-                        <Input
-                            id="other"
-                            type="text"
-                            className="text-lg"
-                            placeholder="Other details"
-                        />
-                    </div>
-                </Card>
-            </TabsContent>
+            <WhenNeededContent strategy={whenNeededStrategy} setStrategy={setWhenNeededStrategy}/>
+            <PeriodicTabsContent strategy={periodicStrategy} setStrategy={setPeriodicStrategy} />
+            <OtherTabsContent strategy={otherStrategy} setStrategy={setOtherStrategy}/>
         </Tabs>
     );
 };

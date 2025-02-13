@@ -1,5 +1,5 @@
 import React from 'react';
-import PrescriptionForm from "@/app/(dashboard)/patients/[id]/_components/PrescriptionForm";
+import PrescriptionForm from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
 
 const Page = () => {
     return (

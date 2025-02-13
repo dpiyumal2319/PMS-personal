@@ -187,16 +187,17 @@ export interface PieChartData {
 const MealStrategySchema = z.object({
     breakfast: z.object({
         active: z.boolean(),
-        quantity: z.number(),
+        dose: z.number(),
     }),
     lunch: z.object({
         active: z.boolean(),
-        quantity: z.number(),
+        dose: z.number(),
     }),
     dinner: z.object({
         active: z.boolean(),
-        quantity: z.number(),
+        dose: z.number(),
     }),
+    forDays: z.number(),
     afterMeal: z.boolean(),
     minutesBeforeAfterMeal: z.number(),
 });
@@ -208,7 +209,8 @@ const WhenNeededStrategySchema = z.object({
 
 const PeriodicStrategySchema = z.object({
     interval: z.number(),
-    quantity: z.number(),
+    dose: z.number(),
+    forDays: z.number(),
 });
 
 const OffRecordStrategySchema = z.object({
