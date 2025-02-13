@@ -14,9 +14,10 @@ interface DrugModelStats {
 export default async function DrugDetailByModel({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const stats: DrugModelStats = await getDrugModelStats(parseInt(params.id));
+  const { id } = await params;
+  const stats: DrugModelStats = await getDrugModelStats(parseInt(id));
 
   return (
     <div className="p-6 space-y-6">

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getAvailableDrugsTotalPages } from "@/app/lib/actions";
-import { SortOption, DateRange } from "@/app/lib/definitions";
+import { SortOption } from "@/app/lib/definitions";
 import Pagination from "@/app/(dashboard)/_components/Pagination";
 import PriceTable from "@/app/(dashboard)/inventory/cost-management/_components/PriceTable";
 import { PriceTableSkeleton } from "../_components/PriceTableSkeleton";

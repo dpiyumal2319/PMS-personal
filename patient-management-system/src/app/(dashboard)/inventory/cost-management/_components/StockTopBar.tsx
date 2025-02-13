@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { SortOption, DateRange } from "@/app/lib/definitions";
+import { DateRange } from "@/app/lib/definitions";
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import SortingDropdownCM from "@/app/(dashboard)/inventory/cost-management/_components/SortingDropdownCM";
@@ -23,9 +23,9 @@ export default function StockTopbar({
   const { replace } = useRouter();
 
   // Get current values from URL or use defaults
-  const query = searchParams.get("query") || "";
+  //   const query = searchParams.get("query") || "";
   const selection = searchParams.get("selection") || defaultSelection;
-  const sort = (searchParams.get("sort") as SortOption) || "alphabetically";
+  //   const sort = (searchParams.get("sort") as SortOption) || "alphabetically";
 
   const startDate = searchParams.get("startDate")
     ? new Date(searchParams.get("startDate")!)
