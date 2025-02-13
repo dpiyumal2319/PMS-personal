@@ -16,10 +16,10 @@ export default function StatCard({
     <Card className={`p-4 ${className}`}>
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
       <div className="space-y-2">
-        <p className="text-gray-600">
+        <p className="text-white">
           Quantity: <span className="font-medium">{quantity}</span>
         </p>
-        <p className="text-gray-600">
+        <p className="text-white">
           Value: <span className="font-medium">Rs. {value.toFixed(2)}</span>
         </p>
       </div>

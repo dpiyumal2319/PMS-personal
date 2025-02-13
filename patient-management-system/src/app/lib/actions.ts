@@ -1503,7 +1503,7 @@ const stats = {
     sold: { quantity: 0, value: 0 },
     expired: { quantity: 0, value: 0 },
     trashed: { quantity: 0, value: 0 },
-    
+
   };
 
   batches.forEach(batch =>{

@@ -1,6 +1,7 @@
 import React from "react";
 import { getDrugModelStats } from "@/app/lib/actions";
 import StatCard from "@/app/(dashboard)/inventory/cost-management/_components/StatCard";
+import BackButton from "@/app/(dashboard)/inventory/cost-management/_components/BackButton";
 
 interface DrugModelStats {
   available: { quantity: number; value: number };
@@ -8,30 +9,35 @@ interface DrugModelStats {
   expired: { quantity: number; value: number };
   trashed: { quantity: number; value: number };
 }
-export default async function DrugDeatailByModel({
+
+export default async function DrugDetailByModel({
   params,
 }: {
   params: { id: string };
 }) {
   const stats: DrugModelStats = await getDrugModelStats(parseInt(params.id));
+
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">
-        Drug Model Statistics
-      </h1>
+      <div className="flex items-center space-x-4">
+        <BackButton />
+        <h1 className="text-2xl font-bold text-primary-500">
+          Drug Model Statistics
+        </h1>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Available Stock"
           quantity={stats.available.quantity}
           value={stats.available.value}
-          className="bg-green-400"
+          className="bg-green-500"
         />
         <StatCard
           title="Sold/Given"
           quantity={stats.sold.quantity}
           value={stats.sold.value}
-          className="bg-blue-400"
+          className="bg-blue-500"
         />
         <StatCard
           title="Expired"
