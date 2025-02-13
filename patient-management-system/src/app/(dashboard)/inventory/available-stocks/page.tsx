@@ -27,6 +27,9 @@ export default async function InventoryAvailable({
   return (
     <div className="flex h-full flex-col w-full">
       <div className="sticky top-0 p-4 bg-white border-b shadow-md flex gap-4 z-20">
+        <div className="relative w-[200px]">
+          <SearchPanel placeholder="Search by Name" />
+        </div>
         <Dropdown
           items={[
             { label: "By Model", value: "model" },
@@ -35,9 +38,7 @@ export default async function InventoryAvailable({
           ]}
           urlParameterName="selection"
         />
-        <div className="relative w-[200px]">
-          <SearchPanel placeholder="Search by Name" />
-        </div>
+
         <SortingDropdown selection="selection" />
         <div>
           <DrugForm />

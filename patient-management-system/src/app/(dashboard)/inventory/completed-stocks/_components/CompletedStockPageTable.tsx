@@ -1,17 +1,18 @@
 import React from 'react'
 import { getFilteredDrugsByModel, getFilteredDrugsByBrand, getFilteredDrugsByBatch, getTotalPagesForFilteredDrugsByBrand, getTotalPagesForFilteredDrugsByModel, getTotalPagesForFilteredDrugsByBatch } from '@/app/lib/actions'
-import DrugListByModel from './DrugListByModel'
-import DrugListByBrand from './DrugListByBrand'
-import DrugListByBatch from './DrugListByBatch'
+import DrugListByModel from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByModel'
+import DrugListByBrand from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByBrand'
+import DrugListByBatch from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByBatch'
 import Pagination from '@/app/(dashboard)/_components/Pagination'
 
-export default async function AvailableStockPageTable({
+export default async function CompletedStockPageTable({
     query,
     currentPage,
     selection,
     sort,
     drugId,
-    brandId
+    brandId,
+    status
 }: {
     query: string;
     currentPage: number;
@@ -19,6 +20,7 @@ export default async function AvailableStockPageTable({
     sort: string;
     drugId?: number;
     brandId?: number;
+    status?: string;
 }) {
 
 

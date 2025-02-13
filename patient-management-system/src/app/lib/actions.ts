@@ -487,6 +487,7 @@ export async function getFilteredDrugsByBatch({
         stockDate: batch.stockDate.toISOString(),
         remainingAmount: batch.remainingQuantity,
         fullAmount: batch.fullAmount,
+        status: batch.status,
     }));
 
     // Sorting logic

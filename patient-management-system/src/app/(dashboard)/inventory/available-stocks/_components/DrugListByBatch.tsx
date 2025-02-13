@@ -3,6 +3,7 @@ import { MdOutlineBrandingWatermark, MdEventAvailable } from "react-icons/md";
 import { FaCalendarAlt } from "react-icons/fa";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AppendButton from "./AppendButton";
+import { CustomBadge } from "@/app/(dashboard)/_components/CustomBadge";
 
 interface Batch {
     id: number;
@@ -13,6 +14,7 @@ interface Batch {
     stockDate: string;
     remainingAmount: number;
     fullAmount: number;
+    status: string;
 }
 
 export default function DrugListByBatch({ batches }: { batches: Batch[] }) {
@@ -29,6 +31,20 @@ export default function DrugListByBatch({ batches }: { batches: Batch[] }) {
                                 <CardTitle className="text-2xl font-bold text-primary-500">
                                     {batch.batchNumber}
                                 </CardTitle>
+                                <CustomBadge
+                                    text={batch.status}
+                                    color={
+                                        batch.status === "AVAILABLE"
+                                            ? "green"
+                                            : batch.status === "TRASHED"
+                                                ? "red"
+                                                : batch.status === "EXPIRED"
+                                                    ? "yellow"
+                                                    : batch.status === "COMPLETED"
+                                                        ? "blue"
+                                                        : "gray"
+                                    }
+                                />
                             </CardHeader>
 
                             <CardContent>
