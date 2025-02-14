@@ -9,11 +9,25 @@ import { useRouter, useSearchParams } from 'next/navigation';
 const DatePickerURL = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Function to get default dates
+  const getDefaultDates = () => {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    return {
+      start: thirtyDaysAgo,
+      end: today
+    };
+  };
   
   // Initialize dates from URL or defaults
-  const [dateRange, setDateRange] = useState({
-    startDate: new Date(searchParams.get('from') || new Date().toISOString()),
-    endDate: new Date(searchParams.get('to') || new Date().toISOString())
+  const [dateRange, setDateRange] = useState(() => {
+    const defaults = getDefaultDates();
+    return {
+      startDate: new Date(searchParams.get('from') || defaults.start.toISOString()),
+      endDate: new Date(searchParams.get('to') || defaults.end.toISOString())
+    };
   });
 
   const formatDateForInput = (date: Date) => {
@@ -86,4 +100,4 @@ const DatePickerURL = () => {
   );
 };
 
-export default DatePicker;
+export default DatePickerURL;

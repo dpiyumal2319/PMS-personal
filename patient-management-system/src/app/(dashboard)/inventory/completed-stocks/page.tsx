@@ -54,6 +54,7 @@ import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 import CompletedStockPageTable from "@/app/(dashboard)/inventory/completed-stocks/_components/CompletedStockPageTable";
 import DrugListSkeleton from "@/app/(dashboard)/inventory/available-stocks/_components/DrugListSkeleton";
+import DatePickerURL from "./_components/DatePickerURL";
 
 export default async function InventoryAvailable({
   searchParams,
@@ -64,6 +65,8 @@ export default async function InventoryAvailable({
     selection?: string;
     sort?: string;
     status?: string;
+    from: string;
+    to: string;
   }>;
 }) {
   const params = await searchParams;
@@ -72,6 +75,8 @@ export default async function InventoryAvailable({
   const selection = params?.selection || "model";
   const sort = params?.sort || "alphabetically";
   const status = params?.status || "ALL";
+  const fromDate = params?.from || "";  // Get from date
+  const toDate = params?.to || "";      // Get to date
 
   return (
     <div className="flex h-full flex-col w-full">
@@ -92,16 +97,16 @@ export default async function InventoryAvailable({
         <div>
           <Dropdown
             items={[
-              { label: "All", value: "all" },
-              { label: "Completed", value: "completed" },
-              { label: "Expired", value: "expired" },
-              { label: "Trashed", value: "trashed" },
+              { label: "All", value: "ALL" },
+              { label: "Completed", value: "COMPLETED" },
+              { label: "Expired", value: "EXPIRED" },
+              { label: "Trashed", value: "TRASHED" },
             ]}
             urlParameterName="status"
           />
         </div>
         <div>
-          <DrugForm />
+          <DatePickerURL />
         </div>
       </div>
       <div className="flex-grow overflow-auto">
@@ -112,6 +117,8 @@ export default async function InventoryAvailable({
             selection={selection}
             sort={sort}
             status={status}
+            fromDate={fromDate}
+            toDate={toDate}
           />
         </Suspense>
       </div>

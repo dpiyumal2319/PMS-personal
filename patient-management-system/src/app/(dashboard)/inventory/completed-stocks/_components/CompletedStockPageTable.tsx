@@ -1,5 +1,5 @@
 import React from 'react'
-import { getFilteredDrugsByModel, getFilteredDrugsByBrand, getFilteredDrugsByBatch, getTotalPagesForFilteredDrugsByBrand, getTotalPagesForFilteredDrugsByModel, getTotalPagesForFilteredDrugsByBatch } from '@/app/lib/actions'
+import { getFilteredDrugsByModel, getFilteredDrugsByBrand, getCompletedFilteredDrugsByBatch, getTotalPagesForFilteredDrugsByBrand, getTotalPagesForFilteredDrugsByModel, getTotalPagesForCompletedFilteredDrugsByBatch } from '@/app/lib/actions'
 import DrugListByModel from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByModel'
 import DrugListByBrand from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByBrand'
 import DrugListByBatch from '@/app/(dashboard)/inventory/available-stocks/_components/DrugListByBatch'
@@ -12,7 +12,9 @@ export default async function CompletedStockPageTable({
     sort,
     drugId,
     brandId,
-    status
+    status,
+    fromDate,
+    toDate
 }: {
     query: string;
     currentPage: number;
@@ -21,7 +23,11 @@ export default async function CompletedStockPageTable({
     drugId?: number;
     brandId?: number;
     status?: string;
-}) {
+    fromDate?: string;
+    toDate?: string;
+}) 
+
+{
 
 
     let content = null;
@@ -67,18 +73,27 @@ export default async function CompletedStockPageTable({
             </div>
         </div>;
     } else if (selection === "batch") {
-        const totalPages = await getTotalPagesForFilteredDrugsByBatch({
+        const totalPages = await getTotalPagesForCompletedFilteredDrugsByBatch({
             query,
             modelId: drugId,
-            brandId: brandId
+            brandId: brandId,
+            fromDate,
+            toDate,
+            status
+
         });
-        const filteredDrugsByBatch = await getFilteredDrugsByBatch({
+
+        const filteredDrugsByBatch = await getCompletedFilteredDrugsByBatch({
             query,
             page: currentPage,
             sort,
             modelId: drugId,
-            brandId: brandId
+            brandId: brandId,
+            fromDate,
+            toDate,
+            status
         });
+
 
         content = <div>
             <div>
