@@ -105,9 +105,15 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             <Card className={'p-4 space-y-4'}>
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-semibold">Prescribe Medication</h1>
+                    <span onClick={formReset} className="text-red-500 cursor-pointer text-sm hover:underline">
+                            X Clear
+                    </span>
+                </div>
                 <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
                     <div className="space-y-6">
-                        <h2 className="text-xl font-semibold">Patient Vitals</h2>
+                        <h2 className="text-lg font-semibold">Patient Vitals</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
@@ -169,11 +175,11 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
 
                 <Card className='bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300'>
                     <div className="space-y-6">
-                        <h2 className="text-xl font-semibold">Medications</h2>
+                        <h2 className="text-lg font-semibold">Medications</h2>
 
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-medium">Issue from Inventory</h3>
+                                <h3 className="font-medium">Issue from Inventory</h3>
                             </div>
                             <PrescriptionIssuesList
                                 issues={formData.issues}
@@ -189,7 +195,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
 
                         <div className="space-y-4 pt-6 border-t">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-medium">Off-Record Medications</h3>
+                                <h3 className="font-medium">Off-Record Medications</h3>
                             </div>
                             <OffRecordMedsList
                                 meds={formData.offRecordMeds}
