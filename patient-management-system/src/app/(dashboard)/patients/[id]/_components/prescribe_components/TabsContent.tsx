@@ -115,6 +115,8 @@ const MealTabsContent = ({strategy, setStrategy}: MealTabsContentProps) => {
                                 type="number"
                                 className="text-lg pl-10"
                                 placeholder="Enter minutes"
+                                value={strategy.minutesBeforeAfterMeal}
+                                onChange={(e) => setStrategy(prev => ({...prev, minutesBeforeAfterMeal: Number(e.target.value)}))}
                             />
                             <Clock
                                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"

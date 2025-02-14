@@ -176,7 +176,6 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                 <Card className='bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300'>
                     <div className="space-y-6">
                         <h2 className="text-lg font-semibold">Medications</h2>
-
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-medium">Issue from Inventory</h3>

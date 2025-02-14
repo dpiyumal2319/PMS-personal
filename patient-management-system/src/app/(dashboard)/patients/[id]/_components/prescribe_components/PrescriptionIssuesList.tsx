@@ -159,7 +159,7 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center space-x-2">
-                                    <h3 className="font-medium">Medicine {index + 1}</h3>
+                                    <h3 className="font-medium">{issue.drugName}</h3>
                                     <CustomBadge
                                         text={issue.strategy}
                                         color={getStrategyBadgeColor(issue.strategy)}
