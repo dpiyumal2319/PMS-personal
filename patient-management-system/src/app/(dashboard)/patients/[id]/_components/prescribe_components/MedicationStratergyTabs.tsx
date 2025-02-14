@@ -63,7 +63,7 @@ const MedicationStrategyTabs = ({selectedStrategy, mealStrategy, periodicStrateg
     }
 
     return (
-        <Tabs defaultValue="MEAL" className="w-full max-w-3xl mx-auto" value={selectedStrategy.selectedStrategy ? selectedStrategy.selectedStrategy : ''}
+        <Tabs defaultValue="MEAL" className="w-full mx-auto" value={selectedStrategy.selectedStrategy ? selectedStrategy.selectedStrategy : ''}
               onValueChange={(value) => handleTabChange(value as IssueingStrategy)}>
             <div className="h-10 mb-6">
                 <TabsList className="w-full">

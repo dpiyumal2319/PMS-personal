@@ -105,7 +105,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             <Card className={'p-4 space-y-4'}>
-                <Card className="bg-slate-100 p-4">
+                <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
                     <div className="space-y-6">
                         <h2 className="text-xl font-semibold">Patient Vitals</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -167,7 +167,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                     </div>
                 </Card>
 
-                <Card className='bg-slate-100 p-4'>
+                <Card className='bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300'>
                     <div className="space-y-6">
                         <h2 className="text-xl font-semibold">Medications</h2>
 

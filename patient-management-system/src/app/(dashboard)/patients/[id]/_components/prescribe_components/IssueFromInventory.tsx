@@ -253,6 +253,11 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         resetForm();
     };
 
+    const handleClose = () => {
+        setOpen(false);
+        resetForm();
+    }
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -294,9 +299,12 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             disabled={!selectedDrug}
                         />
                     </div>
-
-                    <div>
-                        <span className="text-red-500">{error}</span>
+                    {/*Clear Button and error*/}
+                    <div className={'flex justify-between'}>
+                        <span className="text-red-500 text-sm">{error}</span>
+                        <span onClick={resetForm} className="text-red-500 cursor-pointer text-sm hover:underline">
+                            X Clear
+                        </span>
                     </div>
 
                     <MedicationStrategyTabs
@@ -308,7 +316,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     />
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>
+                    <Button variant="outline" onClick={handleClose}>
                         Cancel
                     </Button>
                     <Button
