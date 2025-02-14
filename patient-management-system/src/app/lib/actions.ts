@@ -8,8 +8,8 @@ import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {StockData, StockQueryParams, SortOption} from "@/app/lib/definitions";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
-import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
-import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssueFromInventory";
+import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionForm";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescribe/_components/IssueFromInventory";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -1822,10 +1822,13 @@ export async function addPrescription({
                     bloodPressure: prescriptionForm.bloodPressure,
                     pulse: prescriptionForm.pulse,
                     cardiovascular: prescriptionForm.cardiovascular,
+                    details: prescriptionForm.description,
+                    status: 'PENDING',
                     // Create issues
                     issues: {
                         create: prescriptionForm.issues.map(issue => ({
                             drugId: issue.drugId,
+                            details: issue.details,
                             brandId: issue.brandId,
                             strategy: issue.strategy,
                             strategyDetails: issue.strategyDetails,
@@ -1845,6 +1848,25 @@ export async function addPrescription({
                     issues: true
                 }
             });
+
+            //Check for queue entry
+            const queueEntry = await tx.queueEntry.findFirst({
+                where: {
+                    patientId: patientID,
+                    status: "PENDING"
+                }
+            });
+
+            if (queueEntry) {
+                await tx.queueEntry.update({
+                    where: {
+                        id: queueEntry.id
+                    },
+                    data: {
+                        status: "PRESCRIBED"
+                    }
+                });
+            }
 
             // Update strategy history for each issue
             for (let i = 0; i < prescriptionForm.issues.length; i++) {
@@ -1996,4 +2018,133 @@ export async function searchBrandByDrug({drugID}: {
             };
         })
     );
+}
+
+
+//For prescriptions page
+export async function getPrescriptionsCount(patientID: number) {
+    return prisma.prescription.count({
+        where: {
+            patientId: patientID
+        }
+    });
+}
+
+export async function searchPrescriptions({patientID, query, filter, take, skip}: {
+    patientID: number;
+    query: string;
+    filter: string;
+    take: number;
+    skip: number;
+}) {
+    let where = {};
+
+    if (query) {
+        if (filter === "symptom") {
+            where = {
+                presentingSymptoms: {
+                    contains: query
+                }
+            };
+        } if (filter === "drug") {
+            where = {
+                OR: [
+                    {
+                        issues: {
+                            some: {
+                                drug: {
+                                    name: {
+                                        contains: query
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        OffRecordMeds: {
+                            some: {
+                                name: {
+                                    contains: query
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+        }
+    }
+
+    return prisma.prescription.findMany({
+        where: {
+            patientId: patientID,
+            ...where
+        },
+        take,
+        skip,
+        orderBy: {
+            time: 'desc'
+        },
+        include: {
+            issues: {
+                include: {
+                    drug: true
+                }
+            },
+            OffRecordMeds: {
+                select: {
+                    name: true,
+                }
+            }
+        }
+    });
+}
+
+export async function searchPrescriptionCount({patientID, query, filter}: {
+    patientID: number;
+    query: string;
+    filter: string;
+}) {
+    let where = {};
+
+    if (query) {
+        if (filter === "symptom") {
+            where = {
+                presentingSymptoms: {
+                    contains: query
+                }
+            };
+        } if (filter === "drug") {
+            where = {
+                OR: [
+                    {
+                        issues: {
+                            some: {
+                                drug: {
+                                    name: {
+                                        contains: query
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        OffRecordMeds: {
+                            some: {
+                                name: {
+                                    contains: query
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+        }
+    }
+
+    return prisma.prescription.count({
+        where: {
+            patientId: patientID,
+            ...where
+        }
+    });
 }

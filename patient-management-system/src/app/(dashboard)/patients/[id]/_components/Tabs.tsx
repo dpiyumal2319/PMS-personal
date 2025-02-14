@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {ClipboardEdit, FileText, Stethoscope} from "lucide-react";
+import {ClipboardEdit, FileText, Stethoscope, Pill} from "lucide-react";
 
 const PatientTabs = ({ patientId, role }:
                      {
@@ -13,13 +13,12 @@ const PatientTabs = ({ patientId, role }:
     const pathname = usePathname();
     const links = role === "DOCTOR" ? DoctorLinks : NurseLinks;
 
-    // Extract the tab name from the URL, or default to "prescribe" if on /patients/:id
+    // Extract the tab name
     const pathParts = pathname.split("/");
-    const currentTab = pathParts.length > 3 ? pathParts[3] : "prescribe";
+    const currentTab = pathParts[3];
 
     const handleTabChange = (value: string) => {
         if (value === currentTab) return;
-        if (value === "prescribe") return router.push(`/patients/${patientId}`);
         router.push(`/patients/${patientId}/${value}`);
     };
 
@@ -51,4 +50,5 @@ const DoctorLinks = [
 
 const NurseLinks = [
     {name: "Prescriptions", value: "prescriptions", icon: FileText},
+    {name : "Issue Medication", value: "issue", icon: Pill},
 ]

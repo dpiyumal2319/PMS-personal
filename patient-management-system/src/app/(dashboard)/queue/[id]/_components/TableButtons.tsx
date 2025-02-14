@@ -20,8 +20,8 @@ import {
 import {FaTrash, FaMedkit, FaTablets} from "react-icons/fa";
 import {toast} from "react-toastify";
 import {removePatientFromQueue} from "@/app/lib/actions";
-import {IoIosMore} from "react-icons/io";
-import {handleServerAction} from "@/app/lib/utils";
+import {handleServerAction} from "@/app/lib/utils"
+import {useRouter} from "next/navigation";
 
 // Remove from Queue Button
 const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) => {
@@ -75,19 +75,18 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
 };
 
 // Prescribe Button (For Doctors)
-const PrescribeMedicine = () => {
-    const handlePrescribe = () => {
-        toast.success('Prescription issued successfully!', {
-            position: 'bottom-right'
-        });
-    };
+const PrescribeMedicine = ({id}: {id:number}) => {
+    const router = useRouter();
+
 
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <button
-                        onClick={handlePrescribe}
+                        onClick={() => {
+                            router.push(`/patients/${id}/prescribe`);
+                        }}
                         className="p-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
                     >
                         <FaMedkit/>
@@ -128,30 +127,6 @@ const IssueMedicine = () => {
     );
 };
 
-const ViewProfile = ({
-                         id
-                     }: {
-    id: number
-}) => {
-    return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <button className="flex items-center p-2 text-gray-500 rounded hover:bg-gray-200 transition"
-                            onClick={() => {
-                                console.log('Viewing profile of patient with ID:', id);
-                            }}>
-                        <IoIosMore className={'font-bold text-lg'}/>
-                    </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    View Profile
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
-    )
-}
-
 export {
-    RemoveFromQueue, PrescribeMedicine, IssueMedicine, ViewProfile
+    RemoveFromQueue, PrescribeMedicine, IssueMedicine
 };

@@ -1,16 +1,9 @@
 import React from 'react';
-import PrescriptionForm from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
 
-const Page = async ({
-                        params
-                    }: {
-    params: Promise<{ id: string }>;
-}) => {
-    const {id} = await params;
-
+const Page = () => {
     return (
-        <div>
-            <PrescriptionForm patientID={Number(id)}/>
+        <div className={'text-center flex-grow flex items-center justify-center text-xl text-gray-500'}>
+            Select a tab to view the content
         </div>
     );
 };

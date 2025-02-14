@@ -17,7 +17,7 @@ import {MealStrategy, OtherStrategy, PeriodicStrategy, WhenNeededStrategy} from 
 import type {
     IssueInForm,
     OffRecordMeds
-} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
+} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionForm";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -165,6 +165,10 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
                                         color={getStrategyBadgeColor(issue.strategy)}
                                     />
                                 </div>
+                                <div>
+                                    <span className="text-sm text-slate-500">{issue.details}</span>
+                                </div>
+
                                 <div className="text-sm text-slate-500">
                                     Drug: {issue.drugName} • Brand: {issue.brandName}  • Quantity: {issue.quantity}
                                 </div>

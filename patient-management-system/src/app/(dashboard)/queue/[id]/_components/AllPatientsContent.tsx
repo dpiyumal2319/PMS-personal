@@ -8,8 +8,7 @@ import {calcAge} from "@/app/lib/utils";
 import {
     RemoveFromQueue,
     IssueMedicine,
-    PrescribeMedicine,
-    ViewProfile
+    PrescribeMedicine
 } from "@/app/(dashboard)/queue/[id]/_components/TableButtons";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
@@ -34,8 +33,7 @@ async function AllPatientsContent({id}: { id: number }) {
 
     const filteredPatients = patients.filter((patient) => {
             if (role === 'DOCTOR') {
-                // return patient.status === 'PENDING';
-                return patient.status !== 'COMPLETED';
+                return patient.status === 'PENDING';
             } else if (role === 'NURSE') {
                 return patient.status !== 'COMPLETED';
             } else {
@@ -45,7 +43,13 @@ async function AllPatientsContent({id}: { id: number }) {
     );
 
     const completedPatients = patients.filter((patient) => {
-        return (patient.status === 'COMPLETED');
+        if (role === 'DOCTOR') {
+            return patient.status !== 'PENDING';
+        } else if (role === 'NURSE') {
+            return patient.status === 'COMPLETED';
+        } else {
+            return false;
+        }
     });
 
     const getSex = (sex: string) => {
@@ -65,16 +69,19 @@ async function AllPatientsContent({id}: { id: number }) {
                 <TableRow key={patient.id}>
                     <TableCell className="font-medium">{patient.token}</TableCell>
                     <TableCell>{getStatus(patient.status)}</TableCell>
-                    <TableCell>{patient.patient.name}</TableCell>
+                    <TableCell>
+                        <Link href={`/patients/${patient.id}`} className={'text-blue-800 hover:underline'}>
+                            {patient.patient.name}
+                        </Link>
+                    </TableCell>
                     <TableCell>{getSex(patient.patient.gender)}</TableCell>
                     {patient.patient.birthDate ? <TableCell>{calcAge(new Date(patient.patient.birthDate))}</TableCell> :
                         <TableCell>Unknown</TableCell>}
                     <TableCell>{new Date(patient.time).toLocaleTimeString()}</TableCell>
-                    <TableCell className={'flex justify-center items-center gap-2'}>
-                            {role === 'DOCTOR' && patient.status === 'PENDING' && <PrescribeMedicine/>}
-                            {role === 'NURSE' && patient.status === 'PRESCRIBED' && <IssueMedicine/>}
-                            <RemoveFromQueue queueId={id} token={patient.token}/>
-                            <ViewProfile id={patient.id}/>
+                    <TableCell className={'flex justify-start items-center gap-2'}>
+                        {role === 'DOCTOR' && patient.status === 'PENDING' && <PrescribeMedicine id={patient.id}/>}
+                        {role === 'NURSE' && patient.status === 'PRESCRIBED' && <IssueMedicine/>}
+                        <RemoveFromQueue queueId={id} token={patient.token}/>
                     </TableCell>
                 </TableRow>
             ))}
@@ -86,14 +93,18 @@ async function AllPatientsContent({id}: { id: number }) {
                 <TableRow key={patient.id}>
                     <TableCell className="font-medium">{patient.token}</TableCell>
                     <TableCell>{getStatus(patient.status)}</TableCell>
-                    <TableCell>{patient.patient.name}</TableCell>
+                    <TableCell>
+                        <Link href={`/patients/${patient.id}`} className={'text-blue-800 hover:underline'}>
+                            {patient.patient.name}
+                        </Link>
+                    </TableCell>
                     <TableCell>{getSex(patient.patient.gender)}</TableCell>
                     {patient.patient.birthDate ? <TableCell>{calcAge(new Date(patient.patient.birthDate))}</TableCell> :
                         <TableCell>Unknown</TableCell>}
                     <TableCell>{new Date(patient.time).toLocaleTimeString()}</TableCell>
-                    <TableCell className={'flex justify-center items-center gap-2'}>
+                    <TableCell className={'flex justify-start items-center gap-2'}>
                         <Button asChild variant="default" size="sm">
-                            <Link href={`/queue/${id}/patient/${patient.id}`}>
+                            <Link href={`/patients/${patient.id}`}>
                                 View Profile
                             </Link>
                         </Button>

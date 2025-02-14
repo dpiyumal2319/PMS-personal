@@ -10,7 +10,7 @@ import {
     WhenNeededContent,
     OtherTabsContent,
     PeriodicTabsContent
-} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/TabsContent";
+} from "@/app/(dashboard)/patients/[id]/prescribe/_components/TabsContent";
 import {IssueingStrategy} from "@prisma/client";
 import type {
     MealStrategy,

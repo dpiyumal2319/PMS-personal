@@ -9,17 +9,19 @@ import {Stethoscope, Heart, Activity, FileText} from "lucide-react";
 import IssueFromInventory from "./IssueFromInventory";
 import {StrategyJson} from "@/app/lib/definitions";
 import {IssueingStrategy} from "@prisma/client";
-import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/AddOffRecordDrugs";
+import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescribe/_components/AddOffRecordDrugs";
 import {handleServerAction} from "@/app/lib/utils";
 import {addPrescription} from "@/app/lib/actions";
 import {
     PrescriptionIssuesList,
     OffRecordMedsList
-} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionIssuesList";
+} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionIssuesList";
+import {FaHeadSideCough} from "react-icons/fa";
 
 export interface IssueInForm {
     drugId: number;
     drugName: string;
+    details: string;
     brandId: number;
     brandName: string;
     strategy: IssueingStrategy;
@@ -35,6 +37,7 @@ export interface OffRecordMeds {
 export interface PrescriptionFormData {
     presentingSymptoms: string;
     bloodPressure: string;
+    description: string;
     pulse: string;
     cardiovascular: string;
     issues: IssueInForm[];
@@ -45,6 +48,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
     const [formData, setFormData] = useState<PrescriptionFormData>({
         presentingSymptoms: '',
         bloodPressure: '',
+        description: '',
         pulse: '',
         cardiovascular: '',
         issues: [],
@@ -55,6 +59,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
         setFormData({
             presentingSymptoms: '',
             bloodPressure: '',
+            description: '',
             pulse: '',
             cardiovascular: '',
             issues: [],
@@ -62,7 +67,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
         });
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const {name, value} = e.target;
         setFormData((prevData) => ({
             ...prevData,
@@ -117,8 +122,8 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
-                                    <FileText className="h-4 w-4 text-slate-500"/>
-                                    <Label>Presenting Symptoms</Label>
+                                    <FaHeadSideCough className="h-4 w-4 text-cyan-500"/>
+                                    <Label>Presenting Symptoms<span className="text-red-500">*</span></Label>
                                 </div>
                                 <Input
                                     type="text"
@@ -127,12 +132,12 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                                     onChange={handleChange}
                                     required
                                     className="w-full"
-                                    placeholder="Enter symptoms..."
+                                    placeholder="Enter symptoms e.g., headache, fever"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
-                                    <Activity className="h-4 w-4 text-slate-500"/>
+                                    <Activity className="h-4 w-4 text-amber-500"/>
                                     <Label>Blood Pressure</Label>
                                 </div>
                                 <Input
@@ -145,7 +150,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
-                                    <Heart className="h-4 w-4 text-slate-500"/>
+                                    <Heart className="h-4 w-4 text-rose-500"/>
                                     <Label>Pulse</Label>
                                 </div>
                                 <Input
@@ -158,7 +163,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
-                                    <Stethoscope className="h-4 w-4 text-slate-500"/>
+                                    <Stethoscope className="h-4 w-4 text-emerald-500"/>
                                     <Label>Cardiovascular</Label>
                                 </div>
                                 <Input
@@ -167,6 +172,20 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                                     value={formData.cardiovascular}
                                     onChange={handleChange}
                                     placeholder="Enter cardiovascular status..."
+                                />
+                            </div>
+                            <div className="space-y-2 col-span-2">
+                                <div className="flex items-center space-x-2">
+                                    <FileText className="h-4 w-4 text-gray-500"/>
+                                    <Label>Description</Label>
+                                </div>
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                    placeholder="Additional details..."
                                 />
                             </div>
                         </div>
