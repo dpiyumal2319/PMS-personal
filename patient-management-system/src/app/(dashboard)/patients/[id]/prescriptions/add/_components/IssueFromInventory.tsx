@@ -18,7 +18,7 @@ import type {
 } from "@/app/lib/definitions";
 import {StrategyJsonSchema} from "@/app/lib/definitions";
 import {IssueingStrategy} from "@prisma/client";
-import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionForm";
+import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {calculateQuantity} from "@/app/lib/utils";
 import {Plus} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";

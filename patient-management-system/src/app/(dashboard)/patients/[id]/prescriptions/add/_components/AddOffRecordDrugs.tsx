@@ -6,7 +6,7 @@ import React, {useState} from 'react';
 import {Input} from '@/components/ui/input';
 import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
-import type {OffRecordMeds} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionForm";
+import type {OffRecordMeds} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {Plus} from "lucide-react";
 
 interface AddRecordProps {

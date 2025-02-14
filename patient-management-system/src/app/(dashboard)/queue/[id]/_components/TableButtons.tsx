@@ -75,7 +75,7 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
 };
 
 // Prescribe Button (For Doctors)
-const PrescribeMedicine = ({id}: {id:number}) => {
+const PrescribeMedicine = ({id}: { id: number }) => {
     const router = useRouter();
 
 
@@ -85,7 +85,7 @@ const PrescribeMedicine = ({id}: {id:number}) => {
                 <TooltipTrigger asChild>
                     <button
                         onClick={() => {
-                            router.push(`/patients/${id}/prescribe`);
+                            router.push(`/patients/${id}/prescriptions/add`)
                         }}
                         className="p-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
                     >

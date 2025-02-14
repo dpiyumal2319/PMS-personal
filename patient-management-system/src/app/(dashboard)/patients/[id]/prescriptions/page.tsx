@@ -5,6 +5,9 @@ import SearchDropdown from "@/app/(dashboard)/_components/Dropdown";
 import PrescriptionList from "@/app/(dashboard)/patients/[id]/prescriptions/_components/PrescriptionList";
 import Pagination from "@/app/(dashboard)/_components/Pagination";
 import PrescriptionListSkeleton from "@/app/(dashboard)/patients/[id]/prescriptions/_components/CardsSkeleton";
+import Link from "next/link";
+import {Button} from "@/components/ui/button";
+import {verifySession} from "@/app/lib/sessions";
 
 const Page = async ({searchParams, params}: {
     searchParams?: Promise<{
@@ -26,13 +29,26 @@ const Page = async ({searchParams, params}: {
         patientID: id,
         filter: filter
     })
+    const session = await verifySession();
 
 
     return (
         <div className={'flex flex-col flex-grow gap-4 h-full'}>
-            <div className={'flex justify-start items-center gap-4'}>
+            <div className={'flex justify-between items-center gap-4'}>
                 <span className={'text-md'}>There are total {prescriptionsCount} prescriptions</span>
+                <div>
+                    <Link href={session?.role === 'DOCTOR' ? `/patients/${id}/prescriptions/add` : '#'}>
+                        <Button
+                            disabled={session?.role !== 'DOCTOR'}
+                            className={session?.role !== 'DOCTOR' ? 'opacity-50 cursor-not-allowed' : ''}
+                        >
+                            Add Prescription
+                        </Button>
+                    </Link>
+                </div>
             </div>
+
+
             <div className={'flex gap-4 items-center'}>
                 <Search placeholder={`Search Prescription by ${filter}...`}/>
                 <SearchDropdown items={[

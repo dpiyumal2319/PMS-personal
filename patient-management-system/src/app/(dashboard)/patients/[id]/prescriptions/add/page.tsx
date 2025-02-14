@@ -1,5 +1,5 @@
 import React from 'react';
-import PrescriptionForm from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionForm";
+import PrescriptionForm from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 
 const Page = async ({
                         params

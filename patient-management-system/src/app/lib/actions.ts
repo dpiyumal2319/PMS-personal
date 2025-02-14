@@ -8,8 +8,8 @@ import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {StockData, StockQueryParams, SortOption} from "@/app/lib/definitions";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
-import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionForm";
-import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescribe/_components/IssueFromInventory";
+import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -2038,6 +2038,7 @@ export async function searchPrescriptions({patientID, query, filter, take, skip}
     skip: number;
 }) {
     let where = {};
+    const session = await verifySession();
 
     if (query) {
         if (filter === "symptom") {
@@ -2046,7 +2047,8 @@ export async function searchPrescriptions({patientID, query, filter, take, skip}
                     contains: query
                 }
             };
-        } if (filter === "drug") {
+        }
+        if (filter === "drug") {
             where = {
                 OR: [
                     {
@@ -2072,6 +2074,14 @@ export async function searchPrescriptions({patientID, query, filter, take, skip}
                 ]
             };
         }
+    }
+
+    // Only pending prescriptions can be viewed by non-doctor users
+    if (session.role !== 'DOCTOR') {
+        where = {
+            ...where,
+            status: "PENDING"
+        };
     }
 
     return prisma.prescription.findMany({
@@ -2113,7 +2123,8 @@ export async function searchPrescriptionCount({patientID, query, filter}: {
                     contains: query
                 }
             };
-        } if (filter === "drug") {
+        }
+        if (filter === "drug") {
             where = {
                 OR: [
                     {
@@ -2145,6 +2156,46 @@ export async function searchPrescriptionCount({patientID, query, filter}: {
         where: {
             patientId: patientID,
             ...where
+        }
+    });
+}
+
+export async function getPrescription(prescriptionID: number, patientID: number) {
+    const session = await verifySession();
+
+    return prisma.prescription.findUnique({
+        where: {
+            id: prescriptionID,
+            patientId: patientID,
+            ...(session.role !== 'DOCTOR' && {status: 'PENDING'})
+        },
+        include: {
+            issues: {
+                select: {
+                    id: true,
+                }
+            },
+            OffRecordMeds: {
+                select: {
+                    id: true,
+                }
+            }
+        }
+    });
+}
+
+export async function getIssueData(issueID: number) {
+    const session = await verifySession();
+
+    return prisma.issue.findUnique({
+        where: {
+            id: issueID,
+            ...(session.role !== 'DOCTOR' && {prescription: {status: 'PENDING'}})
+        },
+        include: {
+            drug: true,
+            brand: true,
+            batch: true
         }
     });
 }

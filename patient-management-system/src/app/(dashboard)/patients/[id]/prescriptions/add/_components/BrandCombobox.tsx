@@ -13,10 +13,12 @@ import {
     CommandList,
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
-import type {drug} from "@/app/(dashboard)/patients/[id]/prescribe/_components/IssueFromInventory";
+import {differenceInDays, differenceInMonths} from "date-fns";
+import type {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
-interface PopoverSelectProps {
-    options: drug[];
+interface BrandComboboxProps {
+    options: BrandOption[];
     value?: string | number | null;
     onChange: (value: string | number) => void;
     placeholder?: string;
@@ -28,18 +30,18 @@ interface PopoverSelectProps {
     disabled?: boolean;
 }
 
-const DrugCombobox = ({
-                          options,
-                          value,
-                          onChange,
-                          placeholder = "Select an option...",
-                          searchPlaceholder = "Search options...",
-                          noOptionsMessage = "No options found.",
-                          isSearching = false,
-                          onSearch,
-                          className,
-                          disabled = false,
-                      }: PopoverSelectProps) => {
+const BrandCombobox = ({
+                           options,
+                           value,
+                           onChange,
+                           placeholder = "Select a brand...",
+                           searchPlaceholder = "Search brands...",
+                           noOptionsMessage = "No brands found.",
+                           isSearching = false,
+                           onSearch,
+                           className,
+                           disabled = false,
+                       }: BrandComboboxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const handleSelect = (selectedValue: string) => {
@@ -52,6 +54,18 @@ const DrugCombobox = ({
     };
 
     const selectedOption = options.find((option) => option.id === value);
+
+    const formatExpiry = (expiryDate: Date) => {
+        const now = new Date();
+
+        const monthsLeft = differenceInMonths(expiryDate, now);
+        const daysLeft = differenceInDays(expiryDate, now);
+
+        if (monthsLeft > 0) {
+            return `${monthsLeft} month${monthsLeft > 1 ? 's' : ''}`;
+        }
+        return `${daysLeft} day${daysLeft > 1 ? 's' : ''}`;
+    };
 
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -74,7 +88,7 @@ const DrugCombobox = ({
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
-                <Command shouldFilter={false}>
+                <Command>
                     <CommandInput
                         placeholder={searchPlaceholder}
                         onValueChange={handleSearch}
@@ -94,11 +108,28 @@ const DrugCombobox = ({
                             {options.map((option) => (
                                 <CommandItem
                                     key={option.id}
-                                    value={String(option.id)}
+                                    value={option.name}
                                     onSelect={() => handleSelect(String(option.id))}
-                                    className="flex items-center justify-between"
+                                    className="flex space-y-1 rounded-md hover:bg-gray-100 transition"
                                 >
-                                    <span>{option.name} - ({option.brandCount}) brands</span>
+                                    <div className="flex items-center min-w-24">
+                                        <span className="font-medium">{option.name}</span>
+                                    </div>
+                                    <div
+                                        className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
+                                        <CustomBadge text={option.batchCount > 1 ? `${option.batchCount} batches` : "1 batch"} color={"gray"}/>
+                                        <CustomBadge text={`Total: ${option.totalRemainingQuantity}`}
+                                                     color={option.totalRemainingQuantity > 0 ? "green" : "red"}/>
+                                        <CustomBadge
+                                            text={`Expires in: ${formatExpiry(option.farthestExpiry)}`}
+                                            color={
+                                                differenceInDays(new Date(option.farthestExpiry), new Date()) < 30
+                                                    ? "red"
+                                                    : "yellow"
+                                            }
+                                        />
+                                    </div>
+
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",
@@ -106,6 +137,7 @@ const DrugCombobox = ({
                                         )}
                                     />
                                 </CommandItem>
+
                             ))}
                         </CommandGroup>
                     </CommandList>
@@ -115,4 +147,4 @@ const DrugCombobox = ({
     );
 };
 
-export default DrugCombobox;
+export default BrandCombobox;

@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {ClipboardEdit, FileText, Stethoscope, Pill} from "lucide-react";
+import {ClipboardEdit, FileText, Pill} from "lucide-react";
 
 const PatientTabs = ({ patientId, role }:
                      {
@@ -18,16 +18,16 @@ const PatientTabs = ({ patientId, role }:
     const currentTab = pathParts[3];
 
     const handleTabChange = (value: string) => {
-        if (value === currentTab) return;
+        console.log(value);
         router.push(`/patients/${patientId}/${value}`);
     };
 
     return (
         <div className="mt-6 border-t pt-4 h-14">
-            <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full h-full">
+            <Tabs defaultValue={currentTab} className="w-full h-full">
                 <TabsList className="w-full">
                     {links.map((link, index) => (
-                        <TabsTrigger key={index} value={link.value} className="flex items-center gap-2 w-full">
+                        <TabsTrigger key={index} value={link.value} className="flex items-center gap-2 w-full" onClick={() => handleTabChange(link.value)}>
                             <link.icon className="h-4 w-4" />
                             {link.name}
                         </TabsTrigger>
@@ -42,13 +42,11 @@ export default PatientTabs;
 
 
 const DoctorLinks = [
-    {name: "Prescribe", value: "prescribe", icon: Stethoscope},
-    {name: "Prescriptions", value: "prescriptions", icon: FileText},
+    {name: "Prescriptions", value: "prescriptions", icon: Pill},
     {name: "Reports", value: "reports", icon: FileText},
     {name: "Notes", value: "notes", icon: ClipboardEdit},
 ]
 
 const NurseLinks = [
-    {name: "Prescriptions", value: "prescriptions", icon: FileText},
-    {name : "Issue Medication", value: "issue", icon: Pill},
+    {name: "Prescriptions", value: "prescriptions", icon: FileText}
 ]

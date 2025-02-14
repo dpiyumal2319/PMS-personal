@@ -17,7 +17,7 @@ import {MealStrategy, OtherStrategy, PeriodicStrategy, WhenNeededStrategy} from 
 import type {
     IssueInForm,
     OffRecordMeds
-} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionForm";
+} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel,

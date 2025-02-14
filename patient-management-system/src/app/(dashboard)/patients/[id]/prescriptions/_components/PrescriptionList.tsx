@@ -22,8 +22,6 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
         skip,
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
     return (
         <div className="grid grid-cols-2 gap-4">
             {prescriptions.length > 0 ? (
@@ -37,7 +35,8 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-xl font-semibold">{prescription.presentingSymptoms || "No Symptoms"}</h3>
-                                        <CustomBadge text={`#${prescription.id}`} color="blue" className="text-sm"/>
+                                        <CustomBadge text={`#${prescription.id}`} color="blue"/>
+                                        <CustomBadge text={prescription.status} color={prescription.status === 'PENDING' ? "amber" : "green"}/>
                                     </div>
                                     <p className="text-gray-500 text-sm">{formatDistanceToNow(new Date(prescription.time), {addSuffix: true})}</p>
                                 </div>
@@ -66,7 +65,7 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                 </div>
                                 {prescription.issues.length > 0 && (
                                     <div className="flex items-center flex-wrap gap-2">
-                                        <span className="text-sm">Medicines:</span>
+                                        <span className="text-sm">Inventory Meds:</span>
                                         {prescription.issues.map((issue) => (
                                             issue.drug &&
                                             <CustomBadge key={issue.drug.name} text={issue.drug.name} color="green"
@@ -77,9 +76,9 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
 
                                 {prescription.OffRecordMeds.length > 0 && (
                                     <div className="flex items-center flex-wrap gap-2">
-                                        <span className="text-sm">Off Record Medicines:</span>
+                                        <span className="text-sm">Off Record Meds:</span>
                                         {prescription.OffRecordMeds.map((med) => (
-                                            <CustomBadge key={med.name} text={med.name} color="yellow"
+                                            <CustomBadge key={med.name} text={med.name} color="slate"
                                                          className="text-sm"/>
                                         ))}
                                     </div>

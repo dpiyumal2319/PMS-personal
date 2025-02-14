@@ -5,18 +5,19 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
-import {Stethoscope, Heart, Activity, FileText} from "lucide-react";
+import {Stethoscope, Heart, Activity, FileText, ChevronLeft} from "lucide-react";
 import IssueFromInventory from "./IssueFromInventory";
 import {StrategyJson} from "@/app/lib/definitions";
 import {IssueingStrategy} from "@prisma/client";
-import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescribe/_components/AddOffRecordDrugs";
+import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/AddOffRecordDrugs";
 import {handleServerAction} from "@/app/lib/utils";
 import {addPrescription} from "@/app/lib/actions";
 import {
     PrescriptionIssuesList,
     OffRecordMedsList
-} from "@/app/(dashboard)/patients/[id]/prescribe/_components/PrescriptionIssuesList";
+} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionIssuesList";
 import {FaHeadSideCough} from "react-icons/fa";
+import {useRouter} from "next/navigation";
 
 export interface IssueInForm {
     drugId: number;
@@ -54,6 +55,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
         issues: [],
         offRecordMeds: []
     });
+    const router = useRouter();
 
     function formReset() {
         setFormData({
@@ -107,14 +109,25 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
         }
     };
 
+    const handleBack = () => {
+        router.push(`/patients/${patientID}/prescriptions`);
+        formReset();
+    }
+
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             <Card className={'p-4 space-y-4'}>
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-semibold">Prescribe Medication</h1>
+                    <div className="flex items-center space-x-2">
+                        {/* Back Button */}
+                        <div className="flex items-center hover:bg-gray-100 p-1 rounded-md cursor-pointer" onClick={handleBack}>
+                            <ChevronLeft/>
+                        </div>
+                        <h1 className="text-2xl font-semibold">Prescribe Medication</h1>
+                    </div>
                     <span onClick={formReset} className="text-red-500 cursor-pointer text-sm hover:underline">
-                            X Clear
-                    </span>
+                    X Clear
+                </span>
                 </div>
                 <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
                     <div className="space-y-6">
