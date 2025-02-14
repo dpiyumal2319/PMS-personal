@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 import {StockData, StockQueryParams, SortOption} from "@/app/lib/definitions";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
-import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssueFromInventory";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -1805,6 +1805,13 @@ export async function addPrescription({
             return {success: false, message: 'At least one prescription is required'};
         }
 
+        // check for repeated drugs
+        const drugIds = prescriptionForm.issues.map(issue => issue.drugId);
+        const uniqueDrugIds = new Set(drugIds);
+        if (drugIds.length !== uniqueDrugIds.size) {
+            return {success: false, message: 'Repeated drugs are not allowed in a single prescription'};
+        }
+
         // Create prescription with all related records in a transaction
         await prisma.$transaction(async (tx) => {
             // Create the main prescription and store its result to get issue IDs
@@ -1896,7 +1903,12 @@ export async function getCachedStrategy(drugID: number) {
         select: {
             issueId: true,
             brandId: true,
-            issue: true
+            issue: true,
+            brand: {
+                select: {
+                    name: true
+                }
+            }
         }
     });
 }

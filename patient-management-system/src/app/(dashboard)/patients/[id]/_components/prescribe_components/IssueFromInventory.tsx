@@ -20,6 +20,7 @@ import {StrategyJsonSchema} from "@/app/lib/definitions";
 import {IssueingStrategy} from "@prisma/client";
 import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
 import {calculateQuantity} from "@/app/lib/utils";
+import {Plus} from "lucide-react";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
@@ -39,14 +40,16 @@ export interface BrandOption {
     farthestExpiry: Date;
 }
 
-const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
+const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [open, setOpen] = useState(false);
     const [isDrugSearching, setIsDrugSearching] = useState(false);
     const [isBrandSearching, setIsBrandSearching] = useState(false);
     const [drugs, setDrugs] = useState<drug[]>([]);
     const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
+    const [selectedDrugName, setSelectedDrugName] = useState<string | null>(null);
     const [brands, setBrands] = useState<BrandOption[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
+    const [selectedBrandName, setSelectedBrandName] = useState<string | null>(null);
     const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -123,7 +126,9 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
     const resetForm = () => {
         setSelectedDrug(null);
+        setSelectedDrugName(null);
         setSelectedBrand(null);
+        setSelectedBrandName(null);
         setError(null);
         setStrategy(null);
     };
@@ -142,6 +147,7 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const handleDrugSelect = async (selectedID: number) => {
         if (selectedID !== selectedDrug) {
             setSelectedDrug(selectedID);
+            setSelectedDrugName(drugs.find(drug => drug.id === selectedID)?.name || null);
             setIsBrandSearching(true);
             try {
                 const brands = await searchBrandByDrug({drugID: selectedID});
@@ -151,6 +157,7 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 if (cachedBrand && cachedBrand.brandId === availableBrandIDs[0]) {
                     console.log(cachedBrand);
                     setSelectedBrand(cachedBrand.brandId);
+                    setSelectedBrandName(cachedBrand.brand.name);
                     setStrategy(cachedBrand.issue.strategy);
                     const parsedData = StrategyJsonSchema.parse(cachedBrand.issue.strategyDetails);
                     switch (cachedBrand.issue.strategy) {
@@ -183,8 +190,13 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
+    const handleBrandSelect = (selectedID: number) => {
+        setSelectedBrand(selectedID);
+        setSelectedBrandName(brands.find(brand => brand.id === selectedID)?.name || null);
+    };
+
     const handleAddIssue = async () => {
-        if (!selectedDrug || !selectedBrand || !strategy) {
+        if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName) {
             const missingFields = [];
             if (!selectedDrug) missingFields.push("Drug");
             if (!selectedBrand) missingFields.push("Brand");
@@ -228,7 +240,9 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
         const quantity = calculateQuantity(parsedData);
         const newIssue: IssueInForm = {
             drugId: selectedDrug,
+            drugName: selectedDrugName,
             brandId: selectedBrand,
+            brandName: selectedBrandName,
             strategy: strategy,
             strategyDetails: parsedData,
             quantity: quantity
@@ -242,8 +256,13 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Card className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer">
-                    + Add Drug
+                <Card
+                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 group"
+                >
+                    <div className="flex items-center space-x-2 text-slate-500 group-hover:text-slate-800">
+                        <Plus className="h-5 w-5 transition-transform duration-200 group-hover:scale-110"/>
+                        <span className="font-medium">Issue from Inventory</span>
+                    </div>
                 </Card>
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
@@ -264,7 +283,7 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         />
                         <BrandCombobox
                             options={brands}
-                            onChange={(selectedID) => setSelectedBrand(Number(selectedID))}
+                            onChange={(selectedID) => handleBrandSelect(Number(selectedID))}
                             onSearch={() => {
                             }}
                             isSearching={isBrandSearching}
@@ -304,4 +323,4 @@ const IssuesList: React.FC<IssuesListProps> = ({onAddIssue}) => {
     );
 };
 
-export default IssuesList;
+export default IssueFromInventory;

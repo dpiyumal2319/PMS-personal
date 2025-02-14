@@ -264,15 +264,16 @@ interface OtherTabsContentProps {
 }
 
 const OtherTabsContent = ({strategy, setStrategy}: OtherTabsContentProps) => {
-    const handleQuantityChange = (value: string) => {
-        const quantity = Number(value);
-        if (!isNaN(quantity)) {
+    const handleChange = (field: keyof OtherStrategy) => (value: string) => {
+        const numValue = Number(value);
+        if (!isNaN(numValue)) {
             setStrategy(prev => ({
                 ...prev,
-                quantity
+                [field]: numValue
             }));
         }
-    };
+    }
+
 
     return (
         <TabsContent value="OTHER">
@@ -283,7 +284,7 @@ const OtherTabsContent = ({strategy, setStrategy}: OtherTabsContentProps) => {
                         <Input
                             type="number"
                             value={strategy.dose}
-                            onChange={(e) => handleQuantityChange(e.target.value)}
+                            onChange={(e) => handleChange('dose')(e.target.value)}
                             className="text-lg pl-10"
                             placeholder="Enter dosage"
                         />
@@ -299,7 +300,7 @@ const OtherTabsContent = ({strategy, setStrategy}: OtherTabsContentProps) => {
                         <Input
                             type="number"
                             value={strategy.times}
-                            onChange={(e) => handleQuantityChange(e.target.value)}
+                            onChange={(e) => handleChange('times')(e.target.value)}
                             className="text-lg pl-10"
                             placeholder="Enter how many times"
                         />

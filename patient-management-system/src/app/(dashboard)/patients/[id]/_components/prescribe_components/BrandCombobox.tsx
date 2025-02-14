@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
 import {differenceInDays, differenceInMonths} from "date-fns";
-import type {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
+import type {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssueFromInventory";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 interface BrandComboboxProps {

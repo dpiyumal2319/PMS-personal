@@ -115,7 +115,7 @@ const MealCards = ({
                         placeholder="Dose"
                         value={strategy[id].dose}
                         onChange={(e) => handleIndividualQuantityChange(id, e.target.value)}
-                        disabled={isLocked}
+                        disabled={isLocked || !strategy[id].active}
                     />
                 </div>
             ))}
