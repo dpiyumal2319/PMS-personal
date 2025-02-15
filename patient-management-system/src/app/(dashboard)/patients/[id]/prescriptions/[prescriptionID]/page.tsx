@@ -65,7 +65,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                 </div>
 
                 {/*Prescription Issues*/}
-                {prescription.status === "PENDING" ? (
+                {prescription.status === "COMPLETED" ? (
                     <>
                         {prescription.issues.length > 0 && (
                             <div className="space-y-4 border-t border-gray-200 pt-4">
@@ -86,10 +86,18 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                         )}
                     </>
                 ) : (
-                    <div>Issue medicine</div>
+                    <>
+                        {prescription.OffRecordMeds.length > 0 && (
+                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                                <span className="text font-semibold">Off Record Medications</span>
+                                {prescription.OffRecordMeds.map((med) => (
+                                    <OffRecordMedCard med={med} key={med.id}/>
+                                ))}
+                            </div>
+                        )}
+                        <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id}/>
+                    </>
                 )}
-
-                <BatchAssign issues={prescription.issues} prescriptionID={prescription.id}/>
             </CardContent>
         </Card>
     );

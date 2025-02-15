@@ -1,7 +1,7 @@
 'use server';
 
 import {revalidatePath} from "next/cache";
-import type {myError} from "@/app/lib/definitions";
+import {Bill, myBillError, myError} from "@/app/lib/definitions";
 import {DateRange, InventoryFormData, PatientFormData, StockAnalysis} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
@@ -10,6 +10,10 @@ import {StockData, StockQueryParams, SortOption} from "@/app/lib/definitions";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {
+    BatchAssignPayload
+} from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
+import {DISPENSARY_FEE, DOCTOR_FEE} from "@/app/lib/constants";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -2209,4 +2213,82 @@ export async function getCachedBatch({drugId, brandId}: { drugId: number, brandI
             batchId: true
         }
     });
+}
+
+export async function calculateBill({prescriptionData}: { prescriptionData: BatchAssignPayload }): Promise<myBillError> {
+    const prescriptionID = prescriptionData.prescriptionID;
+    const batchAssignments = prescriptionData.batchAssigns;
+
+    try {
+        return await prisma.$transaction(async (prisma): Promise<myBillError> => {
+            const prescription = await prisma.prescription.findUnique({
+                where: {id: prescriptionID},
+            });
+
+            if (!prescription) {
+                return {success: false, message: 'Prescription not found'};
+            }
+
+            if (prescription.status === 'COMPLETED') {
+                return {success: false, message: 'Prescription already completed'};
+            }
+
+            const bill: Bill = {
+                patientID: prescriptionData.patientID,
+                dispensary_charge: DISPENSARY_FEE,
+                doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
+                cost: 0,
+                entries: [],
+            };
+
+            for (let i = 0; i < batchAssignments.length; i++) {
+                const assign = batchAssignments[i];
+                if (!assign.batchID) {
+                    return {success: false, message: `Batch not found for a drug`};
+                }
+
+                const batch = await prisma.batch.findUnique({
+                    where: {id: assign.batchID},
+                    include: {drug: true, drugBrand: true},
+                });
+
+                if (!batch) {
+                    return {success: false, message: `Batch not found for drug ${assign.batchID}`};
+                }
+
+                const issue = await prisma.issue.findUnique({
+                    where: {id: assign.issueID},
+                });
+
+                if (!issue) {
+                    return {success: false, message: `Issue not found for drug ${assign.issueID}`};
+                }
+
+                await prisma.issue.update({
+                    where: {id: assign.issueID},
+                    data: {batchId: assign.batchID},
+                });
+
+                const batchCost = issue.quantity * batch.price;
+                bill.cost += batchCost;
+
+                bill.entries.push({
+                    drugName: batch.drug.name,
+                    brandName: batch.drugBrand.name,
+                    quantity: issue.quantity,
+                    unitPrice: batch.price,
+                });
+            }
+
+            await prisma.prescription.update({
+                where: {id: prescriptionID},
+                data: {price: bill.cost},
+            });
+
+            return {success: true, message: 'Bill calculated successfully', bill};
+        });
+    } catch (error) {
+        console.error('Error calculating bill:', error);
+        return {success: false, message: 'An error occurred while calculating bill'};
+    }
 }

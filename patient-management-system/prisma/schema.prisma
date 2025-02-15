@@ -172,7 +172,6 @@ model Issue {
   prescriptionId   Int
   details          String?
   batch            Batch?             @relation(fields: [batchId], references: [id])
-  price            Float?
   batchId          Int?
   drug             Drug               @relation(fields: [drugId], references: [id])
   drugId           Int
