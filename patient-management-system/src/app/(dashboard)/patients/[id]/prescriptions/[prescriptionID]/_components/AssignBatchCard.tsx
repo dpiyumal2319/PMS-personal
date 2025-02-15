@@ -34,17 +34,27 @@ type Batches = Awaited<ReturnType<typeof getBatches>>;
 const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
     const [batches, setBatches] = useState<Batches | null>(null);
     const [selectedBatch, setSelectedBatch] = useState<number | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchAndUpdateBatches = useCallback(async () => {
-        console.log('Fetching batches for drug:', issue.drugId, 'brand:', issue.brandId);
-        const batches = await getBatches({drugID: issue.drugId, brandID: issue.brandId});
-        setBatches(batches);
+        try {
+            setLoading(true);
+            const batches = await getBatches({drugID: issue.drugId, brandID: issue.brandId});
+            setBatches(batches);
 
-        const cachedBatch = await getCachedBatch({drugId: issue.drugId, brandId: issue.brandId});
-        const batchIDs = batches.map(batch => batch.id);
+            const cachedBatch = await getCachedBatch({drugId: issue.drugId, brandId: issue.brandId});
+            const batchIDs = batches.map(batch => batch.id);
 
-        if (cachedBatch && batchIDs.includes(cachedBatch.batchId)) {
-            setSelectedBatch(cachedBatch.batchId);
+            if (cachedBatch && batchIDs.includes(cachedBatch.batchId)) {
+                setSelectedBatch(cachedBatch.batchId);
+            }
+            setError(null);
+        } catch (e) {
+            console.error(e);
+            setError('Failed to fetch batches');
+        } finally {
+            setLoading(false);
         }
     }, [issue.drugId, issue.brandId]);
 
@@ -81,7 +91,7 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
             <PrescriptionIssueCard issue={issue}/>
             <Card className={'w-1/2 p-4'}>
                 <CardContent className="flex flex-col gap-4">
-                    <Select onValueChange={handleSelect} value={selectedBatch ? `${selectedBatch}` : ''}>
+                    <Select onValueChange={handleSelect} value={selectedBatch ? `${selectedBatch}` : ''} disabled={loading}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select a batch"/>
                         </SelectTrigger>
@@ -110,6 +120,8 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
                             ))}
                         </SelectContent>
                     </Select>
+
+                    {error && <div className="text-red-500">{error}</div>}
 
                     {/*Buttons*/}
                     <div className={'flex gap-4 justify-end'}>

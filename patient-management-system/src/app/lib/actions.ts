@@ -2215,7 +2215,9 @@ export async function getCachedBatch({drugId, brandId}: { drugId: number, brandI
     });
 }
 
-export async function calculateBill({prescriptionData}: { prescriptionData: BatchAssignPayload }): Promise<myBillError> {
+export async function calculateBill({prescriptionData}: {
+    prescriptionData: BatchAssignPayload
+}): Promise<myBillError> {
     const prescriptionID = prescriptionData.prescriptionID;
     const batchAssignments = prescriptionData.batchAssigns;
 
@@ -2262,6 +2264,38 @@ export async function calculateBill({prescriptionData}: { prescriptionData: Batc
 
                 if (!issue) {
                     return {success: false, message: `Issue not found for drug ${assign.issueID}`};
+                }
+
+                // Updating or creating the cache
+                const existingCache = await prisma.batchHistory.findUnique({
+                    where: {
+                        drugId_drugBrandId: {
+                            drugId: batch.drugId,
+                            drugBrandId: batch.drugBrandId
+                        }
+                    }
+                });
+
+                if (existingCache) {
+                    await prisma.batchHistory.update({
+                        where: {
+                            drugId_drugBrandId: {
+                                drugId: batch.drugId,
+                                drugBrandId: batch.drugBrandId
+                            }
+                        },
+                        data: {
+                            batchId: assign.batchID
+                        }
+                    });
+                } else {
+                    await prisma.batchHistory.create({
+                        data: {
+                            drugId: batch.drugId,
+                            drugBrandId: batch.drugBrandId,
+                            batchId: assign.batchID
+                        }
+                    });
                 }
 
                 await prisma.issue.update({
