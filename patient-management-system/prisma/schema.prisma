@@ -54,6 +54,11 @@ enum IssueingStrategy {
   OTHER
 }
 
+enum PrescriptionStatus {
+  PENDING
+  COMPLETED
+}
+
 model Patient {
   id           Int             @id @default(autoincrement())
   telephone    String
@@ -137,30 +142,35 @@ model Batch {
 }
 
 model Prescription {
-  id                 Int             @id @default(autoincrement())
-  time               DateTime        @default(now())
+  id                 Int                @id @default(autoincrement())
+  time               DateTime           @default(now())
   presentingSymptoms String
+  status             PrescriptionStatus @default(PENDING)
+  doctorCharge       Float?
+  price              Float?
+  details            String?
   bloodPressure      String?
   pulse              String?
   cardiovascular     String?
-  patient            Patient         @relation(fields: [patientId], references: [id])
+  patient            Patient            @relation(fields: [patientId], references: [id])
   patientId          Int
   issues             Issue[]
   OffRecordMeds      OffRecordMeds[]
 }
 
 model OffRecordMeds {
-  id             Int           @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   name           String
   description    String?
-  Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
-  prescriptionId Int?
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int
 }
 
 model Issue {
   id               Int                @id @default(autoincrement())
   prescription     Prescription       @relation(fields: [prescriptionId], references: [id])
   prescriptionId   Int
+  details          String?
   batch            Batch?             @relation(fields: [batchId], references: [id])
   batchId          Int?
   drug             Drug               @relation(fields: [drugId], references: [id])

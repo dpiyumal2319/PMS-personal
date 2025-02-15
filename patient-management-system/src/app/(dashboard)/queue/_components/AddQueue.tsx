@@ -1,7 +1,7 @@
 'use client';
 
 import Button from "@/app/_components/PrimaryButton";
-import {usePathname, useSearchParams} from "next/navigation";
+import {redirect, usePathname, useSearchParams} from "next/navigation";
 import {useRouter} from "next/navigation";
 import {handleServerAction} from "@/app/lib/utils";
 import {addQueue} from "@/app/lib/actions";
@@ -25,7 +25,8 @@ const QueueButton = () => {
         const params = new URLSearchParams(searchParams);
         params.set('page', '1');
         replace(`${pathName}?${params.toString()}`);
-        console.log(`Queue Created Successfully, ${params.toString()}`);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        redirect("/queue/active");
     };
 
     return (

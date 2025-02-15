@@ -18,9 +18,10 @@ import type {
 } from "@/app/lib/definitions";
 import {StrategyJsonSchema} from "@/app/lib/definitions";
 import {IssueingStrategy} from "@prisma/client";
-import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
+import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {calculateQuantity} from "@/app/lib/utils";
 import {Plus} from "lucide-react";
+import {Textarea} from "@/components/ui/textarea";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
@@ -48,6 +49,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
     const [selectedDrugName, setSelectedDrugName] = useState<string | null>(null);
     const [brands, setBrands] = useState<BrandOption[]>([]);
+    const [details, setDetails] = useState<string | null>(null);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
     const [selectedBrandName, setSelectedBrandName] = useState<string | null>(null);
     const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
@@ -128,6 +130,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         setSelectedDrug(null);
         setSelectedDrugName(null);
         setSelectedBrand(null);
+        setDetails("");
         setSelectedBrandName(null);
         setError(null);
         setStrategy(null);
@@ -241,6 +244,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         const newIssue: IssueInForm = {
             drugId: selectedDrug,
             drugName: selectedDrugName,
+            details: details,
             brandId: selectedBrand,
             brandName: selectedBrandName,
             strategy: strategy,
@@ -270,7 +274,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     </div>
                 </Card>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="max-w-3xl overflow-y-scroll max-h-screen">
                 <DialogHeader>
                     <DialogTitle>Add Issue</DialogTitle>
                 </DialogHeader>
@@ -299,6 +303,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             disabled={!selectedDrug}
                         />
                     </div>
+
                     {/*Clear Button and error*/}
                     <div className={'flex justify-between'}>
                         <span className="text-red-500 text-sm">{error}</span>
@@ -314,6 +319,16 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         otherStrategy={{otherStrategy, setOtherStrategy}}
                         selectedStrategy={{selectedStrategy: strategy, setSelectedStrategy: setStrategy}}
                     />
+
+
+                    {/*Text Area*/}
+                    <div className="flex items-start justify-start">
+                        <Textarea
+                            placeholder="Additional Details"
+                            value={details || ""}
+                            onChange={(e) => setDetails(e.target.value)}
+                        />
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose}>

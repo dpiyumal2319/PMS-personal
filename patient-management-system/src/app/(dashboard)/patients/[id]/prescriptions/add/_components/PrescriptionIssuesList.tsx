@@ -17,7 +17,7 @@ import {MealStrategy, OtherStrategy, PeriodicStrategy, WhenNeededStrategy} from 
 import type {
     IssueInForm,
     OffRecordMeds
-} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
+} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -28,21 +28,21 @@ import {
 } from "@/components/ui/alert-dialog";
 import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
 
-interface StrategyDetails {
+export interface StrategyDetails {
     name: IssueingStrategy;
     strategy: MealStrategy | WhenNeededStrategy | PeriodicStrategy | OtherStrategy;
 }
 
-interface StrategyIconProps {
+export interface StrategyIconProps {
     strategy: IssueingStrategy;
 }
 
-interface StrategyDetailsProps {
+export interface StrategyDetailsProps {
     strategy: IssueingStrategy;
     details: StrategyDetails;
 }
 
-const StrategyIcon: React.FC<StrategyIconProps> = ({strategy}) => {
+export const StrategyIcon: React.FC<StrategyIconProps> = ({strategy}) => {
     switch (strategy) {
         case IssueingStrategy.MEAL:
             return <Utensils className="h-5 w-5 text-green-600"/>;
@@ -57,7 +57,7 @@ const StrategyIcon: React.FC<StrategyIconProps> = ({strategy}) => {
     }
 };
 
-const StrategyDetails: React.FC<StrategyDetailsProps> = ({strategy, details}) => {
+export const StrategyDetails: React.FC<StrategyDetailsProps> = ({strategy, details}) => {
     switch (strategy) {
         case IssueingStrategy.MEAL: {
             const mealStrategy = details.strategy as MealStrategy;
@@ -126,7 +126,7 @@ const StrategyDetails: React.FC<StrategyDetailsProps> = ({strategy, details}) =>
     }
 };
 
-const getStrategyBadgeColor = (strategy: IssueingStrategy) => {
+export const getStrategyBadgeColor = (strategy: IssueingStrategy) => {
     switch (strategy) {
         case IssueingStrategy.MEAL:
             return 'green'
@@ -165,6 +165,10 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
                                         color={getStrategyBadgeColor(issue.strategy)}
                                     />
                                 </div>
+                                <div>
+                                    <span className="text-sm text-slate-500">{issue.details}</span>
+                                </div>
+
                                 <div className="text-sm text-slate-500">
                                     Drug: {issue.drugName} • Brand: {issue.brandName}  • Quantity: {issue.quantity}
                                 </div>

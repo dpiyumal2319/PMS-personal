@@ -13,7 +13,7 @@ import {
     CommandList,
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
-import type {drug} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssueFromInventory";
+import type {drug} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
 interface PopoverSelectProps {
     options: drug[];

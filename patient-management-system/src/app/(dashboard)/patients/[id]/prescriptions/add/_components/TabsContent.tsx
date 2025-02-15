@@ -5,7 +5,7 @@ import {AlertCircle, Clock, Calendar} from "lucide-react";
 import {Input} from "@/components/ui/input";
 import {Switch} from "@/components/ui/switch";
 import {TabsContent} from "@/components/ui/tabs";
-import MealCards from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/MealCards";
+import MealCards from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/MealCards";
 import type {
     MealStrategy,
     OtherStrategy,
