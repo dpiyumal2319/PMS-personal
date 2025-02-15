@@ -36,7 +36,7 @@ const PrescriptionIssueCard = ({issue}: { issue: IssueWithDetails }) => {
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                            <h3 className="font-medium">{issue.drug.name}</h3>
+                            <h3 className="font-semibold">{issue.drug.name}</h3>
                             <CustomBadge
                                 text={issue.strategy}
                                 color={getStrategyBadgeColor(issue.strategy)}
@@ -46,9 +46,30 @@ const PrescriptionIssueCard = ({issue}: { issue: IssueWithDetails }) => {
                             <span className="text-sm text-slate-500">{issue.details}</span>
                         </div>
 
-                        <div className="text-sm text-slate-500">
-                            Drug: {issue.drug.name} • Brand: {issue.brand.name} • batchID: {issue.batch?.id || 'N/A'} •
-                            Quantity: {issue.quantity}
+                        <div className="text-sm text-slate-600 flex flex-wrap items-center gap-1">
+                            <div>
+                                <span className="font-medium text-slate-500">Drug: </span>
+                                <span className="text-gray-900 font-semibold">{issue.drug.name}</span>
+                            </div>
+                            <span className="text-gray-400">|</span>
+                            <div>
+                                <span className="font-medium text-slate-500">Brand: </span>
+                                <span className="text-gray-900 font-semibold">{issue.brand.name}</span>
+                            </div>
+                            {issue.batch?.id && (
+                                <>
+                                    <span className="text-gray-400">|</span>
+                                    <div>
+                                        <span className="font-medium text-slate-500">Batch ID: </span>
+                                        <span className="text-gray-900 font-semibold">{issue.batch.id}</span>
+                                    </div>
+                                </>
+                            )}
+                            <span className="text-gray-400">|</span>
+                            <div>
+                                <span className="font-medium text-slate-500">Quantity: </span>
+                                <span className="text-gray-900 font-semibold">{issue.quantity}</span>
+                            </div>
                         </div>
                         <StrategyDetails strategy={issue.strategy} details={strategy}/>
                     </div>
