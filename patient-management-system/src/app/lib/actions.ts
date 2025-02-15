@@ -1,12 +1,21 @@
 'use server';
 
 import {revalidatePath} from "next/cache";
-import {Bill, myBillError, myError} from "@/app/lib/definitions";
-import {DateRange, InventoryFormData, PatientFormData, StockAnalysis} from "@/app/lib/definitions";
+import {
+    Bill,
+    DateRange,
+    InventoryFormData,
+    myBillError,
+    myError,
+    PatientFormData,
+    SortOption,
+    StockAnalysis,
+    StockData,
+    StockQueryParams
+} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import {StockData, StockQueryParams, SortOption} from "@/app/lib/definitions";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
@@ -2325,4 +2334,40 @@ export async function calculateBill({prescriptionData}: {
         console.error('Error calculating bill:', error);
         return {success: false, message: 'An error occurred while calculating bill'};
     }
+}
+
+export async function getBill(prescriptionID: number): Promise<Bill> {
+    const prescription = await prisma.prescription.findUnique({
+        where: {id: prescriptionID},
+        include: {
+            issues: {
+                include: {
+                    batch: true,
+                    drug: true,
+                    brand: true,
+                }
+            }
+        }
+    });
+
+    if (!prescription) {
+        throw new Error('Prescription not found');
+    }
+
+    if (prescription.status === 'PENDING' || !prescription.price || prescription.price === 0 || !prescription.issues.every(issue => issue.batch)) {
+        throw new Error('Prescription not completed');
+    }
+
+    return {
+        patientID: prescription.patientId,
+        dispensary_charge: DISPENSARY_FEE,
+        doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
+        cost: prescription.price,
+        entries: prescription.issues.map(issue => ({
+            drugName: issue.drug.name,
+            brandName: issue.brand.name,
+            quantity: issue.quantity,
+            unitPrice: issue.batch?.price ?? 0,
+        }))
+    };
 }

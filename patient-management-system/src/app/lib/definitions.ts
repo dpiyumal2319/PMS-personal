@@ -1,11 +1,12 @@
 import { IconType } from "react-icons";
 import { z } from "zod";
+import { Role } from '@prisma/client';
 
 export type SessionPayload = {
     id: number;
     name: string;
     email: string;
-    role: string;
+    role: Role;
 }
 
 export type SideBarItem = {

@@ -128,9 +128,9 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button
-                                    variant="destructive"
+                                    variant="outline"
                                     disabled={!selectedBatch}
-                                    className={`${!selectedBatch && "opacity-50 cursor-not-allowed"}`}
+                                    className={`${!selectedBatch && "opacity-50 cursor-not-allowed"} border-red-600 text-red-600 hover:bg-red-600 hover:text-white`}
                                 >
                                     <AlertCircle className="mr-2 h-4 w-4"/>
                                     {selectedBatch ? `Mark Batch #${selectedBatch} as Out of Stock` : "Select a batch to mark as out of stock"}
@@ -142,8 +142,8 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
                                         <AlertDialogTitle className="text-red-600">Mark Batch #{selectedBatch} as Out of
                                             Stock?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This will mark the batch as completely out of stock. This action cannot be
-                                            undone and will affect inventory calculations.
+                                            This will mark the batch as completely out of stock. This action <span className={'text-red-500 font-semibold'}> cannot be
+                                            undone</span> and will affect inventory calculations.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>

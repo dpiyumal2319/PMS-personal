@@ -1,4 +1,4 @@
-import {getPrescription} from "@/app/lib/actions";
+import {getBill, getPrescription} from "@/app/lib/actions";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {Activity, Heart, HeartPulse} from "lucide-react";
@@ -8,15 +8,25 @@ import {
     PrescriptionIssueCard
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/MedicineCards";
 import BatchAssign from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
+import {BillComponent} from "@/app/(dashboard)/_components/Bill";
+import {Bill} from "@/app/lib/definitions";
+import {verifySession} from "@/app/lib/sessions";
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
     const resolvedParams = await params;
     const id = Number(resolvedParams.id);
     const prescriptionID = Number(resolvedParams.prescriptionID);
     const prescription = await getPrescription(prescriptionID, id);
+    const session = await verifySession();
 
     if (!prescription) {
         return <div className="text-center text-red-500 font-semibold">Prescription not found</div>;
+    }
+
+    let bill: Bill | null = null;
+
+    if (prescription.status === 'COMPLETED') {
+        bill = await getBill(prescriptionID);
     }
 
     return (
@@ -84,6 +94,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                                 ))}
                             </div>
                         )}
+                        <BillComponent bill={bill}/>
                     </>
                 ) : (
                     <>
@@ -95,7 +106,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                                 ))}
                             </div>
                         )}
-                        <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id}/>
+                        <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id} role={session.role}/>
                     </>
                 )}
             </CardContent>
