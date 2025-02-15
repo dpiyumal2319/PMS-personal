@@ -1329,9 +1329,11 @@ export async function deletePatientReport(reportId: number, patientID: number): 
 }
 
 export async function getPendingPatientsCount() {
+    const session = await verifySession();
+
     return prisma.queueEntry.count({
         where: {
-            status: 'PENDING'
+            status: session.role === 'DOCTOR' ? 'PENDING' : { not: 'COMPLETED' }
         }
     });
 }
@@ -1837,7 +1839,7 @@ export async function addPrescription({
                     cardiovascular: prescriptionForm.cardiovascular,
                     details: prescriptionForm.description,
                     status: 'PENDING',
-                    doctorCharge: prescriptionForm.extraDoctorCharges,
+                    doctorCharge: Number(prescriptionForm.extraDoctorCharges),
                     // Create issues
                     issues: {
                         create: prescriptionForm.issues.map(issue => ({
@@ -1864,6 +1866,7 @@ export async function addPrescription({
             });
 
             //Check for queue entry
+            console.log(patientID);
             const queueEntry = await tx.queueEntry.findFirst({
                 where: {
                     patientId: patientID,
@@ -1871,7 +1874,10 @@ export async function addPrescription({
                 }
             });
 
+            console.log(queueEntry);
+
             if (queueEntry) {
+                revalidatePath(`/queue/${queueEntry.id}`);
                 await tx.queueEntry.update({
                     where: {
                         id: queueEntry.id
@@ -1918,6 +1924,7 @@ export async function addPrescription({
             }
         });
 
+        revalidatePath(`/patients/${patientID}/prescriptions`);
         return {
             success: true,
             message: 'Prescription created successfully'
@@ -2370,4 +2377,79 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
             unitPrice: issue.batch?.price ?? 0,
         }))
     };
+}
+
+export async function completePrescription(prescriptionID: number): Promise<myError> {
+    try {
+        const prescription = await prisma.prescription.findUnique({
+            where: {id: prescriptionID},
+            include: {
+                issues: {
+                    include: {
+                        batch: true
+                    }
+                }
+            }
+        });
+
+        if (!prescription) {
+            return {success: false, message: 'Prescription not found'};
+        }
+
+        if (prescription.status === 'COMPLETED') {
+            return {success: false, message: 'Prescription already completed'};
+        }
+
+        if (!prescription.issues.every(issue => issue.batch)) {
+            return {success: false, message: 'Prescription not completed'};
+        }
+
+        // Updating remaining quantity of batches
+        await prisma.$transaction(async (prisma) => {
+            for (let i = 0; i < prescription.issues.length; i++) {
+                const issue = prescription.issues[i];
+                if (!issue.batch || !issue.batchId) {
+                    return {success: false, message: 'Batch not found for a drug'};
+                }
+                await prisma.batch.update({
+                    where: {id: issue.batchId},
+                    data: {
+                        remainingQuantity: {
+                            decrement: issue.quantity
+                        }
+                    }
+                });
+            }
+
+            await prisma.prescription.update({
+                where: {id: prescriptionID},
+                data: {status: 'COMPLETED'}
+            });
+
+            //Check for queue entry
+            const queueEntry = await prisma.queueEntry.findFirst({
+                where: {
+                    patientId: prescription.patientId,
+                    status: "PRESCRIBED"
+                }
+            });
+
+            if (queueEntry) {
+                await prisma.queueEntry.update({
+                    where: {
+                        id: queueEntry.id
+                    },
+                    data: {
+                        status: "COMPLETED"
+                    }
+                });
+                revalidatePath(`/queue/${queueEntry.id}`);
+            }
+        });
+        revalidatePath(`/patients/${prescription.patientId}/prescriptions`);
+        return {success: true, message: 'Prescription completed successfully'};
+    } catch (error) {
+        console.error('Error completing prescription:', error);
+        return {success: false, message: 'An error occurred while completing prescription'};
+    }
 }

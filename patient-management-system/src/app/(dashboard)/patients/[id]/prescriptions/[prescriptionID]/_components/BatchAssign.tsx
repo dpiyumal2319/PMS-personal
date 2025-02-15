@@ -8,7 +8,7 @@ import AssignBatchCard
     from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/AssignBatchCard";
 import {Button} from "@/components/ui/button";
 import {toast} from "react-toastify";
-import {calculateBill} from "@/app/lib/actions";
+import {calculateBill, completePrescription} from "@/app/lib/actions";
 import {Bill} from "@/app/lib/definitions";
 import {BillComponent} from "@/app/(dashboard)/_components/Bill";
 import {
@@ -19,6 +19,8 @@ import {
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
+import {handleServerAction} from "@/app/lib/utils";
+import {useRouter} from "next/navigation";
 
 export type BatchAssignment = {
     issueID: number;
@@ -45,6 +47,7 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
         );
         const [error, setError] = useState<string | null>(null);
         const [bill, setBill] = useState<Bill | null>(null);
+        const router = useRouter();
 
         const handleBatchAssign = (issueID: number, batchID: number | null) => {
             setBatchAssignments(prev => prev.map(assignment =>
@@ -91,6 +94,19 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
                 setError(result.message);
             }
         };
+
+        const handleCompletePrescription = async () => {
+            const result = await handleServerAction(() => completePrescription(prescriptionID), {
+                loadingMessage: 'Completing Prescription...',
+            })
+
+            if (result.success) {
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+                router.push('/queue/active');
+            }
+            setError(result.message);
+        }
+
         return (
             <div className="space-y-4 border-t border-gray-200 pt-4">
                 <div className="flex justify-start items-center">
@@ -153,7 +169,7 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                     className="bg-green-500 hover:bg-green-600"
-                                    onClick={generateBill}
+                                    onClick={handleCompletePrescription}
                                 >
                                     Yes, Confirm Prescription
                                 </AlertDialogAction>

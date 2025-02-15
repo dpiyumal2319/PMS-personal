@@ -18,10 +18,9 @@ import {
     TooltipTrigger
 } from "@/components/ui/tooltip";
 import {FaTrash, FaMedkit, FaTablets} from "react-icons/fa";
-import {toast} from "react-toastify";
 import {removePatientFromQueue} from "@/app/lib/actions";
 import {handleServerAction} from "@/app/lib/utils"
-import {useRouter} from "next/navigation";
+import {redirect} from "next/navigation";
 
 // Remove from Queue Button
 const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) => {
@@ -76,16 +75,13 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
 
 // Prescribe Button (For Doctors)
 const PrescribeMedicine = ({id}: { id: number }) => {
-    const router = useRouter();
-
-
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <button
                         onClick={() => {
-                            router.push(`/patients/${id}/prescriptions/add`)
+                            redirect(`/patients/${id}/prescriptions/add`)
                         }}
                         className="p-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
                     >
@@ -101,19 +97,15 @@ const PrescribeMedicine = ({id}: { id: number }) => {
 };
 
 // Issue Medicine Button (For Pharmacists)
-const IssueMedicine = () => {
-    const handleIssue = () => {
-        toast.success('Medicine issued successfully!', {
-            position: 'bottom-right'
-        });
-    };
-
+const IssueMedicine = ({id}: { id: number }) => {
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <button
-                        onClick={handleIssue}
+                        onClick={() => {
+                            redirect(`/patients/${id}/prescriptions`)
+                        }}
                         className="p-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
                     >
                         <FaTablets/>

@@ -74,7 +74,6 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
 
     const handleComplete = async () => {
         if (selectedBatch !== null) {
-            console.log('Marking batch as out of stock:', selectedBatch);
             setSelectedBatch(null);
 
             // Refetch batches after marking as complete

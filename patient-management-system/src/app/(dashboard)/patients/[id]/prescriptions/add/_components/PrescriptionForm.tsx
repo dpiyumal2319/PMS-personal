@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
@@ -23,7 +23,7 @@ import {Textarea} from "@/components/ui/textarea";
 export interface IssueInForm {
     drugId: number;
     drugName: string;
-    details: string;
+    details: string | null;
     brandId: number;
     brandName: string;
     strategy: IssueingStrategy;
@@ -48,17 +48,30 @@ export interface PrescriptionFormData {
 }
 
 const PrescriptionForm = ({patientID}: { patientID: number }) => {
-    const [formData, setFormData] = useState<PrescriptionFormData>({
-        presentingSymptoms: '',
-        bloodPressure: '',
-        description: '',
-        extraDoctorCharges: 0,
-        pulse: '',
-        cardiovascular: '',
-        issues: [],
-        offRecordMeds: []
+    const [formData, setFormData] = useState<PrescriptionFormData>(() => {
+        if (typeof window !== 'undefined') {
+            const savedForm = localStorage.getItem(`prescription-form-${patientID}`);
+            if (savedForm) {
+                return JSON.parse(savedForm);
+            }
+        }
+        return {
+            presentingSymptoms: '',
+            bloodPressure: '',
+            description: '',
+            extraDoctorCharges: 0,
+            pulse: '',
+            cardiovascular: '',
+            issues: [],
+            offRecordMeds: []
+        };
     });
     const router = useRouter();
+
+    // Save to localStorage whenever formData changes
+    useEffect(() => {
+        localStorage.setItem(`prescription-form-${patientID}`, JSON.stringify(formData));
+    }, [formData, patientID]);
 
     function formReset() {
         setFormData({
@@ -71,6 +84,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
             issues: [],
             offRecordMeds: []
         });
+        localStorage.removeItem(`prescription-form-${patientID}`);
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -106,7 +120,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
             });
 
             if (result.success) {
-                formReset();
+                formReset(); // This will also clear localStorage
             }
         } catch (error) {
             console.error('Error submitting prescription:', error);
@@ -114,9 +128,9 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
     };
 
     const handleBack = () => {
+        // Don't reset the form when going back, to preserve the state
         router.push(`/patients/${patientID}/prescriptions`);
-        formReset();
-    }
+    };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">

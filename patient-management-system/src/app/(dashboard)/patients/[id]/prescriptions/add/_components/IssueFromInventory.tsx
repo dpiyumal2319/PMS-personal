@@ -49,7 +49,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
     const [selectedDrugName, setSelectedDrugName] = useState<string | null>(null);
     const [brands, setBrands] = useState<BrandOption[]>([]);
-    const [details, setDetails] = useState<string>("");
+    const [details, setDetails] = useState<string | null>(null);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
     const [selectedBrandName, setSelectedBrandName] = useState<string | null>(null);
     const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
@@ -130,6 +130,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         setSelectedDrug(null);
         setSelectedDrugName(null);
         setSelectedBrand(null);
+        setDetails("");
         setSelectedBrandName(null);
         setError(null);
         setStrategy(null);
@@ -324,7 +325,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     <div className="flex items-start justify-start">
                         <Textarea
                             placeholder="Additional Details"
-                            value={details}
+                            value={details || ""}
                             onChange={(e) => setDetails(e.target.value)}
                         />
                     </div>

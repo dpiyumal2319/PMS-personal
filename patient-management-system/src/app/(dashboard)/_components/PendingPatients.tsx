@@ -1,21 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getActiveQueue, getPendingPatientsCount } from "@/app/lib/actions";
+import React, {useEffect, useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {getPendingPatientsCount} from "@/app/lib/actions";
 
 const PendingPatients = () => {
     const [pending, setPending] = useState(0);
-    const [queueNumber, setQueueNumber] = useState<number | null>(null);
     const router = useRouter();
 
     useEffect(() => {
         const fetchPendingPatients = async () => {
             try {
                 const count = await getPendingPatientsCount();
-                const queue = await getActiveQueue();
                 setPending(count);
-                setQueueNumber(count > 0 && queue ? queue.id : null);
             } catch (error) {
                 console.error("Failed to fetch pending patients count:", error);
             }
@@ -32,18 +29,16 @@ const PendingPatients = () => {
     }, []);
 
     const handleClick = () => {
-        if (queueNumber) {
-            router.push(`/queue/${queueNumber}`);
-        }
+        router.push(`/queue/active`);
     };
 
     return (
         <button
-            onClick={queueNumber ? handleClick : undefined}
+            onClick={handleClick}
             className={`relative flex items-center gap-2 p-2 rounded text-white transition-all duration-200
                 ${pending > 0 ? "bg-primary-500 hover:bg-primary-600 cursor-pointer" : "bg-gray-400 cursor-default"}
             `}
-            disabled={!queueNumber}
+            disabled={pending === 0}
         >
             {pending > 0 ? (
                 <span className="animate-ping h-2 w-2 rounded-full bg-amber-400"></span>

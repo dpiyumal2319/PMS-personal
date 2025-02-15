@@ -110,9 +110,9 @@ const BrandCombobox = ({
                                     key={option.id}
                                     value={option.name}
                                     onSelect={() => handleSelect(String(option.id))}
-                                    className="flex space-y-1 rounded-md hover:bg-gray-100 transition"
+                                    className="flex flex-col rounded-md hover:bg-gray-100 transition"
                                 >
-                                    <div className="flex items-center min-w-24">
+                                    <div className="flex items-center min-w-24 w-full">
                                         <span className="font-medium">{option.name}</span>
                                     </div>
                                     <div

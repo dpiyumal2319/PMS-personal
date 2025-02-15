@@ -70,7 +70,7 @@ async function AllPatientsContent({id}: { id: number }) {
                     <TableCell className="font-medium">{patient.token}</TableCell>
                     <TableCell>{getStatus(patient.status)}</TableCell>
                     <TableCell>
-                        <Link href={`/patients/${patient.id}`} className={'text-blue-800 hover:underline'}>
+                        <Link href={`/patients/${patient.patientId}`} className={'text-blue-800 hover:underline'}>
                             {patient.patient.name}
                         </Link>
                     </TableCell>
@@ -79,8 +79,8 @@ async function AllPatientsContent({id}: { id: number }) {
                         <TableCell>Unknown</TableCell>}
                     <TableCell>{new Date(patient.time).toLocaleTimeString()}</TableCell>
                     <TableCell className={'flex justify-start items-center gap-2'}>
-                        {role === 'DOCTOR' && patient.status === 'PENDING' && <PrescribeMedicine id={patient.id}/>}
-                        {role === 'NURSE' && patient.status === 'PRESCRIBED' && <IssueMedicine/>}
+                        {role === 'DOCTOR' && patient.status === 'PENDING' && <PrescribeMedicine id={patient.patientId}/>}
+                        {role === 'NURSE' && patient.status === 'PRESCRIBED' && <IssueMedicine id={patient.patientId}/>}
                         <RemoveFromQueue queueId={id} token={patient.token}/>
                     </TableCell>
                 </TableRow>
@@ -94,7 +94,7 @@ async function AllPatientsContent({id}: { id: number }) {
                     <TableCell className="font-medium">{patient.token}</TableCell>
                     <TableCell>{getStatus(patient.status)}</TableCell>
                     <TableCell>
-                        <Link href={`/patients/${patient.id}`} className={'text-blue-800 hover:underline'}>
+                        <Link href={`/patients/${patient.patientId}`} className={'text-blue-800 hover:underline'}>
                             {patient.patient.name}
                         </Link>
                     </TableCell>
@@ -104,7 +104,7 @@ async function AllPatientsContent({id}: { id: number }) {
                     <TableCell>{new Date(patient.time).toLocaleTimeString()}</TableCell>
                     <TableCell className={'flex justify-start items-center gap-2'}>
                         <Button asChild variant="default" size="sm">
-                            <Link href={`/patients/${patient.id}`}>
+                            <Link href={`/patients/${patient.patientId}`}>
                                 View Profile
                             </Link>
                         </Button>

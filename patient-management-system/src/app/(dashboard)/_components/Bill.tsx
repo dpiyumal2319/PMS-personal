@@ -1,5 +1,6 @@
 import React from "react";
 import {Bill} from "@/app/lib/definitions";
+import {Card} from "@/components/ui/card";
 
 export function BillComponent({ bill }: { bill: Bill | null }) {
     if (!bill) return null;
@@ -7,7 +8,7 @@ export function BillComponent({ bill }: { bill: Bill | null }) {
     const total = bill.cost + bill.dispensary_charge + bill.doctor_charge;
 
     return (
-        <div className="border border-gray-300 rounded-xl p-6 shadow-md bg-white">
+        <Card className="p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">💰 Bill Summary</h2>
 
             <div className="space-y-3">
@@ -42,6 +43,6 @@ export function BillComponent({ bill }: { bill: Bill | null }) {
                     <span>LKR {total.toFixed(2)}</span>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }
