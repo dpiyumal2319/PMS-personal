@@ -16,8 +16,9 @@ import {
     PrescriptionIssuesList,
     OffRecordMedsList
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionIssuesList";
-import {FaHeadSideCough} from "react-icons/fa";
+import {FaHeadSideCough, FaMoneyBill} from "react-icons/fa";
 import {useRouter} from "next/navigation";
+import {Textarea} from "@/components/ui/textarea";
 
 export interface IssueInForm {
     drugId: number;
@@ -39,6 +40,7 @@ export interface PrescriptionFormData {
     presentingSymptoms: string;
     bloodPressure: string;
     description: string;
+    extraDoctorCharges: number;
     pulse: string;
     cardiovascular: string;
     issues: IssueInForm[];
@@ -50,6 +52,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
         presentingSymptoms: '',
         bloodPressure: '',
         description: '',
+        extraDoctorCharges: 0,
         pulse: '',
         cardiovascular: '',
         issues: [],
@@ -63,6 +66,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
             bloodPressure: '',
             description: '',
             pulse: '',
+            extraDoctorCharges: 0,
             cardiovascular: '',
             issues: [],
             offRecordMeds: []
@@ -120,7 +124,8 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                 <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                         {/* Back Button */}
-                        <div className="flex items-center hover:bg-gray-100 p-1 rounded-md cursor-pointer" onClick={handleBack}>
+                        <div className="flex items-center hover:bg-gray-100 p-1 rounded-md cursor-pointer"
+                             onClick={handleBack}>
                             <ChevronLeft/>
                         </div>
                         <h1 className="text-2xl font-semibold">Prescribe Medication</h1>
@@ -187,20 +192,35 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                                     placeholder="Enter cardiovascular status..."
                                 />
                             </div>
-                            <div className="space-y-2 col-span-2">
+                            <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
                                     <FileText className="h-4 w-4 text-gray-500"/>
                                     <Label>Description</Label>
                                 </div>
-                                <textarea
+                                <Textarea
                                     name="description"
                                     value={formData.description}
                                     onChange={handleChange}
                                     rows={3}
-                                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                    className="w-full p-2 rounded-md"
                                     placeholder="Additional details..."
                                 />
                             </div>
+                            {/*Extra doctor charges*/}
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <FaMoneyBill className="h-4 w-4 text-orange-500"/>
+                                    <Label>Description</Label>
+                                </div>
+                                <Input
+                                    type="number"
+                                    name="extraDoctorCharges"
+                                    value={formData.extraDoctorCharges}
+                                    onChange={handleChange}
+                                    placeholder="Enter extra charges..."
+                                />
+                            </div>
+
                         </div>
                     </div>
                 </Card>

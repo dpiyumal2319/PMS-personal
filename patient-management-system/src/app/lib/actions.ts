@@ -1824,6 +1824,7 @@ export async function addPrescription({
                     cardiovascular: prescriptionForm.cardiovascular,
                     details: prescriptionForm.description,
                     status: 'PENDING',
+                    doctorCharge: prescriptionForm.extraDoctorCharges,
                     // Create issues
                     issues: {
                         create: prescriptionForm.issues.map(issue => ({
@@ -2198,10 +2199,6 @@ export async function getBatches({drugID, brandID}: { drugID: number, brandID: n
 }
 
 export async function getCachedBatch({drugId, brandId}: { drugId: number, brandId: number }) {
-    // return 1 after 2s for test
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return {batchId: 1};
-
     return prisma.batchHistory.findUnique({
         where: {
             drugId_drugBrandId: {

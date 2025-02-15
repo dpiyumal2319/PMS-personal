@@ -303,15 +303,6 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         />
                     </div>
 
-                    {/*Text Area*/}
-                    <div className="flex items-start justify-start">
-                        <Textarea
-                            placeholder="Additional Details"
-                            value={details}
-                            onChange={(e) => setDetails(e.target.value)}
-                        />
-                    </div>
-
                     {/*Clear Button and error*/}
                     <div className={'flex justify-between'}>
                         <span className="text-red-500 text-sm">{error}</span>
@@ -327,6 +318,16 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         otherStrategy={{otherStrategy, setOtherStrategy}}
                         selectedStrategy={{selectedStrategy: strategy, setSelectedStrategy: setStrategy}}
                     />
+
+
+                    {/*Text Area*/}
+                    <div className="flex items-start justify-start">
+                        <Textarea
+                            placeholder="Additional Details"
+                            value={details}
+                            onChange={(e) => setDetails(e.target.value)}
+                        />
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose}>
