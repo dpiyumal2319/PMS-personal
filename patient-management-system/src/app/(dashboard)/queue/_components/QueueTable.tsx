@@ -5,7 +5,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { LoadingRows } from "@/app/(dashboard)/queue/Loading";
+import { LoadingRows } from "@/app/(dashboard)/queue/loading";
 import TableContents from "@/app/(dashboard)/queue/_components/TableContents";
 
 // Main Table Component

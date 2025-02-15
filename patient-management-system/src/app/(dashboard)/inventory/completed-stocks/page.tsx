@@ -1,5 +1,5 @@
 import React, {Suspense} from "react";
-import Loading from "@/app/(dashboard)/Loading";
+import Loading from "@/app/(dashboard)/loading";
 
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";

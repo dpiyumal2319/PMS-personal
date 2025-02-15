@@ -17,11 +17,12 @@ import type {
     OtherStrategy
 } from "@/app/lib/definitions";
 import {StrategyJsonSchema} from "@/app/lib/definitions";
-import {IssueingStrategy} from "@prisma/client";
+import {DrugType, IssueingStrategy} from "@prisma/client";
 import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {calculateQuantity} from "@/app/lib/utils";
 import {Plus} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";
+import {differenceInDays} from "date-fns";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
@@ -36,6 +37,7 @@ export type drug = {
 export interface BrandOption {
     id: string | number;
     name: string;
+    type: DrugType;
     batchCount: number;
     totalRemainingQuantity: number;
     farthestExpiry: Date;
@@ -54,6 +56,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [selectedBrandName, setSelectedBrandName] = useState<string | null>(null);
     const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [warning, setWarning] = useState<string | null>(null);
 
     const [mealStrategy, setMealStrategy] = useState<MealStrategy>({
         dinner: {
@@ -136,6 +139,25 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         setStrategy(null);
     };
 
+    const showWarnings = (brand: BrandOption) => {
+        const expiry = brand.farthestExpiry;
+        const remainingQuantity = brand.totalRemainingQuantity;
+        const currentDate = new Date();
+        const expiryDate = new Date(expiry);
+        const daysUntilExpiry = differenceInDays(expiryDate, currentDate);
+
+        if (daysUntilExpiry < 120 && remainingQuantity < 150) {
+            setWarning(`Warning: Expiry in ${daysUntilExpiry} days (${expiry}) and stock is ${remainingQuantity} units`);
+        } else if (daysUntilExpiry < 120) {
+            setWarning(`Warning: Expiry in ${daysUntilExpiry} days (${expiry})`);
+        } else if (remainingQuantity < 150) {
+            setWarning(`Warning: Current stock is ${remainingQuantity} units`);
+        } else {
+            setWarning(null);
+        }
+    };
+
+
 
     const handleDrugSearch = useDebouncedCallback(async (term: string) => {
         setIsDrugSearching(true);
@@ -157,11 +179,15 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 setBrands(brands);
                 const cachedBrand = await getCachedStrategy(selectedID);
                 const availableBrandIDs = brands.map(brand => brand.id);
-                if (cachedBrand && cachedBrand.brandId === availableBrandIDs[0]) {
-                    console.log(cachedBrand);
+                if (cachedBrand && cachedBrand.brandId && availableBrandIDs.includes(cachedBrand.brandId)) {
                     setSelectedBrand(cachedBrand.brandId);
                     setSelectedBrandName(cachedBrand.brand.name);
                     setStrategy(cachedBrand.issue.strategy);
+                    setDetails(cachedBrand.issue.details);
+                    const selectedBrand = brands.find(brand => brand.id === cachedBrand.brandId);
+                    if (selectedBrand) {
+                        showWarnings(selectedBrand);
+                    }
                     const parsedData = StrategyJsonSchema.parse(cachedBrand.issue.strategyDetails);
                     switch (cachedBrand.issue.strategy) {
                         case IssueingStrategy.MEAL:
@@ -195,7 +221,11 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
     const handleBrandSelect = (selectedID: number) => {
         setSelectedBrand(selectedID);
-        setSelectedBrandName(brands.find(brand => brand.id === selectedID)?.name || null);
+        const selectedBrand = brands.find(brand => brand.id === selectedID);
+        setSelectedBrandName(selectedBrand?.name || null);
+        if (selectedBrand) {
+            showWarnings(selectedBrand);
+        }
     };
 
     const handleAddIssue = async () => {
@@ -306,6 +336,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
                     {/*Clear Button and error*/}
                     <div className={'flex justify-between'}>
+                        <span className="text-red-500 text-sm">{warning}</span>
                         <span className="text-red-500 text-sm">{error}</span>
                         <span onClick={resetForm} className="text-red-500 cursor-pointer text-sm hover:underline">
                             X Clear

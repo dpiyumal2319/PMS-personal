@@ -76,7 +76,7 @@ const BrandCombobox = ({
                     aria-expanded={popoverOpen}
                     disabled={disabled}
                     className={cn(
-                        "w-full justify-between h-10 rounded-lg border-2 transition-all duration-200",
+                        "w-full justify-between h-10 rounded-lg border-2",
                         value
                             ? "border-primary-500 shadow-sm"
                             : "border-gray-300 hover:border-gray-400",
@@ -110,10 +110,11 @@ const BrandCombobox = ({
                                     key={option.id}
                                     value={option.name}
                                     onSelect={() => handleSelect(String(option.id))}
-                                    className="flex flex-col rounded-md hover:bg-gray-100 transition"
+                                    className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
-                                    <div className="flex items-center min-w-24 w-full">
+                                    <div className="flex items-center min-w-24 w-full gap-2">
                                         <span className="font-medium">{option.name}</span>
+                                        <CustomBadge text={option.type} color={option.type === "Tablet" ? "purple" : "cyan"}/>
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">

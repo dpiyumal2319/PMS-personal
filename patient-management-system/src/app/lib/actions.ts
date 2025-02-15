@@ -2021,7 +2021,8 @@ export async function searchBrandByDrug({drugID}: {
                 },
                 select: {
                     remainingQuantity: true,
-                    expiry: true
+                    expiry: true,
+                    type: true
                 }
             }
         }
@@ -2039,6 +2040,7 @@ export async function searchBrandByDrug({drugID}: {
                 id: brand.id,
                 name: brand.name,
                 batchCount,
+                type: brand.Batch[0].type,
                 totalRemainingQuantity,
                 farthestExpiry
             };

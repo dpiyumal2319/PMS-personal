@@ -2,7 +2,7 @@
 import Sidebar from "@/app/(dashboard)/_components/Sidebar";
 import TopBar from "@/app/(dashboard)/_components/TopBar";
 import React, {Suspense} from "react";
-import Loading from "@/app/(dashboard)/Loading";
+import Loading from "@/app/(dashboard)/loading";
 
 export default function DashboardLayout({
                                             children,
