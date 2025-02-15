@@ -9,7 +9,7 @@ import {Card, CardContent} from "@/components/ui/card";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {getBatches, getCachedBatch} from "@/app/lib/actions";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
-import {formatDistanceToNow} from 'date-fns';
+import {differenceInDays, formatDistanceToNow} from 'date-fns';
 import {Button} from "@/components/ui/button";
 import {
     AlertDialog,
@@ -90,7 +90,8 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
             <PrescriptionIssueCard issue={issue}/>
             <Card className={'w-1/2 p-4'}>
                 <CardContent className="flex flex-col gap-4">
-                    <Select onValueChange={handleSelect} value={selectedBatch ? `${selectedBatch}` : ''} disabled={loading}>
+                    <Select onValueChange={handleSelect} value={selectedBatch ? `${selectedBatch}` : ''}
+                            disabled={loading}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select a batch"/>
                         </SelectTrigger>
@@ -106,13 +107,15 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
                                             />
                                             <CustomBadge
                                                 text={`Expires in: ${formatDistanceToNow(batch.expiry)}`}
-                                                color={new Date(batch.expiry).getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 30
-                                                    ? "red"
-                                                    : new Date(batch.expiry).getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 90
-                                                        ? "yellow"
-                                                        : "blue"
+                                                color={
+                                                    differenceInDays(new Date(batch.expiry), new Date()) < 60
+                                                        ? "red"
+                                                        : differenceInDays(new Date(batch.expiry), new Date()) < 120
+                                                            ? "yellow"
+                                                            : "green"
                                                 }
                                             />
+
                                         </div>
                                     </div>
                                 </SelectItem>
@@ -141,7 +144,8 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
                                         <AlertDialogTitle className="text-red-600">Mark Batch #{selectedBatch} as Out of
                                             Stock?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This will mark the batch as completely out of stock. This action <span className={'text-red-500 font-semibold'}> cannot be
+                                            This will mark the batch as completely out of stock. This action <span
+                                            className={'text-red-500 font-semibold'}> cannot be
                                             undone</span> and will affect inventory calculations.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>

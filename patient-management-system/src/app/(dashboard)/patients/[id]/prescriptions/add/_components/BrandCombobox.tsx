@@ -117,15 +117,25 @@ const BrandCombobox = ({
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
-                                        <CustomBadge text={option.batchCount > 1 ? `${option.batchCount} batches` : "1 batch"} color={"gray"}/>
-                                        <CustomBadge text={`Total: ${option.totalRemainingQuantity}`}
-                                                     color={option.totalRemainingQuantity > 0 ? "green" : "red"}/>
+                                        <CustomBadge
+                                            text={option.batchCount > 1 ? `${option.batchCount} batches` : "1 batch"}
+                                            color={"gray"}/>
+                                        <CustomBadge
+                                            text={`Total: ${option.totalRemainingQuantity}`}
+                                            color={
+                                                option.totalRemainingQuantity < 50 ? "red" :
+                                                    option.totalRemainingQuantity < 150 ? "yellow" :
+                                                        "green"
+                                            }
+                                        />
                                         <CustomBadge
                                             text={`Expires in: ${formatExpiry(option.farthestExpiry)}`}
                                             color={
-                                                differenceInDays(new Date(option.farthestExpiry), new Date()) < 30
+                                                differenceInDays(new Date(option.farthestExpiry), new Date()) < 60
                                                     ? "red"
-                                                    : "yellow"
+                                                    : differenceInDays(new Date(option.farthestExpiry), new Date()) < 120
+                                                        ? "yellow"
+                                                        : "blue"
                                             }
                                         />
                                     </div>
