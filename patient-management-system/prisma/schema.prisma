@@ -146,6 +146,8 @@ model Prescription {
   time               DateTime           @default(now())
   presentingSymptoms String
   status             PrescriptionStatus @default(PENDING)
+  doctorCharge       Float?
+  price              Float?
   details            String?
   bloodPressure      String?
   pulse              String?
@@ -157,11 +159,11 @@ model Prescription {
 }
 
 model OffRecordMeds {
-  id             Int           @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   name           String
   description    String?
-  Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
-  prescriptionId Int?
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int
 }
 
 model Issue {
@@ -170,6 +172,7 @@ model Issue {
   prescriptionId   Int
   details          String?
   batch            Batch?             @relation(fields: [batchId], references: [id])
+  price            Float?
   batchId          Int?
   drug             Drug               @relation(fields: [drugId], references: [id])
   drugId           Int

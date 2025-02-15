@@ -41,4 +41,22 @@ const PrescriptionIssueSkeleton = () => {
     );
 };
 
-export {PrescriptionIssueSkeleton};
+const OffRecordIssueSkeleton = () => {
+    return (
+        <Card className="p-4">
+            <div className="flex items-start justify-between">
+                <div className="flex items-start space-x-4">
+                    <Skeleton className="h-5 w-5 rounded-full"/>
+                    <div className="space-y-2">
+                        <Skeleton className="h-5 w-32"/>
+                        <div className="flex items-center space-x-2">
+                            <Skeleton className="h-4 w-4"/>
+                            <Skeleton className="h-4 w-48"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Card>
+    );
+};
+export {PrescriptionIssueSkeleton, OffRecordIssueSkeleton};

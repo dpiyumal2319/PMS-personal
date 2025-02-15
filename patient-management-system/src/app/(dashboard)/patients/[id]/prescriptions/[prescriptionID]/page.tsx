@@ -1,15 +1,13 @@
-import React, {Suspense} from "react";
 import {getPrescription} from "@/app/lib/actions";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {Activity, Heart, HeartPulse} from "lucide-react";
 import {formatDistanceToNow} from "date-fns";
 import {
-    PrescriptionIssue
+    OffRecordMedCard,
+    PrescriptionIssueCard
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/MedicineCards";
-import {
-    PrescriptionIssueSkeleton
-} from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/Skeletons";
+import BatchAssign from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
     const resolvedParams = await params;
@@ -67,15 +65,31 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                 </div>
 
                 {/*Prescription Issues*/}
-                <div className="space-y-4 border-t border-gray-200 pt-4">
-                    <span className="text font-semibold">Prescription Issues from Inventory</span>
-                    {prescription.issues.map((issue, index) => (
-                        <Suspense fallback={<PrescriptionIssueSkeleton/>}>
-                            <PrescriptionIssue issueID={issue.id} key={index}/>
-                        </Suspense>
-                    ))}
-                </div>
+                {prescription.status === "PENDING" ? (
+                    <>
+                        {prescription.issues.length > 0 && (
+                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                                <span className="text font-semibold">Prescription Issues from Inventory</span>
+                                {prescription.issues.map((issue) => (
+                                    <PrescriptionIssueCard issue={issue} key={issue.id}/>
+                                ))}
+                            </div>
+                        )}
 
+                        {prescription.OffRecordMeds.length > 0 && (
+                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                                <span className="text font-semibold">Off Record Medications</span>
+                                {prescription.OffRecordMeds.map((med) => (
+                                    <OffRecordMedCard med={med} key={med.id}/>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div>Issue medicine</div>
+                )}
+
+                <BatchAssign issues={prescription.issues} prescriptionID={prescription.id}/>
             </CardContent>
         </Card>
     );

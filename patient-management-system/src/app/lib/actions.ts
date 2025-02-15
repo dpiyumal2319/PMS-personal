@@ -2162,7 +2162,6 @@ export async function searchPrescriptionCount({patientID, query, filter}: {
 
 export async function getPrescription(prescriptionID: number, patientID: number) {
     const session = await verifySession();
-
     return prisma.prescription.findUnique({
         where: {
             id: prescriptionID,
@@ -2171,31 +2170,46 @@ export async function getPrescription(prescriptionID: number, patientID: number)
         },
         include: {
             issues: {
-                select: {
-                    id: true,
+                include: {
+                    drug: true,
+                    brand: true,
+                    batch: true
                 }
             },
-            OffRecordMeds: {
-                select: {
-                    id: true,
-                }
-            }
+            OffRecordMeds: true
+        }
+    })
+}
+
+export async function getBatches({drugID, brandID}: { drugID: number, brandID: number }) {
+    return prisma.batch.findMany({
+        where: {
+            drugId: drugID,
+            drugBrandId: brandID,
+            status: "AVAILABLE"
+        },
+        select: {
+            id: true,
+            number: true,
+            remainingQuantity: true,
+            expiry: true
         }
     });
 }
 
-export async function getIssueData(issueID: number) {
-    const session = await verifySession();
+export async function getCachedBatch({drugId, brandId}: { drugId: number, brandId: number }) {
+    // return 1 after 2s for test
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return {batchId: 1};
 
-    return prisma.issue.findUnique({
+    return prisma.batchHistory.findUnique({
         where: {
-            id: issueID,
-            ...(session.role !== 'DOCTOR' && {prescription: {status: 'PENDING'}})
-        },
-        include: {
-            drug: true,
-            brand: true,
-            batch: true
+            drugId_drugBrandId: {
+                drugId,
+                drugBrandId: brandId
+            }
+        }, select: {
+            batchId: true
         }
     });
 }
