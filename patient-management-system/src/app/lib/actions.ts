@@ -626,8 +626,13 @@ export async function queuePatients(id: number) {
                 queueId: id
             },
             include: {
-                patient: true,
-                queue: true
+                patient: {
+                    select: {
+                        name: true,
+                        gender: true,
+                        birthDate: true,
+                    }
+                }
             },
             orderBy: {
                 token: 'asc'
@@ -1333,7 +1338,7 @@ export async function getPendingPatientsCount() {
 
     return prisma.queueEntry.count({
         where: {
-            status: session.role === 'DOCTOR' ? 'PENDING' : { not: 'COMPLETED' }
+            status: session.role === 'DOCTOR' ? 'PENDING' : {not: 'COMPLETED'}
         }
     });
 }

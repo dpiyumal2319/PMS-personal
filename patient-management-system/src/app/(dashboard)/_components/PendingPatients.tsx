@@ -21,8 +21,8 @@ const PendingPatients = () => {
         // Initial fetch
         fetchPendingPatients().then();
 
-        // Set interval to refetch every 3 minutes (180000ms)
-        const interval = setInterval(fetchPendingPatients, 60000);
+        // Set interval to refetch every 45 seconds
+        const interval = setInterval(fetchPendingPatients, 45000);
 
         // Cleanup interval on unmount
         return () => clearInterval(interval);
