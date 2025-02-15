@@ -210,7 +210,7 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
                                     <FaMoneyBill className="h-4 w-4 text-orange-500"/>
-                                    <Label>Description</Label>
+                                    <Label>Extra Doctor Charges</Label>
                                 </div>
                                 <Input
                                     type="number"
