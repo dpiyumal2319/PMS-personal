@@ -1,15 +1,28 @@
 'use server';
 
 import {revalidatePath} from "next/cache";
-import type {myError} from "@/app/lib/definitions";
-import {DateRange, InventoryFormData, PatientFormData, StockAnalysis} from "@/app/lib/definitions";
+import {
+    Bill,
+    DateRange,
+    InventoryFormData,
+    myBillError,
+    myError,
+    PatientFormData,
+    SortOption,
+    StockAnalysis,
+    StockData,
+    StockQueryParams
+} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import {StockData, StockQueryParams, SortOption} from "@/app/lib/definitions";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
-import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
-import {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
+import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {
+    BatchAssignPayload
+} from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
+import {DISPENSARY_FEE, DOCTOR_FEE} from "@/app/lib/constants";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -613,8 +626,13 @@ export async function queuePatients(id: number) {
                 queueId: id
             },
             include: {
-                patient: true,
-                queue: true
+                patient: {
+                    select: {
+                        name: true,
+                        gender: true,
+                        birthDate: true,
+                    }
+                }
             },
             orderBy: {
                 token: 'asc'
@@ -1316,9 +1334,11 @@ export async function deletePatientReport(reportId: number, patientID: number): 
 }
 
 export async function getPendingPatientsCount() {
+    const session = await verifySession();
+
     return prisma.queueEntry.count({
         where: {
-            status: 'PENDING'
+            status: session.role === 'DOCTOR' ? 'PENDING' : {not: 'COMPLETED'}
         }
     });
 }
@@ -1805,6 +1825,13 @@ export async function addPrescription({
             return {success: false, message: 'At least one prescription is required'};
         }
 
+        // check for repeated drugs
+        const drugIds = prescriptionForm.issues.map(issue => issue.drugId);
+        const uniqueDrugIds = new Set(drugIds);
+        if (drugIds.length !== uniqueDrugIds.size) {
+            return {success: false, message: 'Repeated drugs are not allowed in a single prescription'};
+        }
+
         // Create prescription with all related records in a transaction
         await prisma.$transaction(async (tx) => {
             // Create the main prescription and store its result to get issue IDs
@@ -1815,10 +1842,14 @@ export async function addPrescription({
                     bloodPressure: prescriptionForm.bloodPressure,
                     pulse: prescriptionForm.pulse,
                     cardiovascular: prescriptionForm.cardiovascular,
+                    details: prescriptionForm.description,
+                    status: 'PENDING',
+                    doctorCharge: Number(prescriptionForm.extraDoctorCharges),
                     // Create issues
                     issues: {
                         create: prescriptionForm.issues.map(issue => ({
                             drugId: issue.drugId,
+                            details: issue.details,
                             brandId: issue.brandId,
                             strategy: issue.strategy,
                             strategyDetails: issue.strategyDetails,
@@ -1838,6 +1869,29 @@ export async function addPrescription({
                     issues: true
                 }
             });
+
+            //Check for queue entry
+            console.log(patientID);
+            const queueEntry = await tx.queueEntry.findFirst({
+                where: {
+                    patientId: patientID,
+                    status: "PENDING"
+                }
+            });
+
+            console.log(queueEntry);
+
+            if (queueEntry) {
+                revalidatePath(`/queue/${queueEntry.id}`);
+                await tx.queueEntry.update({
+                    where: {
+                        id: queueEntry.id
+                    },
+                    data: {
+                        status: "PRESCRIBED"
+                    }
+                });
+            }
 
             // Update strategy history for each issue
             for (let i = 0; i < prescriptionForm.issues.length; i++) {
@@ -1875,6 +1929,7 @@ export async function addPrescription({
             }
         });
 
+        revalidatePath(`/patients/${patientID}/prescriptions`);
         return {
             success: true,
             message: 'Prescription created successfully'
@@ -1896,7 +1951,12 @@ export async function getCachedStrategy(drugID: number) {
         select: {
             issueId: true,
             brandId: true,
-            issue: true
+            issue: true,
+            brand: {
+                select: {
+                    name: true
+                }
+            }
         }
     });
 }
@@ -1961,7 +2021,8 @@ export async function searchBrandByDrug({drugID}: {
                 },
                 select: {
                     remainingQuantity: true,
-                    expiry: true
+                    expiry: true,
+                    type: true
                 }
             }
         }
@@ -1984,4 +2045,417 @@ export async function searchBrandByDrug({drugID}: {
             };
         })
     );
+}
+
+
+//For prescriptions page
+export async function getPrescriptionsCount(patientID: number) {
+    return prisma.prescription.count({
+        where: {
+            patientId: patientID
+        }
+    });
+}
+
+export async function searchPrescriptions({patientID, query, filter, take, skip}: {
+    patientID: number;
+    query: string;
+    filter: string;
+    take: number;
+    skip: number;
+}) {
+    let where = {};
+    const session = await verifySession();
+
+    if (query) {
+        if (filter === "symptom") {
+            where = {
+                presentingSymptoms: {
+                    contains: query
+                }
+            };
+        }
+        if (filter === "drug") {
+            where = {
+                OR: [
+                    {
+                        issues: {
+                            some: {
+                                drug: {
+                                    name: {
+                                        contains: query
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        OffRecordMeds: {
+                            some: {
+                                name: {
+                                    contains: query
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+        }
+    }
+
+    // Only pending prescriptions can be viewed by non-doctor users
+    if (session.role !== 'DOCTOR') {
+        where = {
+            ...where,
+            status: "PENDING"
+        };
+    }
+
+    return prisma.prescription.findMany({
+        where: {
+            patientId: patientID,
+            ...where
+        },
+        take,
+        skip,
+        orderBy: {
+            time: 'desc'
+        },
+        include: {
+            issues: {
+                include: {
+                    drug: true
+                }
+            },
+            OffRecordMeds: {
+                select: {
+                    name: true,
+                }
+            }
+        }
+    });
+}
+
+export async function searchPrescriptionCount({patientID, query, filter}: {
+    patientID: number;
+    query: string;
+    filter: string;
+}) {
+    let where = {};
+
+    if (query) {
+        if (filter === "symptom") {
+            where = {
+                presentingSymptoms: {
+                    contains: query
+                }
+            };
+        }
+        if (filter === "drug") {
+            where = {
+                OR: [
+                    {
+                        issues: {
+                            some: {
+                                drug: {
+                                    name: {
+                                        contains: query
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        OffRecordMeds: {
+                            some: {
+                                name: {
+                                    contains: query
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+        }
+    }
+
+    return prisma.prescription.count({
+        where: {
+            patientId: patientID,
+            ...where
+        }
+    });
+}
+
+export async function getPrescription(prescriptionID: number, patientID: number) {
+    const session = await verifySession();
+    return prisma.prescription.findUnique({
+        where: {
+            id: prescriptionID,
+            patientId: patientID,
+            ...(session.role !== 'DOCTOR' && {status: 'PENDING'})
+        },
+        include: {
+            issues: {
+                include: {
+                    drug: true,
+                    brand: true,
+                    batch: true
+                }
+            },
+            OffRecordMeds: true
+        }
+    })
+}
+
+export async function getBatches({drugID, brandID}: { drugID: number, brandID: number }) {
+    return prisma.batch.findMany({
+        where: {
+            drugId: drugID,
+            drugBrandId: brandID,
+            status: "AVAILABLE"
+        },
+        select: {
+            id: true,
+            number: true,
+            remainingQuantity: true,
+            expiry: true
+        }
+    });
+}
+
+export async function getCachedBatch({drugId, brandId}: { drugId: number, brandId: number }) {
+    return prisma.batchHistory.findUnique({
+        where: {
+            drugId_drugBrandId: {
+                drugId,
+                drugBrandId: brandId
+            }
+        }, select: {
+            batchId: true
+        }
+    });
+}
+
+export async function calculateBill({prescriptionData}: {
+    prescriptionData: BatchAssignPayload
+}): Promise<myBillError> {
+    const prescriptionID = prescriptionData.prescriptionID;
+    const batchAssignments = prescriptionData.batchAssigns;
+
+    try {
+        return await prisma.$transaction(async (prisma): Promise<myBillError> => {
+            const prescription = await prisma.prescription.findUnique({
+                where: {id: prescriptionID},
+            });
+
+            if (!prescription) {
+                return {success: false, message: 'Prescription not found'};
+            }
+
+            if (prescription.status === 'COMPLETED') {
+                return {success: false, message: 'Prescription already completed'};
+            }
+
+            const bill: Bill = {
+                patientID: prescriptionData.patientID,
+                dispensary_charge: DISPENSARY_FEE,
+                doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
+                cost: 0,
+                entries: [],
+            };
+
+            for (let i = 0; i < batchAssignments.length; i++) {
+                const assign = batchAssignments[i];
+                if (!assign.batchID) {
+                    return {success: false, message: `Batch not found for a drug`};
+                }
+
+                const batch = await prisma.batch.findUnique({
+                    where: {id: assign.batchID},
+                    include: {drug: true, drugBrand: true},
+                });
+
+                if (!batch) {
+                    return {success: false, message: `Batch not found for drug ${assign.batchID}`};
+                }
+
+                const issue = await prisma.issue.findUnique({
+                    where: {id: assign.issueID},
+                });
+
+                if (!issue) {
+                    return {success: false, message: `Issue not found for drug ${assign.issueID}`};
+                }
+
+                // Updating or creating the cache
+                const existingCache = await prisma.batchHistory.findUnique({
+                    where: {
+                        drugId_drugBrandId: {
+                            drugId: batch.drugId,
+                            drugBrandId: batch.drugBrandId
+                        }
+                    }
+                });
+
+                if (existingCache) {
+                    await prisma.batchHistory.update({
+                        where: {
+                            drugId_drugBrandId: {
+                                drugId: batch.drugId,
+                                drugBrandId: batch.drugBrandId
+                            }
+                        },
+                        data: {
+                            batchId: assign.batchID
+                        }
+                    });
+                } else {
+                    await prisma.batchHistory.create({
+                        data: {
+                            drugId: batch.drugId,
+                            drugBrandId: batch.drugBrandId,
+                            batchId: assign.batchID
+                        }
+                    });
+                }
+
+                await prisma.issue.update({
+                    where: {id: assign.issueID},
+                    data: {batchId: assign.batchID},
+                });
+
+                const batchCost = issue.quantity * batch.price;
+                bill.cost += batchCost;
+
+                bill.entries.push({
+                    drugName: batch.drug.name,
+                    brandName: batch.drugBrand.name,
+                    quantity: issue.quantity,
+                    unitPrice: batch.price,
+                });
+            }
+
+            await prisma.prescription.update({
+                where: {id: prescriptionID},
+                data: {price: bill.cost},
+            });
+
+            return {success: true, message: 'Bill calculated successfully', bill};
+        });
+    } catch (error) {
+        console.error('Error calculating bill:', error);
+        return {success: false, message: 'An error occurred while calculating bill'};
+    }
+}
+
+export async function getBill(prescriptionID: number): Promise<Bill> {
+    const prescription = await prisma.prescription.findUnique({
+        where: {id: prescriptionID},
+        include: {
+            issues: {
+                include: {
+                    batch: true,
+                    drug: true,
+                    brand: true,
+                }
+            }
+        }
+    });
+
+    if (!prescription) {
+        throw new Error('Prescription not found');
+    }
+
+    if (prescription.status === 'PENDING' || !prescription.price || prescription.price === 0 || !prescription.issues.every(issue => issue.batch)) {
+        throw new Error('Prescription not completed');
+    }
+
+    return {
+        patientID: prescription.patientId,
+        dispensary_charge: DISPENSARY_FEE,
+        doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
+        cost: prescription.price,
+        entries: prescription.issues.map(issue => ({
+            drugName: issue.drug.name,
+            brandName: issue.brand.name,
+            quantity: issue.quantity,
+            unitPrice: issue.batch?.price ?? 0,
+        }))
+    };
+}
+
+export async function completePrescription(prescriptionID: number): Promise<myError> {
+    try {
+        const prescription = await prisma.prescription.findUnique({
+            where: {id: prescriptionID},
+            include: {
+                issues: {
+                    include: {
+                        batch: true
+                    }
+                }
+            }
+        });
+
+        if (!prescription) {
+            return {success: false, message: 'Prescription not found'};
+        }
+
+        if (prescription.status === 'COMPLETED') {
+            return {success: false, message: 'Prescription already completed'};
+        }
+
+        if (!prescription.issues.every(issue => issue.batch)) {
+            return {success: false, message: 'Prescription not completed'};
+        }
+
+        // Updating remaining quantity of batches
+        await prisma.$transaction(async (prisma) => {
+            for (let i = 0; i < prescription.issues.length; i++) {
+                const issue = prescription.issues[i];
+                if (!issue.batch || !issue.batchId) {
+                    return {success: false, message: 'Batch not found for a drug'};
+                }
+                await prisma.batch.update({
+                    where: {id: issue.batchId},
+                    data: {
+                        remainingQuantity: {
+                            decrement: issue.quantity
+                        }
+                    }
+                });
+            }
+
+            await prisma.prescription.update({
+                where: {id: prescriptionID},
+                data: {status: 'COMPLETED'}
+            });
+
+            //Check for queue entry
+            const queueEntry = await prisma.queueEntry.findFirst({
+                where: {
+                    patientId: prescription.patientId,
+                    status: "PRESCRIBED"
+                }
+            });
+
+            if (queueEntry) {
+                await prisma.queueEntry.update({
+                    where: {
+                        id: queueEntry.id
+                    },
+                    data: {
+                        status: "COMPLETED"
+                    }
+                });
+                revalidatePath(`/queue/${queueEntry.id}`);
+            }
+        });
+        revalidatePath(`/patients/${prescription.patientId}/prescriptions`);
+        return {success: true, message: 'Prescription completed successfully'};
+    } catch (error) {
+        console.error('Error completing prescription:', error);
+        return {success: false, message: 'An error occurred while completing prescription'};
+    }
 }

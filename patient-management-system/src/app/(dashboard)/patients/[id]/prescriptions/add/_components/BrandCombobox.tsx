@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
 import {differenceInDays, differenceInMonths} from "date-fns";
-import type {BrandOption} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/IssuesList";
+import type {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 interface BrandComboboxProps {
@@ -76,7 +76,7 @@ const BrandCombobox = ({
                     aria-expanded={popoverOpen}
                     disabled={disabled}
                     className={cn(
-                        "w-full justify-between h-10 rounded-lg border-2 transition-all duration-200",
+                        "w-full justify-between h-10 rounded-lg border-2",
                         value
                             ? "border-primary-500 shadow-sm"
                             : "border-gray-300 hover:border-gray-400",
@@ -110,22 +110,32 @@ const BrandCombobox = ({
                                     key={option.id}
                                     value={option.name}
                                     onSelect={() => handleSelect(String(option.id))}
-                                    className="flex space-y-1 rounded-md hover:bg-gray-100 transition"
+                                    className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
-                                    <div className="flex items-center min-w-24">
+                                    <div className="flex items-center min-w-24 w-full gap-2">
                                         <span className="font-medium">{option.name}</span>
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
-                                        <CustomBadge text={option.batchCount > 1 ? `${option.batchCount} batches` : "1 batch"} color={"gray"}/>
-                                        <CustomBadge text={`Total: ${option.totalRemainingQuantity}`}
-                                                     color={option.totalRemainingQuantity > 0 ? "green" : "red"}/>
+                                        <CustomBadge
+                                            text={option.batchCount > 1 ? `${option.batchCount} batches` : "1 batch"}
+                                            color={"gray"}/>
+                                        <CustomBadge
+                                            text={`Total: ${option.totalRemainingQuantity}`}
+                                            color={
+                                                option.totalRemainingQuantity < 50 ? "red" :
+                                                    option.totalRemainingQuantity < 150 ? "yellow" :
+                                                        "green"
+                                            }
+                                        />
                                         <CustomBadge
                                             text={`Expires in: ${formatExpiry(option.farthestExpiry)}`}
                                             color={
-                                                differenceInDays(new Date(option.farthestExpiry), new Date()) < 30
+                                                differenceInDays(new Date(option.farthestExpiry), new Date()) < 60
                                                     ? "red"
-                                                    : "yellow"
+                                                    : differenceInDays(new Date(option.farthestExpiry), new Date()) < 120
+                                                        ? "yellow"
+                                                        : "blue"
                                             }
                                         />
                                     </div>

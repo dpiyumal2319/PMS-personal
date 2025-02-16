@@ -1,11 +1,12 @@
 import { IconType } from "react-icons";
 import { z } from "zod";
+import { Role } from '@prisma/client';
 
 export type SessionPayload = {
     id: number;
     name: string;
     email: string;
-    role: string;
+    role: Role;
 }
 
 export type SideBarItem = {
@@ -26,6 +27,11 @@ export type myError = {
     message: string
 }
 
+export type myBillError = {
+    success: boolean,
+    message: string,
+    bill? : Bill | null
+}
 
 export interface Parameter {
     name: string;
@@ -245,3 +251,18 @@ export type MealStrategy = z.infer<typeof MealStrategySchema>;
 export type WhenNeededStrategy = z.infer<typeof WhenNeededStrategySchema>;
 export type PeriodicStrategy = z.infer<typeof PeriodicStrategySchema>;
 export type OtherStrategy = z.infer<typeof OtherStrategySchema>;
+
+export type BillEntry = {
+    drugName: string;
+    brandName: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+export type Bill = {
+    entries: BillEntry[];
+    cost: number;
+    patientID: number;
+    dispensary_charge: number;
+    doctor_charge: number
+}

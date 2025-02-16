@@ -1,4 +1,4 @@
-import {PrismaClient, Gender, Role, QueueStatus, VisitStatus} from '@prisma/client';
+import {PrismaClient, Gender, Role} from '@prisma/client';
 import {faker} from '@faker-js/faker';
 
 const prisma = new PrismaClient();
@@ -19,8 +19,7 @@ async function main() {
             NIC: '199056789V',
         },
     });
-
-    const patient2 = await prisma.patient.create({
+    await prisma.patient.create({
         data: {
             telephone: '0719876543',
             name: 'Nimal Rajapaksa',
@@ -32,7 +31,6 @@ async function main() {
             NIC: '198578954V',
         },
     });
-
     // Generate 50 random patients
     const patients = Array.from({length: 50}).map(() => ({
         telephone: faker.phone.number({
@@ -79,23 +77,6 @@ async function main() {
             role: Role.NURSE,
             name: 'Dasun Nona'
         },
-    });
-
-    // Create a Queue
-    const queue = await prisma.queue.create({
-        data: {
-            start: new Date(),
-            status: QueueStatus.IN_PROGRESS,
-        },
-    });
-
-    // Create Queue Entries
-    await prisma.queueEntry.createMany({
-        data: [
-            {queueId: queue.id, status: VisitStatus.PENDING, patientId: patient1.id, token: 1},
-            {queueId: queue.id, status: VisitStatus.COMPLETED, patientId: patient2.id, token: 2},
-            {queueId: queue.id, status: VisitStatus.PRESCRIBED, patientId: patient1.id, token: 3},
-        ],
     });
 
     await prisma.drug.createMany({

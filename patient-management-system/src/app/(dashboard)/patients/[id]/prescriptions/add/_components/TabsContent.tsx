@@ -5,7 +5,7 @@ import {AlertCircle, Clock, Calendar} from "lucide-react";
 import {Input} from "@/components/ui/input";
 import {Switch} from "@/components/ui/switch";
 import {TabsContent} from "@/components/ui/tabs";
-import MealCards from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/MealCards";
+import MealCards from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/MealCards";
 import type {
     MealStrategy,
     OtherStrategy,
@@ -115,6 +115,8 @@ const MealTabsContent = ({strategy, setStrategy}: MealTabsContentProps) => {
                                 type="number"
                                 className="text-lg pl-10"
                                 placeholder="Enter minutes"
+                                value={strategy.minutesBeforeAfterMeal}
+                                onChange={(e) => setStrategy(prev => ({...prev, minutesBeforeAfterMeal: Number(e.target.value)}))}
                             />
                             <Clock
                                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5"
@@ -264,15 +266,16 @@ interface OtherTabsContentProps {
 }
 
 const OtherTabsContent = ({strategy, setStrategy}: OtherTabsContentProps) => {
-    const handleQuantityChange = (value: string) => {
-        const quantity = Number(value);
-        if (!isNaN(quantity)) {
+    const handleChange = (field: keyof OtherStrategy) => (value: string) => {
+        const numValue = Number(value);
+        if (!isNaN(numValue)) {
             setStrategy(prev => ({
                 ...prev,
-                quantity
+                [field]: numValue
             }));
         }
-    };
+    }
+
 
     return (
         <TabsContent value="OTHER">
@@ -283,7 +286,7 @@ const OtherTabsContent = ({strategy, setStrategy}: OtherTabsContentProps) => {
                         <Input
                             type="number"
                             value={strategy.dose}
-                            onChange={(e) => handleQuantityChange(e.target.value)}
+                            onChange={(e) => handleChange('dose')(e.target.value)}
                             className="text-lg pl-10"
                             placeholder="Enter dosage"
                         />
@@ -299,7 +302,7 @@ const OtherTabsContent = ({strategy, setStrategy}: OtherTabsContentProps) => {
                         <Input
                             type="number"
                             value={strategy.times}
-                            onChange={(e) => handleQuantityChange(e.target.value)}
+                            onChange={(e) => handleChange('times')(e.target.value)}
                             className="text-lg pl-10"
                             placeholder="Enter how many times"
                         />

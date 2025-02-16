@@ -6,11 +6,13 @@ import React, {useState} from 'react';
 import {Input} from '@/components/ui/input';
 import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
-import type {OffRecordMeds} from "@/app/(dashboard)/patients/[id]/_components/prescribe_components/PrescriptionForm";
+import type {OffRecordMeds} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
+import {Plus} from "lucide-react";
 
 interface AddRecordProps {
     addRecord: (offRecordDrug: OffRecordMeds) => void
 }
+
 
 const AddOffRecordDrugs = ({addRecord}: AddRecordProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -35,8 +37,13 @@ const AddOffRecordDrugs = ({addRecord}: AddRecordProps) => {
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-                <Card className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer">
-                    + Add Drug
+                <Card
+                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 group"
+                >
+                    <div className="flex items-center space-x-2 text-slate-500 group-hover:text-slate-800">
+                        <Plus className="h-5 w-5 transition-transform duration-200 group-hover:scale-110"/>
+                        <span className="font-medium">Add Off-Record Medication</span>
+                    </div>
                 </Card>
             </DialogTrigger>
             <DialogContent>
