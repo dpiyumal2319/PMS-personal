@@ -6,11 +6,10 @@ import {cn} from "@/lib/utils";
 import {Gender, Role} from "@prisma/client";
 
 interface UserAvatarProps {
-    role?: Role;
-    name?: string;
-    gender?: Gender;
+    role: Role;
+    gender: Gender;
     imageUrl: string | null;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const UserAvatar = ({
@@ -24,14 +23,14 @@ const UserAvatar = ({
         sm: 'h-8 w-8',
         md: 'h-10 w-10',
         lg: 'h-12 w-12',
-        xl: 'h-16 w-16',
+        xl: 'h-32 w-32',
     };
 
     const iconSizes = {
         sm: 'h-4 w-4',
         md: 'h-5 w-5',
         lg: 'h-6 w-6',
-        xl: 'h-8 w-8',
+        xl: 'h-16 w-16',
     };
 
     return (
