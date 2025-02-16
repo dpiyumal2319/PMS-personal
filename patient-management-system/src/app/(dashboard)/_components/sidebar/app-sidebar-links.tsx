@@ -31,26 +31,6 @@ export const DoctorLinks: SidebarItem[] = [
         isActive: false,
     },
     {
-        type: "expandable",
-        title: "Admins",
-        icon: Shield,
-        initiallyExpanded: false,
-        items: [
-            {
-                type: "link",
-                title: "Staff",
-                url: "/admin/staff",
-                isActive: false,
-            },
-            {
-                type: "link",
-                title: "Reports",
-                url: "/admin/reports",
-                isActive: false,
-            },
-        ],
-    },
-    {
         type: "link",
         title: "Patients",
         url: "/patients",
@@ -88,6 +68,32 @@ export const DoctorLinks: SidebarItem[] = [
                 url: "/inventory/completed-stocks",
                 isActive: false,
             },
+        ],
+    },
+    {
+        type: "expandable",
+        title: "Admins",
+        icon: Shield,
+        initiallyExpanded: false,
+        items: [
+            {
+                type: "link",
+                title: "Staff",
+                url: "/admin/staff",
+                isActive: false,
+            },
+            {
+                type: "link",
+                title: "Report templates",
+                url: "/admin/reports",
+                isActive: false,
+            },
+            {
+                type: "link",
+                title: "Profile",
+                url: "/admin/profile",
+                isActive: false,
+            }
         ],
     },
 ];
@@ -146,6 +152,11 @@ const AppSidebarLinks = ({role}: { role: Role }) => {
     const pathname = usePathname();
     const links = role === Role.DOCTOR ? DoctorLinks : NurseLinks;
 
+    // Helper function to check if any sub-items match the current path
+    const shouldExpandGroup = (items: Array<{ url: string }>) => {
+        return items.some(item => pathname.startsWith(item.url));
+    };
+
     return (
         <SidebarGroup>
             <SidebarGroupLabel>{role === Role.DOCTOR ? "Doctor" : "Nurse"} Navigation</SidebarGroupLabel>
@@ -156,7 +167,7 @@ const AppSidebarLinks = ({role}: { role: Role }) => {
                             <SidebarMenuButton
                                 asChild
                                 tooltip={link.title}
-                                isActive={pathname === link.url} // Check if the current route matches
+                                isActive={pathname === link.url}
                             >
                                 <Link href={link.url} className="flex items-center">
                                     {link.icon && <link.icon className="mr-2 h-4 w-4"/>}
@@ -168,12 +179,14 @@ const AppSidebarLinks = ({role}: { role: Role }) => {
                         <Collapsible
                             key={link.title}
                             asChild
-                            defaultOpen={pathname.startsWith(link.items.map(sub => sub.url).find(url => pathname.startsWith(url)) ?? '')}
+                            defaultOpen={link.initiallyExpanded || shouldExpandGroup(link.items)}
                             className="group/collapsible"
                         >
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
-                                    <SidebarMenuButton tooltip={link.title}>
+                                    <SidebarMenuButton
+                                        tooltip={link.title}
+                                    >
                                         {link.icon && <link.icon className="mr-2 h-4 w-4"/>}
                                         <span>{link.title}</span>
                                         <ChevronRight
@@ -186,7 +199,7 @@ const AppSidebarLinks = ({role}: { role: Role }) => {
                                             <SidebarMenuSubItem key={subItem.title}>
                                                 <SidebarMenuSubButton
                                                     asChild
-                                                    isActive={pathname === subItem.url} // Check active state for sub-items
+                                                    isActive={pathname === subItem.url}
                                                 >
                                                     <Link href={subItem.url}>
                                                         <span>{subItem.title}</span>
@@ -204,6 +217,5 @@ const AppSidebarLinks = ({role}: { role: Role }) => {
         </SidebarGroup>
     );
 };
-
 
 export default AppSidebarLinks;
