@@ -1576,15 +1576,11 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
 
 export async function getTotalPagesForCompletedFilteredDrugsByBatch({
     query = "",
-    modelId = 0,
-    brandId = 0,
     status = "ALL",
     fromDate,
     toDate,
 }: {
     query?: string;
-    modelId?: number;
-    brandId?: number;
     status?: string;
     fromDate?: string;
     toDate?: string;
@@ -1593,8 +1589,6 @@ export async function getTotalPagesForCompletedFilteredDrugsByBatch({
         number: { contains: query },
     };
 
-    if (modelId !== 0) whereCondition.drugId = Number(modelId);
-    if (brandId !== 0) whereCondition.drugBrandId = Number(brandId);
     if (status === "ALL") {
         whereCondition.status = { not: "AVAILABLE" }; // Excludes AVAILABLE
     } else {
@@ -1616,8 +1610,6 @@ export async function getCompletedFilteredDrugsByBatch({
     query = "",
     page = 1,
     sort = "expiryDate",
-    modelId = 0,
-    brandId = 0,
     status = "ALL",
     fromDate,
     toDate,
@@ -1625,8 +1617,6 @@ export async function getCompletedFilteredDrugsByBatch({
     query?: string;
     page?: number;
     sort?: string;
-    modelId?: number;
-    brandId?: number;
     status?: string;
     fromDate?: string;
     toDate?: string;
@@ -1636,8 +1626,7 @@ export async function getCompletedFilteredDrugsByBatch({
         number: { contains: query },
     };
 
-    if (modelId !== 0) whereCondition.drugId = Number(modelId);
-    if (brandId !== 0) whereCondition.drugBrandId = Number(brandId);
+
     if (status === "ALL") {
         whereCondition.status = { not: "AVAILABLE" }; // Excludes AVAILABLE
     } else {
@@ -1688,3 +1677,190 @@ export async function getCompletedFilteredDrugsByBatch({
         page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
     );
 }
+
+
+export async function getTotalPagesForCompletedFilteredDrugsByModel({
+    query = "",
+    status = "ALL",
+    fromDate,
+    toDate,
+}: {
+    query?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+}) {
+    const whereCondition: any = {
+        drug: { name: { startsWith: query} },
+    };
+
+    if (status === "ALL") {
+        whereCondition.status = { not: "AVAILABLE" };
+    } else {
+        whereCondition.status = status as BatchStatus;
+    }
+    if (fromDate && toDate) {
+        whereCondition.stockDate = {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+        };
+    }
+
+    const totalItems = await prisma.batch.count({ where: whereCondition });
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
+}
+
+export async function getCompletedFilteredDrugsByModel({
+    query = "",
+    page = 1,
+    sort = "expiryDate",
+    status = "ALL",
+    fromDate,
+    toDate,
+}: {
+    query?: string;
+    page?: number;
+    sort?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+}) {
+    const whereCondition: any = {
+        drug: { name: { startsWith: query } },
+    };
+
+    if (status === "ALL") {
+        whereCondition.status = { not: "AVAILABLE" };
+    } else {
+        whereCondition.status = status as BatchStatus;
+    }
+    if (fromDate && toDate) {
+        whereCondition.stockDate = {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+        };
+    }
+
+    const batches = await prisma.batch.findMany({
+        where: whereCondition,
+        include: {
+            drug: true,
+            drugBrand: true,
+        },
+    });
+
+    const formattedBatches = batches.map((batch) => ({
+        id: batch.id,
+        batchNumber: batch.number,
+        brandName: batch.drugBrand.name,
+        modelName: batch.drug.name,
+        expiryDate: batch.expiry.toISOString(),
+        stockDate: batch.stockDate.toISOString(),
+        remainingAmount: batch.remainingQuantity,
+        fullAmount: batch.fullAmount,
+        status: batch.status,
+    }));
+
+    return sortAndPaginateBatches(formattedBatches, sort, page);
+}
+
+export async function getTotalPagesForCompletedFilteredDrugsByBrand({
+    query = "",
+    status = "ALL",
+    fromDate,
+    toDate,
+}: {
+    query?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+}) {
+    const whereCondition: any = {
+        drugBrand: { name: { startsWith: query} },
+    };
+
+    if (status === "ALL") {
+        whereCondition.status = { not: "AVAILABLE" };
+    } else {
+        whereCondition.status = status as BatchStatus;
+    }
+    if (fromDate && toDate) {
+        whereCondition.stockDate = {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+        };
+    }
+
+    const totalItems = await prisma.batch.count({ where: whereCondition });
+    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
+}
+
+export async function getCompletedFilteredDrugsByBrand({
+    query = "",
+    page = 1,
+    sort = "expiryDate",
+    status = "ALL",
+    fromDate,
+    toDate,
+}: {
+    query?: string;
+    page?: number;
+    sort?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+}) {
+    const whereCondition: any = {
+        drugBrand: { name: { startsWith: query } },
+    };
+
+    if (status === "ALL") {
+        whereCondition.status = { not: "AVAILABLE" };
+    } else {
+        whereCondition.status = status as BatchStatus;
+    }
+    if (fromDate && toDate) {
+        whereCondition.stockDate = {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+        };
+    }
+
+    const batches = await prisma.batch.findMany({
+        where: whereCondition,
+        include: {
+            drug: true,
+            drugBrand: true,
+        },
+    });
+
+    const formattedBatches = batches.map((batch) => ({
+        id: batch.id,
+        batchNumber: batch.number,
+        brandName: batch.drugBrand.name,
+        modelName: batch.drug.name,
+        expiryDate: batch.expiry.toISOString(),
+        stockDate: batch.stockDate.toISOString(),
+        remainingAmount: batch.remainingQuantity,
+        fullAmount: batch.fullAmount,
+        status: batch.status,
+    }));
+
+    return sortAndPaginateBatches(formattedBatches, sort, page);
+}
+
+function sortAndPaginateBatches(batches: any[], sort: string, page: number) {
+    if (sort === "expiryDate") {
+        batches.sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
+    } else if (sort === "newlyAdded") {
+        batches.sort((a, b) => new Date(b.stockDate).getTime() - new Date(a.stockDate).getTime());
+    } else if (sort === "alphabetically") {
+        batches.sort((a, b) => a.modelName.localeCompare(b.modelName));
+    }
+
+    return batches.slice(
+        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH,
+        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
+    );
+}
+
