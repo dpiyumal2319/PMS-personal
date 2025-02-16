@@ -17,7 +17,7 @@ import type {
     OtherStrategy
 } from "@/app/lib/definitions";
 import {StrategyJsonSchema} from "@/app/lib/definitions";
-import {DrugType, IssueingStrategy} from "@prisma/client";
+import {IssueingStrategy} from "@prisma/client";
 import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {calculateQuantity} from "@/app/lib/utils";
 import {Plus} from "lucide-react";
@@ -37,7 +37,6 @@ export type drug = {
 export interface BrandOption {
     id: string | number;
     name: string;
-    type: DrugType;
     batchCount: number;
     totalRemainingQuantity: number;
     farthestExpiry: Date;
@@ -156,7 +155,6 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             setWarning(null);
         }
     };
-
 
 
     const handleDrugSearch = useDebouncedCallback(async (term: string) => {

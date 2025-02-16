@@ -114,7 +114,6 @@ const BrandCombobox = ({
                                 >
                                     <div className="flex items-center min-w-24 w-full gap-2">
                                         <span className="font-medium">{option.name}</span>
-                                        <CustomBadge text={option.type} color={option.type === "Tablet" ? "purple" : "cyan"}/>
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
