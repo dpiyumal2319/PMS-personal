@@ -3,6 +3,8 @@
 import React, {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {getPendingPatientsCount} from "@/app/lib/actions";
+import {Button} from "@/components/ui/button";
+import {cn} from "@/lib/utils";
 
 const PendingPatients = () => {
     const [pending, setPending] = useState(0);
@@ -33,21 +35,22 @@ const PendingPatients = () => {
     };
 
     return (
-        <button
+        <Button
             onClick={handleClick}
-            className={`relative flex items-center gap-2 p-2 rounded text-white transition-all duration-200
-                ${pending > 0 ? "bg-primary-500 hover:bg-primary-600 cursor-pointer" : "bg-gray-400 cursor-default"}
-            `}
+            variant="ghost"
+            className={cn(
+                "relative h-8 px-3 text-sm font-medium transition-colors",
+                pending > 0
+                    ? "text-blue-600 bg-blue-100 hover:bg-blue-200"
+                    : "text-gray-400"
+            )}
             disabled={pending === 0}
         >
-            {pending > 0 ? (
-                <span className="animate-ping h-2 w-2 rounded-full bg-amber-400"></span>
-            ) : (
-                <span className="h-2 w-2 rounded-full bg-gray-200"></span>
+            {pending > 0 && (
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-blue-500"/>
             )}
-            <span className={`font-bold ${pending === 0 ? "text-gray-300" : ""}`}>{pending}</span>
-            <span>{pending === 0 ? "No Patients" : "Patients"}</span>
-        </button>
+            {pending > 0 ? `${pending} Patients` : "No Patients"}
+        </Button>
     );
 };
 
