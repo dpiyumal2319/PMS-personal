@@ -2,16 +2,17 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarHeader
+    SidebarHeader, SidebarSeparator
 } from "@/components/ui/sidebar"
-import AppSidebarLinks from "@/app/(dashboard)/_components/app-sidebar-links";
-import {Role} from "@prisma/client";
 import {Stethoscope} from 'lucide-react';
+import {Suspense} from "react";
+import AppSidebarLinksWrapper from "@/app/(dashboard)/_components/sidebar/app-sidebar-links-wrapper";
+import AppSidebarLinkSkeleton from "@/app/(dashboard)/_components/sidebar/app-sidebar-link-skeleton";
 
-export function AppSidebar() {
+export async function AppSidebar() {
     return (
-        <Sidebar className="h-screen border-r">
-            <SidebarHeader className="p-4 border-b">
+        <Sidebar className="h-screen">
+            <SidebarHeader className="p-4">
                 <div className="flex items-center space-x-3">
                     <div className="bg-primary p-2 rounded-md">
                         <Stethoscope className="h-6 w-6 text-primary-foreground"/>
@@ -22,10 +23,15 @@ export function AppSidebar() {
                     </div>
                 </div>
             </SidebarHeader>
+            <SidebarSeparator/>
             <SidebarContent>
-                <AppSidebarLinks role={Role.DOCTOR}/>
+                <Suspense fallback={<AppSidebarLinkSkeleton />}>
+                    <AppSidebarLinksWrapper />
+                </Suspense>
+
             </SidebarContent>
-            <SidebarFooter className="p-4 border-t">
+            <SidebarSeparator/>
+            <SidebarFooter className="p-4">
                 <p className="text-xs text-center">
                     © 2025 ColorNovels
                 </p>

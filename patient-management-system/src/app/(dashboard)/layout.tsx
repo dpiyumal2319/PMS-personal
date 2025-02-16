@@ -1,9 +1,9 @@
 // DashboardLayout
-import TopBar from "@/app/(dashboard)/_components/TopBar";
+import TopBar from "@/app/(dashboard)/_components/topbar/TopBar";
 import React, {Suspense} from "react";
 import Loading from "@/app/(dashboard)/loading";
 import {SidebarProvider} from "@/components/ui/sidebar";
-import {AppSidebar} from "@/app/(dashboard)/_components/app-sidebar";
+import {AppSidebar} from "@/app/(dashboard)/_components/sidebar/app-sidebar";
 
 export default function DashboardLayout({
                                             children,
