@@ -1574,6 +1574,9 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
   }
 }
 
+
+const PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH = 15;
+
 export async function getTotalPagesForCompletedFilteredDrugsByBatch({
     query = "",
     status = "ALL",
@@ -1602,7 +1605,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByBatch({
     }
 
     const totalItems = await prisma.batch.count({ where: whereCondition });
-    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
+    return Math.ceil(totalItems / PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH);
 }
 
 
@@ -1673,8 +1676,8 @@ export async function getCompletedFilteredDrugsByBatch({
     }
 
     return formattedBatches.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH,
-        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
+        (page - 1) * PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH,
+        page * PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH
     );
 }
 
@@ -1707,7 +1710,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByModel({
     }
 
     const totalItems = await prisma.batch.count({ where: whereCondition });
-    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
+    return Math.ceil(totalItems / PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH);
 }
 
 export async function getCompletedFilteredDrugsByModel({
@@ -1792,7 +1795,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByBrand({
     }
 
     const totalItems = await prisma.batch.count({ where: whereCondition });
-    return Math.ceil(totalItems / PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH);
+    return Math.ceil(totalItems / PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH);
 }
 
 export async function getCompletedFilteredDrugsByBrand({
@@ -1859,8 +1862,8 @@ function sortAndPaginateBatches(batches: any[], sort: string, page: number) {
     }
 
     return batches.slice(
-        (page - 1) * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH,
-        page * PAGE_SIZE_AVAILABLE_DRUGS_BY_BATCH
+        (page - 1) * PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH,
+        page * PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH
     );
 }
 

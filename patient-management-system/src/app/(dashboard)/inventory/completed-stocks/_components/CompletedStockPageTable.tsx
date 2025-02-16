@@ -82,7 +82,7 @@ export default async function CompletedStockPageTable({
                 <DrugListByBatch batches={filteredDrugs} />
             </div>
             <div className="mt-auto flex justify-center py-4 sticky bottom-0">
-                <Pagination totalPages={totalPages} itemsPerPage={6} />
+                <Pagination totalPages={totalPages} itemsPerPage={15} />
             </div>
         </div>
     );
