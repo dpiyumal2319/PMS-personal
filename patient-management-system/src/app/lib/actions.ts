@@ -16,19 +16,21 @@ import {
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import {BatchStatus, DrugType, Prisma} from "@prisma/client";
+import {BatchStatus, DrugType, Prisma, Role} from "@prisma/client";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {
     BatchAssignPayload
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
 import {DISPENSARY_FEE, DOCTOR_FEE} from "@/app/lib/constants";
+import {ChangePasswordFormData} from "@/app/(dashboard)/admin/_components/ChangePasswordDialog";
 
-export async function changePassword({currentPassword, newPassword, confirmPassword}: {
-    currentPassword: string,
-    newPassword: string,
-    confirmPassword: string
-}): Promise<myError> {
+export async function changePassword({
+                                         currentPassword,
+                                         newPassword,
+                                         confirmPassword,
+                                         userID
+                                     }: ChangePasswordFormData): Promise<myError> {
     try {
         if (newPassword !== confirmPassword) {
             return {success: false, message: 'Passwords do not match'};
@@ -36,11 +38,15 @@ export async function changePassword({currentPassword, newPassword, confirmPassw
 
         const session = await verifySession();
 
+        if (!(session.role === Role.DOCTOR)) {
+            return {success: false, message: 'You do not have permission to change password'};
+        }
+
         const user = await prisma.user.findUnique({
-            where: {id: session.id}
+            where: {id: userID}
         });
 
-        if (!session || !user) {
+        if (!user) {
             return {success: false, message: 'User not found'};
         }
 
@@ -51,72 +57,16 @@ export async function changePassword({currentPassword, newPassword, confirmPassw
         const hashedPassword = bcrypt.hashSync(newPassword, 10);
 
         await prisma.user.update({
-            where: {id: session.id},
+            where: {id: userID},
             data: {password: hashedPassword}
         });
 
         return {success: true, message: 'Password changed successfully'};
-
     } catch (e) {
-        console.error(e);
+        if (e instanceof Error) {
+            console.error(e.message);
+        }
         return {success: false, message: 'An error occurred while changing password'};
-    }
-}
-
-// For admin changing nurse passwords
-export async function changeUserPassword({
-                                             nurseId,
-                                             newPassword,
-                                             confirmPassword
-                                         }: {
-    nurseId: number,  // Add nurse ID parameter
-    newPassword: string,
-    confirmPassword: string
-}): Promise<myError> {
-
-    try {
-        if (newPassword !== confirmPassword) {
-            return {success: false, message: 'Passwords do not match'};
-        }
-
-        const session = await verifySession();
-
-        //  Verify admin role
-        const admin = await prisma.user.findUnique({
-            where: {id: session.id},
-            select: {role: true}
-        });
-
-        if (admin?.role !== 'DOCTOR') {
-            return {success: false, message: 'Unauthorized'};
-        }
-
-        // Verify target user exists and is a nurse
-        const nurse = await prisma.user.findUnique({
-            where: {id: nurseId},
-            select: {role: true}
-        });
-
-        if (!nurse) {
-            return {success: false, message: 'Nurse not found'};
-        }
-
-        if (nurse.role !== 'NURSE') {
-            return {success: false, message: 'User is not a nurse'};
-        }
-
-
-        const hashedPassword = bcrypt.hashSync(newPassword, 10);
-
-        await prisma.user.update({
-            where: {id: nurseId},  // Use nurse ID here
-            data: {password: hashedPassword}
-        });
-
-        return {success: true, message: 'Password changed successfully'};
-    } catch (e) {
-        console.error(e);
-        return {success: false, message: 'An error occurred while changing password'}
     }
 }
 

@@ -3,18 +3,20 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {FaUserDoctor} from "react-icons/fa6";
 import {FaUserNurse} from "react-icons/fa";
 import {cn} from "@/lib/utils";
+import {Gender, Role} from "@prisma/client";
 
 interface UserAvatarProps {
-    role?: 'DOCTOR' | 'NURSE';
+    role?: Role;
     name?: string;
-    imageUrl?: string;
+    gender?: Gender;
+    imageUrl: string | null;
     size?: 'sm' | 'md' | 'lg';
 }
 
 const UserAvatar = ({
                         role = 'DOCTOR',
-                        name,
                         imageUrl,
+                        gender,
                         size = 'md',
                     }: UserAvatarProps) => {
     // Size mappings
@@ -37,14 +39,14 @@ const UserAvatar = ({
             sizeClasses[size],
             "transition-all duration-150"
         )}>
-            {imageUrl && <AvatarImage src={imageUrl} alt={name || role}/>}
+            {imageUrl && <AvatarImage src={imageUrl} alt={role}/>}
             <AvatarFallback className={cn(
                 "flex items-center justify-center",
-                role === "DOCTOR"
+                gender === Gender.MALE
                     ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
                     : "bg-pink-100 text-pink-600 hover:bg-pink-200"
             )}>
-                {role === "DOCTOR" ? (
+                {role === Role.DOCTOR ? (
                     <FaUserDoctor className={iconSizes[size]}/>
                 ) : (
                     <FaUserNurse className={iconSizes[size]}/>

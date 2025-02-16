@@ -75,9 +75,11 @@ model Patient {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
   name     String
+  gender   Gender
+  image    String?
   mobile   String
   password String
   role     Role

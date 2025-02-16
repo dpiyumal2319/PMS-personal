@@ -1,5 +1,5 @@
 import React from 'react';
-import UserAvatar from "@/app/(dashboard)/_components/topbar/RoleAvatar";
+import UserAvatar from "@/app/(dashboard)/_components/UserAvatar";
 import {verifySession} from "@/app/lib/sessions";
 import {Skeleton} from "@/components/ui/skeleton";
 
@@ -14,7 +14,8 @@ const UserDetails = async () => {
             <UserAvatar
                 role={session.role}
                 name={session.name}
-                // imageUrl={session.imageUrl} // Uncomment if available in session
+                gender={session.gender}
+                imageUrl={session.image}
             />
         </div>
     );

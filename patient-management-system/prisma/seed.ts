@@ -55,6 +55,7 @@ async function main() {
             mobile: '0765432189',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.DOCTOR,
+            gender: Gender.MALE,
             name: 'Dr. Pubudu'
         },
     });
@@ -65,6 +66,7 @@ async function main() {
             mobile: '0775671234',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.NURSE,
+            gender: Gender.FEMALE,
             name: 'Pubudu Nona'
         },
     });
@@ -75,6 +77,7 @@ async function main() {
             mobile: '0775677890',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.NURSE,
+            gender: Gender.FEMALE,
             name: 'Dasun Nona'
         },
     });

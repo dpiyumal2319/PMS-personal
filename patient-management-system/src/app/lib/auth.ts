@@ -4,6 +4,7 @@ import {redirect} from "next/navigation";
 import {createSession, deleteSession} from "@/app/lib/sessions";
 import {prisma} from "@/app/lib/prisma";
 import bcrypt from 'bcryptjs';
+import {Role} from "@prisma/client";
 
 export async function login(message: string, formData: FormData) {
     const email = formData.get("email") as string;
@@ -11,7 +12,7 @@ export async function login(message: string, formData: FormData) {
 
     console.log(formData);
 
-    if (!email || !password ) {
+    if (!email || !password) {
         return "Please fill in all fields";
     }
 
@@ -33,7 +34,14 @@ export async function login(message: string, formData: FormData) {
 
     console.log(user);
 
-    await createSession({role: user.role, id:user.id, email: user.email, name: user.name});
+    await createSession({
+        role: user.role,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        gender: user.gender,
+        image: user.image
+    });
 
 
     // await createSession({ role, id: parseInt(id) });
@@ -47,51 +55,45 @@ export async function logout() {
 
 //get user details from session
 
-export async function getUsers() {
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        role: true,
-        name: true,
-        email: true,
-        mobile: true,
-      },
-    });
-
-    return users.map(user => ({
-      ...user,
-      role: user.role.toLowerCase() as "doctor" | "nurse",
-      telephone: user.mobile,
-      profilePic: getDefaultAvatar(user.role)
-    }));
-  } catch (error) {
-    console.error("Failed to fetch users:", error);
-    throw new Error("Failed to fetch users");
-  }
+export async function getStaff() {
+    try {
+        return await prisma.user.findMany({
+            where: {
+                role: {
+                    not: Role.DOCTOR
+                }
+            },
+            select: {
+                id: true,
+                role: true,
+                name: true,
+                gender: true,
+                email: true,
+                image: true,
+                mobile: true,
+            },
+        });
+    } catch (error) {
+        console.error("Failed to fetch users:", error);
+        throw new Error("Failed to fetch users");
+    }
 }
 
-// Helper function for default avatars
-  function getDefaultAvatar(role: "DOCTOR" | "NURSE") {
-    return role === "DOCTOR" ? "/doctor-avatar.jpg" : "/nurse-avatar.jpg";
-  }
 //To get Nurse Details
 export async function getNurses() {
-  try {
-    const nurses = await prisma.user.findMany({
-      where: {
-        role: 'NURSE' 
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true
-      }
-    });
-
-    return nurses;
-  } catch (error) {
-    console.error("Failed to fetch nurses:", error);
-    throw new Error("Failed to fetch nurses");
-  }
+    try {
+        return await prisma.user.findMany({
+            where: {
+                role: 'NURSE'
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true
+            }
+        });
+    } catch (error) {
+        console.error("Failed to fetch nurses:", error);
+        throw new Error("Failed to fetch nurses");
+    }
 }

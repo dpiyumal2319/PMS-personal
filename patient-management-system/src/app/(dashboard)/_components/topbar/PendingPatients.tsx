@@ -42,7 +42,7 @@ const PendingPatients = () => {
                 "relative h-8 px-3 text-sm font-medium transition-colors",
                 pending > 0
                     ? "text-blue-600 bg-blue-100 hover:bg-blue-200"
-                    : "text-gray-400"
+                    : "text-gray-500"
             )}
             disabled={pending === 0}
         >
