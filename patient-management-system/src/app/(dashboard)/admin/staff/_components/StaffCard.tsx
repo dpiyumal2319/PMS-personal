@@ -1,8 +1,9 @@
 import {Card} from "@/components/ui/card";
 import UserAvatar from "@/app/(dashboard)/_components/UserAvatar";
 import {Gender, Role} from "@prisma/client";
-import EditProfileDialog from "@/app/(dashboard)/admin/_components/EditProfileDialog";
-import ChangePasswordDialog from "@/app/(dashboard)/admin/_components/ChangePasswordDialog";
+import EditProfileDialog from "@/app/(dashboard)/admin/staff/_components/EditProfileDialog";
+import ChangePasswordDialog from "@/app/(dashboard)/admin/staff/_components/ChangePasswordDialog";
+import DeleteUserDialog from "@/app/(dashboard)/admin/staff/_components/DeleteUserAlert";
 
 interface CardProps {
     name: string;
@@ -16,7 +17,7 @@ interface CardProps {
 export function StaffCard({name, email, telephone, profilePic, gender, id}: CardProps) {
     return (
         <Card
-            className={`w-80 p-6 rounded-xl shadow-lg bg-background-50 border-l-4 border-primary-800 hover:shadow-xl transition-all duration-300`}
+            className={`p-6 hover:shadow-lg transition-shadow duration-200`}
         >
             {/* Profile Header */}
             <div className="flex items-center justify-between gap-4 mb-6">
@@ -34,6 +35,7 @@ export function StaffCard({name, email, telephone, profilePic, gender, id}: Card
                     email={email}
                     telephone={telephone}
                     gender={gender}
+                    image={profilePic}
                     id={id}
                 />
             </div>
@@ -55,7 +57,8 @@ export function StaffCard({name, email, telephone, profilePic, gender, id}: Card
                     </div>
                 </div>
                 <div className={`flex items-center justify-end gap-2`}>
-                    <ChangePasswordDialog userID={id}/>
+                    <DeleteUserDialog id={id}/>
+                    <ChangePasswordDialog userID={id} currentPw={false}/>
                 </div>
             </div>
         </Card>

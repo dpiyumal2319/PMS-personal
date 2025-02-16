@@ -64,13 +64,13 @@ export function DeleteReport({id}: { id: number }) {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-green-600 text-white hover:bg-green-700 hover:text-white">
+                        Keep
+                    </AlertDialogCancel>
                     <AlertDialogAction className="bg-red-600 text-white hover:bg-red-700" onClick={handleDelete}
                                        disabled={disabled}>
                         {disabled ? `Delete all data (${countdown})` : "Delete all data"}
                     </AlertDialogAction>
-                    <AlertDialogCancel className="bg-green-600 text-white hover:bg-green-700 hover:text-white">
-                        Keep
-                    </AlertDialogCancel>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

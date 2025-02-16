@@ -38,8 +38,8 @@ export const DoctorLinks: SidebarItem[] = [
         items: [
             {
                 type: "link",
-                title: "Admin",
-                url: "/admin",
+                title: "Staff",
+                url: "/admin/staff",
                 isActive: false,
             },
             {

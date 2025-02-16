@@ -29,7 +29,7 @@ export interface ChangePasswordFormData {
     confirmPassword: string;
 }
 
-const ChangePasswordDialog = ({userID}: { userID: number }) => {
+const ChangePasswordDialog = ({userID, currentPw}: { userID: number, currentPw: boolean }) => {
     const form = useForm<ChangePasswordFormData>({
         defaultValues: {
             currentPassword: '',
@@ -84,19 +84,22 @@ const ChangePasswordDialog = ({userID}: { userID: number }) => {
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="currentPassword"
-                            render={({field}) => (
-                                <FormItem>
-                                    <FormLabel>Current Password</FormLabel>
-                                    <FormControl>
-                                        <Input type="password" {...field} />
-                                    </FormControl>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
+
+                        {currentPw && (
+                            <FormField
+                                control={form.control}
+                                name="currentPassword"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Current Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" {...field} />
+                                        </FormControl>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+                        )}
 
                         <FormField
                             control={form.control}

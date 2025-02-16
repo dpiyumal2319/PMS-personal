@@ -1,5 +1,6 @@
 import { toast, ToastPosition } from "react-toastify";
 import {StrategyJson} from "@/app/lib/definitions";
+import {z} from "zod";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();
@@ -117,3 +118,20 @@ export function calculateQuantity(strategy: StrategyJson): number {
             throw new Error(`Unknown strategy type`);
     }
 }
+
+
+const emailSchema = z.string().email("Invalid email format");
+
+const mobileSchema = z
+    .string()
+    .regex(/^\d{10}$/, "Invalid mobile number (must be 10 digits)");
+
+export const validateEmail = (email: string) => {
+    const result = emailSchema.safeParse(email);
+    return result.success ? null : result.error.errors[0].message;
+};
+
+export const validateMobile = (mobile: string) => {
+    const result = mobileSchema.safeParse(mobile);
+    return result.success ? null : result.error.errors[0].message;
+};
