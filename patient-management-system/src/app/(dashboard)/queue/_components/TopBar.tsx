@@ -101,7 +101,7 @@ const TopBar = () => {
                         <IoArrowBack className="size-6"/>
                     </Link>
                 )}
-                <p className="ml-2">{title}</p>
+                <h2 className="text-xl font-bold text-primary-700">{title}</h2>
             </div>
 
             {perQueuePageActive &&

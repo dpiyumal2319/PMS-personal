@@ -23,7 +23,7 @@ export default async function Page({
             <div className="w-full p-4 flex-grow flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-semibold">All Report Templates <span className="text-gray-500">({totalReports})</span></h1>
+                    <h1 className="text-2xl font-bold text-primary-700">All Report Templates <span className="text-gray-500">({totalReports})</span></h1>
                     <AddReports/>
                 </div>
 

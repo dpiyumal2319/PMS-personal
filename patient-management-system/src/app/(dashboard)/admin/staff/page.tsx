@@ -10,7 +10,7 @@ export default async function AdminPage() {
     return (
         <div className="p-4 min-h-screen">
             <div className={'flex justify-between items-center mb-6'}>
-                <h1 className="text-3xl font-bold text-primary-700 font-montserrat">
+                <h1 className="text-2xl font-bold text-primary-700">
                     Medical Staff Management
                 </h1>
                 <AddUserDialog/>

@@ -25,7 +25,7 @@ export default async function InventoryAvailable({
     const sort = params?.sort || "alphabetically";
 
     return (
-        <div className="flex h-full flex-col w-full">
+        <div className="flex flex-col w-full">
             <div className="sticky top-0 p-4 bg-white border-b shadow-md flex gap-4 z-20">
                 <Dropdown
                     items={[
@@ -43,9 +43,8 @@ export default async function InventoryAvailable({
                     <DrugForm/>
                 </div>
             </div>
-            <div className="flex-grow overflow-auto">
+            <div className="flex-grow">
                 <Suspense fallback={<DrugListSkeleton isLoading={true}/>}>
-                    {" "}
                     <AvailableStockPageTable
                         query={query}
                         currentPage={currentPage}
@@ -54,7 +53,6 @@ export default async function InventoryAvailable({
                     />
                 </Suspense>
             </div>
-
         </div>
     );
 }
