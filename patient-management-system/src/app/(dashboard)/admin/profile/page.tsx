@@ -28,7 +28,7 @@ const ProfilePage = () => {
                         gender={user.gender}
                         role={user.role}
                     />
-                    <h2 className="mt-4 text-2xl font-semibold">{user.name}</h2>
+                    <h2 className="mt-4 text-2xl font-semibold text-primary-700">{user.name}</h2>
                     <p className="text-gray-500">{user.email}</p>
                     <p className="text-gray-500">{user.telephone}</p>
                 </div>

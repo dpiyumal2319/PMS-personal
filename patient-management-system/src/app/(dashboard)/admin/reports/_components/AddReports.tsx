@@ -8,6 +8,7 @@ import {addReportType} from "@/app/lib/actions";
 import {handleServerAction} from "@/app/lib/utils";
 import {Parameter, ReportForm} from "@/app/lib/definitions";
 import {Textarea} from "@/components/ui/textarea";
+import {Plus} from "lucide-react";
 
 
 const ReportFormPopup: React.FC = () => {
@@ -64,7 +65,7 @@ const ReportFormPopup: React.FC = () => {
         <>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
-                    <Button>Add Report Template</Button>
+                    <Button> <Plus/>Add Report Template</Button>
                 </DialogTrigger>
                 <DialogContent className={'overflow-y-scroll max-h-screen'}>
                     <DialogHeader>
@@ -79,7 +80,7 @@ const ReportFormPopup: React.FC = () => {
                         <div>
                             <label className="block">Description</label>
                             <Textarea value={form.description}
-                                   onChange={(e) => setForm({...form, description: e.target.value})}/>
+                                      onChange={(e) => setForm({...form, description: e.target.value})}/>
                         </div>
                         <div>
                             <label className="block">Parameters</label>
