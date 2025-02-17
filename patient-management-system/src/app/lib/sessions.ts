@@ -35,7 +35,7 @@ export async function createSession(sessionPayload: SessionPayload) {
 
     cookieStore.set('session', session, {
         httpOnly: true,
-        secure: false,
+        secure: true,
         expires: new Date(Date.now() + 1000 * 60 * 60 * 4), // 4 hours
         sameSite: 'strict',
         path: '/'
