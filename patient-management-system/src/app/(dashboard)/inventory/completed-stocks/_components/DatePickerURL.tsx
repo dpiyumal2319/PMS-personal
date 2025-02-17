@@ -1,10 +1,10 @@
 "use client";
 
-import React, {useCallback, useEffect, useState} from 'react';
-import {Calendar as CalendarIcon} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {useRouter, useSearchParams} from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const DatePickerURL = () => {
     const router = useRouter();
@@ -34,15 +34,15 @@ const DatePickerURL = () => {
         return date.toISOString().split("T")[0];
     };
 
-    const updateURLParameters = useCallback((start: Date, end: Date) => {
+    const updateURLParameters = (start: Date, end: Date) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('from', formatDateForInput(start));
         params.set('to', formatDateForInput(end));
         router.push(`?${params.toString()}`);
-    }, [router, searchParams]);
+    };
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         const newDate = new Date(value);
 
         const newDateRange = {
@@ -57,7 +57,7 @@ const DatePickerURL = () => {
     // Sync URL parameters on component mount
     useEffect(() => {
         updateURLParameters(dateRange.startDate, dateRange.endDate);
-    }, [dateRange.endDate, dateRange.startDate, updateURLParameters]);
+    }, []);
 
     return (
         <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ const DatePickerURL = () => {
                         variant="outline"
                         className="w-[300px] justify-start text-left font-normal"
                     >
-                        <CalendarIcon className="mr-2 h-4 w-4"/>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateRange.startDate && dateRange.endDate ? (
                             `${formatDateForInput(dateRange.startDate)} - ${formatDateForInput(dateRange.endDate)}`
                         ) : (
