@@ -57,7 +57,7 @@ const DatePickerURL = () => {
   // Sync URL parameters on component mount
   useEffect(() => {
     updateURLParameters(dateRange.startDate, dateRange.endDate);
-  }, []);
+  }, [dateRange.endDate, dateRange.startDate, updateURLParameters]);
 
   return (
     <div className="flex items-center justify-between">
