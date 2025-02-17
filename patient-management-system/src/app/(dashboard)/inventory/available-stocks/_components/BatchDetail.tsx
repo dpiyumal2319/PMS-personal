@@ -57,7 +57,7 @@ export default async function BatchDetail({ batchId }: { batchId: string }) {
                         </div>
                         <div className="flex flex-col items-center text-xl font-semibold text-primary">
                             <FaCoins className="size-6 text-yellow-500" />
-                            <span>{batchData.price}</span>
+                            <span>{batchData.wholesalePrice}</span>
                         </div>
                     </div>
 
