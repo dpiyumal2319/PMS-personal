@@ -12,7 +12,6 @@ import {getUser} from "@/app/lib/actions";
 const ProfileCard = async () => {
     const session = await verifySession();
     const user = await getUser(session.id);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     if (!user) {
         return null;

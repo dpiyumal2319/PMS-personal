@@ -47,7 +47,7 @@ const PendingPatients = () => {
             disabled={pending === 0}
         >
             {pending > 0 && (
-                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-blue-500"/>
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"/>
             )}
             {pending > 0 ? `${pending} Patients` : "No Patients"}
         </Button>

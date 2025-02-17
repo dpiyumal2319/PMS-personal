@@ -26,13 +26,13 @@ const PatientTabs = ({
 
     // If no match was found, default to the first tab
     if (!currentTab && links.length > 0) {
-        currentTab = links[0].value;
+        currentTab = '';
     }
 
     return (
         <div className="mt-6 border-t pt-4 h-14">
             <Tabs value={currentTab} className="w-full h-full">
-                <TabsList className="w-full">
+                <TabsList className="w-full" >
                     {links.map((link, index) => (
                         <Link
                             key={index}
