@@ -2018,39 +2018,26 @@ export async function addPrescription({
             }
 
             // Update strategy history for each issue
-            for (let i = 0; i < prescriptionForm.issues.length; i++) {
-                const issue = prescriptionForm.issues[i];
-                const createdIssue = prescription.issues[i]; // Get the corresponding created issue
+            await Promise.all(
+                prescriptionForm.issues.map((issue, index) => {
+                    const createdIssue = prescription.issues[index]; // Get the corresponding created issue
 
-                // Try to find existing history
-                const existingHistory = await tx.stratergyHistory.findUnique({
-                    where: {
-                        drugId: issue.drugId
-                    }
-                });
-
-                if (existingHistory) {
-                    // Update existing history with new brand and issue
-                    await tx.stratergyHistory.update({
+                    return tx.stratergyHistory.upsert({
                         where: {
                             drugId: issue.drugId
                         },
-                        data: {
+                        update: {
                             brandId: issue.brandId,
                             issueId: createdIssue.id
-                        }
-                    });
-                } else {
-                    // Create new history entry
-                    await tx.stratergyHistory.create({
-                        data: {
+                        },
+                        create: {
                             drugId: issue.drugId,
                             brandId: issue.brandId,
                             issueId: createdIssue.id
                         }
                     });
-                }
-            }
+                })
+            );
         });
 
         revalidatePath(`/patients/${patientID}/prescriptions`);
@@ -2435,36 +2422,23 @@ export async function calculateBill({prescriptionData}: {
                 }
 
                 // Updating or creating the cache
-                const existingCache = await prisma.batchHistory.findUnique({
+                await prisma.batchHistory.upsert({
                     where: {
                         drugId_drugBrandId: {
                             drugId: batch.drugId,
                             drugBrandId: batch.drugBrandId
                         }
+                    },
+                    update: {
+                        batchId: assign.batchID
+                    },
+                    create: {
+                        drugId: batch.drugId,
+                        drugBrandId: batch.drugBrandId,
+                        batchId: assign.batchID
                     }
                 });
 
-                if (existingCache) {
-                    await prisma.batchHistory.update({
-                        where: {
-                            drugId_drugBrandId: {
-                                drugId: batch.drugId,
-                                drugBrandId: batch.drugBrandId
-                            }
-                        },
-                        data: {
-                            batchId: assign.batchID
-                        }
-                    });
-                } else {
-                    await prisma.batchHistory.create({
-                        data: {
-                            drugId: batch.drugId,
-                            drugBrandId: batch.drugBrandId,
-                            batchId: assign.batchID
-                        }
-                    });
-                }
 
                 await prisma.issue.update({
                     where: {id: assign.issueID},
@@ -2482,19 +2456,30 @@ export async function calculateBill({prescriptionData}: {
                 });
             }
 
-            await prisma.bill.create({
-                data: {
+            await prisma.bill.upsert({
+                where: {
+                    prescriptionId: prescriptionID
+                },
+                update: {
+                    doctorCharge: bill.doctor_charge,
+                    dispensaryCharge: bill.dispensary_charge,
+                    medicinesCharge: bill.cost
+                },
+                create: {
                     prescriptionId: prescriptionID,
                     doctorCharge: bill.doctor_charge,
                     dispensaryCharge: bill.dispensary_charge,
                     medicinesCharge: bill.cost
                 }
-            })
+            });
+
 
             return {success: true, message: 'Bill calculated successfully', bill};
         });
     } catch (error) {
-        console.error('Error calculating bill:', error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            console.error(error.message);
+        }
         return {success: false, message: 'An error occurred while calculating bill'};
     }
 }
@@ -2608,5 +2593,35 @@ export async function completePrescription(prescriptionID: number): Promise<myEr
     } catch (error) {
         console.error('Error completing prescription:', error);
         return {success: false, message: 'An error occurred while completing prescription'};
+    }
+}
+
+
+export async function getCharges() {
+    return prisma.charge.findMany({
+        where: {
+            OR: [
+                {name: ChargeType.DISPENSARY},
+                {name: ChargeType.DOCTOR}
+            ]
+        }
+    })
+}
+
+export async function updateCharges({charge, value}: { charge: ChargeType, value: number }): Promise<myError> {
+    try {
+        await prisma.charge.upsert({
+            where: {name: charge},
+            update: {value},
+            create: {name: charge, value}
+        });
+
+        return {success: true, message: `Charge for ${charge} updated successfully`};
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            console.error(e);
+        }
+
+        return {success: false, message: 'An error occurred while updating charge'};
     }
 }

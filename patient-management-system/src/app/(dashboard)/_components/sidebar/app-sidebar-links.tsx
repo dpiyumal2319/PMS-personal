@@ -17,7 +17,7 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import {Clock, LayoutDashboard, Package, Shield, Users} from "lucide-react"
+import {Clock, LayoutDashboard, Package, Shield, Users, UserPen} from "lucide-react"
 import {Role} from '@prisma/client';
 import {SidebarItem} from "@/app/lib/definitions";
 import {usePathname} from "next/navigation";
@@ -125,6 +125,13 @@ export const NurseLinks: SidebarItem[] = [
         url: "/queue",
         icon: Clock,
         isActive: false,
+    },
+    {
+        type: 'link',
+        title: 'Profile',
+        url: 'admin/profile',
+        icon: UserPen,
+        isActive: false
     },
     {
         type: "expandable",

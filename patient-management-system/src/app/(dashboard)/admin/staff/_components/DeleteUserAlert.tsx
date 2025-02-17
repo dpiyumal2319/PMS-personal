@@ -14,28 +14,9 @@ import {
 import {Button} from "@/components/ui/button";
 import {handleServerAction} from "@/app/lib/utils";
 import {deleteUser} from "@/app/lib/actions";
-import {useEffect, useState} from "react";
+
 
 export default function DeleteUserDialog({id}: { id: number }) {
-    const [countdown, setCountdown] = useState(5);
-    const [disabled, setDisabled] = useState(true);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    setDisabled(false);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000); // Changed from 3000 to 1000 for 1-second intervals
-
-        return () => clearInterval(interval);
-    }, []);
-
-
     const handleDelete = async () => {
         await handleServerAction(() => deleteUser(id), {
             loadingMessage: "Deleting user...",
@@ -56,9 +37,9 @@ export default function DeleteUserDialog({id}: { id: number }) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction disabled={disabled} onClick={handleDelete}
+                    <AlertDialogAction onClick={handleDelete}
                                        className={'bg-red-600 text-white hover:bg-red-700'}>
-                        Delete {countdown > 0 ? `(${countdown})` : ''}
+                        Delete
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

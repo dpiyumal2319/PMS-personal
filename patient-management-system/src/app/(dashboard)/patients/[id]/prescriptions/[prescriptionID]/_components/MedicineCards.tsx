@@ -60,8 +60,8 @@ const PrescriptionIssueCard = ({issue}: { issue: IssueWithDetails }) => {
                                 <>
                                     <span className="text-gray-400">|</span>
                                     <div>
-                                        <span className="font-medium text-slate-500">Batch ID: </span>
-                                        <span className="text-gray-900 font-semibold">{issue.batch.id}</span>
+                                        <span className="font-medium text-slate-500">Batch #: </span>
+                                        <span className="text-gray-900 font-semibold">{issue.batch.number}</span>
                                     </div>
                                 </>
                             )}
