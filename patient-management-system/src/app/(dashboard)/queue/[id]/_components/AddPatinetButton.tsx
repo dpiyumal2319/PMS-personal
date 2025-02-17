@@ -15,14 +15,14 @@ import Link from "next/link";
 import {getQueueStatus} from "@/app/lib/actions";
 
 // Search by types
-const AddPatientButton = ({id}: { id: number }) => {
+const AddPatientButton = ({ id, refetch }: { id: number; refetch: () => void }) => {
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchBy, setSearchBy] = useState<"name" | "telephone" | "NIC">("name");
     const [results, setResults] = useState<Patient[]>([]);
     const [error, setError] = useState<string | null>(null);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
-    const [queueStatus , setQueueStatus] = useState<QueueStatus | null>(null);
+    const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
 
     const isNumber = (value: string) => {
         return /^\d+$/.test(value);
@@ -95,11 +95,10 @@ const AddPatientButton = ({id}: { id: number }) => {
             }
         );
 
-        if (!result.success) {
-            return;
+        if (result.success) {
+            setOpen(false);
+            refetch();
         }
-
-        setOpen(false);
     }
 
     return (
@@ -151,42 +150,44 @@ const AddPatientButton = ({id}: { id: number }) => {
 
                     {/* Search Results */}
                     {results.length > 0 ? (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>SEX</TableHead>
-                                        <TableHead>Age</TableHead>
-                                        <TableHead>Telephone</TableHead>
-                                        <TableHead>NIC</TableHead>
-                                        <TableHead>Actions</TableHead>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>SEX</TableHead>
+                                    <TableHead>Age</TableHead>
+                                    <TableHead>Telephone</TableHead>
+                                    <TableHead>NIC</TableHead>
+                                    <TableHead>Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {results.map((patient) => (
+                                    <TableRow
+                                        key={patient.id}
+                                        className="cursor-pointer hover:bg-gray-50"
+                                    >
+                                        <TableCell>{patient.name}</TableCell>
+                                        <TableCell>{getSex(patient.gender)}</TableCell>
+                                        <TableCell>{patient.birthDate ? calcAge(new Date(patient.birthDate)) : "N/A"}</TableCell>
+                                        <TableCell>{patient.telephone}</TableCell>
+                                        <TableCell>{patient.NIC || "N/A"}</TableCell>
+                                        <TableCell>
+                                            <Button onClick={() => handleAddToQueue(patient.id)}>
+                                                Add to Queue
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {results.map((patient) => (
-                                        <TableRow
-                                            key={patient.id}
-                                            className="cursor-pointer hover:bg-gray-50"
-                                        >
-                                            <TableCell>{patient.name}</TableCell>
-                                            <TableCell>{getSex(patient.gender)}</TableCell>
-                                            <TableCell>{patient.birthDate ? calcAge(new Date(patient.birthDate)) : "N/A"}</TableCell>
-                                            <TableCell>{patient.telephone}</TableCell>
-                                            <TableCell>{patient.NIC || "N/A"}</TableCell>
-                                            <TableCell>
-                                                <Button onClick={() => handleAddToQueue(patient.id)}>
-                                                    Add to Queue
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        ) : (
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
                         searchTerm && <p className="p-2 text-gray-500">No results found</p>
-                        )}
+                    )}
                     {results.length > 9 && (
-                        <Link href={`/patients?query=${encodeURIComponent(searchTerm)}&filter=${encodeURIComponent(searchBy)}`} className={'text-blue-500 underline'}>
+                        <Link
+                            href={`/patients?query=${encodeURIComponent(searchTerm)}&filter=${encodeURIComponent(searchBy)}`}
+                            className={'text-blue-500 underline'}>
                             Show More...
                         </Link>
                     )}
