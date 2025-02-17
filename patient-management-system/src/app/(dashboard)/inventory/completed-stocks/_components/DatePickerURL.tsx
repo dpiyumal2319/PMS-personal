@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -34,12 +34,12 @@ const DatePickerURL = () => {
         return date.toISOString().split("T")[0];
     };
 
-    const updateURLParameters = (start: Date, end: Date) => {
+    const updateURLParameters = useCallback((start: Date, end: Date) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('from', formatDateForInput(start));
         params.set('to', formatDateForInput(end));
         router.push(`?${params.toString()}`);
-    };
+    }, [router, searchParams]);
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -57,7 +57,7 @@ const DatePickerURL = () => {
     // Sync URL parameters on component mount
     useEffect(() => {
         updateURLParameters(dateRange.startDate, dateRange.endDate);
-    }, []);
+    }, [dateRange.endDate, dateRange.startDate, updateURLParameters]);
 
     return (
         <div className="flex items-center justify-between">

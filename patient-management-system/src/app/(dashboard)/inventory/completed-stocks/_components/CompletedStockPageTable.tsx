@@ -43,6 +43,7 @@ export default async function CompletedStockPageTable({
         const batchTotalPages = await getTotalPagesForCompletedFilteredDrugsByBatch({
             query, fromDate, toDate, status
         });
+
         const batchDrugs = await getCompletedFilteredDrugsByBatch({
             query, page: currentPage, sort, fromDate, toDate, status
         });

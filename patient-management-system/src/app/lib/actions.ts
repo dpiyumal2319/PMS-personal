@@ -1951,6 +1951,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByBatch({
     fromDate?: string;
     toDate?: string;
 }) {
+
     const whereCondition: Record<string, unknown> = {
         number: {contains: query},
     };
