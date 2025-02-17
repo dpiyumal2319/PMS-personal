@@ -58,14 +58,14 @@ export const DoctorLinks: SidebarItem[] = [
             },
             {
                 type: "link",
-                title: "Cost Management",
-                url: "/inventory/cost-management",
+                title: "Completed Stocks",
+                url: "/inventory/completed-stocks",
                 isActive: false,
             },
             {
                 type: "link",
-                title: "Completed Stocks",
-                url: "/inventory/completed-stocks",
+                title: "Cost Management",
+                url: "/inventory/cost-management",
                 isActive: false,
             },
         ],
@@ -92,6 +92,12 @@ export const DoctorLinks: SidebarItem[] = [
                 type: "link",
                 title: "Profile",
                 url: "/admin/profile",
+                isActive: false,
+            },
+            {
+                type: "link",
+                title: "Fees",
+                url: "/admin/fees",
                 isActive: false,
             }
         ],
