@@ -6,12 +6,13 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@
 import {Input} from "@/components/ui/input";
 import {useDebounce} from "@/hooks/useDebounce";
 import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
-import type {Patient} from "@prisma/client";
+import {QueueStatus, type Patient} from "@prisma/client";
 import {calcAge, handleServerAction} from "@/app/lib/utils";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import Link from "next/link";
+import {getQueueStatus} from "@/app/lib/actions";
 
 // Search by types
 const AddPatientButton = ({id}: { id: number }) => {
@@ -21,10 +22,20 @@ const AddPatientButton = ({id}: { id: number }) => {
     const [results, setResults] = useState<Patient[]>([]);
     const [error, setError] = useState<string | null>(null);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
+    const [queueStatus , setQueueStatus] = useState<QueueStatus | null>(null);
 
     const isNumber = (value: string) => {
         return /^\d+$/.test(value);
     }
+
+    useEffect(() => {
+        const fetchStatus = async () => {
+            return await getQueueStatus(id);
+        };
+        fetchStatus().then((status) => {
+            setQueueStatus(status?.status || null);
+        });
+    }, [id]);
 
     useEffect(() => {
         if (searchBy === "NIC") {
@@ -96,6 +107,7 @@ const AddPatientButton = ({id}: { id: number }) => {
             <Dialog open={open} onOpenChange={setOpen} modal={true}>
                 <DialogTrigger asChild>
                     <Button
+                        disabled={queueStatus !== 'IN_PROGRESS'}
                         className='text-white font-bold disabled:bg-gray-500'
                         onClick={() => setOpen(true)}
                     >
