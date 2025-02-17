@@ -259,6 +259,45 @@ async function main() {
         }
     })
 
+    // Create Prescriptions
+const prescription1 = await prisma.prescription.create({
+    data: {
+        presentingSymptoms: 'Fever and headache',
+        bloodPressure: '120/80',
+        pulse: '75',
+        cardiovascular: 'Normal',
+        patientId: patient1.id,
+    },
+});
+
+const prescription2 = await prisma.prescription.create({
+    data: {
+        presentingSymptoms: 'Body pain and fever',
+        bloodPressure: '110/70',
+        pulse: '80',
+        cardiovascular: 'Normal',
+        patientId: patient2.id,
+    },
+});
+
+// Create Issues
+await prisma.issue.createMany({
+    data: [
+        {
+            prescriptionId: prescription1.id,
+            strategy: 'MEAL',
+            stratergyDetails: JSON.stringify({ timing: 'After meals' }),
+            quantity: 2,
+        },
+        {
+            prescriptionId: prescription2.id,
+            strategy: 'WHEN_NEEDED',
+            stratergyDetails: JSON.stringify({ timing: 'Only when in pain' }),
+            quantity: 1,
+        },
+    ],
+});
+
     console.log('Seeding complete!');
 }
 

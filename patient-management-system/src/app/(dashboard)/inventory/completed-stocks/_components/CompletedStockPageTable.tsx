@@ -15,18 +15,13 @@ interface Batch {
     status: string;
 }
 
-interface PaginationProps {
-    totalPages: number;
-    itemsPerPage?: number;
-}
+
 
 export default async function CompletedStockPageTable({
     query,
     currentPage,
     selection,
     sort,
-    drugId,
-    brandId,
     status,
     fromDate,
     toDate

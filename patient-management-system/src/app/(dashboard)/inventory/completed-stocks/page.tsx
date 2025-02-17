@@ -2,11 +2,9 @@
 
 import React, { Suspense } from "react";
 
-import { DrugForm } from "@/app/(dashboard)/inventory/_components/DrugForm";
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
-import SortingDropdown from "@/app/(dashboard)/inventory/_components/SortingDropdown";
 import CompletedStockPageTable from "@/app/(dashboard)/inventory/completed-stocks/_components/CompletedStockPageTable";
 import DrugListSkeleton from "@/app/(dashboard)/inventory/available-stocks/_components/DrugListSkeleton";
 import DatePickerURL from "./_components/DatePickerURL";

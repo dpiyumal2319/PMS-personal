@@ -260,6 +260,8 @@ interface whereCondition {
     drugBrandId?: number;
 }
 
+
+
 // Function to get total pages for filtered drugs by batch
 export async function getTotalPagesForFilteredDrugsByBatch({
     query = "",
@@ -1577,111 +1579,6 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
 
 const PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH = 15;
 
-export async function getTotalPagesForCompletedFilteredDrugsByBatch({
-    query = "",
-    status = "ALL",
-    fromDate,
-    toDate,
-}: {
-    query?: string;
-    status?: string;
-    fromDate?: string;
-    toDate?: string;
-}) {
-    const whereCondition: any = {
-        number: { contains: query },
-    };
-
-    if (status === "ALL") {
-        whereCondition.status = { not: "AVAILABLE" }; // Excludes AVAILABLE
-    } else {
-        whereCondition.status = status as BatchStatus;
-    }
-    if (fromDate && toDate) {
-        whereCondition.stockDate = {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-        };
-    }
-
-    const totalItems = await prisma.batch.count({ where: whereCondition });
-    return Math.ceil(totalItems / PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH);
-}
-
-
-export async function getCompletedFilteredDrugsByBatch({
-    query = "",
-    page = 1,
-    sort = "expiryDate",
-    status = "ALL",
-    fromDate,
-    toDate,
-}: {
-    query?: string;
-    page?: number;
-    sort?: string;
-    status?: string;
-    fromDate?: string;
-    toDate?: string;
-}) {
-
-    const whereCondition: any = {
-        number: { contains: query },
-    };
-
-
-    if (status === "ALL") {
-        whereCondition.status = { not: "AVAILABLE" }; // Excludes AVAILABLE
-    } else {
-        whereCondition.status = status as BatchStatus;
-    }
-    if (fromDate && toDate) {
-        whereCondition.stockDate = {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-        };
-    }
-
-    const batches = await prisma.batch.findMany({
-        where: whereCondition,
-        include: {
-            drug: true,
-            drugBrand: true,
-        },
-    });
-
-    const formattedBatches = batches.map((batch) => ({
-        id: batch.id,
-        batchNumber: batch.number,
-        brandName: batch.drugBrand.name,
-        modelName: batch.drug.name,
-        expiryDate: batch.expiry.toISOString(),
-        stockDate: batch.stockDate.toISOString(),
-        remainingAmount: batch.remainingQuantity,
-        fullAmount: batch.fullAmount,
-        status: batch.status,
-    }));
-
-    // Sorting logic
-    if (sort === "expiryDate") {
-        formattedBatches.sort(
-            (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
-        );
-    } else if (sort === "newlyAdded") {
-        formattedBatches.sort(
-            (a, b) => new Date(b.stockDate).getTime() - new Date(a.stockDate).getTime()
-        );
-    } else if (sort === "alphabetically") {
-        formattedBatches.sort((a, b) => a.modelName.localeCompare(b.modelName));
-    }
-
-    return formattedBatches.slice(
-        (page - 1) * PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH,
-        page * PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH
-    );
-}
-
-
 export async function getTotalPagesForCompletedFilteredDrugsByModel({
     query = "",
     status = "ALL",
@@ -1693,8 +1590,8 @@ export async function getTotalPagesForCompletedFilteredDrugsByModel({
     fromDate?: string;
     toDate?: string;
 }) {
-    const whereCondition: any = {
-        drug: { name: { startsWith: query} },
+    const whereCondition: Record<string, unknown> = {
+        drug: { name: { contains: query } },
     };
 
     if (status === "ALL") {
@@ -1728,8 +1625,8 @@ export async function getCompletedFilteredDrugsByModel({
     fromDate?: string;
     toDate?: string;
 }) {
-    const whereCondition: any = {
-        drug: { name: { startsWith: query } },
+    const whereCondition: Record<string, unknown> = {
+        drug: { name: { contains: query } },
     };
 
     if (status === "ALL") {
@@ -1778,8 +1675,8 @@ export async function getTotalPagesForCompletedFilteredDrugsByBrand({
     fromDate?: string;
     toDate?: string;
 }) {
-    const whereCondition: any = {
-        drugBrand: { name: { startsWith: query} },
+    const whereCondition: Record<string, unknown> = {
+        drugBrand: { name: { contains: query } },
     };
 
     if (status === "ALL") {
@@ -1813,8 +1710,8 @@ export async function getCompletedFilteredDrugsByBrand({
     fromDate?: string;
     toDate?: string;
 }) {
-    const whereCondition: any = {
-        drugBrand: { name: { startsWith: query } },
+    const whereCondition: Record<string, unknown> = {
+        drugBrand: { name: { contains: query } },
     };
 
     if (status === "ALL") {
@@ -1852,7 +1749,93 @@ export async function getCompletedFilteredDrugsByBrand({
     return sortAndPaginateBatches(formattedBatches, sort, page);
 }
 
-function sortAndPaginateBatches(batches: any[], sort: string, page: number) {
+export async function getTotalPagesForCompletedFilteredDrugsByBatch({
+    query = "",
+    status = "ALL",
+    fromDate,
+    toDate,
+}: {
+    query?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+}) {
+    const whereCondition: Record<string, unknown> = {
+        number: { contains: query },
+    };
+
+    if (status === "ALL") {
+        whereCondition.status = { not: "AVAILABLE" };
+    } else {
+        whereCondition.status = status as BatchStatus;
+    }
+    if (fromDate && toDate) {
+        whereCondition.stockDate = {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+        };
+    }
+
+    const totalItems = await prisma.batch.count({ where: whereCondition });
+    return Math.ceil(totalItems / PAGE_SIZE_COMPLETED_DRUGS_BY_BATCH);
+}
+
+export async function getCompletedFilteredDrugsByBatch({
+    query = "",
+    page = 1,
+    sort = "expiryDate",
+    status = "ALL",
+    fromDate,
+    toDate,
+}: {
+    query?: string;
+    page?: number;
+    sort?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+}) {
+    const whereCondition: Record<string, unknown> = {
+        number: { contains: query },
+    };
+
+    if (status === "ALL") {
+        whereCondition.status = { not: "AVAILABLE" };
+    } else {
+        whereCondition.status = status as BatchStatus;
+    }
+    if (fromDate && toDate) {
+        whereCondition.stockDate = {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+        };
+    }
+
+    const batches = await prisma.batch.findMany({
+        where: whereCondition,
+        include: {
+            drug: true,
+            drugBrand: true,
+        },
+    });
+
+    const formattedBatches = batches.map((batch) => ({
+        id: batch.id,
+        batchNumber: batch.number,
+        brandName: batch.drugBrand.name,
+        modelName: batch.drug.name,
+        expiryDate: batch.expiry.toISOString(),
+        stockDate: batch.stockDate.toISOString(),
+        remainingAmount: batch.remainingQuantity,
+        fullAmount: batch.fullAmount,
+        status: batch.status,
+    }));
+
+    return sortAndPaginateBatches(formattedBatches, sort, page);
+}
+
+
+function sortAndPaginateBatches(batches: { id: number; batchNumber: string; brandName: string; modelName: string; expiryDate: string; stockDate: string; remainingAmount: number; fullAmount: number; status: string; }[], sort: string, page: number) {
     if (sort === "expiryDate") {
         batches.sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
     } else if (sort === "newlyAdded") {
@@ -1867,3 +1850,34 @@ function sortAndPaginateBatches(batches: any[], sort: string, page: number) {
     );
 }
 
+
+export async function getIssuedPatients(batchId: number) {
+    return await prisma.issue.findMany({
+        where: { batchId },
+        select: {
+            id: true,
+            quantity: true,
+            prescriptionId: true,
+            prescription: {
+                select: {
+                    time: true,
+                    patientId: true,
+                    patient: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+            },
+        },
+    }).then(issues =>
+        issues.map(issue => ({
+            id: issue.id,
+            issuedDate: issue.prescription.time.toISOString().split('T')[0],
+            patientId: issue.prescription.patientId,
+            patientName: issue.prescription.patient.name,
+            prescriptionId: issue.prescriptionId,
+            issuedAmount: issue.quantity,
+        }))
+    );
+}
