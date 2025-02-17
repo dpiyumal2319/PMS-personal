@@ -1,9 +1,9 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {ReactNode, useState} from 'react';
 import {Button} from "@/components/ui/button";
 import {
-    Dialog,
+    Dialog, DialogClose,
     DialogContent,
     DialogHeader,
     DialogTitle,
@@ -29,7 +29,11 @@ export interface ChangePasswordFormData {
     confirmPassword: string;
 }
 
-const ChangePasswordDialog = ({userID, currentPw}: { userID: number, currentPw: boolean }) => {
+const ChangePasswordDialog = ({userID, currentPw, trigger}: {
+    userID: number,
+    currentPw: boolean,
+    trigger: ReactNode
+}) => {
     const form = useForm<ChangePasswordFormData>({
         defaultValues: {
             currentPassword: '',
@@ -67,9 +71,7 @@ const ChangePasswordDialog = ({userID, currentPw}: { userID: number, currentPw: 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size={'sm'}>
-                    Change Password
-                </Button>
+                {trigger}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
@@ -128,11 +130,10 @@ const ChangePasswordDialog = ({userID, currentPw}: { userID: number, currentPw: 
                                 </FormItem>
                             )}
                         />
-
                         <div className="flex justify-end gap-3">
-                            <DialogTrigger asChild>
+                            <DialogClose asChild>
                                 <Button type="button" variant="outline">Cancel</Button>
-                            </DialogTrigger>
+                            </DialogClose>
                             <Button type="submit">Update Password</Button>
                         </div>
                     </form>

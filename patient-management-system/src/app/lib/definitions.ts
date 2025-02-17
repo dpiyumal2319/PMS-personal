@@ -1,14 +1,10 @@
 import type {LucideIcon} from "lucide-react";
 import {z} from "zod";
-import {Gender, Role} from '@prisma/client';
+import {Role} from '@prisma/client';
 
 export type SessionPayload = {
     id: number;
-    name: string;
-    email: string;
-    image: string | null;
     role: Role;
-    gender: Gender;
 }
 
 export type SidebarLinkItem = {

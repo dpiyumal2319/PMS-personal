@@ -1,9 +1,12 @@
 import {Card} from "@/components/ui/card";
 import UserAvatar from "@/app/(dashboard)/_components/UserAvatar";
 import {Gender, Role} from "@prisma/client";
-import EditProfileDialog from "@/app/(dashboard)/admin/staff/_components/EditProfileDialog";
-import ChangePasswordDialog from "@/app/(dashboard)/admin/staff/_components/ChangePasswordDialog";
+import EditProfileDialog from "@/app/(dashboard)/admin/_components/EditProfileDialog";
+import ChangePasswordDialog from "@/app/(dashboard)/admin/_components/ChangePasswordDialog";
 import DeleteUserDialog from "@/app/(dashboard)/admin/staff/_components/DeleteUserAlert";
+import {Edit} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import React from "react";
 
 interface CardProps {
     name: string;
@@ -23,7 +26,7 @@ export function StaffCard({name, email, telephone, profilePic, gender, id}: Card
             <div className="flex items-center justify-between gap-4 mb-6">
                 <div className={`flex items-center gap-4`}>
                     <div className="relative w-12 h-12">
-                        <UserAvatar role={Role.NURSE} name={name} imageUrl={profilePic} size="lg" gender={gender}/>
+                        <UserAvatar role={Role.NURSE} imageUrl={profilePic} size="lg" gender={gender}/>
                     </div>
                     <div>
                         <h2 className="text-lg font-semibold text-primary-700">{name}</h2>
@@ -31,12 +34,19 @@ export function StaffCard({name, email, telephone, profilePic, gender, id}: Card
                     </div>
                 </div>
                 <EditProfileDialog
-                    name={name}
-                    email={email}
-                    telephone={telephone}
-                    gender={gender}
-                    image={profilePic}
-                    id={id}
+                    initial={{
+                        name,
+                        email,
+                        telephone,
+                        id,
+                        image: profilePic,
+                        gender,
+                    }
+                    }
+                    trigger={
+                        <Button size="icon" variant="ghost">
+                            <Edit/>
+                        </Button>}
                 />
             </div>
 
@@ -58,7 +68,11 @@ export function StaffCard({name, email, telephone, profilePic, gender, id}: Card
                 </div>
                 <div className={`flex items-center justify-end gap-2`}>
                     <DeleteUserDialog id={id}/>
-                    <ChangePasswordDialog userID={id} currentPw={false}/>
+                    <ChangePasswordDialog userID={id} currentPw={false} trigger={
+                        <Button size={'sm'}>
+                            Change Password
+                        </Button>
+                    }/>
                 </div>
             </div>
         </Card>

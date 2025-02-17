@@ -10,8 +10,6 @@ export async function login(message: string, formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    console.log(formData);
-
     if (!email || !password) {
         return "Please fill in all fields";
     }
@@ -32,19 +30,13 @@ export async function login(message: string, formData: FormData) {
         return "Invalid credentials";
     }
 
-    console.log(user);
-
     await createSession({
         role: user.role,
         id: user.id,
-        email: user.email,
-        name: user.name,
-        gender: user.gender,
-        image: user.image
     });
 
+    console.log("Logged in as", user.role, user.id);
 
-    // await createSession({ role, id: parseInt(id) });
     redirect("/dashboard"); // Redirect only if valid
 }
 

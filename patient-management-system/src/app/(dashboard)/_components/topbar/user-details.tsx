@@ -2,20 +2,26 @@ import React from 'react';
 import UserAvatar from "@/app/(dashboard)/_components/UserAvatar";
 import {verifySession} from "@/app/lib/sessions";
 import {Skeleton} from "@/components/ui/skeleton";
+import {getUser} from "@/app/lib/actions";
 
 const UserDetails = async () => {
     const session = await verifySession();
+    const user = await getUser(session.id);
+
+    if (!user) {
+        return null
+    }
 
     return (
         <div className="flex items-center gap-3">
             <div className="flex flex-col">
-                <span className="font-medium text-sm">{session.name}</span>
+                <span className="font-medium text-sm">{user.name}</span>
             </div>
             <UserAvatar
-                role={session.role}
-                name={session.name}
-                gender={session.gender}
-                imageUrl={session.image}
+                role={user.role}
+                imageUrl={user.image}
+                size="sm"
+                gender={user.gender}
             />
         </div>
     );

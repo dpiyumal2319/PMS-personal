@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, {ReactNode} from 'react';
 import {Button} from "@/components/ui/button";
-import {Edit} from "lucide-react";
 import {
     Dialog,
     DialogContent, DialogFooter,
@@ -34,15 +33,10 @@ export interface EditUserProfileFormData {
     gender: Gender;
 }
 
-const EditProfileDialog = ({name, email, image, telephone, gender, id}: EditUserProfileFormData) => {
+const EditProfileDialog = ({initial, trigger}: { initial: EditUserProfileFormData, trigger: ReactNode }) => {
     const form = useForm<EditUserProfileFormData>({
         defaultValues: {
-            name,
-            email,
-            id,
-            telephone,
-            image,
-            gender,
+            ...initial,
         },
     });
     const [error, setError] = React.useState<string | null>(null);
@@ -104,9 +98,7 @@ const EditProfileDialog = ({name, email, image, telephone, gender, id}: EditUser
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="icon" variant="ghost">
-                    <Edit/>
-                </Button>
+                {trigger}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
@@ -162,13 +154,13 @@ const EditProfileDialog = ({name, email, image, telephone, gender, id}: EditUser
                         <FormField
                             control={form.control}
                             name="gender"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Gender <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <CustomGenderSelect value={field.value} onValueChange={field.onChange} />
+                                        <CustomGenderSelect value={field.value} onValueChange={field.onChange}/>
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />

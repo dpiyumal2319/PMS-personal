@@ -23,8 +23,8 @@ import {
     BatchAssignPayload
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
 import {DISPENSARY_FEE, DOCTOR_FEE} from "@/app/lib/constants";
-import {ChangePasswordFormData} from "@/app/(dashboard)/admin/staff/_components/ChangePasswordDialog";
-import {EditUserProfileFormData} from "@/app/(dashboard)/admin/staff/_components/EditProfileDialog";
+import {ChangePasswordFormData} from "@/app/(dashboard)/admin/_components/ChangePasswordDialog";
+import {EditUserProfileFormData} from "@/app/(dashboard)/admin/_components/EditProfileDialog";
 import {validateEmail, validateMobile} from "@/app/lib/utils";
 import {AddUserFormData} from "@/app/(dashboard)/admin/staff/_components/AddUserDialog";
 
@@ -86,6 +86,26 @@ export async function changePassword({
     }
 }
 
+export async function getUser(id: number) {
+    const session = await verifySession();
+
+    if (session.role !== Role.DOCTOR && session.id !== id) {
+        throw new Error('You do not have permission to view this user');
+    }
+
+    return prisma.user.findUnique({
+        where: {id},
+        select: {
+            name: true,
+            email: true,
+            mobile: true,
+            role: true,
+            image: true,
+            gender: true
+        }
+    });
+}
+
 export async function deleteUser(id: number): Promise<myError> {
     try {
         const session = await verifySession();
@@ -103,6 +123,7 @@ export async function deleteUser(id: number): Promise<myError> {
         });
 
         revalidatePath("/admin/staff");
+        revalidatePath("/admin/profile");
         return {success: true, message: "User deleted successfully"};
     } catch (e) {
         if (e instanceof Error) {
@@ -146,6 +167,12 @@ export async function editProfile(formData: EditUserProfileFormData) {
         })
 
         revalidatePath('/admin/staff');
+        revalidatePath('/admin/profile');
+
+        if (session.id === formData.id) {
+            revalidatePath('/')
+        }
+
         return {success: true, message: 'Profile updated successfully'};
     } catch (e) {
         if (e instanceof Error) {
