@@ -61,11 +61,11 @@ export const badgeColors = {
 
 
 export function CustomBadge({
-                                text,
-                                color,
-                                className,
-                                ...props
-                            }: ParameterBadgeProps) {
+    text,
+    color,
+    className,
+    ...props
+}: ParameterBadgeProps) {
 
 
     return (
@@ -86,9 +86,9 @@ export function getRandomColor() {
 
 
 export function RandomColorBadge({
-                                     text,
-                                     ...props
-                                 }: ParameterBadgeProps) {
+    text,
+    ...props
+}: ParameterBadgeProps) {
     return (
         <CustomBadge
             {...props}

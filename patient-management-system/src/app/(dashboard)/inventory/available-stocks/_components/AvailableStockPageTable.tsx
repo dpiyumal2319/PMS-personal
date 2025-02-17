@@ -77,6 +77,7 @@ export default async function AvailableStockPageTable({
             modelId: drugId,
             brandId: brandId
         });
+
         content = <div>
             <div>
                 <DrugListByBatch batches={filteredDrugsByBatch} />
