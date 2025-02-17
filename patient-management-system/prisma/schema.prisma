@@ -164,7 +164,7 @@ model Prescription {
 model Bill {
   id               Int          @id @default(autoincrement())
   doctorCharge     Float
-  dispensoryCharge Float
+  dispensaryCharge Float
   medicinesCharge  Float
   Prescription     Prescription @relation(fields: [prescriptionId], references: [id])
   prescriptionId   Int          @unique // Ensures one-to-one relationship
@@ -252,4 +252,15 @@ model BatchHistory {
   batch       Batch     @relation(fields: [batchId], references: [id])
 
   @@unique([drugId, drugBrandId])
+}
+
+enum ChargeType {
+  DOCTOR
+  DISPENSARY
+}
+
+model Charge {
+  name      ChargeType @id
+  value     Float
+  updatedAt DateTime   @updatedAt // Tracks last modification
 }
