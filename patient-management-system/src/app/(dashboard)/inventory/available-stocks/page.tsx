@@ -39,7 +39,7 @@ export default async function InventoryAvailable({
           urlParameterName="selection"
         />
 
-        <SortingDropdown selection="selection" />
+        <SortingDropdown selection={selection} />
         <div>
           <DrugForm />
         </div>
