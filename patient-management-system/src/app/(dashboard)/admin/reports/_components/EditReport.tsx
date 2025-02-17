@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { editReportType, getReportType } from "@/app/lib/actions";
-import { handleServerAction } from "@/app/lib/utils";
-import { Edit } from "lucide-react";
+import React, {useState, useEffect} from "react";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {editReportType, getReportType} from "@/app/lib/actions";
+import {handleServerAction} from "@/app/lib/utils";
+import {Edit} from "lucide-react";
+import {Textarea} from "@/components/ui/textarea";
 
 interface Parameter {
     name: string;
@@ -25,7 +26,7 @@ interface ReportFormEditPopupProps {
     ID: number;
 }
 
-const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
+const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ID}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState<ReportForm>({
@@ -67,7 +68,8 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
             }
         };
 
-        fetchReport().then(() => {});
+        fetchReport().then(() => {
+        });
 
         return () => {
             isMounted = false;
@@ -99,7 +101,7 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
     const addParameter = () => {
         setForm(prev => ({
             ...prev,
-            parameters: [...prev.parameters, { name: "", units: "", isNew: true, id: -1 }]
+            parameters: [...prev.parameters, {name: "", units: "", isNew: true, id: -1}]
         }));
     };
 
@@ -114,7 +116,7 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
         setForm(prev => ({
             ...prev,
             parameters: prev.parameters.map((param, i) =>
-                i === index ? { ...param, [field]: value } : param
+                i === index ? {...param, [field]: value} : param
             )
         }));
     };
@@ -129,7 +131,7 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
 
             if (result.success) {
                 setIsOpen(false);
-                setForm({ name: "", description: "", parameters: [] });
+                setForm({name: "", description: "", parameters: []});
             }
         } catch (error) {
             console.error('Failed to submit form:', error);
@@ -145,10 +147,10 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
                     className="h-8 w-8 p-0"
                     onClick={() => setIsOpen(true)}
                 >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-4 w-4"/>
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className={"overflow-y-scroll max-h-screen"}>
                 <DialogHeader>
                     <DialogTitle>Edit Report</DialogTitle>
                 </DialogHeader>
@@ -162,7 +164,7 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
                             </label>
                             <Input
                                 value={form.name}
-                                onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+                                onChange={(e) => setForm(prev => ({...prev, name: e.target.value}))}
                                 className={errors.name ? "border-red-500" : ""}
                             />
                             {errors.name && (
@@ -171,9 +173,9 @@ const ReportFormEditPopup: React.FC<ReportFormEditPopupProps> = ({ ID }) => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Description</label>
-                            <Input
+                            <Textarea
                                 value={form.description}
-                                onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+                                onChange={(e) => setForm(prev => ({...prev, description: e.target.value}))}
                             />
                         </div>
                         <div>

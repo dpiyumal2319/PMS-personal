@@ -75,9 +75,11 @@ model Patient {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
   name     String
+  gender   Gender
+  image    String?
   mobile   String
   password String
   role     Role
@@ -135,7 +137,8 @@ model Batch {
   expiry            DateTime
   stockDate         DateTime       @default(now())
   remainingQuantity Float
-  price             Float
+  wholesalePrice    Float
+  retailPrice       Float
   status            BatchStatus
   Issue             Issue[]
   BatchHistory      BatchHistory[]
@@ -146,8 +149,7 @@ model Prescription {
   time               DateTime           @default(now())
   presentingSymptoms String
   status             PrescriptionStatus @default(PENDING)
-  doctorCharge       Float?
-  price              Float?
+  extraDoctorCharge  Float?
   details            String?
   bloodPressure      String?
   pulse              String?
@@ -156,6 +158,16 @@ model Prescription {
   patientId          Int
   issues             Issue[]
   OffRecordMeds      OffRecordMeds[]
+  Bill               Bill?
+}
+
+model Bill {
+  id               Int          @id @default(autoincrement())
+  doctorCharge     Float
+  dispensaryCharge Float
+  medicinesCharge  Float
+  Prescription     Prescription @relation(fields: [prescriptionId], references: [id])
+  prescriptionId   Int          @unique // Ensures one-to-one relationship
 }
 
 model OffRecordMeds {
@@ -240,4 +252,15 @@ model BatchHistory {
   batch       Batch     @relation(fields: [batchId], references: [id])
 
   @@unique([drugId, drugBrandId])
+}
+
+enum ChargeType {
+  DOCTOR
+  DISPENSARY
+}
+
+model Charge {
+  name      ChargeType @id
+  value     Float
+  updatedAt DateTime   @updatedAt // Tracks last modification
 }

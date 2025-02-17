@@ -55,6 +55,7 @@ async function main() {
             mobile: '0765432189',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.DOCTOR,
+            gender: Gender.MALE,
             name: 'Dr. Pubudu'
         },
     });
@@ -65,6 +66,7 @@ async function main() {
             mobile: '0775671234',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.NURSE,
+            gender: Gender.FEMALE,
             name: 'Pubudu Nona'
         },
     });
@@ -75,6 +77,7 @@ async function main() {
             mobile: '0775677890',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.NURSE,
+            gender: Gender.FEMALE,
             name: 'Dasun Nona'
         },
     });
@@ -99,7 +102,8 @@ async function main() {
                     fullAmount: 100,
                     expiry: new Date('2025-12-01'),
                     remainingQuantity: 100,
-                    price: 50,
+                    wholesalePrice: 2,
+                    retailPrice: 3,
                     status: 'AVAILABLE',
                     drugId: 1
                 }]
@@ -118,7 +122,8 @@ async function main() {
                     fullAmount: 100,
                     expiry: new Date('2025-12-10'),
                     remainingQuantity: 80,
-                    price: 40,
+                    wholesalePrice: 2.5,
+                    retailPrice: 3,
                     status: 'AVAILABLE',
                     drugId: 1
                 }]
@@ -137,7 +142,8 @@ async function main() {
                     fullAmount: 200,
                     expiry: new Date('2026-06-15'),
                     remainingQuantity: 200,
-                    price: 80,
+                    wholesalePrice: 3,
+                    retailPrice: 4,
                     status: 'AVAILABLE',
                     drugId: 2
                 }]
@@ -156,7 +162,8 @@ async function main() {
                     fullAmount: 150,
                     expiry: new Date('2025-09-30'),
                     remainingQuantity: 150,
-                    price: 120,
+                    wholesalePrice: 5,
+                    retailPrice: 6,
                     status: 'AVAILABLE',
                     drugId: 3
                 }]

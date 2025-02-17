@@ -1,26 +1,29 @@
-import { IconType } from "react-icons";
-import { z } from "zod";
-import { Role } from '@prisma/client';
+import type {LucideIcon} from "lucide-react";
+import {z} from "zod";
+import {Role} from '@prisma/client';
 
 export type SessionPayload = {
     id: number;
-    name: string;
-    email: string;
     role: Role;
 }
 
-export type SideBarItem = {
-    icon: IconType,
-    name: string,
-    link: string
-}
+export type SidebarLinkItem = {
+    type: "link";
+    icon?: LucideIcon;
+    title: string;
+    url: string;
+    isActive: boolean;
+};
 
-export type ExpandingSidebarItem = {
-    icon: IconType,
-    name: string,
-    initially_expanded: boolean,
-    links: SideBarItem[]
-}
+export type SidebarExpandableItem = {
+    type: "expandable";
+    title: string;
+    icon?: LucideIcon;
+    initiallyExpanded: boolean;
+    items: SidebarLinkItem[];
+};
+
+export type SidebarItem = SidebarLinkItem | SidebarExpandableItem;
 
 export type myError = {
     success: boolean,
@@ -30,7 +33,7 @@ export type myError = {
 export type myBillError = {
     success: boolean,
     message: string,
-    bill? : Bill | null
+    bill?: Bill | null
 }
 
 export interface Parameter {
@@ -53,9 +56,9 @@ export type PatientFormData = {
     height: string;  // Keep as string since input fields return strings
     weight: string;  // Keep as string since input fields return strings
     gender: "MALE" | "FEMALE" | ""
-  };
+};
 
-export type InventoryFormData= {
+export type InventoryFormData = {
     drugName: string;
     brandName: string;
     brandDescription?: string;
@@ -63,7 +66,8 @@ export type InventoryFormData= {
     drugType: string;
     quantity: number | string;
     expiry: string;
-    price: number | string;
+    retailPrice: number | string;
+    wholesalePrice: number | string;
     brandId?: number; // Add brandId property
     drugId?: number;  // Add drugId property
 }
@@ -82,71 +86,72 @@ export type InventoryFormData= {
 
 export const searchModels = [
     {
-      label: "By Brand",
-      value: "brand",
-      sortOptions: [
-        { label: "Alphabetically", value: "alphabetically" },
-        { label: "Lowest", value: "lowest" },
-        { label: "Highest", value: "highest" },
-      ],
+        label: "By Brand",
+        value: "brand",
+        sortOptions: [
+            {label: "Alphabetically", value: "alphabetically"},
+            {label: "Lowest", value: "lowest"},
+            {label: "Highest", value: "highest"},
+        ],
     },
     {
-      label: "By Model",
-      value: "model",
-      sortOptions: [
-        { label: "Alphabetically", value: "alphabetically" },
-        { label: "Lowest", value: "lowest" },
-        { label: "Highest", value: "highest" },
-      ],
+        label: "By Model",
+        value: "model",
+        sortOptions: [
+            {label: "Alphabetically", value: "alphabetically"},
+            {label: "Lowest", value: "lowest"},
+            {label: "Highest", value: "highest"},
+        ],
     },
     {
-      label: "By Batch",
-      value: "batch",
-      sortOptions: [
-        { label: "Expiry Date", value: "expiryDate" },
-        { label: "Newly Added", value: "newlyAdded" },
-        { label: "Alphabetically", value: "alphabetically" },
-      ],
+        label: "By Batch",
+        value: "batch",
+        sortOptions: [
+            {label: "Expiry Date", value: "expiryDate"},
+            {label: "Newly Added", value: "newlyAdded"},
+            {label: "Alphabetically", value: "alphabetically"},
+        ],
     },
-  ];
+];
 
-  //search models for cost management
+//search models for cost management
 
-  export const searchModelsCM = [
+export const searchModelsCM = [
     {
-      label: "By Brand",
-      value: "brand",
-      sortOptions: [
-        { label: "Alphabetically", value: "alphabetically" },
-        { label: "Total Cost", value: "totalcost" },
-        { label: "Cost Per Unit", value: "costperunit" },
-      ],
+        label: "By Brand",
+        value: "brand",
+        sortOptions: [
+            {label: "Alphabetically", value: "alphabetically"},
+            {label: "Total Cost", value: "totalcost"},
+            {label: "Cost Per Unit", value: "costperunit"},
+        ],
     },
     {
-      label: "By Model",
-      value: "model",
-      sortOptions: [
-        { label: "Alphabetically", value: "alphabetically" },
-        { label: "Total Cost", value: "totalcost" },
-        { label: "Cost Per Unit", value: "costperunit" },
-      ],
+        label: "By Model",
+        value: "model",
+        sortOptions: [
+            {label: "Alphabetically", value: "alphabetically"},
+            {label: "Total Cost", value: "totalcost"},
+            {label: "Cost Per Unit", value: "costperunit"},
+        ],
     },
     {
-      label: "By Batch",
-      value: "batch",
-      sortOptions: [
-        { label: "Total Cost", value: "totalcost" },
-        { label: "Cost Per Unit", value: "costperunit" },
-        { label: "Alphabetically", value: "alphabetically" },
-      ],
+        label: "By Batch",
+        value: "batch",
+        sortOptions: [
+            {label: "Total Cost", value: "totalcost"},
+            {label: "Cost Per Unit", value: "costperunit"},
+            {label: "Alphabetically", value: "alphabetically"},
+        ],
     },
-  ];
+];
 
 export interface StockData {
     id: number;
     name: string;
     totalPrice: number;
-    unitPrice?: number;
+    retailPrice?: number;
+    wholesalePrice?: number;
     remainingQuantity?: number;
 }
 
@@ -156,50 +161,50 @@ export interface StockQueryParams {
     query?: string;
     page?: number;
     sort?: SortOption;
-     startDate?: Date;
+    startDate?: Date;
     endDate?: Date;
 }
 
 // types for inventory cost analysis
 
 export interface StockAnalysis {
-  available: number;  // Total value of available drugs
-  sold: number;      // Total value of sold drugs
-  expired: number;   // Total value of expired drugs
-  trashed: number;   // Total value of trashed drugs
-  errors: number;    // Total value of drugs with errors
+    available: number;  // Total value of available drugs
+    sold: number;      // Total value of sold drugs
+    expired: number;   // Total value of expired drugs
+    trashed: number;   // Total value of trashed drugs
+    errors: number;    // Total value of drugs with errors
 }
 
 export interface DateRange {
-  startDate: Date;
-  endDate: Date;
+    startDate: Date;
+    endDate: Date;
 }
 
 export interface BatchAnalysisData {
-  id: number;
-  status: string;
-  price: number;
-  fullAmount: number;
-  remainingQuantity: number;
-  stockDate: Date;
-  expiry: Date;
+    id: number;
+    status: string;
+    price: number;
+    fullAmount: number;
+    remainingQuantity: number;
+    stockDate: Date;
+    expiry: Date;
 }
 
 export interface PieChartData {
-  name: string;
-  value: number;
-  color: string;
+    name: string;
+    value: number;
+    color: string;
 }
 
 export interface DrugBrandSuggestion {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
 
 }
 
 export interface DrugModelSuggestion {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
 }
 
 
@@ -240,10 +245,10 @@ const OtherStrategySchema = z.object({
 });
 
 export const StrategyJsonSchema = z.discriminatedUnion("name", [
-    z.object({ name: z.literal("MEAL"), strategy: MealStrategySchema }),
-    z.object({ name: z.literal("WHEN_NEEDED"), strategy: WhenNeededStrategySchema }),
-    z.object({ name: z.literal("PERIODIC"), strategy: PeriodicStrategySchema }),
-    z.object({ name: z.literal("OTHER"), strategy: OtherStrategySchema }),
+    z.object({name: z.literal("MEAL"), strategy: MealStrategySchema}),
+    z.object({name: z.literal("WHEN_NEEDED"), strategy: WhenNeededStrategySchema}),
+    z.object({name: z.literal("PERIODIC"), strategy: PeriodicStrategySchema}),
+    z.object({name: z.literal("OTHER"), strategy: OtherStrategySchema}),
 ]);
 
 export type StrategyJson = z.infer<typeof StrategyJsonSchema>;

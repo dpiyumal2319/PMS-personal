@@ -29,7 +29,7 @@ export default async function Page({
         <div className={"flex flex-col p-4"}>
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold">All Patients</h1>
+                <h1 className="text-2xl font-bold text-primary-700">All Patients</h1>
                 <AddPatientForm modal={model}/>
             </div>
 
