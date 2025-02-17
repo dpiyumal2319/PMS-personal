@@ -66,7 +66,8 @@ export type InventoryFormData = {
     drugType: string;
     quantity: number | string;
     expiry: string;
-    price: number | string;
+    retailPrice: number | string;
+    wholesalePrice: number | string;
     brandId?: number; // Add brandId property
     drugId?: number;  // Add drugId property
 }
@@ -149,7 +150,8 @@ export interface StockData {
     id: number;
     name: string;
     totalPrice: number;
-    unitPrice?: number;
+    retailPrice?: number;
+    wholesalePrice?: number;
     remainingQuantity?: number;
 }
 

@@ -99,7 +99,7 @@ const AssignBatchCard = ({issue, onBatchAssign}: AssignBatchCardProps) => {
                             {batches?.map((batch) => (
                                 <SelectItem key={batch.id} value={`${batch.id}`} className={'p-4'}>
                                     <div className={'flex justify-between gap-4 items-center w-full'}>
-                                        <span className={'font-semibold'}>#{batch.id}</span>
+                                        <span className={'font-semibold'}>#{batch.number}</span>
                                         <div className="flex gap-2">
                                             <CustomBadge
                                                 text={`${batch.remainingQuantity} left`}

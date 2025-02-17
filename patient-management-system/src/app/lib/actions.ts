@@ -16,17 +16,17 @@ import {
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import {BatchStatus, DrugType, Prisma, Role} from "@prisma/client";
+import {$Enums, BatchStatus, DrugType, Prisma, Role} from "@prisma/client";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {
     BatchAssignPayload
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
-import {DISPENSARY_FEE, DOCTOR_FEE} from "@/app/lib/constants";
 import {ChangePasswordFormData} from "@/app/(dashboard)/admin/_components/ChangePasswordDialog";
 import {EditUserProfileFormData} from "@/app/(dashboard)/admin/_components/EditProfileDialog";
 import {validateEmail, validateMobile} from "@/app/lib/utils";
 import {AddUserFormData} from "@/app/(dashboard)/admin/staff/_components/AddUserDialog";
+import ChargeType = $Enums.ChargeType;
 
 export async function changePassword({
                                          currentPassword,
@@ -1176,7 +1176,8 @@ export async function addNewItem(
                     fullAmount: parseFloat(formData.quantity.toString()),
                     remainingQuantity: parseFloat(formData.quantity.toString()),
                     expiry: new Date(formData.expiry),
-                    price: parseFloat(formData.price.toString()),
+                    retailPrice: parseFloat(formData.retailPrice.toString()),
+                    wholesalePrice: parseFloat(formData.wholesalePrice.toString()),
                     status: 'AVAILABLE'
                 }
             });
@@ -1223,7 +1224,8 @@ export async function getBatchData(batchId: number) {
             remainingQuantity: batchData.remainingQuantity,
             expiryDate: batchData.expiry.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
             stockDate: batchData.stockDate.toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
-            price: batchData.price,
+            retailPrice: batchData.retailPrice,
+            wholesalePrice: batchData.wholesalePrice,
             status: batchData.status,
         };
     } catch (error) {
@@ -1474,14 +1476,14 @@ function applySorting(data: StockData[], sort: SortOption = "alphabetically"): S
             return data.sort((a, b) => a.totalPrice - b.totalPrice);
         case "unit-highest":
             return data.sort((a, b) => {
-                const aUnit = a.unitPrice || 0;
-                const bUnit = b.unitPrice || 0;
+                const aUnit = a.retailPrice || 0;
+                const bUnit = b.retailPrice || 0;
                 return bUnit - aUnit;
             });
         case "unit-lowest":
             return data.sort((a, b) => {
-                const aUnit = a.unitPrice || 0;
-                const bUnit = b.unitPrice || 0;
+                const aUnit = a.retailPrice || 0;
+                const bUnit = b.retailPrice || 0;
                 return aUnit - bUnit;
             });
         default:
@@ -1560,7 +1562,8 @@ export async function getStockByModel({
                     } : {})
                 },
                 select: {
-                    price: true,
+                    wholesalePrice: true,
+                    retailPrice: true,
                     remainingQuantity: true,
                 },
             },
@@ -1571,8 +1574,8 @@ export async function getStockByModel({
         id: drug.id,
         name: drug.name,
         totalPrice: drug.batch.reduce(
-            (sum: number, batch: { price: number; remainingQuantity: number }) =>
-                sum + batch.price * batch.remainingQuantity,
+            (sum: number, batch: { retailPrice: number; remainingQuantity: number }) =>
+                sum + batch.retailPrice * batch.remainingQuantity,
             0
         ),
     }));
@@ -1611,8 +1614,9 @@ export async function getStockByBatch({
     const stockData: StockData[] = batches.map(batch => ({
         id: batch.id,
         name: `${batch.drugBrand.name} - ${batch.drug.name} (Batch ${batch.number})`,
-        totalPrice: batch.price * batch.remainingQuantity,
-        unitPrice: batch.price,
+        totalPrice: batch.retailPrice * batch.remainingQuantity,
+        retailPrice: batch.retailPrice,
+        wholesalePrice: batch.wholesalePrice,
         remainingQuantity: batch.remainingQuantity,
     }));
 
@@ -1662,7 +1666,8 @@ export async function getStockByBrand({
                     ],
                 },
                 select: {
-                    price: true,
+                    wholesalePrice: true,
+                    retailPrice: true,
                     remainingQuantity: true,
                 },
             },
@@ -1676,7 +1681,7 @@ export async function getStockByBrand({
             id: brand.id,
             name: brand.name,
             totalPrice: brand.Batch.reduce(
-                (sum, batch) => sum + batch.price * batch.remainingQuantity,
+                (sum, batch) => sum + batch.retailPrice * batch.remainingQuantity,
                 0
             ),
         }));
@@ -1708,7 +1713,7 @@ export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnaly
         };
 
         batches.forEach((batch) => {
-            const pricePerUnit = batch.price;
+            const pricePerUnit = batch.retailPrice;
 
             switch (batch.status) {
                 case "AVAILABLE":
@@ -1865,7 +1870,8 @@ export async function getDrugModelStats(drugId: number) {
             select: {
                 status: true,
                 remainingQuantity: true,
-                price: true,
+                retailPrice: true,
+                wholesalePrice: true,
                 fullAmount: true,
             },
         });
@@ -1883,41 +1889,41 @@ export async function getDrugModelStats(drugId: number) {
             switch (batch.status) {
                 case 'AVAILABLE':
                     stats.available.quantity += batch.remainingQuantity;
-                    stats.available.value += batch.price * batch.remainingQuantity;
+                    stats.available.value += batch.retailPrice * batch.remainingQuantity;
                     if (batch.fullAmount > batch.remainingQuantity) {
                         stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
-                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.retailPrice;
                     }
                     break;
 
                 case 'EXPIRED':
                     stats.expired.quantity += batch.remainingQuantity;
-                    stats.expired.value += batch.price * batch.remainingQuantity;
+                    stats.expired.value += batch.retailPrice * batch.remainingQuantity;
                     if (batch.fullAmount > batch.remainingQuantity) {
                         stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
-                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.retailPrice;
                     }
                     break;
 
                 case 'COMPLETED':
                     if (batch.remainingQuantity > 0) {
                         stats.errors.quantity += batch.remainingQuantity;
-                        stats.errors.value += batch.remainingQuantity * batch.price;
+                        stats.errors.value += batch.remainingQuantity * batch.retailPrice;
                     }
                     stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
-                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.retailPrice;
                     break;
                 case 'TRASHED':
                     stats.trashed.quantity += batch.remainingQuantity;
-                    stats.trashed.value += batch.remainingQuantity * batch.price;
+                    stats.trashed.value += batch.remainingQuantity * batch.retailPrice;
                     if (batch.fullAmount > batch.remainingQuantity) {
-                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.retailPrice;
                         stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
                     }
                     break;
                 default:
                     // Any unknown status, count as error
-                    stats.errors.value += batch.fullAmount * batch.price;
+                    stats.errors.value += batch.fullAmount * batch.retailPrice;
                     stats.errors.quantity += batch.fullAmount;
             }
         });
@@ -1962,7 +1968,7 @@ export async function addPrescription({
                     cardiovascular: prescriptionForm.cardiovascular,
                     details: prescriptionForm.description,
                     status: 'PENDING',
-                    doctorCharge: Number(prescriptionForm.extraDoctorCharges),
+                    extraDoctorCharge: Number(prescriptionForm.extraDoctorCharges),
                     // Create issues
                     issues: {
                         create: prescriptionForm.issues.map(issue => ({
@@ -2012,39 +2018,26 @@ export async function addPrescription({
             }
 
             // Update strategy history for each issue
-            for (let i = 0; i < prescriptionForm.issues.length; i++) {
-                const issue = prescriptionForm.issues[i];
-                const createdIssue = prescription.issues[i]; // Get the corresponding created issue
+            await Promise.all(
+                prescriptionForm.issues.map((issue, index) => {
+                    const createdIssue = prescription.issues[index]; // Get the corresponding created issue
 
-                // Try to find existing history
-                const existingHistory = await tx.stratergyHistory.findUnique({
-                    where: {
-                        drugId: issue.drugId
-                    }
-                });
-
-                if (existingHistory) {
-                    // Update existing history with new brand and issue
-                    await tx.stratergyHistory.update({
+                    return tx.stratergyHistory.upsert({
                         where: {
                             drugId: issue.drugId
                         },
-                        data: {
+                        update: {
                             brandId: issue.brandId,
                             issueId: createdIssue.id
-                        }
-                    });
-                } else {
-                    // Create new history entry
-                    await tx.stratergyHistory.create({
-                        data: {
+                        },
+                        create: {
                             drugId: issue.drugId,
                             brandId: issue.brandId,
                             issueId: createdIssue.id
                         }
                     });
-                }
-            }
+                })
+            );
         });
 
         revalidatePath(`/patients/${patientID}/prescriptions`);
@@ -2375,10 +2368,32 @@ export async function calculateBill({prescriptionData}: {
                 return {success: false, message: 'Prescription already completed'};
             }
 
+            let dspFees: number = 0;
+            const dispensaryFee = await prisma.charge.findUnique({
+                where: {
+                    name: ChargeType.DISPENSARY
+                }
+            })
+
+            if (dispensaryFee) {
+                dspFees = dispensaryFee.value;
+            }
+
+            let dctFee: number = 0;
+            const doctorFee = await prisma.charge.findUnique({
+                where: {
+                    name: ChargeType.DOCTOR
+                }
+            })
+
+            if (doctorFee) {
+                dctFee = doctorFee.value;
+            }
+
             const bill: Bill = {
                 patientID: prescriptionData.patientID,
-                dispensary_charge: DISPENSARY_FEE,
-                doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
+                dispensary_charge: dspFees,
+                doctor_charge: dctFee + (prescription.extraDoctorCharge ?? 0),
                 cost: 0,
                 entries: [],
             };
@@ -2407,62 +2422,64 @@ export async function calculateBill({prescriptionData}: {
                 }
 
                 // Updating or creating the cache
-                const existingCache = await prisma.batchHistory.findUnique({
+                await prisma.batchHistory.upsert({
                     where: {
                         drugId_drugBrandId: {
                             drugId: batch.drugId,
                             drugBrandId: batch.drugBrandId
                         }
+                    },
+                    update: {
+                        batchId: assign.batchID
+                    },
+                    create: {
+                        drugId: batch.drugId,
+                        drugBrandId: batch.drugBrandId,
+                        batchId: assign.batchID
                     }
                 });
 
-                if (existingCache) {
-                    await prisma.batchHistory.update({
-                        where: {
-                            drugId_drugBrandId: {
-                                drugId: batch.drugId,
-                                drugBrandId: batch.drugBrandId
-                            }
-                        },
-                        data: {
-                            batchId: assign.batchID
-                        }
-                    });
-                } else {
-                    await prisma.batchHistory.create({
-                        data: {
-                            drugId: batch.drugId,
-                            drugBrandId: batch.drugBrandId,
-                            batchId: assign.batchID
-                        }
-                    });
-                }
 
                 await prisma.issue.update({
                     where: {id: assign.issueID},
                     data: {batchId: assign.batchID},
                 });
 
-                const batchCost = issue.quantity * batch.price;
+                const batchCost = issue.quantity * batch.retailPrice;
                 bill.cost += batchCost;
 
                 bill.entries.push({
                     drugName: batch.drug.name,
                     brandName: batch.drugBrand.name,
                     quantity: issue.quantity,
-                    unitPrice: batch.price,
+                    unitPrice: batch.retailPrice
                 });
             }
 
-            await prisma.prescription.update({
-                where: {id: prescriptionID},
-                data: {price: bill.cost},
+            await prisma.bill.upsert({
+                where: {
+                    prescriptionId: prescriptionID
+                },
+                update: {
+                    doctorCharge: bill.doctor_charge,
+                    dispensaryCharge: bill.dispensary_charge,
+                    medicinesCharge: bill.cost
+                },
+                create: {
+                    prescriptionId: prescriptionID,
+                    doctorCharge: bill.doctor_charge,
+                    dispensaryCharge: bill.dispensary_charge,
+                    medicinesCharge: bill.cost
+                }
             });
+
 
             return {success: true, message: 'Bill calculated successfully', bill};
         });
     } catch (error) {
-        console.error('Error calculating bill:', error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            console.error(error.message);
+        }
         return {success: false, message: 'An error occurred while calculating bill'};
     }
 }
@@ -2477,7 +2494,8 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
                     drug: true,
                     brand: true,
                 }
-            }
+            },
+            Bill: true
         }
     });
 
@@ -2485,20 +2503,20 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
         throw new Error('Prescription not found');
     }
 
-    if (prescription.status === 'PENDING' || !prescription.price || prescription.price === 0 || !prescription.issues.every(issue => issue.batch)) {
+    if (prescription.status === 'PENDING' || !prescription.Bill || !prescription.issues.every(issue => issue.batch)) {
         throw new Error('Prescription not completed');
     }
 
     return {
         patientID: prescription.patientId,
-        dispensary_charge: DISPENSARY_FEE,
-        doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
-        cost: prescription.price,
+        dispensary_charge: prescription.Bill.dispensaryCharge,
+        doctor_charge: prescription.Bill.doctorCharge,
+        cost: (prescription.Bill.medicinesCharge + prescription.Bill.dispensaryCharge + prescription.Bill.doctorCharge),
         entries: prescription.issues.map(issue => ({
             drugName: issue.drug.name,
             brandName: issue.brand.name,
             quantity: issue.quantity,
-            unitPrice: issue.batch?.price ?? 0,
+            unitPrice: issue.batch?.retailPrice ?? 0,
         }))
     };
 }
@@ -2575,5 +2593,35 @@ export async function completePrescription(prescriptionID: number): Promise<myEr
     } catch (error) {
         console.error('Error completing prescription:', error);
         return {success: false, message: 'An error occurred while completing prescription'};
+    }
+}
+
+
+export async function getCharges() {
+    return prisma.charge.findMany({
+        where: {
+            OR: [
+                {name: ChargeType.DISPENSARY},
+                {name: ChargeType.DOCTOR}
+            ]
+        }
+    })
+}
+
+export async function updateCharges({charge, value}: { charge: ChargeType, value: number }): Promise<myError> {
+    try {
+        await prisma.charge.upsert({
+            where: {name: charge},
+            update: {value},
+            create: {name: charge, value}
+        });
+
+        return {success: true, message: `Charge for ${charge} updated successfully`};
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            console.error(e);
+        }
+
+        return {success: false, message: 'An error occurred while updating charge'};
     }
 }

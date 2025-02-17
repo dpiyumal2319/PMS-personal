@@ -3,6 +3,7 @@ import UserAvatar from "@/app/(dashboard)/_components/UserAvatar";
 import {verifySession} from "@/app/lib/sessions";
 import {Skeleton} from "@/components/ui/skeleton";
 import {getUser} from "@/app/lib/actions";
+import Link from "next/link";
 
 const UserDetails = async () => {
     const session = await verifySession();
@@ -13,17 +14,19 @@ const UserDetails = async () => {
     }
 
     return (
-        <div className="flex items-center gap-3">
-            <div className="flex flex-col">
-                <span className="font-medium text-sm">{user.name}</span>
+        <Link href={'/admin/profile'}>
+            <div className="flex items-center gap-3">
+                <div className="flex flex-col">
+                    <span className="font-medium text-sm">{user.name}</span>
+                </div>
+                <UserAvatar
+                    role={user.role}
+                    imageUrl={user.image}
+                    size="sm"
+                    gender={user.gender}
+                />
             </div>
-            <UserAvatar
-                role={user.role}
-                imageUrl={user.image}
-                size="sm"
-                gender={user.gender}
-            />
-        </div>
+        </Link>
     );
 };
 

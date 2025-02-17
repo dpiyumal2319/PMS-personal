@@ -17,7 +17,7 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import {Clock, LayoutDashboard, Package, Shield, Users} from "lucide-react"
+import {Clock, LayoutDashboard, Package, Shield, Users, UserPen} from "lucide-react"
 import {Role} from '@prisma/client';
 import {SidebarItem} from "@/app/lib/definitions";
 import {usePathname} from "next/navigation";
@@ -58,14 +58,14 @@ export const DoctorLinks: SidebarItem[] = [
             },
             {
                 type: "link",
-                title: "Cost Management",
-                url: "/inventory/cost-management",
+                title: "Completed Stocks",
+                url: "/inventory/completed-stocks",
                 isActive: false,
             },
             {
                 type: "link",
-                title: "Completed Stocks",
-                url: "/inventory/completed-stocks",
+                title: "Cost Management",
+                url: "/inventory/cost-management",
                 isActive: false,
             },
         ],
@@ -93,6 +93,12 @@ export const DoctorLinks: SidebarItem[] = [
                 title: "Profile",
                 url: "/admin/profile",
                 isActive: false,
+            },
+            {
+                type: "link",
+                title: "Fees",
+                url: "/admin/fees",
+                isActive: false,
             }
         ],
     },
@@ -119,6 +125,13 @@ export const NurseLinks: SidebarItem[] = [
         url: "/queue",
         icon: Clock,
         isActive: false,
+    },
+    {
+        type: 'link',
+        title: 'Profile',
+        url: 'admin/profile',
+        icon: UserPen,
+        isActive: false
     },
     {
         type: "expandable",
