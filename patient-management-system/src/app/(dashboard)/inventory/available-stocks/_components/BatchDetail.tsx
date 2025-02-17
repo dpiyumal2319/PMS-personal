@@ -40,7 +40,7 @@ export default async function BatchDetail({ batchId }: { batchId: string }) {
                                             ? "blue"
                                             : "gray"
                         }
-                        className="text-xl px-4 py-1"
+                        className="text-sm px-4 py-1"
                     />
                 </CardHeader>
 
