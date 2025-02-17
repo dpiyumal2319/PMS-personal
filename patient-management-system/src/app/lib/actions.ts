@@ -1,12 +1,28 @@
 'use server';
 
 import {revalidatePath} from "next/cache";
-import type {myError} from "@/app/lib/definitions";
-import {DateRange, InventoryFormData, PatientFormData, StockAnalysis} from "@/app/lib/definitions";
+import {
+    Bill,
+    DateRange,
+    InventoryFormData,
+    myBillError,
+    myError,
+    PatientFormData,
+    SortOption,
+    StockAnalysis,
+    StockData,
+    StockQueryParams
+} from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
 import {BatchStatus, DrugType, Prisma} from "@prisma/client";
+import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
+import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {
+    BatchAssignPayload
+} from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
+import {DISPENSARY_FEE, DOCTOR_FEE} from "@/app/lib/constants";
 
 export async function changePassword({currentPassword, newPassword, confirmPassword}: {
     currentPassword: string,
@@ -259,8 +275,6 @@ interface whereCondition {
     drugId?: number;
     drugBrandId?: number;
 }
-
-
 
 // Function to get total pages for filtered drugs by batch
 export async function getTotalPagesForFilteredDrugsByBatch({
@@ -1325,14 +1339,14 @@ export async function deletePatientReport(reportId: number, patientID: number): 
 }
 
 export async function getPendingPatientsCount() {
+    const session = await verifySession();
+
     return prisma.queueEntry.count({
         where: {
-            status: 'PENDING'
+            status: session.role === 'DOCTOR' ? 'PENDING' : {not: 'COMPLETED'}
         }
     });
 }
-
-
 
 const PAGE_SIZE = 10;
 
@@ -1453,18 +1467,38 @@ export async function getStockByBrand({
 
 // Fetch stock grouped by model
 export async function getStockByModel({
-    query = "",
-    page = 1,
-    sort = "alphabetically"
-}: StockQueryParams): Promise<StockData[]> {
+                                          query = "",
+                                          page = 1,
+                                          sort = "alphabetically",
+                                          startDate,
+                                          endDate
+                                      }: StockQueryParams): Promise<StockData[]> {
     const drugs = await prisma.drug.findMany({
         where: {
-            name: { contains: query },
-            batch: { some: { status: "AVAILABLE" } },
+            name: {contains: query},
+            batch: {
+                some: {
+                    // status: "AVAILABLE",
+                    ...(startDate && endDate ? {
+                        stockDate: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    } : {})
+                }
+            },
         },
         include: {
             batch: {
-                where: { status: "AVAILABLE" },
+                where: {
+                    // status: "AVAILABLE",
+                    ...(startDate && endDate ? {
+                        stockDate: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    } : {})
+                },
                 select: {
                     price: true,
                     remainingQuantity: true,
@@ -1477,7 +1511,8 @@ export async function getStockByModel({
         id: drug.id,
         name: drug.name,
         totalPrice: drug.batch.reduce(
-            (sum, batch) => sum + batch.price * batch.remainingQuantity,
+            (sum: number, batch: { price: number; remainingQuantity: number }) =>
+                sum + batch.price * batch.remainingQuantity,
             0
         ),
     }));
@@ -1488,17 +1523,25 @@ export async function getStockByModel({
 
 // Fetch stock grouped by batch
 export async function getStockByBatch({
-    query = "",
-    page = 1,
-    sort = "alphabetically"
-}: StockQueryParams): Promise<StockData[]> {
+                                          query = "",
+                                          page = 1,
+                                          sort = "alphabetically",
+                                          startDate,
+                                          endDate,
+                                      }: StockQueryParams): Promise<StockData[]> {
     const batches = await prisma.batch.findMany({
         where: {
             OR: [
-                { drug: { name: { contains: query } } },
-                { drugBrand: { name: { contains: query } } },
+                {drug: {name: {contains: query}}},
+                {drugBrand: {name: {contains: query}}},
             ],
-            status: "AVAILABLE",
+            // status: "AVAILABLE",
+            ...(startDate && endDate ? {
+                stockDate: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            } : {})
         },
         include: {
             drug: true,
@@ -1518,62 +1561,148 @@ export async function getStockByBatch({
     return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
 
-export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnalysis> {
-  try {
-    const batches = await prisma.batch.findMany({
-      where: {
-        stockDate: {
-          gte: dateRange.startDate,
-          lte: dateRange.endDate,
+export async function getStockByBrand({
+                                          query = "",
+                                          page = 1,
+                                          sort = "alphabetically",
+                                          startDate,
+                                          endDate,
+                                      }: StockQueryParams): Promise<StockData[]> {
+    // Ensure dates are properly formatted for Prisma
+    const formattedStartDate = startDate ? new Date(startDate) : undefined;
+    const formattedEndDate = endDate ? new Date(endDate) : undefined;
+
+    const brands = await prisma.drugBrand.findMany({
+        where: {
+            name: {contains: query},
+            Batch: {
+                some: {
+                    AND: [
+                        // { status: "AVAILABLE" },
+                        {
+                            stockDate: {
+                                gte: formattedStartDate,
+                                lte: formattedEndDate,
+                            },
+                        },
+                    ],
+                },
+            },
         },
-      },
-      include: {
-        Issue: true,
-      },
+        include: {
+            Batch: {
+                where: {
+                    AND: [
+                        // { status: "AVAILABLE" },
+                        {
+                            stockDate: {
+                                gte: formattedStartDate,
+                                lte: formattedEndDate,
+                            },
+                        },
+                    ],
+                },
+                select: {
+                    price: true,
+                    remainingQuantity: true,
+                },
+            },
+        },
     });
 
-    const analysis: StockAnalysis = {
-      available: 0,
-      sold: 0,
-      expired: 0,
-      trashed: 0,
-      errors: 0,
-    };
+    // Transform and sort the data
+    const stockData: StockData[] = brands
+        .filter(brand => brand.Batch.length > 0) // Only include brands with matching batches
+        .map(brand => ({
+            id: brand.id,
+            name: brand.name,
+            totalPrice: brand.Batch.reduce(
+                (sum, batch) => sum + batch.price * batch.remainingQuantity,
+                0
+            ),
+        }));
 
-    batches.forEach((batch) => {
-      const soldQuantity = batch.fullAmount - batch.remainingQuantity;
-      const pricePerUnit = batch.price;
+    const sortedData = applySorting(stockData, sort as SortOption);
+    return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+}
 
-      // Calculate values based on price
-      const remainingValue = batch.remainingQuantity * pricePerUnit;
-      const soldValue = soldQuantity * pricePerUnit;
+export async function getStockAnalysis(dateRange: DateRange): Promise<StockAnalysis> {
+    try {
+        const batches = await prisma.batch.findMany({
+            where: {
+                stockDate: {
+                    gte: dateRange.startDate,
+                    lte: dateRange.endDate,
+                },
+            },
+            include: {
+                Issue: true,
+            },
+        });
 
-      switch (batch.status) {
-        case "AVAILABLE":
-          analysis.available += remainingValue;
-          analysis.sold += soldValue;
-          break;
-        case "EXPIRED":
-          analysis.expired += remainingValue;
-          analysis.sold += soldValue;
-          break;
-        case "COMPLETED":
-          analysis.sold += batch.fullAmount * pricePerUnit;
-          break;
-        case "TRASHED":
-          analysis.trashed += remainingValue;
-          analysis.sold += soldValue;
-          break;
-        default:
-          analysis.errors += batch.fullAmount * pricePerUnit;
-      }
-    });
+        const analysis: StockAnalysis = {
+            available: 0,    // Will store available quantity value
+            sold: 0,        // Will store sold quantity value
+            expired: 0,     // Will store expired quantity value
+            trashed: 0,     // Will store trashed quantity value
+            errors: 0,      // Will store error quantity value
+        };
 
-    return analysis;
-  } catch (error) {
-    console.error("Error fetching stock analysis:", error);
-    throw new Error("Failed to fetch stock analysis");
-  }
+        batches.forEach((batch) => {
+            const pricePerUnit = batch.price;
+
+            switch (batch.status) {
+                case "AVAILABLE":
+                    // For available status:
+                    // - available = remainingQuantity * price
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    analysis.available += batch.remainingQuantity * pricePerUnit;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    }
+                    break;
+
+                case "EXPIRED":
+                    // For expired status:
+                    // - expired = remainingQuantity * price
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    analysis.expired += batch.remainingQuantity * pricePerUnit;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    }
+                    break;
+
+                case "COMPLETED":
+                    // For completed status:
+                    // - If there's remaining quantity, it's an error
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    if (batch.remainingQuantity > 0) {
+                        analysis.errors += batch.remainingQuantity * pricePerUnit;
+                    }
+                    analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    break;
+
+                case "TRASHED":
+                    // For trashed status:
+                    // - trashed = remainingQuantity * price
+                    // - sold = (fullAmount - remainingQuantity) * price
+                    analysis.trashed += batch.remainingQuantity * pricePerUnit;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        analysis.sold += (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+                    }
+                    break;
+
+                default:
+                    // Any unknown status, count as error
+                    analysis.errors += batch.fullAmount * pricePerUnit;
+            }
+        });
+
+        return analysis;
+    } catch (error) {
+        console.error("Error fetching stock analysis:", error);
+        throw new Error("Failed to fetch stock analysis");
+    }
 }
 
 
@@ -1880,4 +2009,819 @@ export async function getIssuedPatients(batchId: number) {
             issuedAmount: issue.quantity,
         }))
     );
+}
+
+
+//Suggest the name when adding the drugs
+
+export async function searchDrugBrands(query: string) {
+    if (!query || query.length < 2) return [];
+
+    return prisma.drugBrand.findMany({
+        where: {
+            name: {
+                startsWith: query,
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+            description: true,
+        },
+        take: 8,
+    });
+}
+
+export async function searchDrugModels(query: string) {
+    if (!query || query.length < 2) return [];
+
+    return prisma.drug.findMany({
+        where: {
+            name: {
+                startsWith: query,
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+        },
+        take: 8,
+    });
+}
+
+
+// export async function getPriceOfDrugModel({
+//     query,
+//     page = 1,
+//     startDate,
+//     endDate,
+// }: StockQueryParams){
+//     const take = 10;
+//     const skip = (page - 1) * take;
+
+//     const drugs = await prisma.drug.findMany({
+//         where: {
+//             name: {
+//                 contains: query,
+//             },
+//             batch: {
+//                 some: {
+//                     stockDate:{
+//                         gte: startDate,
+//                         lte: endDate,
+//                     },
+//                 },
+//             },
+//         },
+
+//         select: {
+//       id: true,
+//       name: true,
+//       batch: {
+//         where: {
+//           status: 'AVAILABLE',
+//         },
+//         select: {
+//           remainingQuantity: true,
+//           price: true,
+//         },
+//       },
+//     },
+//     skip,
+//     take,
+// });
+
+//     return drugs.map(drug => ({
+//     id: drug.id,
+//     name: drug.name,
+//     totalPrice: drug.batch.reduce((sum, batch) =>
+//       sum + (batch.price * batch.remainingQuantity), 0),
+//     remainingQuantity: drug.batch.reduce((sum, batch) =>
+//       sum + batch.remainingQuantity, 0),
+//   }));
+// }
+
+
+//show the info of one drug model
+export async function getDrugModelStats(drugId: number) {
+
+    try {
+        const batches = await prisma.batch.findMany({
+            where: {
+                drugId: drugId,
+            },
+            select: {
+                status: true,
+                remainingQuantity: true,
+                price: true,
+                fullAmount: true,
+            },
+        });
+
+        const stats = {
+            available: {quantity: 0, value: 0},
+            sold: {quantity: 0, value: 0},
+            expired: {quantity: 0, value: 0},
+            trashed: {quantity: 0, value: 0},
+            errors: {quantity: 0, value: 0},
+
+        };
+
+        batches.forEach(batch => {
+            switch (batch.status) {
+                case 'AVAILABLE':
+                    stats.available.quantity += batch.remainingQuantity;
+                    stats.available.value += batch.price * batch.remainingQuantity;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                    }
+                    break;
+
+                case 'EXPIRED':
+                    stats.expired.quantity += batch.remainingQuantity;
+                    stats.expired.value += batch.price * batch.remainingQuantity;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                    }
+                    break;
+
+                case 'COMPLETED':
+                    if (batch.remainingQuantity > 0) {
+                        stats.errors.quantity += batch.remainingQuantity;
+                        stats.errors.value += batch.remainingQuantity * batch.price;
+                    }
+                    stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                    stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                    break;
+                case 'TRASHED':
+                    stats.trashed.quantity += batch.remainingQuantity;
+                    stats.trashed.value += batch.remainingQuantity * batch.price;
+                    if (batch.fullAmount > batch.remainingQuantity) {
+                        stats.sold.value += (batch.fullAmount - batch.remainingQuantity) * batch.price;
+                        stats.sold.quantity += (batch.fullAmount - batch.remainingQuantity);
+                    }
+                    break;
+                default:
+                    // Any unknown status, count as error
+                    stats.errors.value += batch.fullAmount * batch.price;
+                    stats.errors.quantity += batch.fullAmount;
+            }
+        });
+
+        return stats;
+
+    } catch (error) {
+        console.error("Error fetching stock analysis:", error);
+        throw new Error("Failed to fetch stock analysis");
+    }
+}
+
+export async function addPrescription({
+                                          prescriptionForm,
+                                          patientID
+                                      }: {
+    prescriptionForm: PrescriptionFormData;
+    patientID: number;
+}): Promise<myError> {
+    try {
+        // Basic validation checks
+        if (prescriptionForm.issues.length === 0 && prescriptionForm.offRecordMeds.length === 0) {
+            return {success: false, message: 'At least one prescription is required'};
+        }
+
+        // check for repeated drugs
+        const drugIds = prescriptionForm.issues.map(issue => issue.drugId);
+        const uniqueDrugIds = new Set(drugIds);
+        if (drugIds.length !== uniqueDrugIds.size) {
+            return {success: false, message: 'Repeated drugs are not allowed in a single prescription'};
+        }
+
+        // Create prescription with all related records in a transaction
+        await prisma.$transaction(async (tx) => {
+            // Create the main prescription and store its result to get issue IDs
+            const prescription = await tx.prescription.create({
+                data: {
+                    patientId: patientID,
+                    presentingSymptoms: prescriptionForm.presentingSymptoms,
+                    bloodPressure: prescriptionForm.bloodPressure,
+                    pulse: prescriptionForm.pulse,
+                    cardiovascular: prescriptionForm.cardiovascular,
+                    details: prescriptionForm.description,
+                    status: 'PENDING',
+                    doctorCharge: Number(prescriptionForm.extraDoctorCharges),
+                    // Create issues
+                    issues: {
+                        create: prescriptionForm.issues.map(issue => ({
+                            drugId: issue.drugId,
+                            details: issue.details,
+                            brandId: issue.brandId,
+                            strategy: issue.strategy,
+                            strategyDetails: issue.strategyDetails,
+                            quantity: issue.quantity
+                        }))
+                    },
+                    // Create off-record medications
+                    OffRecordMeds: {
+                        create: prescriptionForm.offRecordMeds.map(med => ({
+                            name: med.name,
+                            description: med.description
+                        }))
+                    }
+                },
+                // Include the created issues in the return value
+                include: {
+                    issues: true
+                }
+            });
+
+            //Check for queue entry
+            console.log(patientID);
+            const queueEntry = await tx.queueEntry.findFirst({
+                where: {
+                    patientId: patientID,
+                    status: "PENDING"
+                }
+            });
+
+            console.log(queueEntry);
+
+            if (queueEntry) {
+                revalidatePath(`/queue/${queueEntry.id}`);
+                await tx.queueEntry.update({
+                    where: {
+                        id: queueEntry.id
+                    },
+                    data: {
+                        status: "PRESCRIBED"
+                    }
+                });
+            }
+
+            // Update strategy history for each issue
+            for (let i = 0; i < prescriptionForm.issues.length; i++) {
+                const issue = prescriptionForm.issues[i];
+                const createdIssue = prescription.issues[i]; // Get the corresponding created issue
+
+                // Try to find existing history
+                const existingHistory = await tx.stratergyHistory.findUnique({
+                    where: {
+                        drugId: issue.drugId
+                    }
+                });
+
+                if (existingHistory) {
+                    // Update existing history with new brand and issue
+                    await tx.stratergyHistory.update({
+                        where: {
+                            drugId: issue.drugId
+                        },
+                        data: {
+                            brandId: issue.brandId,
+                            issueId: createdIssue.id
+                        }
+                    });
+                } else {
+                    // Create new history entry
+                    await tx.stratergyHistory.create({
+                        data: {
+                            drugId: issue.drugId,
+                            brandId: issue.brandId,
+                            issueId: createdIssue.id
+                        }
+                    });
+                }
+            }
+        });
+
+        revalidatePath(`/patients/${patientID}/prescriptions`);
+        return {
+            success: true,
+            message: 'Prescription created successfully'
+        };
+    } catch (e) {
+        console.error('Error adding prescription:', e);
+        return {
+            success: false,
+            message: e instanceof Error ? e.message : 'An error occurred while adding prescription'
+        };
+    }
+}
+
+export async function getCachedStrategy(drugID: number) {
+    return prisma.stratergyHistory.findUnique({
+        where: {
+            drugId: drugID
+        },
+        select: {
+            issueId: true,
+            brandId: true,
+            issue: true,
+            brand: {
+                select: {
+                    name: true
+                }
+            }
+        }
+    });
+}
+
+
+export async function searchAvailableDrugs(term: string) {
+    return prisma.drug.findMany({
+        where: {
+            name: {
+                startsWith: term
+            },
+            batch: {
+                some: {
+                    status: "AVAILABLE"
+                }
+            }
+        },
+        take: 10,
+        select: {
+            id: true,
+            name: true,
+            _count: {
+                select: {
+                    batch: true // Counts the number of related batches
+                }
+            },
+            batch: {
+                distinct: ["drugBrandId"], // Get unique brands from batches
+                select: {
+                    drugBrandId: true
+                }
+            }
+        }
+    }).then((drugs) =>
+        drugs.map((drug) => ({
+            id: drug.id,
+            name: drug.name,
+            brandCount: drug.batch.length // Count unique brands
+        }))
+    );
+}
+
+export async function searchBrandByDrug({drugID}: {
+    drugID: number;
+}): Promise<BrandOption[]> {
+    return prisma.drugBrand.findMany({
+        where: {
+            Batch: {
+                some: {
+                    status: "AVAILABLE",
+                    drugId: drugID
+                }
+            }
+        },
+        select: {
+            id: true,
+            name: true,
+            Batch: {
+                where: {
+                    status: "AVAILABLE",
+                    drugId: drugID
+                },
+                select: {
+                    remainingQuantity: true,
+                    expiry: true,
+                    type: true
+                }
+            }
+        }
+    }).then((brands) =>
+        brands.map((brand) => {
+            const batchCount = brand.Batch.length;
+            const totalRemainingQuantity = brand.Batch.reduce(
+                (sum, batch) => sum + batch.remainingQuantity, 0
+            );
+            const farthestExpiry = brand.Batch.reduce(
+                (maxDate, batch) => (batch.expiry > maxDate ? batch.expiry : maxDate),
+                new Date(0) // Initialize with the oldest possible date
+            );
+            return {
+                id: brand.id,
+                name: brand.name,
+                batchCount,
+                totalRemainingQuantity,
+                farthestExpiry
+            };
+        })
+    );
+}
+
+
+//For prescriptions page
+export async function getPrescriptionsCount(patientID: number) {
+    return prisma.prescription.count({
+        where: {
+            patientId: patientID
+        }
+    });
+}
+
+export async function searchPrescriptions({patientID, query, filter, take, skip}: {
+    patientID: number;
+    query: string;
+    filter: string;
+    take: number;
+    skip: number;
+}) {
+    let where = {};
+    const session = await verifySession();
+
+    if (query) {
+        if (filter === "symptom") {
+            where = {
+                presentingSymptoms: {
+                    contains: query
+                }
+            };
+        }
+        if (filter === "drug") {
+            where = {
+                OR: [
+                    {
+                        issues: {
+                            some: {
+                                drug: {
+                                    name: {
+                                        contains: query
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        OffRecordMeds: {
+                            some: {
+                                name: {
+                                    contains: query
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+        }
+    }
+
+    // Only pending prescriptions can be viewed by non-doctor users
+    if (session.role !== 'DOCTOR') {
+        where = {
+            ...where,
+            status: "PENDING"
+        };
+    }
+
+    return prisma.prescription.findMany({
+        where: {
+            patientId: patientID,
+            ...where
+        },
+        take,
+        skip,
+        orderBy: {
+            time: 'desc'
+        },
+        include: {
+            issues: {
+                include: {
+                    drug: true
+                }
+            },
+            OffRecordMeds: {
+                select: {
+                    name: true,
+                }
+            }
+        }
+    });
+}
+
+export async function searchPrescriptionCount({patientID, query, filter}: {
+    patientID: number;
+    query: string;
+    filter: string;
+}) {
+    let where = {};
+
+    if (query) {
+        if (filter === "symptom") {
+            where = {
+                presentingSymptoms: {
+                    contains: query
+                }
+            };
+        }
+        if (filter === "drug") {
+            where = {
+                OR: [
+                    {
+                        issues: {
+                            some: {
+                                drug: {
+                                    name: {
+                                        contains: query
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        OffRecordMeds: {
+                            some: {
+                                name: {
+                                    contains: query
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+        }
+    }
+
+    return prisma.prescription.count({
+        where: {
+            patientId: patientID,
+            ...where
+        }
+    });
+}
+
+export async function getPrescription(prescriptionID: number, patientID: number) {
+    const session = await verifySession();
+    return prisma.prescription.findUnique({
+        where: {
+            id: prescriptionID,
+            patientId: patientID,
+            ...(session.role !== 'DOCTOR' && {status: 'PENDING'})
+        },
+        include: {
+            issues: {
+                include: {
+                    drug: true,
+                    brand: true,
+                    batch: true
+                }
+            },
+            OffRecordMeds: true
+        }
+    })
+}
+
+export async function getBatches({drugID, brandID}: { drugID: number, brandID: number }) {
+    return prisma.batch.findMany({
+        where: {
+            drugId: drugID,
+            drugBrandId: brandID,
+            status: "AVAILABLE"
+        },
+        select: {
+            id: true,
+            number: true,
+            remainingQuantity: true,
+            expiry: true
+        }
+    });
+}
+
+export async function getCachedBatch({drugId, brandId}: { drugId: number, brandId: number }) {
+    return prisma.batchHistory.findUnique({
+        where: {
+            drugId_drugBrandId: {
+                drugId,
+                drugBrandId: brandId
+            }
+        }, select: {
+            batchId: true
+        }
+    });
+}
+
+export async function calculateBill({prescriptionData}: {
+    prescriptionData: BatchAssignPayload
+}): Promise<myBillError> {
+    const prescriptionID = prescriptionData.prescriptionID;
+    const batchAssignments = prescriptionData.batchAssigns;
+
+    try {
+        return await prisma.$transaction(async (prisma): Promise<myBillError> => {
+            const prescription = await prisma.prescription.findUnique({
+                where: {id: prescriptionID},
+            });
+
+            if (!prescription) {
+                return {success: false, message: 'Prescription not found'};
+            }
+
+            if (prescription.status === 'COMPLETED') {
+                return {success: false, message: 'Prescription already completed'};
+            }
+
+            const bill: Bill = {
+                patientID: prescriptionData.patientID,
+                dispensary_charge: DISPENSARY_FEE,
+                doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
+                cost: 0,
+                entries: [],
+            };
+
+            for (let i = 0; i < batchAssignments.length; i++) {
+                const assign = batchAssignments[i];
+                if (!assign.batchID) {
+                    return {success: false, message: `Batch not found for a drug`};
+                }
+
+                const batch = await prisma.batch.findUnique({
+                    where: {id: assign.batchID},
+                    include: {drug: true, drugBrand: true},
+                });
+
+                if (!batch) {
+                    return {success: false, message: `Batch not found for drug ${assign.batchID}`};
+                }
+
+                const issue = await prisma.issue.findUnique({
+                    where: {id: assign.issueID},
+                });
+
+                if (!issue) {
+                    return {success: false, message: `Issue not found for drug ${assign.issueID}`};
+                }
+
+                // Updating or creating the cache
+                const existingCache = await prisma.batchHistory.findUnique({
+                    where: {
+                        drugId_drugBrandId: {
+                            drugId: batch.drugId,
+                            drugBrandId: batch.drugBrandId
+                        }
+                    }
+                });
+
+                if (existingCache) {
+                    await prisma.batchHistory.update({
+                        where: {
+                            drugId_drugBrandId: {
+                                drugId: batch.drugId,
+                                drugBrandId: batch.drugBrandId
+                            }
+                        },
+                        data: {
+                            batchId: assign.batchID
+                        }
+                    });
+                } else {
+                    await prisma.batchHistory.create({
+                        data: {
+                            drugId: batch.drugId,
+                            drugBrandId: batch.drugBrandId,
+                            batchId: assign.batchID
+                        }
+                    });
+                }
+
+                await prisma.issue.update({
+                    where: {id: assign.issueID},
+                    data: {batchId: assign.batchID},
+                });
+
+                const batchCost = issue.quantity * batch.price;
+                bill.cost += batchCost;
+
+                bill.entries.push({
+                    drugName: batch.drug.name,
+                    brandName: batch.drugBrand.name,
+                    quantity: issue.quantity,
+                    unitPrice: batch.price,
+                });
+            }
+
+            await prisma.prescription.update({
+                where: {id: prescriptionID},
+                data: {price: bill.cost},
+            });
+
+            return {success: true, message: 'Bill calculated successfully', bill};
+        });
+    } catch (error) {
+        console.error('Error calculating bill:', error);
+        return {success: false, message: 'An error occurred while calculating bill'};
+    }
+}
+
+export async function getBill(prescriptionID: number): Promise<Bill> {
+    const prescription = await prisma.prescription.findUnique({
+        where: {id: prescriptionID},
+        include: {
+            issues: {
+                include: {
+                    batch: true,
+                    drug: true,
+                    brand: true,
+                }
+            }
+        }
+    });
+
+    if (!prescription) {
+        throw new Error('Prescription not found');
+    }
+
+    if (prescription.status === 'PENDING' || !prescription.price || prescription.price === 0 || !prescription.issues.every(issue => issue.batch)) {
+        throw new Error('Prescription not completed');
+    }
+
+    return {
+        patientID: prescription.patientId,
+        dispensary_charge: DISPENSARY_FEE,
+        doctor_charge: DOCTOR_FEE + (prescription.doctorCharge ?? 0),
+        cost: prescription.price,
+        entries: prescription.issues.map(issue => ({
+            drugName: issue.drug.name,
+            brandName: issue.brand.name,
+            quantity: issue.quantity,
+            unitPrice: issue.batch?.price ?? 0,
+        }))
+    };
+}
+
+export async function completePrescription(prescriptionID: number): Promise<myError> {
+    try {
+        const prescription = await prisma.prescription.findUnique({
+            where: {id: prescriptionID},
+            include: {
+                issues: {
+                    include: {
+                        batch: true
+                    }
+                }
+            }
+        });
+
+        if (!prescription) {
+            return {success: false, message: 'Prescription not found'};
+        }
+
+        if (prescription.status === 'COMPLETED') {
+            return {success: false, message: 'Prescription already completed'};
+        }
+
+        if (!prescription.issues.every(issue => issue.batch)) {
+            return {success: false, message: 'Prescription not completed'};
+        }
+
+        // Updating remaining quantity of batches
+        await prisma.$transaction(async (prisma) => {
+            for (let i = 0; i < prescription.issues.length; i++) {
+                const issue = prescription.issues[i];
+                if (!issue.batch || !issue.batchId) {
+                    return {success: false, message: 'Batch not found for a drug'};
+                }
+                await prisma.batch.update({
+                    where: {id: issue.batchId},
+                    data: {
+                        remainingQuantity: {
+                            decrement: issue.quantity
+                        }
+                    }
+                });
+            }
+
+            await prisma.prescription.update({
+                where: {id: prescriptionID},
+                data: {status: 'COMPLETED'}
+            });
+
+            //Check for queue entry
+            const queueEntry = await prisma.queueEntry.findFirst({
+                where: {
+                    patientId: prescription.patientId,
+                    status: "PRESCRIBED"
+                }
+            });
+
+            if (queueEntry) {
+                await prisma.queueEntry.update({
+                    where: {
+                        id: queueEntry.id
+                    },
+                    data: {
+                        status: "COMPLETED"
+                    }
+                });
+                revalidatePath(`/queue/${queueEntry.id}`);
+            }
+        });
+        revalidatePath(`/patients/${prescription.patientId}/prescriptions`);
+        return {success: true, message: 'Prescription completed successfully'};
+    } catch (error) {
+        console.error('Error completing prescription:', error);
+        return {success: false, message: 'An error occurred while completing prescription'};
+    }
 }

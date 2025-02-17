@@ -14,14 +14,24 @@ export default async function PriceTable({
   currentPage,
   selection,
   sort,
+  startDate,
+  endDate,
 }: {
   query: string;
   currentPage: number;
   selection: string;
   sort: SortOption;
+  startDate: Date;
+  endDate: Date;
 }) {
   let items: StockData[] = [];
-  const params: StockQueryParams = { query, page: currentPage, sort };
+  const params: StockQueryParams = {
+    query,
+    page: currentPage,
+    sort,
+    startDate,
+    endDate,
+  };
 
   try {
     switch (selection) {

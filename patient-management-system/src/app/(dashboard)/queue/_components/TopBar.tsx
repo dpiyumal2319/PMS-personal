@@ -1,7 +1,7 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import {usePathname} from "next/navigation";
+import {redirect, usePathname} from "next/navigation";
 import Link from "next/link";
 import {IoArrowBack} from "react-icons/io5";
 import {getQueue} from "@/app/lib/actions";
@@ -68,6 +68,8 @@ const TopBar = () => {
         }
 
         setStatus("COMPLETED");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        redirect("/queue");
     }
 
     useEffect(() => {

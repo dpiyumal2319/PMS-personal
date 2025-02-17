@@ -1,10 +1,9 @@
 import React from 'react';
-import PrescriptionForm from "@/app/(dashboard)/patients/[id]/_components/PrescriptionForm";
 
 const Page = () => {
     return (
-        <div>
-            <PrescriptionForm />
+        <div className={'text-center flex-grow flex items-center justify-center text-xl text-gray-500'}>
+            Select a tab to view the content
         </div>
     );
 };

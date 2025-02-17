@@ -4,13 +4,28 @@ import { HTMLAttributes } from "react";
 
 
 export type badgeColorsType = {
-    blue: string;
-    green: string;
-    red: string;
-    yellow: string;
-    purple: string;
-    pink: string;
+    slate: string;
     gray: string;
+    zinc: string;
+    neutral: string;
+    stone: string;
+    red: string;
+    orange: string;
+    amber: string;
+    yellow: string;
+    lime: string;
+    green: string;
+    emerald: string;
+    teal: string;
+    cyan: string;
+    sky: string;
+    blue: string;
+    indigo: string;
+    violet: string;
+    purple: string;
+    fuchsia: string;
+    pink: string;
+    rose: string;
 }
 
 interface ParameterBadgeProps extends HTMLAttributes<HTMLSpanElement> {

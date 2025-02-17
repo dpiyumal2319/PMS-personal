@@ -1,4 +1,5 @@
 import { toast, ToastPosition } from "react-toastify";
+import {StrategyJson} from "@/app/lib/definitions";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();
@@ -75,3 +76,44 @@ export const handleServerAction = async (
         return { success: false, message: "An error occurred" };
     }
 };
+
+
+export function calculateQuantity(strategy: StrategyJson): number {
+    switch (strategy.name) {
+        case 'MEAL': {
+            const mealStrategy = strategy.strategy
+            let dailyDoses = 0;
+
+            if (mealStrategy.breakfast.active) {
+                dailyDoses += mealStrategy.breakfast.dose;
+            }
+            if (mealStrategy.lunch.active) {
+                dailyDoses += mealStrategy.lunch.dose;
+            }
+            if (mealStrategy.dinner.active) {
+                dailyDoses += mealStrategy.dinner.dose;
+            }
+
+            return dailyDoses * mealStrategy.forDays;
+        }
+
+        case 'WHEN_NEEDED' : {
+            const whenNeededStrategy = strategy.strategy
+            return whenNeededStrategy.dose * whenNeededStrategy.times;
+        }
+
+        case 'PERIODIC': {
+            const periodicStrategy = strategy.strategy
+            const dosesPerDay = 24 / periodicStrategy.interval;
+            return Math.ceil(dosesPerDay * periodicStrategy.dose * periodicStrategy.forDays);
+        }
+
+        case 'OTHER': {
+            const otherStrategy = strategy.strategy
+            return otherStrategy.dose * otherStrategy.times;
+        }
+
+        default:
+            throw new Error(`Unknown strategy type`);
+    }
+}
