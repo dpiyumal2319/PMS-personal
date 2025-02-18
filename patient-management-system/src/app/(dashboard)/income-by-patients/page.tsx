@@ -3,6 +3,7 @@ import { getDailyIncomes, getIncomeStats } from "@/app/lib/actions";
 import IncomeCard from "@/app/(dashboard)/income-by-patients/_components/IncomeCard";
 import IncomeHeader from "@/app/(dashboard)/income-by-patients/_components/IncomeHeader";
 import { Suspense } from "react";
+import { FaClipboardList } from "react-icons/fa";
 
 async function IncomeContent({
   start,
@@ -24,7 +25,10 @@ async function IncomeContent({
       {stats && (
         <Card className="w-full bg-primary/5">
           <CardHeader>
-            <CardTitle>Summary</CardTitle>
+            <CardTitle>
+              Summary
+              <FaClipboardList className="inline-block ml-2" />
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
@@ -38,7 +42,11 @@ async function IncomeContent({
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Patients</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Total Patients
+                  </p>
+                </div>
                 <p className="text-2xl font-bold">{stats.patientCount}</p>
               </div>
               <div>
