@@ -21,7 +21,7 @@ import {
     PrescribeMedicine,
 } from "@/app/(dashboard)/queue/[id]/_components/TableButtons";
 import { CustomBadge } from "@/app/(dashboard)/_components/CustomBadge";
-import AddPatinetButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
+import AddPatientButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
 
 type Patients = Awaited<ReturnType<typeof queuePatients>>;
 
@@ -92,7 +92,7 @@ export default function AllPatientsTable({ id }: { id: number }) {
     return (
         <div className="flex flex-col gap-5">
             <div className={"flex justify-end mt-5 w-full"}>
-                <AddPatinetButton id={id} refetch={fetchData} />
+                <AddPatientButton id={id} refetch={fetchData} />
             </div>
             <Table>
                 <TableHeader>
