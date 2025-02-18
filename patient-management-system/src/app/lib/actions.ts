@@ -28,6 +28,7 @@ import {validateEmail, validateMobile} from "@/app/lib/utils";
 import {AddUserFormData} from "@/app/(dashboard)/admin/staff/_components/AddUserDialog";
 import ChargeType = $Enums.ChargeType;
 
+
 export async function changePassword({
                                          currentPassword,
                                          newPassword,
@@ -2940,4 +2941,75 @@ export async function updateCharges({charge, value}: { charge: ChargeType, value
 
         return {success: false, message: 'An error occurred while updating charge'};
     }
+}
+
+//server actions for getting daily income.
+
+export async function getDailyIncomes(dateRange: DateRange) {
+  const { startDate, endDate } = dateRange;
+
+  // First get all bills with their prescriptions for the date range
+  const bills = await prisma.bill.findMany({
+    where: {
+      Prescription: {
+        time: {
+          gte: startDate,
+          lte: endDate,
+        }
+      }
+    },
+    include: {
+      Prescription: {
+        select: {
+          time: true,
+        }
+      }
+    }
+  });
+
+  // Group bills by date and calculate totals
+  const groupedByDate = bills.reduce((acc, bill) => {
+    const date = bill.Prescription.time.toISOString().split('T')[0];
+    
+    if (!acc[date]) {
+      acc[date] = {
+        totalIncome: 0,
+        patientCount: 0,
+      };
+    }
+    
+    // Calculate total income for this bill
+    const totalBillAmount = 
+      (bill.doctorCharge || 0) +
+      (bill.dispensaryCharge || 0) +
+      (bill.medicinesCharge || 0);
+    
+    acc[date].totalIncome += totalBillAmount;
+    acc[date].patientCount += 1;
+    
+    return acc;
+  }, {} as Record<string, { totalIncome: number; patientCount: number }>);
+
+  // Convert to array and sort by date
+  const dailyIncomes = Object.entries(groupedByDate).map(([date, data]) => ({
+    date,
+    totalIncome: data.totalIncome,
+    patientCount: data.patientCount,
+  }));
+
+  // Sort by date in descending order (most recent first)
+  return dailyIncomes.sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export async function getIncomeStats(dateRange: DateRange) {
+  const dailyIncomes = await getDailyIncomes(dateRange);
+  
+  const totalIncome = dailyIncomes.reduce((sum, day) => sum + day.totalIncome, 0);
+  const patientCount = dailyIncomes.reduce((sum, day) => sum + day.patientCount, 0);
+  
+  return {
+    totalIncome,
+    patientCount,
+    averagePerPatient: patientCount > 0 ? totalIncome / patientCount : 0,
+  };
 }
