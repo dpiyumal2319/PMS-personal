@@ -4,10 +4,6 @@ import IncomeCard from "@/app/(dashboard)/income-by-patients/_components/IncomeC
 import IncomeHeader from "@/app/(dashboard)/income-by-patients/_components/IncomeHeader";
 import { Suspense } from "react";
 
-interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
 async function IncomeContent({
   start,
   end,
@@ -75,14 +71,25 @@ async function IncomeContent({
   );
 }
 
-export default function PatientIncomePage({ searchParams }: PageProps) {
+interface PageProps {
+  start: string;
+  end: string;
+}
+
+export default async function PatientIncomePage({
+  searchParams,
+}: {
+  searchParams: Promise<PageProps>;
+}) {
+  const resolvedParams = await searchParams;
+
   return (
     <div className="p-6 space-y-6">
       <IncomeHeader />
       <Suspense fallback={<div>Loading...</div>}>
         <IncomeContent
-          start={searchParams.start?.toString()}
-          end={searchParams.end?.toString()}
+          start={resolvedParams.start?.toString()}
+          end={resolvedParams.end?.toString()}
         />
       </Suspense>
     </div>

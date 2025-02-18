@@ -137,14 +137,14 @@ export const NurseLinks: SidebarItem[] = [
   {
     type: "link",
     title: "Profile",
-    url: "admin/profile",
+    url: "/admin/profile",
     icon: UserPen,
     isActive: false,
   },
   {
     type: "link",
     title: "Income",
-    url: "income-by-patients",
+    url: "/income-by-patients",
     icon: HandCoins,
     isActive: false,
   },
