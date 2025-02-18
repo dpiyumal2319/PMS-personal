@@ -24,7 +24,7 @@ export default function IncomeHeader() {
     // Format dates for URL
     const start = newDateRange.startDate.toISOString().split("T")[0];
     const end = newDateRange.endDate.toISOString().split("T")[0];
-    router.push(`/inventory/income-by-patients?start=${start}&end=${end}`);
+    router.push(`/income-by-patients?start=${start}&end=${end}`);
   };
 
   return (

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDailyIncomes, getIncomeStats } from "@/app/lib/actions";
-import IncomeCard from "@/app/(dashboard)/inventory/income-by-patients/_components/IncomeCard";
-import IncomeHeader from "@/app/(dashboard)/inventory/income-by-patients/_components/IncomeHeader";
+import IncomeCard from "@/app/(dashboard)/income-by-patients/_components/IncomeCard";
+import IncomeHeader from "@/app/(dashboard)/income-by-patients/_components/IncomeHeader";
 import { Suspense } from "react";
 
 interface PageProps {
