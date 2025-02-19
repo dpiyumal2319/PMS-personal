@@ -46,12 +46,67 @@ enum BatchStatus {
   TRASHED
 }
 
-enum IssueingStrategy {
-  MEAL
-  WHEN_NEEDED
-  PERIODIC
-  OFF_RECORD
+enum IssuingStrategy {
+  /**
+   * TDS (ter die sumendum) - Three times a day
+   */
+  TDS
+
+  /**
+   * BD (bis die) - Twice a day
+   */
+  BD
+
+  /**
+   * OD (omni die) - Once daily
+   */
+  OD
+
+  /**
+   * QDS (quater die sumendum) - Four times a day (every 6 hours)
+   */
+  QDS
+
+  /**
+   * SOS (si opus sit) - Take only when needed
+   */
+  SOS
+
+  /**
+   * NOCTE - Take at night
+   */
+  NOCTE
+
+  /**
+   * MANE - Take in the morning
+   */
+  MANE
+
+  /**
+   * VESPE - Take in the evening
+   */
+  VESPE
+
+  /**
+   * NOON - Take in the afternoon
+   */
+  NOON
+
+  /**
+   * WEEKLY - Take once a week
+   */
+  WEEKLY
+
+  /**
+   * OTHER - Any other prescription strategy
+   */
   OTHER
+}
+
+enum MEAL {
+  BEFORE
+  AFTER
+  WITH
 }
 
 enum PrescriptionStatus {
@@ -142,6 +197,21 @@ model Batch {
   status            BatchStatus
   Issue             Issue[]
   BatchHistory      BatchHistory[]
+  BatchWeights      BatchWeights[]
+}
+
+model Weights {
+  id           Int            @id @default(autoincrement())
+  weight       Float
+  BatchWeights BatchWeights[]
+}
+
+model BatchWeights {
+  id       Int     @id @default(autoincrement())
+  batchId  Int
+  batch    Batch   @relation(fields: [batchId], references: [id])
+  weightId Int
+  weight   Weights @relation(fields: [weightId], references: [id])
 }
 
 model Prescription {
@@ -182,16 +252,17 @@ model Issue {
   id               Int                @id @default(autoincrement())
   prescription     Prescription       @relation(fields: [prescriptionId], references: [id])
   prescriptionId   Int
-  details          String?
   batch            Batch?             @relation(fields: [batchId], references: [id])
   batchId          Int?
   drug             Drug               @relation(fields: [drugId], references: [id])
   drugId           Int
   brand            DrugBrand          @relation(fields: [brandId], references: [id])
   brandId          Int
-  strategy         IssueingStrategy
-  strategyDetails  Json
-  quantity         Float
+  strategy         IssuingStrategy
+  forDays          Float
+  dose             Float
+  details          String?
+  meal             MEAL?
   stratergyHistory StratergyHistory[]
 }
 
