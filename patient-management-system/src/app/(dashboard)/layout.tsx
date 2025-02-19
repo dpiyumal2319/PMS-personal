@@ -29,7 +29,7 @@ export default function DashboardLayout({
         <SidebarProvider>
             <AppSidebar/>
             <main className="flex flex-col w-full h-full">
-                <div className="flex-none">
+                <div className="flex">
                     <TopBar/>
                 </div>
                 <div className="flex-1 overflow-y-auto min-h-0">

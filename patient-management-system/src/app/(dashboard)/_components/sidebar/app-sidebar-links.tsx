@@ -129,7 +129,7 @@ export const NurseLinks: SidebarItem[] = [
     {
         type: 'link',
         title: 'Profile',
-        url: 'admin/profile',
+        url: '/admin/profile',
         icon: UserPen,
         isActive: false
     },
