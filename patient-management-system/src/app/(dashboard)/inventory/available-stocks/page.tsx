@@ -23,30 +23,24 @@ export default async function InventoryAvailable({
     const sort = params?.sort || "alphabetically";
 
     return (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col w-full">
             {/* Fixed header instead of sticky */}
-            <div className="flex-none bg-white border-b shadow-md">
-                <div className="p-4 flex gap-4">
-                    <div className="relative w-[200px]">
-                        <SearchPanel placeholder="Search by Name"/>
-                    </div>
-                    <Dropdown
-                        items={[
-                            {label: "By Model", value: "model"},
-                            {label: "By Brand", value: "brand"},
-                            {label: "By Batch", value: "batch"},
-                        ]}
-                        urlParameterName="selection"
-                    />
-                    <SortingDropdown selection={selection}/>
-                    <div>
-                        <DrugForm/>
-                    </div>
-                </div>
+            <div className="flex p-2 h-14 sticky top-0 bg-white border-b shadow-md gap-4 overflow-x-auto">
+                <SearchPanel placeholder="Search by Name"/>
+                <Dropdown
+                    items={[
+                        {label: "By Model", value: "model"},
+                        {label: "By Brand", value: "brand"},
+                        {label: "By Batch", value: "batch"},
+                    ]}
+                    urlParameterName="selection"
+                />
+                <SortingDropdown selection={selection}/>
+                <DrugForm/>
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-auto min-h-0">
+            <div className="flex-grow overflow-y-auto">
                 <Suspense fallback={<DrugListSkeleton isLoading={true}/>}>
                     <AvailableStockPageTable
                         query={query}

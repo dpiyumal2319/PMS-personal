@@ -65,7 +65,7 @@ const DatePickerURL = () => {
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
-                        className="w-[300px] justify-start text-left font-normal"
+                        className="w-[300px] justify-start text-left font-normal bg-white hover:bg-white"
                     >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateRange.startDate && dateRange.endDate ? (

@@ -22,7 +22,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
   }, 700);
 
   return (
-    <div className="relative w-full">
+    <div className="relative min-w-56 h-full">
       <LucidSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
       <Input
         className="h-full peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"

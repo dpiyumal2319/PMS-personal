@@ -7,8 +7,8 @@ export default function Layout({
     children: React.ReactNode;
 }) {
     return (
-        <div className={'flex flex-col h-full'}>
-            <div className="flex flex-grow">
+        <div className={'flex flex-col h-full bg-amber-600'}>
+            <div className="flex-1 min-h-0 overflow-y-auto">
                 {children}
             </div>
             <NextBreadcrumb
@@ -18,9 +18,6 @@ export default function Layout({
                 listClasses="text-gray-600 hover:text-blue-500 transition-colors duration-200 last:font-bold last:text-black text-xs"
                 capitalizeLinks
             />
-
-
-
         </div>
     )
 }

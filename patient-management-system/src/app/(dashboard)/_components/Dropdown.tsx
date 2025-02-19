@@ -30,7 +30,7 @@ export default function SearchDropdown({
 
   return (
     <Select onValueChange={handleSelect} value={selectedValue}>
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-48 h-full">
         <SelectValue placeholder="Search by" />
       </SelectTrigger>
       <SelectContent>
