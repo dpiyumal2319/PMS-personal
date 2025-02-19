@@ -2948,6 +2948,7 @@ export async function updateCharges({charge, value}: { charge: ChargeType, value
 export async function getDailyIncomes(dateRange: DateRange) {
   const { startDate, endDate } = dateRange;
 
+  console.log(`Getting daily incomes for ${startDate} to ${endDate}`);
   // First get all bills with their prescriptions for the date range
   const bills = await prisma.bill.findMany({
     where: {
@@ -2985,8 +2986,9 @@ export async function getDailyIncomes(dateRange: DateRange) {
       (bill.medicinesCharge || 0);
     
     acc[date].totalIncome += totalBillAmount;
-    acc[date].patientCount += 1;
+    acc[date].patientCount += 1;   
     
+    console.log(`${acc[date].totalIncome} ${acc[date].patientCount}`);
     return acc;
   }, {} as Record<string, { totalIncome: number; patientCount: number }>);
 

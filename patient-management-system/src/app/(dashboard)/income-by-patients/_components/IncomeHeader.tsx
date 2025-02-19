@@ -1,27 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DatePicker from "@/app/(dashboard)/inventory/cost-management/_components/DatePickerCM";
 import { DateRange } from "@/app/lib/definitions";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function IncomeHeader() {
+interface IncomeHeaderProps {
+  start: Date;
+  end: Date;
+}
+
+export default function IncomeHeader({ start, end }: IncomeHeaderProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // Initialize with current URL params or today's date
+  // Manage state
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: searchParams.get("start")
-      ? new Date(searchParams.get("start")!)
-      : new Date(),
-    endDate: searchParams.get("end")
-      ? new Date(searchParams.get("end")!)
-      : new Date(),
+    startDate: start,
+    endDate: end,
   });
 
+  // Handle date change and update URL
   const handleDateChange = (newDateRange: DateRange) => {
     setDateRange(newDateRange);
-    // Format dates for URL
     const start = newDateRange.startDate.toISOString().split("T")[0];
     const end = newDateRange.endDate.toISOString().split("T")[0];
     router.push(`/income-by-patients?start=${start}&end=${end}`);
