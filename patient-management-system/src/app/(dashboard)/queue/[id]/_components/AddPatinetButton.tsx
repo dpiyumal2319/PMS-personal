@@ -9,16 +9,16 @@ import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
 import {QueueStatus, type Patient} from "@prisma/client";
 import {calcAge, handleServerAction} from "@/app/lib/utils";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import Link from "next/link";
 import {getQueueStatus} from "@/app/lib/actions";
+import CustomSearchSelect, {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 
 // Search by types
-const AddPatientButton = ({ id, refetch }: { id: number; refetch: () => void }) => {
+const AddPatientButton = ({id, refetch}: { id: number; refetch: () => void }) => {
     const [open, setOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    const [searchBy, setSearchBy] = useState<"name" | "telephone" | "NIC">("name");
+    const [searchBy, setSearchBy] = useState<SearchType>("name");
     const [results, setResults] = useState<Patient[]>([]);
     const [error, setError] = useState<string | null>(null);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -119,23 +119,13 @@ const AddPatientButton = ({ id, refetch }: { id: number; refetch: () => void }) 
                     </DialogHeader>
                     {/* Radio Group for Search By Options */}
                     <div className={'flex gap-2'}>
-                        <Select
+                        <CustomSearchSelect
                             value={searchBy}
-                            onValueChange={(value) => {
-                                setSearchBy(value as "name" | "telephone" | "NIC");
-                                setError(null);
-                                setSearchTerm("");
-                            }}
-                        >
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Search by"/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="name">Name</SelectItem>
-                                <SelectItem value="telephone">Mobile</SelectItem>
-                                <SelectItem value="NIC">NIC</SelectItem>
-                            </SelectContent>
-                        </Select>
+                            onValueChange={setSearchBy}
+                            setError={setError}
+                            setSearchTerm={setSearchTerm}
+                            placeholder="Search by"
+                        />
 
                         {/* Search Input */}
                         <Input
