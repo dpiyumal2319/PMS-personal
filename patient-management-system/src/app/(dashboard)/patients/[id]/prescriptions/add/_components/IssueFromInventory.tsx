@@ -4,7 +4,7 @@ import React, {useState} from 'react';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Card} from "@/components/ui/card";
 import {useDebouncedCallback} from "use-debounce";
-import {getCachedStrategy, searchAvailableDrugs, searchBrandByDrug} from "@/app/lib/actions";
+import {getCachedStrategy, searchAvailableDrugs, searchBrandByDrug} from "@/app/lib/actions/prescriptions";
 import DrugCombobox from "./DrugCombobox";
 import BrandCombobox from "./BrandCombobox";
 import MedicationStrategyTabs from "./MedicationStratergyTabs";

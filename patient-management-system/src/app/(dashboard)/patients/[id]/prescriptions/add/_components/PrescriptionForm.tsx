@@ -11,7 +11,7 @@ import {StrategyJson} from "@/app/lib/definitions";
 import {IssueingStrategy} from "@prisma/client";
 import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/AddOffRecordDrugs";
 import {handleServerAction} from "@/app/lib/utils";
-import {addPrescription} from "@/app/lib/actions";
+import {addPrescription} from "@/app/lib/actions/prescriptions";
 import {
     PrescriptionIssuesList,
     OffRecordMedsList

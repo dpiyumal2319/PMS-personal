@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import {searchPrescriptions} from "@/app/lib/actions";
+import {searchPrescriptions} from "@/app/lib/actions/prescriptions";
 import {Card, CardContent} from "@/components/ui/card";
 import {formatDistanceToNow} from "date-fns";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";

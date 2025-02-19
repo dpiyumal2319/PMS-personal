@@ -8,7 +8,8 @@ import AssignBatchCard
     from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/AssignBatchCard";
 import {Button} from "@/components/ui/button";
 import {toast} from "react-toastify";
-import {calculateBill, completePrescription} from "@/app/lib/actions";
+import {calculateBill} from "@/app/lib/actions/bills";
+import {completePrescription} from "@/app/lib/actions/prescriptions";
 import {Bill} from "@/app/lib/definitions";
 import {BillComponent} from "@/app/(dashboard)/_components/Bill";
 import {

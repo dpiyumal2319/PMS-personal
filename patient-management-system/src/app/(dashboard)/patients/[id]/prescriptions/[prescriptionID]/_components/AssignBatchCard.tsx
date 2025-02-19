@@ -7,7 +7,7 @@ import {
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/MedicineCards";
 import {Card, CardContent} from "@/components/ui/card";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {getBatches, getCachedBatch} from "@/app/lib/actions";
+import {getBatches, getCachedBatch} from "@/app/lib/actions/prescriptions";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {differenceInDays, formatDistanceToNow} from 'date-fns';
 import {Button} from "@/components/ui/button";
