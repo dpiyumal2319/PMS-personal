@@ -29,6 +29,7 @@ export default async function StockPage({
 
   // Default to last 30 days if no dates are provided
   const defaultStartDate = new Date();
+  defaultStartDate.setHours(0, 1, 0, 0);
   defaultStartDate.setDate(defaultStartDate.getDate() - 30);
 
   const startDate = resolvedSearchParams?.startDate

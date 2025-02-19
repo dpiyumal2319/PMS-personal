@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DatePicker from "@/app/(dashboard)/inventory/cost-management/_components/DatePickerCM";
 import { DateRange } from "@/app/lib/definitions";
 import { useRouter } from "next/navigation";

@@ -19,6 +19,7 @@ export default function CardOfPieChart() {
     new Date().setMonth(new Date().getMonth() - 1)
   );
   const defaultEndDate = new Date();
+  defaultEndDate.setHours(0, 1, 0, 0);
 
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: searchParams.get("startDate")
