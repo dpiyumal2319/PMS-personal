@@ -13,10 +13,10 @@ import {
     CommandList,
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
-import type {drug} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import type {DrugOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
 interface PopoverSelectProps {
-    options: drug[];
+    options: DrugOption[];
     value?: string | number | null;
     onChange: (value: string | number) => void;
     placeholder?: string;
@@ -98,7 +98,7 @@ const DrugCombobox = ({
                                     onSelect={() => handleSelect(String(option.id))}
                                     className="flex items-center justify-between"
                                 >
-                                    <span>{option.name} - ({option.brandCount}) brands</span>
+                                    <span>{option.name} - in ({option.weightCount} dosages)</span>
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",

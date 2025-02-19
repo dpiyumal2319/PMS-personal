@@ -201,10 +201,11 @@ model Batch {
 }
 
 model Weights {
-  id         Int          @id @default(autoincrement())
-  weight     Float        @unique
-  DrugWeight DrugWeight[]
-  Issue      Issue[]
+  id               Int                @id @default(autoincrement())
+  weight           Float              @unique
+  DrugWeight       DrugWeight[]
+  Issue            Issue[]
+  StratergyHistory StratergyHistory[]
 }
 
 model DrugWeight {
@@ -308,13 +309,15 @@ model ReportValue {
 }
 
 model StratergyHistory {
-  id      Int       @id @default(autoincrement())
-  drug    Drug      @relation(fields: [drugId], references: [id])
-  drugId  Int       @unique
-  brand   DrugBrand @relation(fields: [brandId], references: [id])
-  brandId Int
-  issue   Issue     @relation(fields: [issueId], references: [id])
-  issueId Int
+  id        Int       @id @default(autoincrement())
+  drug      Drug      @relation(fields: [drugId], references: [id])
+  drugId    Int       @unique
+  brand     DrugBrand @relation(fields: [brandId], references: [id])
+  brandId   Int
+  weight    Weights   @relation(fields: [weightsId], references: [id])
+  issue     Issue     @relation(fields: [issueId], references: [id])
+  issueId   Int
+  weightsId Int
 }
 
 model BatchHistory {

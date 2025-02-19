@@ -29,6 +29,7 @@ export interface IssueInForm {
     dose: number;
     forDays: number;
     strategy: IssuingStrategy;
+    quantity: number;
     forTimes: number | null;
 }
 

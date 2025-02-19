@@ -7,7 +7,7 @@ import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {
-    BrandOption, drugOptions,
+    BrandOption, DrugOption,
     WeightOption
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
@@ -463,10 +463,11 @@ export async function getCachedStrategy(drugID: number) {
         },
         select: {
             issueId: true,
-            brandId: true,
             issue: true,
+            weight: true,
             brand: {
                 select: {
+                    id: true,
                     name: true,
                 },
             },
@@ -474,13 +475,7 @@ export async function getCachedStrategy(drugID: number) {
     });
 }
 
-export type drugOptions = {
-    id: number;
-    name: string;
-    weightCount: number;
-};
-
-export async function searchAvailableDrugs(term: string): Promise<drugOptions[]> {
+export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> {
     return prisma.drug
         .findMany({
             where: {
@@ -565,4 +560,92 @@ export async function searchBrandByDrug({
                 };
             })
         );
+}
+
+export async function getWeightByBrand({drugID}: { drugID: number }): Promise<WeightOption[]> {
+    return prisma.drugWeight.findMany({
+        where: {
+            drugId: drugID,
+            drug: {
+                batch: {
+                    some: {
+                        drugId: drugID,
+                        status: 'AVAILABLE'
+                    }
+                }
+            }
+        },
+        include: {
+            weight: true,
+            drug: {
+                select: {
+                    batch: {
+                        where: {
+                            drugId: drugID,
+                            status: 'AVAILABLE'
+                        },
+                        select: {
+                            remainingQuantity: true,
+                            expiry: true
+                        }
+                    }
+                }
+            }
+        }
+    }).then((drugWeights) => {
+        return drugWeights.map(dw => ({
+            id: dw.id,
+            weight: dw.weight.weight.toString(), // Convert weight (Float) to string
+            brandCount: dw.drug.batch.length,
+            totalRemainingQuantity: dw.drug.batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
+            farthestExpiry: dw.drug.batch.reduce((latest, batch) =>
+                batch.expiry > latest ? batch.expiry : latest, new Date(0) // Initialize with the oldest possible date
+            )
+        }));
+    });
+}
+
+export async function getBrandByDrugAndWeight({drugID, weightID}: {
+    drugID: number,
+    weightID: number
+}): Promise<BrandOption[]> {
+    const brands = await prisma.drugBrand.findMany({
+        where: {
+            Batch: {
+                some: {
+                    drugId: drugID,
+                    status: 'AVAILABLE',
+                    drug: {
+                        DrugWeight: {
+                            some: {
+                                weightId: weightID
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        include: {
+            Batch: {
+                where: {
+                    drugId: drugID,
+                    status: 'AVAILABLE'
+                },
+                select: {
+                    remainingQuantity: true,
+                    expiry: true
+                }
+            }
+        }
+    });
+
+    return brands.map(brand => ({
+        id: brand.id,
+        name: brand.name,
+        batchCount: brand.Batch.length,
+        totalRemainingQuantity: brand.Batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
+        farthestExpiry: brand.Batch.reduce((latest, batch) =>
+            batch.expiry > latest ? batch.expiry : latest, new Date(0) // Initialize with oldest possible date
+        )
+    }));
 }

@@ -85,7 +85,7 @@ const WeightComboBox= ({
                         className
                     )}
                 >
-                    {selectedOption ? selectedOption.name : placeholder}
+                    {selectedOption ? selectedOption.weight : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -110,17 +110,17 @@ const WeightComboBox= ({
                             {options.map((option) => (
                                 <CommandItem
                                     key={option.id}
-                                    value={option.name}
+                                    value={option.weight}
                                     onSelect={() => handleSelect(String(option.id))}
                                     className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
                                     <div className="flex items-center min-w-24 w-full gap-2">
-                                        <span className="font-medium">{option.name}</span>
+                                        <span className="font-medium">{option.weight}</span>
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
                                         <CustomBadge
-                                            text={option.brandCount > 1 ? `${option.brandCount} batches` : "1 batch"}
+                                            text={option.brandCount > 1 ? `${option.brandCount} brands` : `${option.brandCount} brand`}
                                             color={"gray"}/>
                                         <CustomBadge
                                             text={`Total: ${option.totalRemainingQuantity}`}

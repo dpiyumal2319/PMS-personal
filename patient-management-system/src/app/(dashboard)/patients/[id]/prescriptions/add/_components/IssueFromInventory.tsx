@@ -2,9 +2,14 @@
 
 import React, {useState} from 'react';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import {Card} from "@/components/ui/card";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {useDebouncedCallback} from "use-debounce";
-import {getCachedStrategy, searchAvailableDrugs, searchBrandByDrug} from "@/app/lib/actions/prescriptions";
+import {
+    getCachedStrategy,
+    searchAvailableDrugs,
+    getWeightByBrand,
+    getBrandByDrugAndWeight
+} from "@/app/lib/actions/prescriptions";
 import DrugCombobox from "./DrugCombobox";
 import BrandCombobox from "./BrandCombobox";
 import MedicationStrategyTabs from "./MedicationStratergyTabs";
@@ -12,15 +17,20 @@ import {Button} from "@/components/ui/button";
 import {IssuingStrategy, MEAL} from "@prisma/client";
 import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {calculateQuantity} from "@/app/lib/utils";
-import {Plus} from "lucide-react";
+import {ClipboardCheck, Plus, Utensils} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";
 import {differenceInDays} from "date-fns";
+import WeightComboBox from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/WeightComboBox";
+import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {Switch} from "@/components/ui/switch";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
 }
 
-export type drugOptions = {
+export type DrugOption = {
     id: number;
     name: string;
     weightCount: number;
@@ -46,19 +56,20 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [open, setOpen] = useState(false);
     const [isDrugSearching, setIsDrugSearching] = useState(false);
     const [isBrandSearching, setIsBrandSearching] = useState(false);
+    const [isWeightSearching, setIsWeightSearching] = useState(false);
 
-    const [drugs, setDrugs] = useState<drugOptions[]>([]);
+    const [drugs, setDrugs] = useState<DrugOption[]>([]);
     const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
     const [selectedDrugName, setSelectedDrugName] = useState<string | null>(null);
 
     const [weights, setWeights] = useState<WeightOption[]>([]);
-    const [selectedWeight, setSelectedWeight] = useState<WeightOption | null>(null);
+    const [selectedWeight, setSelectedWeight] = useState<number | null>(null);
 
     const [brands, setBrands] = useState<BrandOption[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
     const [selectedBrandName, setSelectedBrandName] = useState<string | null>(null);
 
-    const [details, setDetails] = useState<string | null>(null);
+    const [details, setDetails] = useState<string>("");
     const [strategy, setStrategy] = useState<IssuingStrategy | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [warning, setWarning] = useState<string | null>(null);
@@ -67,29 +78,52 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [quantity, setQuantity] = useState<number | null>(null);
     const [times, setTimes] = useState<number | null>(null);
     const [forDays, setForDays] = useState<number | null>(null);
-    const [meal, setMeal] = useState<MEAL | null>(null);
+    const [mealTiming, setMealTiming] = useState<MEAL | null>(null);
+    const [skipMeal, setSkipMeal] = useState(false);
 
-    const resetStrategies = () => {
-        setStrategy(null);
-    }
 
+    const handleDoseChange = (value: string) => {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+            setDose(numValue);
+        }
+    };
+
+    const handleForDaysChange = (value: string) => {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+            setForDays(numValue);
+        }
+    };
+
+    const handleQuantityChange = (value: string) => {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+            setQuantity(numValue);
+        }
+    };
 
     const resetForm = () => {
         setSelectedDrug(null);
         setSelectedDrugName(null);
+        setSelectedWeight(null);
         setSelectedBrand(null);
-        setDetails("");
         setSelectedBrandName(null);
+        setDetails("");
         setError(null);
+        setWarning(null);
         setStrategy(null);
+        setDose(null);
+        setQuantity(null);
+        setTimes(null);
+        setForDays(null);
+        setMealTiming(null);
     };
 
-    const showWarnings = (brand: BrandOption) => {
-        const expiry = brand.farthestExpiry;
-        const remainingQuantity = brand.totalRemainingQuantity;
-        const currentDate = new Date();
-        const expiryDate = new Date(expiry);
-        const daysUntilExpiry = differenceInDays(expiryDate, currentDate);
+    const showWarnings = (item: WeightOption | BrandOption) => {
+        const expiry = item.farthestExpiry;
+        const remainingQuantity = item.totalRemainingQuantity;
+        const daysUntilExpiry = differenceInDays(new Date(expiry), new Date());
 
         if (daysUntilExpiry < 120 && remainingQuantity < 150) {
             setWarning(`Warning: Expiry in ${daysUntilExpiry} days (${expiry}) and stock is ${remainingQuantity} units`);
@@ -102,44 +136,93 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-
     const handleDrugSearch = useDebouncedCallback(async (term: string) => {
         setIsDrugSearching(true);
         try {
             const drugs = await searchAvailableDrugs(term);
             setDrugs(drugs);
+            console.log(drugs);
+        } catch (error) {
+            setError("Error searching drugs");
+            console.error(error);
         } finally {
             setIsDrugSearching(false);
         }
     }, 700);
 
     const handleDrugSelect = async (selectedID: number) => {
-        if (selectedID !== selectedDrug) {
-            setSelectedDrug(selectedID);
-            setSelectedDrugName(drugs.find(drug => drug.id === selectedID)?.name || null);
-            setIsBrandSearching(true);
-            try {
-                const brands = await searchBrandByDrug({drugID: selectedID});
-                setBrands(brands);
-                const cachedBrand = await getCachedStrategy(selectedID);
-                const availableBrandIDs = brands.map(brand => brand.id);
-                if (cachedBrand && cachedBrand.brandId && availableBrandIDs.includes(cachedBrand.brandId)) {
-                    setSelectedBrand(cachedBrand.brandId);
-                    setSelectedBrandName(cachedBrand.brand.name);
-                    setStrategy(cachedBrand.issue.strategy);
-                    setDetails(cachedBrand.issue.details);
-                    const selectedBrand = brands.find(brand => brand.id === cachedBrand.brandId);
+        if (selectedID === selectedDrug) return;
+
+        setSelectedDrug(selectedID);
+        setSelectedDrugName(drugs.find(drug => drug.id === selectedID)?.name || null);
+        setIsBrandSearching(true);
+        setIsWeightSearching(true);
+
+        try {
+            const weights = await getWeightByBrand({drugID: selectedID});
+            setWeights(weights);
+
+            const cachedStrategy = await getCachedStrategy(selectedID);
+            const availableWeightIDs = weights.map(weight => weight.id);
+
+            if (cachedStrategy && availableWeightIDs.includes(cachedStrategy.weight.id)) {
+                setSelectedWeight(cachedStrategy.weight.id);
+                const selectedWeight = weights.find(weight => weight.id === cachedStrategy.weight.id);
+                if (selectedWeight) {
+                    showWarnings(selectedWeight);
+                }
+
+                const drugBrands = await getBrandByDrugAndWeight({
+                    drugID: selectedID,
+                    weightID: cachedStrategy.weight.id
+                });
+                setBrands(drugBrands);
+
+                const availableBrandIDs = drugBrands.map(brand => brand.id);
+                if (availableBrandIDs.includes(cachedStrategy.brand.id)) {
+                    const {brand, issue} = cachedStrategy;
+                    setSelectedBrand(brand.id);
+                    setSelectedBrandName(brand.name);
+                    setStrategy(issue.strategy);
+                    setDose(issue.dose);
+                    setForDays(issue.forDays);
+                    setMealTiming(issue.meal);
+                    setDetails(issue.strategy);
+
+                    if (issue.strategy === IssuingStrategy.OTHER) {
+                        const {quantity, dose} = issue;
+                        setTimes(dose > 0 && quantity != null ? quantity / dose : null);
+                    }
+
+                    const selectedBrand = drugBrands.find(b => b.id === brand.id);
                     if (selectedBrand) {
                         showWarnings(selectedBrand);
                     }
-                } else {
-                    resetStrategies();
                 }
-            } catch (e) {
-                console.error(e);
+            }
+        } catch (error) {
+            console.error(error);
+            setError("Error fetching data");
+        } finally {
+            setIsBrandSearching(false);
+            setIsWeightSearching(false);
+        }
+    };
+
+    const handleWeightSelect = async (selectedID: number) => {
+        setSelectedWeight(selectedID);
+        const selectedWeight = weights.find(weight => weight.id === selectedID);
+        if (selectedWeight) {
+            showWarnings(selectedWeight);
+            try {
+                const drugBrands = await getBrandByDrugAndWeight({
+                    drugID: selectedDrug!,
+                    weightID: selectedID
+                });
+                setBrands(drugBrands);
+            } catch (error) {
+                console.error(error);
                 setError("Error fetching brands");
-            } finally {
-                setIsBrandSearching(false);
             }
         }
     };
@@ -153,32 +236,37 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-    const handleAddIssue = async () => {
-        if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName) {
-            const missingFields = [];
-            if (!selectedDrug) missingFields.push("Drug");
-            if (!selectedBrand) missingFields.push("Brand");
-            if (!strategy) missingFields.push("Strategy");
-            setError(`Please fill all the fields, missing: ${missingFields.join(", ")}`);
+    const handleAddIssue = () => {
+        if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName || !selectedWeight) {
+            const missingFields = [
+                !selectedDrug && "Drug",
+                !selectedWeight && "Weight",
+                !selectedBrand && "Brand",
+                !strategy && "Strategy"
+            ].filter(Boolean);
+
+            setError(`Please fill all required fields: ${missingFields.join(", ")}`);
             return;
         }
 
-        const quantity = calculateQuantity({
+        const calculatedQuantity = calculateQuantity({
             dose: dose || 0,
-            strategy: strategy,
+            strategy,
             forDays: forDays || 0,
             times: times || 0
-        })
+        });
+
         const newIssue: IssueInForm = {
             drugId: selectedDrug,
             drugName: selectedDrugName,
-            details: details,
+            details,
             brandId: selectedBrand,
             brandName: selectedBrandName,
-            strategy: strategy,
+            strategy,
             dose: dose || 0,
             forDays: forDays || 0,
-            meal: meal,
+            quantity: calculatedQuantity,
+            meal: mealTiming,
             forTimes: times || 0,
         };
 
@@ -187,24 +275,18 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         resetForm();
     };
 
-    const handleClose = () => {
-        setOpen(false);
-        resetForm();
-    }
-
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Card
-                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 group"
-                >
+                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 group">
                     <div className="flex items-center space-x-2 text-slate-500 group-hover:text-slate-800">
                         <Plus className="h-5 w-5 transition-transform duration-200 group-hover:scale-110"/>
                         <span className="font-medium">Issue from Inventory</span>
                     </div>
                 </Card>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl overflow-y-scroll max-h-screen">
+            <DialogContent className="max-w-5xl overflow-y-auto max-h-screen overflow-x-visible">
                 <DialogHeader>
                     <DialogTitle>Add Issue</DialogTitle>
                 </DialogHeader>
@@ -212,7 +294,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     <div className="flex items-center space-x-4">
                         <DrugCombobox
                             options={drugs}
-                            onChange={(selectedID) => handleDrugSelect(Number(selectedID))}
+                            onChange={(id) => handleDrugSelect(Number(id))}
                             onSearch={handleDrugSearch}
                             isSearching={isDrugSearching}
                             value={selectedDrug}
@@ -220,9 +302,21 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             searchPlaceholder="Search drug"
                             noOptionsMessage="No drugs found"
                         />
+                        <WeightComboBox
+                            options={weights}
+                            onChange={(id) => handleWeightSelect(Number(id))}
+                            onSearch={() => {
+                            }}
+                            isSearching={isWeightSearching}
+                            value={selectedWeight}
+                            placeholder="Select weight"
+                            noOptionsMessage="No weights found"
+                            searchPlaceholder="Search weights"
+                            disabled={!selectedDrug}
+                        />
                         <BrandCombobox
                             options={brands}
-                            onChange={(selectedID) => handleBrandSelect(Number(selectedID))}
+                            onChange={(id) => handleBrandSelect(Number(id))}
                             onSearch={() => {
                             }}
                             isSearching={isBrandSearching}
@@ -230,39 +324,141 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             placeholder="Select brand"
                             searchPlaceholder="Search brand"
                             noOptionsMessage="No brands found"
-                            disabled={!selectedDrug}
+                            disabled={!selectedWeight}
                         />
                     </div>
 
-                    {/*Clear Button and error*/}
-                    <div className={'flex justify-between'}>
+                    <div className="flex justify-between">
                         <span className="text-red-500 text-sm">{warning}</span>
                         <span className="text-red-500 text-sm">{error}</span>
-                        <span onClick={resetForm} className="text-red-500 cursor-pointer text-sm hover:underline">
+                        <button
+                            onClick={resetForm}
+                            className="text-red-500 cursor-pointer text-sm hover:underline"
+                        >
                             X Clear
-                        </span>
+                        </button>
                     </div>
 
                     <MedicationStrategyTabs
-                        mealStrategy={{mealStrategy, setMealStrategy}}
-                        whenNeededStrategy={{whenNeededStrategy, setWhenNeededStrategy}}
-                        periodicStrategy={{periodicStrategy, setPeriodicStrategy}}
-                        otherStrategy={{otherStrategy, setOtherStrategy}}
-                        selectedStrategy={{selectedStrategy: strategy, setSelectedStrategy: setStrategy}}
+                        selectedStrategy={{
+                            selectedStrategy: strategy,
+                            setSelectedStrategy: setStrategy
+                        }}
                     />
 
+                    {/* Dosage & Duration Card */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center space-x-2">
+                                <ClipboardCheck className="h-6 w-6 text-blue-500"/>
+                                <span>Dosage & Duration</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {strategy && strategy !== IssuingStrategy.SOS && strategy !== IssuingStrategy.OTHER ? (
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="dose">Dosage</Label>
+                                        <Input
+                                            id="dose"
+                                            type="number"
+                                            min="0"
+                                            step="0.5"
+                                            value={dose || ""}
+                                            onChange={(e) => {
+                                                handleDoseChange(e.target.value);
+                                            }}
+                                            placeholder="Enter dosage"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="forDays">For Days</Label>
+                                        <Input
+                                            id="forDays"
+                                            type="number"
+                                            min="0"
+                                            value={forDays || ""}
+                                            onChange={(e) => {
+                                                handleForDaysChange(e.target.value);
+                                            }}
+                                            placeholder="Enter number of days"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                strategy && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="quantity">Quantity</Label>
+                                        <Input
+                                            id="quantity"
+                                            type="number"
+                                            min="0"
+                                            value={quantity || ""}
+                                            onChange={(e) => {
+                                                handleQuantityChange(e.target.value);
+                                            }}
+                                            placeholder="Enter quantity"
+                                        />
+                                    </div>
+                                )
+                            )}
+                        </CardContent>
+                    </Card>
 
-                    {/*Text Area*/}
-                    <div className="flex items-start justify-start">
-                        <Textarea
-                            placeholder="Additional Details"
-                            value={details || ""}
-                            onChange={(e) => setDetails(e.target.value)}
-                        />
-                    </div>
+                    {/* Meal Timing Card */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center space-x-2">
+                                <Utensils className="h-6 w-6 text-green-500"/>
+                                <span>Meal Timing</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <Label>No Meal Preference</Label>
+                                <Switch checked={skipMeal} onCheckedChange={(checked) => {
+                                    setSkipMeal(checked);
+                                    if (checked) setMealTiming(null);
+                                }}/>
+                            </div>
+                            {!skipMeal && (
+                                <RadioGroup
+                                    value={mealTiming || ""}
+                                    onValueChange={(value) => setMealTiming(value as MEAL)}
+                                    className="grid grid-cols-3 gap-4"
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value={MEAL.BEFORE} id="before"/>
+                                        <Label htmlFor="before">Before Meal</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value={MEAL.WITH} id="with"/>
+                                        <Label htmlFor="with">With Meal</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value={MEAL.AFTER} id="after"/>
+                                        <Label htmlFor="after">After Meal</Label>
+                                    </div>
+                                </RadioGroup>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Textarea
+                        placeholder="Additional Details"
+                        value={details}
+                        onChange={(e) => setDetails(e.target.value)}
+                        className="resize-none"
+                    />
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={handleClose}>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            setOpen(false);
+                            resetForm();
+                        }}
+                    >
                         Cancel
                     </Button>
                     <Button
