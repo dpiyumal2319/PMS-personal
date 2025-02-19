@@ -11,7 +11,7 @@ import {
     SortOption,
     StockAnalysis,
     StockData,
-    StockQueryParams
+    StockQueryParams,
 } from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
@@ -27,7 +27,7 @@ import {EditUserProfileFormData} from "@/app/(dashboard)/admin/_components/EditP
 import {validateEmail, validateMobile} from "@/app/lib/utils";
 import {AddUserFormData} from "@/app/(dashboard)/admin/staff/_components/AddUserDialog";
 import ChargeType = $Enums.ChargeType;
-
+import {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 
 export async function changePassword({
                                          currentPassword,
@@ -2971,23 +2971,23 @@ export async function getDailyIncomes(dateRange: DateRange) {
   // Group bills by date and calculate totals
   const groupedByDate = bills.reduce((acc, bill) => {
     const date = bill.Prescription.time.toISOString().split('T')[0];
-    
+
     if (!acc[date]) {
       acc[date] = {
         totalIncome: 0,
         patientCount: 0,
       };
     }
-    
+
     // Calculate total income for this bill
-    const totalBillAmount = 
+    const totalBillAmount =
       (bill.doctorCharge || 0) +
       (bill.dispensaryCharge || 0) +
       (bill.medicinesCharge || 0);
-    
+
     acc[date].totalIncome += totalBillAmount;
-    acc[date].patientCount += 1;   
-    
+    acc[date].patientCount += 1;
+
     console.log(`${acc[date].totalIncome} ${acc[date].patientCount}`);
     return acc;
   }, {} as Record<string, { totalIncome: number; patientCount: number }>);
@@ -3005,10 +3005,10 @@ export async function getDailyIncomes(dateRange: DateRange) {
 
 export async function getIncomeStats(dateRange: DateRange) {
   const dailyIncomes = await getDailyIncomes(dateRange);
-  
+
   const totalIncome = dailyIncomes.reduce((sum, day) => sum + day.totalIncome, 0);
   const patientCount = dailyIncomes.reduce((sum, day) => sum + day.patientCount, 0);
-  
+
   return {
     totalIncome,
     patientCount,

@@ -10,7 +10,7 @@ import UserDetails, {UserDetailsSkeleton} from "@/app/(dashboard)/_components/to
 export default async function TopBar() {
     return (
         <div
-            className={"h-14 bg-white flex items-center justify-between px-1 py-3 border-b border-primary-900/25 shadow"}>
+            className={"h-14 w-full bg-white flex items-center justify-between px-1 py-3 border-b border-primary-900/25 shadow"}>
             <div className={"flex items-center gap-3"}>
                 <CustomSideBarTrigger/>
                 <PendingPatients/>
