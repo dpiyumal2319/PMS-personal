@@ -1,6 +1,6 @@
 "use client"
 
-import {ChevronRight} from "lucide-react"
+import {ChevronRight, HandCoins} from "lucide-react"
 import {
     Collapsible,
     CollapsibleContent,
@@ -105,60 +105,61 @@ export const DoctorLinks: SidebarItem[] = [
 ];
 
 export const NurseLinks: SidebarItem[] = [
-    {
+  {
+    type: "link",
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+    isActive: false,
+  },
+  {
+    type: "link",
+    title: "Patients",
+    url: "/patients",
+    icon: Users,
+    isActive: false,
+  },
+  {
+    type: "link",
+    title: "Queue",
+    url: "/queue",
+    icon: Clock,
+    isActive: false,
+  },
+  {
+    type: "link",
+    title: "Profile",
+    url: "/admin/profile",
+    icon: UserPen,
+    isActive: false,
+  },
+  {
+    type: "link",
+    title: "Income",
+    url: "/income-by-patients",
+    icon: HandCoins,
+    isActive: false,
+  },
+  {
+    type: "expandable",
+    title: "Inventory",
+    icon: Package,
+    initiallyExpanded: true,
+    items: [
+      {
         type: "link",
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: LayoutDashboard,
+        title: "Available Stocks",
+        url: "/inventory/available-stocks",
         isActive: false,
-    },
-    {
+      },
+      {
         type: "link",
-        title: "Patients",
-        url: "/patients",
-        icon: Users,
+        title: "Completed Stocks",
+        url: "/inventory/completed-stocks",
         isActive: false,
-    },
-    {
-        type: "link",
-        title: "Queue",
-        url: "/queue",
-        icon: Clock,
-        isActive: false,
-    },
-    {
-        type: 'link',
-        title: 'Profile',
-        url: '/admin/profile',
-        icon: UserPen,
-        isActive: false
-    },
-    {
-        type: "expandable",
-        title: "Inventory",
-        icon: Package,
-        initiallyExpanded: true,
-        items: [
-            {
-                type: "link",
-                title: "Available Stocks",
-                url: "/inventory/available-stocks",
-                isActive: false,
-            },
-            {
-                type: "link",
-                title: "Cost Management",
-                url: "/inventory/cost-management",
-                isActive: false,
-            },
-            {
-                type: "link",
-                title: "Completed Stocks",
-                url: "/inventory/completed-stocks",
-                isActive: false,
-            },
-        ],
-    },
+      },
+    ],
+  },
 ];
 
 const AppSidebarLinks = ({role}: { role: Role }) => {
