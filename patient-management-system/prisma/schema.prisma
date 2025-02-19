@@ -178,6 +178,7 @@ model Drug {
   stratergyHistory StratergyHistory[]
   Issue            Issue[]
   BatchHistory     BatchHistory[]
+  DrugWeight       DrugWeight[]
 }
 
 model Batch {
@@ -197,19 +198,18 @@ model Batch {
   status            BatchStatus
   Issue             Issue[]
   BatchHistory      BatchHistory[]
-  BatchWeights      BatchWeights[]
 }
 
 model Weights {
-  id           Int            @id @default(autoincrement())
-  weight       Float
-  BatchWeights BatchWeights[]
+  id         Int          @id @default(autoincrement())
+  weight     Float
+  DrugWeight DrugWeight[]
 }
 
-model BatchWeights {
+model DrugWeight {
   id       Int     @id @default(autoincrement())
-  batchId  Int
-  batch    Batch   @relation(fields: [batchId], references: [id])
+  drugId   Int
+  drug     Drug    @relation(fields: [drugId], references: [id])
   weightId Int
   weight   Weights @relation(fields: [weightId], references: [id])
 }
