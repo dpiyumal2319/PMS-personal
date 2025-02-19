@@ -202,7 +202,7 @@ model Batch {
 
 model Weights {
   id         Int          @id @default(autoincrement())
-  weight     Float
+  weight     Float        @unique
   DrugWeight DrugWeight[]
 }
 

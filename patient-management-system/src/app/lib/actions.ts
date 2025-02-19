@@ -1299,6 +1299,22 @@ export async function addNewItem({
                     status: "AVAILABLE",
                 },
             });
+            
+            // 4. Create drug weight relation if weight is selected
+            if (formData.weightId) {
+                await tx.drugWeight.upsert({
+                where: {
+                    id: drug.id,
+                },
+                update: {
+                    weightId: formData.weightId,
+                },
+                create: {
+                    drugId: drug.id,
+                    weightId: formData.weightId,
+                },
+                });
+            }
 
             revalidatePath("/inventory/available-stocks");
             return {success: true, message: "Item added successfully"};
@@ -2307,6 +2323,27 @@ export async function searchDrugModels(query: string) {
         },
         take: 8,
     });
+}
+
+export async function getDrugWeights(drugId: number) {
+  try {
+    const weights = await prisma.drugWeight.findMany({
+      where: {
+        drugId: drugId,
+      },
+      include: {
+        weight: true,
+      },
+    });
+    
+    return weights.map(w => ({
+      id: w.weightId,
+      weight: w.weight.weight
+    }));
+  } catch (error) {
+    console.error('Error fetching drug weights:', error);
+    return [];
+  }
 }
 
 // export async function getPriceOfDrugModel({

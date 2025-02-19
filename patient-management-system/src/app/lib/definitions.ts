@@ -70,6 +70,9 @@ export type InventoryFormData = {
     wholesalePrice: number | string;
     brandId?: number; // Add brandId property
     drugId?: number;  // Add drugId property
+    weightId?: number;
+    weight?: number;
+
 }
 
 
@@ -205,6 +208,23 @@ export interface DrugBrandSuggestion {
 export interface DrugModelSuggestion {
     id: number;
     name: string;
+}
+
+export interface DrugWeightDataSuggestion {
+  id: number;
+  weight: number;
+}
+export interface DrugWeightDataSuggestions {
+  id: number;
+  weight: number;
+}
+export interface DrugWeight {
+  id: number;
+  drugId: number;
+  weightId: number;
+  weight: {
+    weight: number;
+  };
 }
 
 
