@@ -1,6 +1,7 @@
-import { toast, ToastPosition } from "react-toastify";
-import {StrategyJson} from "@/app/lib/definitions";
+import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
+import {IssuingStrategy} from "@prisma/client";
+import {strategy} from "sharp";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();
@@ -45,7 +46,7 @@ export const handleServerAction = async (
         position = "bottom-right",
     } = options;
 
-    const id = toast.loading(loadingMessage, { position, pauseOnFocusLoss: false });
+    const id = toast.loading(loadingMessage, {position, pauseOnFocusLoss: false});
 
     try {
         const result = await action();
@@ -57,7 +58,7 @@ export const handleServerAction = async (
                 isLoading: false,
                 autoClose: 2000,
             });
-            return { success: false, message: result.message };
+            return {success: false, message: result.message};
         }
 
         toast.update(id, {
@@ -74,45 +75,52 @@ export const handleServerAction = async (
             isLoading: false,
             autoClose: 2000,
         });
-        return { success: false, message: "An error occurred" };
+        return {success: false, message: "An error occurred"};
     }
 };
 
 
-export function calculateQuantity(strategy: StrategyJson): number {
-    switch (strategy.name) {
-        case 'MEAL': {
-            const mealStrategy = strategy.strategy
-            let dailyDoses = 0;
+export function calculateQuantity({
+                                      strategy,
+                                      dose,
+                                      forDays,
+                                      times
+                                  }: {
+    strategy: IssuingStrategy,
+    dose: number,
+    forDays: number
+    times?: number
+}): number {
+    switch (strategy) {
+        case IssuingStrategy.TDS: // Three times a day
+            return dose * 3 * forDays;
 
-            if (mealStrategy.breakfast.active) {
-                dailyDoses += mealStrategy.breakfast.dose;
-            }
-            if (mealStrategy.lunch.active) {
-                dailyDoses += mealStrategy.lunch.dose;
-            }
-            if (mealStrategy.dinner.active) {
-                dailyDoses += mealStrategy.dinner.dose;
-            }
+        case IssuingStrategy.BD: // Twice a day
+            return dose * 2 * forDays;
 
-            return dailyDoses * mealStrategy.forDays;
-        }
+        case IssuingStrategy.OD: // Once daily
+            return dose * forDays;
 
-        case 'WHEN_NEEDED' : {
-            const whenNeededStrategy = strategy.strategy
-            return whenNeededStrategy.dose * whenNeededStrategy.times;
-        }
+        case IssuingStrategy.QDS: // Four times a day (every 6 hours)
+            return dose * 4 * forDays;
 
-        case 'PERIODIC': {
-            const periodicStrategy = strategy.strategy
-            const dosesPerDay = 24 / periodicStrategy.interval;
-            return Math.ceil(dosesPerDay * periodicStrategy.dose * periodicStrategy.forDays);
-        }
+        case 'SOS': // When needed (can't calculate exact quantity)
+            if (times) return dose * times;
+            throw new Error(`Times must be provided for SOS strategy`);
 
-        case 'OTHER': {
-            const otherStrategy = strategy.strategy
-            return otherStrategy.dose * otherStrategy.times;
-        }
+        case IssuingStrategy.NOCTE: // At night
+        case IssuingStrategy.MANE: // In the morning
+        case IssuingStrategy.VESPE : // In the evening
+        case IssuingStrategy.NOON: // At noon
+            return dose * forDays;
+
+        case 'WEEKLY': // Once per week
+            return dose * Math.ceil(forDays / 7);
+
+        case 'OTHER':
+            if (times) return dose * times;
+            throw new Error(`Times must be provided for OTHER strategy`);
+
 
         default:
             throw new Error(`Unknown strategy type`);

@@ -90,6 +90,30 @@ async function main() {
         ]
     })
 
+    await prisma.weights.createMany({
+        data: [
+            {weight: 500},
+            {weight: 1000},
+            {weight: 250},
+            {weight: 50},
+        ]
+    })
+
+    await prisma.drugWeight.createMany({
+        data: [
+            {drugId: 1, weightId: 1},
+            {drugId: 1, weightId: 2},
+            {drugId: 2, weightId: 1},
+            {drugId: 2, weightId: 2},
+            {drugId: 2, weightId: 3},
+            {drugId: 2, weightId: 4},
+            {drugId: 3, weightId: 1},
+            {drugId: 3, weightId: 2},
+            {drugId: 3, weightId: 3},
+            {drugId: 3, weightId: 4},
+        ]
+    })
+
     // Add Drugs
     await prisma.drugBrand.create({
         data: {

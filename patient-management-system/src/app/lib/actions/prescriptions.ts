@@ -6,7 +6,10 @@ import {ChargeType} from "@prisma/client";
 import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
-import {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {
+    BrandOption, drugOptions,
+    WeightOption
+} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
 export async function completePrescription(
     prescriptionID: number
@@ -471,7 +474,13 @@ export async function getCachedStrategy(drugID: number) {
     });
 }
 
-export async function searchAvailableDrugs(term: string) {
+export type drugOptions = {
+    id: number;
+    name: string;
+    weightCount: number;
+};
+
+export async function searchAvailableDrugs(term: string): Promise<drugOptions[]> {
     return prisma.drug
         .findMany({
             where: {
@@ -488,15 +497,9 @@ export async function searchAvailableDrugs(term: string) {
             select: {
                 id: true,
                 name: true,
-                _count: {
+                DrugWeight: {
                     select: {
-                        batch: true, // Counts the number of related batches
-                    },
-                },
-                batch: {
-                    distinct: ["drugBrandId"], // Get unique brands from batches
-                    select: {
-                        drugBrandId: true,
+                        weightId: true, // Get unique weight IDs
                     },
                 },
             },
@@ -505,7 +508,7 @@ export async function searchAvailableDrugs(term: string) {
             drugs.map((drug) => ({
                 id: drug.id,
                 name: drug.name,
-                brandCount: drug.batch.length, // Count unique brands
+                weightCount: new Set(drug.DrugWeight.map((dw) => dw.weightId)).size, // Count unique weights
             }))
         );
 }

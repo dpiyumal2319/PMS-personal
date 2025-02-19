@@ -1,5 +1,4 @@
 import type {LucideIcon} from "lucide-react";
-import {z} from "zod";
 import {Role} from '@prisma/client';
 
 export type SessionPayload = {
@@ -206,56 +205,6 @@ export interface DrugModelSuggestion {
     id: number;
     name: string;
 }
-
-
-const MealStrategySchema = z.object({
-    breakfast: z.object({
-        active: z.boolean(),
-        dose: z.number(),
-    }),
-    lunch: z.object({
-        active: z.boolean(),
-        dose: z.number(),
-    }),
-    dinner: z.object({
-        active: z.boolean(),
-        dose: z.number(),
-    }),
-    forDays: z.number(),
-    afterMeal: z.boolean(),
-    minutesBeforeAfterMeal: z.number(),
-});
-
-
-const WhenNeededStrategySchema = z.object({
-    dose: z.number(),
-    times: z.number(),
-});
-
-const PeriodicStrategySchema = z.object({
-    interval: z.number(), // in hours
-    dose: z.number(),
-    forDays: z.number(),
-});
-
-const OtherStrategySchema = z.object({
-    details: z.string(),
-    dose: z.number(),
-    times: z.number(),
-});
-
-export const StrategyJsonSchema = z.discriminatedUnion("name", [
-    z.object({name: z.literal("MEAL"), strategy: MealStrategySchema}),
-    z.object({name: z.literal("WHEN_NEEDED"), strategy: WhenNeededStrategySchema}),
-    z.object({name: z.literal("PERIODIC"), strategy: PeriodicStrategySchema}),
-    z.object({name: z.literal("OTHER"), strategy: OtherStrategySchema}),
-]);
-
-export type StrategyJson = z.infer<typeof StrategyJsonSchema>;
-export type MealStrategy = z.infer<typeof MealStrategySchema>;
-export type WhenNeededStrategy = z.infer<typeof WhenNeededStrategySchema>;
-export type PeriodicStrategy = z.infer<typeof PeriodicStrategySchema>;
-export type OtherStrategy = z.infer<typeof OtherStrategySchema>;
 
 export type BillEntry = {
     drugName: string;

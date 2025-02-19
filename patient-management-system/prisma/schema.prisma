@@ -202,8 +202,9 @@ model Batch {
 
 model Weights {
   id         Int          @id @default(autoincrement())
-  weight     Float
+  weight     Float        @unique
   DrugWeight DrugWeight[]
+  Issue      Issue[]
 }
 
 model DrugWeight {
@@ -259,11 +260,14 @@ model Issue {
   brand            DrugBrand          @relation(fields: [brandId], references: [id])
   brandId          Int
   strategy         IssuingStrategy
-  forDays          Float
+  weight           Weights            @relation(fields: [weightsId], references: [id])
+  forDays          Float?
+  quantity         Float
   dose             Float
   details          String?
   meal             MEAL?
   stratergyHistory StratergyHistory[]
+  weightsId        Int
 }
 
 model ReportParameter {
