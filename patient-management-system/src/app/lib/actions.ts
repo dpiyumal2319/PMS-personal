@@ -2674,6 +2674,13 @@ export async function calculateBill({prescriptionData}: {
         return await prisma.$transaction(async (prisma): Promise<myBillError> => {
             const prescription = await prisma.prescription.findUnique({
                 where: {id: prescriptionID},
+                include: {
+                    patient: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
             });
 
             if (!prescription) {
@@ -2707,7 +2714,10 @@ export async function calculateBill({prescriptionData}: {
             }
 
             const bill: Bill = {
+                prescriptionID,
+                patientName: prescription.patient.name,
                 patientID: prescriptionData.patientID,
+
                 dispensary_charge: dspFees,
                 doctor_charge: dctFee + (prescription.extraDoctorCharge ?? 0),
                 cost: 0,
@@ -2804,6 +2814,11 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
     const prescription = await prisma.prescription.findUnique({
         where: {id: prescriptionID},
         include: {
+            patient: {
+                select: {
+                    name: true
+                }
+            },
             issues: {
                 include: {
                     batch: true,
@@ -2824,6 +2839,8 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
     }
 
     return {
+        patientName : prescription.patient.name,
+        prescriptionID,
         patientID: prescription.patientId,
         dispensary_charge: prescription.Bill.dispensaryCharge,
         doctor_charge: prescription.Bill.doctorCharge,
