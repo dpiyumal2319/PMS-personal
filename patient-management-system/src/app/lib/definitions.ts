@@ -271,3 +271,17 @@ export type Bill = {
     dispensary_charge: number;
     doctor_charge: number
 }
+
+//types of income for day 
+
+export interface DailyIncome {
+  date: string;
+  totalIncome: number;
+  patientCount: number;
+}
+
+export interface IncomeStats {
+  totalIncome: number;
+  patientCount: number;
+  averagePerPatient: number;
+}
