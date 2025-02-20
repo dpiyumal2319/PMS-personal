@@ -2346,6 +2346,37 @@ export async function getDrugWeights(drugId: number) {
   }
 }
 
+export async function addNewWeight(weight: number): Promise<{ id: number; weight: number }> {
+  try {
+    const newWeight = await prisma.weights.create({
+      data: {
+        weight: weight,
+      },
+    });
+    
+    return { id: newWeight.id, weight: newWeight.weight };
+  } catch (error) {
+    console.error('Error adding weight:', error);
+    throw new Error('Failed to add weight');
+  }
+}
+
+// Add drug weight relationship
+export async function addDrugWeight(drugId: number, weightId: number) {
+  try {
+    await prisma.drugWeight.create({
+      data: {
+        drugId: drugId,
+        weightId: weightId,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding drug weight:', error);
+    throw new Error('Failed to add drug weight relationship');
+  }
+}
+
 // export async function getPriceOfDrugModel({
 //     query,
 //     page = 1,

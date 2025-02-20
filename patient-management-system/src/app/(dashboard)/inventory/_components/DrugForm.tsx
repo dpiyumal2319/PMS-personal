@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +16,7 @@ import {
   DrugWeightDataSuggestion,
 } from "@/app/lib/definitions";
 import { DrugSuggestionBox } from "@/app/(dashboard)/inventory/_components/DrugSuggestionBox";
+import { DrugWeightField } from "@/app/(dashboard)/inventory/_components/AddWeight";
 
 type DrugType = "Tablet" | "Syrup";
 
@@ -48,6 +49,13 @@ export function DrugForm() {
     wholesalePrice: "",
     weight: 0,
   });
+  const handleWeightAdded = (newWeight: DrugWeightDataSuggestion) => {
+    setDrugWeights((prev) => [...prev, newWeight]);
+    setFormData((prev) => ({
+      ...prev,
+      weightId: newWeight.id,
+    }));
+  };
 
   const [brandSuggestions, setBrandSuggestions] = useState<
     DrugBrandSuggestion[]
@@ -245,30 +253,13 @@ export function DrugForm() {
                   visible={showDrugSuggestions}
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="weight"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Drug Weight
-                </label>
-                <select
-                  id="weight"
-                  value={formData.weightId || ""}
-                  onChange={handleChange}
-                  name="weightId"
-                  className="w-full p-2 border rounded"
-                  required
-                >
-                  <option value="">Select Weight</option>
-                  {drugWeights.map((weight) => (
-                    <option key={weight.id} value={weight.id}>
-                      {weight.weight} mg
-                    </option>
-                  ))}
-                </select>
-              </div>
-
+              <DrugWeightField
+                weights={drugWeights}
+                selectedWeightId={formData.weightId}
+                drugId={formData.drugId}
+                onChange={handleChange}
+                onWeightAdded={handleWeightAdded}
+              />
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label

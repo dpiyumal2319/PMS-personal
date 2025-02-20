@@ -214,10 +214,7 @@ export interface DrugWeightDataSuggestion {
   id: number;
   weight: number;
 }
-export interface DrugWeightDataSuggestions {
-  id: number;
-  weight: number;
-}
+
 export interface DrugWeight {
   id: number;
   drugId: number;
