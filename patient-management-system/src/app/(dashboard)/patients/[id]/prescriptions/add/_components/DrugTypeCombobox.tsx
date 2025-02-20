@@ -12,15 +12,12 @@ import {
     CommandList,
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
-import type {
-    TypeOption,
-} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {DrugType} from "@prisma/client";
 
 interface TypeComboBoxProps {
-    options: TypeOption[];
+    options: DrugType[];
     value?: DrugType
-    onChange: (value: TypeOption) => void;
+    onChange: (value: DrugType) => void;
     placeholder?: string;
     noOptionsMessage?: string;
     className?: string;
@@ -38,11 +35,11 @@ const DrugTypeComboBox = ({
                           }: TypeComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const handleSelect = (selectedValue: TypeOption) => {
+    const handleSelect = (selectedValue: DrugType) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
-    const selectedOption = options.find((option) => option.type === value);
+    const selectedOption = options.find((option) => option === value);
 
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -60,7 +57,7 @@ const DrugTypeComboBox = ({
                         className
                     )}
                 >
-                    {selectedOption ? selectedOption.type : placeholder}
+                    {selectedOption ? selectedOption : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -73,21 +70,20 @@ const DrugTypeComboBox = ({
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
-                                    key={option.type}
-                                    value={option.type}
+                                    key={option}
+                                    value={option}
                                     onSelect={() => handleSelect(option)}
                                     className="rounded-md hover:bg-gray-100"
                                 >
-                                    <span className="font-medium">{option.type}</span>
+                                    <span className="font-medium">{option}</span>
 
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",
-                                            value === option.type ? "opacity-100" : "opacity-0"
+                                            value === option ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                 </CommandItem>
-
                             ))}
                         </CommandGroup>
                     </CommandList>
