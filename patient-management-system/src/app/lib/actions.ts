@@ -12,6 +12,7 @@ import {
     StockAnalysis,
     StockData,
     StockQueryParams,
+    DrugWeightDataSuggestion
 } from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
@@ -2325,24 +2326,25 @@ export async function searchDrugModels(query: string) {
     });
 }
 
-export async function getDrugWeights(drugId: number) {
+export async function getDrugWeights(drugId: number): Promise<DrugWeightDataSuggestion[]> {
   try {
     const weights = await prisma.drugWeight.findMany({
       where: {
-        drugId: drugId,
+        drugId: drugId
       },
       include: {
-        weight: true,
+        weight: true
       },
+      distinct: ['weightId'] // Ensure unique weightIds
     });
     
-    return weights.map(w => ({
-      id: w.weightId,
-      weight: w.weight.weight
+    return weights.map(dw => ({
+      id: dw.weightId,
+      weight: dw.weight.weight
     }));
   } catch (error) {
     console.error('Error fetching drug weights:', error);
-    return [];
+    throw new Error('Failed to fetch drug weights');
   }
 }
 

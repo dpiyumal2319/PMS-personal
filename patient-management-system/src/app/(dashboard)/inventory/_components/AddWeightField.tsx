@@ -11,6 +11,7 @@ interface DrugWeightFieldProps {
   drugId?: number;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onWeightAdded: (weight: DrugWeightDataSuggestion) => void;
+  refetch: () => void; // Added refetch function
 }
 
 export function DrugWeightField({
@@ -19,10 +20,14 @@ export function DrugWeightField({
   drugId,
   onChange,
   onWeightAdded,
+  refetch, // Destructure refetch
 }: DrugWeightFieldProps) {
   const [showModal, setShowModal] = useState(false);
   const [newWeight, setNewWeight] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const uniqueWeights = Array.from(
+    new Map(weights.map((weight) => [weight.id, weight])).values()
+  );
 
   const handleAddWeight = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +43,11 @@ export function DrugWeightField({
       setError("Please enter a valid weight");
       return;
     }
+    const weightExists = uniqueWeights.some((w) => w.weight === weightValue);
+    if (weightExists) {
+      setError("This weight already exists");
+      return;
+    }
 
     try {
       // Add new weight to Weights table
@@ -48,11 +58,15 @@ export function DrugWeightField({
         await addDrugWeight(drugId, addedWeight.id);
       }
 
+      // Step 3: Trigger refetch to update weight dropdown
+      await refetch();
+
       // Update parent component
       onWeightAdded(addedWeight);
 
       // Reset and close modal
       setNewWeight("");
+      setError("");
       setShowModal(false);
     } catch (error) {
       setError("Failed to add weight");
@@ -126,15 +140,15 @@ export function DrugWeightField({
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <div className="flex justify-end gap-2">
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowModal(false)}
               >
                 Cancel
-              </Button>
+              </Button> */}
               <Button
-                type="submit"
+                onClick={handleAddWeight}
                 className="bg-primary-500 hover:bg-primary-600"
               >
                 Add

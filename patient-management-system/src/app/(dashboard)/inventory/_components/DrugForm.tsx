@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,7 +16,7 @@ import {
   DrugWeightDataSuggestion,
 } from "@/app/lib/definitions";
 import { DrugSuggestionBox } from "@/app/(dashboard)/inventory/_components/DrugSuggestionBox";
-import { DrugWeightField } from "@/app/(dashboard)/inventory/_components/AddWeight";
+import { DrugWeightField } from "@/app/(dashboard)/inventory/_components/AddWeightField";
 
 type DrugType = "Tablet" | "Syrup";
 
@@ -49,13 +49,6 @@ export function DrugForm() {
     wholesalePrice: "",
     weight: 0,
   });
-  const handleWeightAdded = (newWeight: DrugWeightDataSuggestion) => {
-    setDrugWeights((prev) => [...prev, newWeight]);
-    setFormData((prev) => ({
-      ...prev,
-      weightId: newWeight.id,
-    }));
-  };
 
   const [brandSuggestions, setBrandSuggestions] = useState<
     DrugBrandSuggestion[]
@@ -69,6 +62,23 @@ export function DrugForm() {
   const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
   const [showDrugSuggestions, setShowDrugSuggestions] = useState(false);
 
+  const handleWeightAdded = (newWeight: DrugWeightDataSuggestion) => {
+    // Update the weights list and select the new weight
+    setDrugWeights((prev) => {
+      const exists = prev.some((w) => w.id === newWeight.id);
+      if (!exists) {
+        return [...prev, newWeight];
+      }
+      return prev;
+    });
+
+    // Update the form data with the new weight
+    setFormData((prev) => ({
+      ...prev,
+      weightId: newWeight.id,
+      weight: newWeight.weight,
+    }));
+  };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -110,6 +120,27 @@ export function DrugForm() {
     }
   };
 
+  const fetchDrugWeights = useCallback(async () => {
+    if (!formData.drugId) return;
+
+    try {
+      console.log("Fetching drug weights");
+      const weights = await getDrugWeights(formData.drugId);
+      const uniqueWeights = Array.from(
+        new Map(weights.map((weight) => [weight.id, weight])).values()
+      );
+      setDrugWeights(uniqueWeights);
+    } catch (error) {
+      console.error("Error fetching drug weights:", error);
+      setDrugWeights([]);
+    }
+  }, [formData.drugId]); // Dependencies ensure this function updates when drugId changes
+
+  // Fetch when drugId changes
+  useEffect(() => {
+    fetchDrugWeights();
+  }, [fetchDrugWeights]); // Calls fetch when the function reference changes
+
   const handleBrandSearch = async (query: string) => {
     try {
       const results = await searchDrugBrands(query);
@@ -139,21 +170,13 @@ export function DrugForm() {
     setShowBrandSuggestions(false);
   };
 
-  const handleDrugSelect = async (suggestion: DrugModelSuggestion) => {
+  const handleDrugSelect = (suggestion: DrugModelSuggestion) => {
     setFormData((prev) => ({
       ...prev,
       drugId: suggestion.id,
       drugName: suggestion.name,
     }));
     setShowDrugSuggestions(false);
-
-    try {
-      const weights = await getDrugWeights(suggestion.id);
-      setDrugWeights(weights);
-    } catch (error) {
-      console.error("Error fetching drug weights:", error);
-      setDrugWeights([]);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -259,6 +282,7 @@ export function DrugForm() {
                 drugId={formData.drugId}
                 onChange={handleChange}
                 onWeightAdded={handleWeightAdded}
+                refetch={fetchDrugWeights}
               />
               <div className="grid grid-cols-2 gap-4">
                 <div>
