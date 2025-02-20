@@ -2379,6 +2379,35 @@ export async function addDrugWeight(drugId: number, weightId: number) {
   }
 }
 
+export async function deleteWeight(weightId: number) {
+  try {
+    // First delete all DrugWeight relationships
+    await prisma.drugWeight.deleteMany({
+      where: {
+        weightId: weightId
+      }
+    });
+
+    // Then delete the weight itself
+    await prisma.weights.delete({
+      where: {
+        id: weightId
+      }
+    });
+
+    return {
+      success: true,
+      message: "Weight deleted successfully"
+    };
+  } catch (error) {
+    console.error("Failed to delete weight:", error);
+    return {
+      success: false,
+      message: "Failed to delete weight"
+    };
+  }
+}
+
 // export async function getPriceOfDrugModel({
 //     query,
 //     page = 1,

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Trash2 } from "lucide-react";
 import { DrugWeightDataSuggestion } from "@/app/lib/definitions";
-import { addNewWeight, addDrugWeight } from "@/app/lib/actions";
-import { handleServerAction } from "@/app/lib/utils"; // Import handleServerAction
+import { addNewWeight, addDrugWeight, deleteWeight } from "@/app/lib/actions";
+import { handleServerAction } from "@/app/lib/utils";
 
 interface DrugWeightFieldProps {
   weights: DrugWeightDataSuggestion[];
@@ -51,7 +51,6 @@ export function DrugWeightField({
     }
 
     try {
-      // Wrap the weight addition logic in handleServerAction
       const result = await handleServerAction(
         async () => {
           const addedWeight = await addNewWeight(weightValue);
@@ -81,6 +80,24 @@ export function DrugWeightField({
       }
     } catch (error) {
       setError("Failed to add weight");
+    }
+  };
+
+  const handleDeleteWeight = async (weightId: number) => {
+    if (confirm("Are you sure you want to delete this weight?")) {
+      await handleServerAction(
+        async () => {
+          const result = await deleteWeight(weightId);
+          if (result.success) {
+            await refetch();
+          }
+          return result;
+        },
+        {
+          loadingMessage: "Deleting weight...",
+          position: "bottom-right",
+        }
+      );
     }
   };
 
@@ -159,6 +176,29 @@ export function DrugWeightField({
               </Button>
             </div>
           </form>
+
+          {/* Weight List with Delete Buttons */}
+          <div className="mt-4">
+            <h4 className="text-sm font-medium mb-2">Existing Weights</h4>
+            <div className="max-h-40 overflow-y-auto">
+              {uniqueWeights.map((weight) => (
+                <div
+                  key={weight.id}
+                  className="flex justify-between items-center py-2 border-b"
+                >
+                  <span>{weight.weight} mg</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-red-500 hover:text-red-700 p-1"
+                    onClick={() => handleDeleteWeight(weight.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
