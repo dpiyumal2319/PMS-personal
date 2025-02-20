@@ -76,11 +76,9 @@ const DrugTypeComboBox = ({
                                     key={option.type}
                                     value={option.type}
                                     onSelect={() => handleSelect(option)}
-                                    className="flex flex-col rounded-md hover:bg-gray-100"
+                                    className="rounded-md hover:bg-gray-100"
                                 >
-                                    <div className="flex items-center min-w-24 w-full gap-2">
-                                        <span className="font-medium">{option.type}</span>
-                                    </div>
+                                    <span className="font-medium">{option.type}</span>
 
                                     <Check
                                         className={cn(
