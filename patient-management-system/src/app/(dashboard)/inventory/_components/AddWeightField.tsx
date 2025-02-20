@@ -5,6 +5,14 @@ import { Plus, X, Trash2 } from "lucide-react";
 import { DrugWeightDataSuggestion } from "@/app/lib/definitions";
 import { addNewWeight, addDrugWeight, deleteWeight } from "@/app/lib/actions";
 import { handleServerAction } from "@/app/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 
 interface DrugWeightFieldProps {
   weights: DrugWeightDataSuggestion[];
@@ -26,6 +34,11 @@ export function DrugWeightField({
   const [showModal, setShowModal] = useState(false);
   const [newWeight, setNewWeight] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedWeightToDelete, setSelectedWeightToDelete] = useState<
+    number | null
+  >(null);
+
   const uniqueWeights = Array.from(
     new Map(weights.map((weight) => [weight.id, weight])).values()
   );
@@ -83,11 +96,11 @@ export function DrugWeightField({
     }
   };
 
-  const handleDeleteWeight = async (weightId: number) => {
-    if (confirm("Are you sure you want to delete this weight?")) {
+  const handleDeleteWeight = async () => {
+    if (selectedWeightToDelete !== null) {
       await handleServerAction(
         async () => {
-          const result = await deleteWeight(weightId);
+          const result = await deleteWeight(selectedWeightToDelete);
           if (result.success) {
             await refetch();
           }
@@ -99,6 +112,7 @@ export function DrugWeightField({
         }
       );
     }
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -164,9 +178,7 @@ export function DrugWeightField({
                 className="w-full"
               />
             </div>
-
             {error && <p className="text-red-500 text-sm">{error}</p>}
-
             <div className="flex justify-end gap-2">
               <Button
                 onClick={handleAddWeight}
@@ -176,8 +188,6 @@ export function DrugWeightField({
               </Button>
             </div>
           </form>
-
-          {/* Weight List with Delete Buttons */}
           <div className="mt-4">
             <h4 className="text-sm font-medium mb-2">Existing Weights</h4>
             <div className="max-h-40 overflow-y-auto">
@@ -191,7 +201,10 @@ export function DrugWeightField({
                     type="button"
                     variant="ghost"
                     className="text-red-500 hover:text-red-700 p-1"
-                    onClick={() => handleDeleteWeight(weight.id)}
+                    onClick={() => {
+                      setSelectedWeightToDelete(weight.id);
+                      setDeleteDialogOpen(true);
+                    }}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -201,8 +214,29 @@ export function DrugWeightField({
           </div>
         </div>
       )}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this weight? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteWeight}>
+              Delete
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
-
 export default DrugWeightField;
