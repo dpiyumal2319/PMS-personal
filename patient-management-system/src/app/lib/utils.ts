@@ -127,6 +127,49 @@ export function calculateQuantity({
     }
 }
 
+export function calculateForDays({
+                                     strategy,
+                                     dose,
+                                     quantity,
+                                     times,
+                                 }: {
+    strategy: IssuingStrategy;
+    dose: number;
+    quantity: number;
+    times?: number;
+}): number {
+    switch (strategy) {
+        case IssuingStrategy.TDS: // Three times a day
+            return Math.floor(quantity / (dose * 3));
+
+        case IssuingStrategy.BD: // Twice a day
+            return Math.floor(quantity / (dose * 2));
+
+        case IssuingStrategy.OD: // Once daily
+            return Math.floor(quantity / dose);
+
+        case IssuingStrategy.QDS: // Four times a day
+            return Math.floor(quantity / (dose * 4));
+
+        case 'SOS': // When needed
+        case 'OTHER':
+            if (times) return Math.floor(quantity / (dose * times));
+            throw new Error(`Times must be provided for ${strategy} strategy`);
+
+        case IssuingStrategy.NOCTE: // At night
+        case IssuingStrategy.MANE: // In the morning
+        case IssuingStrategy.VESPE: // In the evening
+        case IssuingStrategy.NOON: // At noon
+            return Math.floor(quantity / dose);
+
+        case 'WEEKLY': // Once per week
+            return Math.ceil((quantity / dose) * 7);
+
+        default:
+            throw new Error(`Unknown strategy type`);
+    }
+}
+
 
 const emailSchema = z.string().email("Invalid email format");
 

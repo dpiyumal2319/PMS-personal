@@ -262,7 +262,6 @@ model Issue {
   brandId          Int
   strategy         IssuingStrategy
   weight           Weights            @relation(fields: [weightsId], references: [id])
-  forDays          Float?
   quantity         Float
   dose             Float
   details          String?

@@ -21,8 +21,8 @@ import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 interface WeightComboBoxProps {
     options: WeightOption[];
-    value?: string | number | null;
-    onChange: (value: string | number) => void;
+    value?: WeightOption | null;
+    onChange: (value: WeightOption) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     noOptionsMessage?: string;
@@ -44,12 +44,11 @@ const WeightComboBox = ({
                         }: WeightComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const handleSelect = (selectedValue: string) => {
+    const handleSelect = (selectedValue: WeightOption) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
 
-    const selectedOption = options.find((option) => option.id === value);
 
     const formatExpiry = (expiryDate: Date) => {
         const now = new Date();
@@ -79,7 +78,7 @@ const WeightComboBox = ({
                         className
                     )}
                 >
-                    {selectedOption ? selectedOption.weight : placeholder}
+                    {value ? value.weight : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -104,7 +103,7 @@ const WeightComboBox = ({
                                 <CommandItem
                                     key={option.id}
                                     value={option.weight}
-                                    onSelect={() => handleSelect(String(option.id))}
+                                    onSelect={() => handleSelect(option)}
                                     className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
                                     <div className="flex items-center min-w-24 w-full gap-2">
@@ -138,7 +137,7 @@ const WeightComboBox = ({
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",
-                                            value === option.id ? "opacity-100" : "opacity-0"
+                                            value === option ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                 </CommandItem>

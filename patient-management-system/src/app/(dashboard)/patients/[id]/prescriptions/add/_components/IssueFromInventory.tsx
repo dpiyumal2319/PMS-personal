@@ -16,7 +16,7 @@ import MedicationStrategyTabs from "./MedicationStratergyTabs";
 import {Button} from "@/components/ui/button";
 import {DrugType, IssuingStrategy, MEAL} from "@prisma/client";
 import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
-import {calculateQuantity} from "@/app/lib/utils";
+import {calculateForDays, calculateQuantity} from "@/app/lib/utils";
 import {ClipboardCheck, Plus, Utensils} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";
 import {differenceInDays} from "date-fns";
@@ -37,12 +37,9 @@ export type DrugOption = {
     weightCount: number;
 }
 
-export type TypeOption = {
-    type: DrugType
-}
 
 export interface WeightOption {
-    id: string | number;
+    id: number;
     weight: string;
     brandCount: number;
     totalRemainingQuantity: number;
@@ -50,7 +47,7 @@ export interface WeightOption {
 }
 
 export interface BrandOption {
-    id: string | number;
+    id: number;
     name: string;
     batchCount: number;
     totalRemainingQuantity: number;
@@ -66,22 +63,20 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [isWeightSearching, setIsWeightSearching] = useState(false);
 
     const [drugs, setDrugs] = useState<DrugOption[]>([]);
-    const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
-    const [selectedDrugName, setSelectedDrugName] = useState<string | null>(null);
+    const [selectedDrug, setSelectedDrug] = useState<DrugOption | null>(null);
 
-    const [types, setTypes] = useState<TypeOption[]>([]);
+    const [types, setTypes] = useState<DrugType[]>([]);
     const [selectedType, setSelectedType] = useState<DrugType>("Tablet");
 
     const [weights, setWeights] = useState<WeightOption[]>([]);
-    const [selectedWeight, setSelectedWeight] = useState<number | null>(null);
+    const [selectedWeight, setSelectedWeight] = useState<WeightOption | null>(null);
 
     const [brands, setBrands] = useState<BrandOption[]>([]);
-    const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
-    const [selectedBrandName, setSelectedBrandName] = useState<string | null>(null);
+    const [selectedBrand, setSelectedBrand] = useState<BrandOption | null>(null);
 
     const [details, setDetails] = useState<string>("");
-    const [strategy, setStrategy] = useState<IssuingStrategy | null>(null);
 
+    const [strategy, setStrategy] = useState<IssuingStrategy | null>(null);
 
     const [error, setError] = useState<string | null>(null);
     const [warning, setWarning] = useState<string | null>(null);
@@ -91,7 +86,6 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [times, setTimes] = useState<number | null>(null);
     const [forDays, setForDays] = useState<number | null>(null);
     const [mealTiming, setMealTiming] = useState<MEAL | null>(null);
-    const [skipMeal, setSkipMeal] = useState(true);
 
 
     const handleDoseChange = (value: string) => {
@@ -108,7 +102,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-    const handleQuantityChange = (value: string) => {
+    const handleTimesChange = (value: string) => {
         const numValue = parseInt(value);
         if (!isNaN(numValue) && numValue >= 0) {
             setQuantity(numValue);
@@ -117,12 +111,9 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
     const resetForm = () => {
         setSelectedDrug(null);
-        setSelectedDrugName(null);
         setSelectedWeight(null);
         setSelectedBrand(null);
-        setSelectedBrandName(null);
         setDetails("");
-        setSkipMeal(true);
         setError(null);
         setWarning(null);
         setStrategy(null);
@@ -164,20 +155,17 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     }, 700);
 
-    const handleDrugSelect = async (selectedID: number) => {
-        if (selectedID === selectedDrug) return;
-
+    const handleDrugSelect = async (selected: DrugOption) => {
+        if (selected === selectedDrug) return;
         try {
             // Reset states before fetching new data
-            setSelectedDrug(selectedID);
-            setSelectedDrugName(drugs.find(drug => drug.id === selectedID)?.name || null);
+            setSelectedDrug(selected);
             setIsBrandSearching(true);
             setIsWeightSearching(true);
 
             // Clear previous selections
             setSelectedWeight(null);
             setSelectedBrand(null);
-            setSelectedBrandName(null);
             setStrategy(null);
             setDose(null);
             setForDays(null);
@@ -187,8 +175,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
             // Fetch initial data
             const [cachedStrategy, types] = await Promise.all([
-                getCachedStrategy(selectedID),
-                getDrugTypesByDrug(selectedID)
+                getCachedStrategy(selected.id),
+                getDrugTypesByDrug(selected.id)
             ]);
 
             if (!types.length) {
@@ -204,27 +192,28 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
             if (selectedDrugType === 'Tablet') {
                 const weights = await getWeightByBrand({
-                    drugID: selectedID,
+                    drugID: selected.id,
                     type: selectedDrugType
                 });
                 setWeights(weights);
 
                 // Handle weight selection for tablets
-                const cachedWeight = cachedStrategy?.weight?.id;
+                const cachedWeightID = cachedStrategy?.weight?.id;
                 const availableWeightIDs = weights.map(weight => weight.id);
-                const isValidCachedWeight = cachedWeight && availableWeightIDs.includes(cachedWeight);
+                const isValidCachedWeight = cachedWeightID && availableWeightIDs.includes(cachedWeightID);
 
                 if (isValidCachedWeight && cachedStrategy) {
+                    const cachedWeight: WeightOption = weights.find(weight => weight.id === cachedWeightID)!;
                     setSelectedWeight(cachedWeight);
-                    const selectedWeight = weights.find(weight => weight.id === cachedWeight);
+                    const selectedWeight = weights.find(weight => weight.id === cachedWeightID);
                     if (selectedWeight) {
                         showWarnings(selectedWeight);
                     }
 
                     // Fetch brands for selected weight
                     const drugBrands = await getBrandByDrugWeightType({
-                        drugID: selectedID,
-                        weightID: cachedWeight,
+                        drugID: selected.id,
+                        weightID: cachedWeightID,
                         type: selectedDrugType
                     });
                     setBrands(drugBrands);
@@ -238,7 +227,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             } else {
                 // Handle non-tablet drug types
                 const drugBrands = await getBrandByDrugWeightType({
-                    drugID: selectedID,
+                    drugID: selected.id,
                     type: selectedDrugType,
                     weightID: 0
                 });
@@ -257,7 +246,6 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             setWeights([]);
             setSelectedWeight(null);
             setSelectedBrand(null);
-            setSelectedBrandName(null);
         } finally {
             setIsBrandSearching(false);
             setIsWeightSearching(false);
@@ -277,20 +265,19 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             const {brand, issue} = cachedStrategy;
 
             // Set brand information
-            setSelectedBrand(brand.id);
-            setSelectedBrandName(brand.name);
-
+            setSelectedBrand(drugBrands.find(b => b.id === brand.id) || null);
             // Set issue details
             setStrategy(issue.strategy);
             setDose(issue.dose);
-            setForDays(issue.forDays);
             setMealTiming(issue.meal);
             setDetails(issue.strategy);
 
             // Handle OTHER strategy specific logic
-            if (issue.strategy === IssuingStrategy.OTHER) {
+            if (issue.strategy === IssuingStrategy.OTHER || issue.strategy === IssuingStrategy.SOS) {
                 const {quantity, dose} = issue;
                 setTimes(dose > 0 && quantity != null ? quantity / dose : null);
+            } else {
+                setForDays(calculateForDays({strategy: issue.strategy, dose: issue.dose, quantity: issue.quantity}));
             }
 
             // Show warnings if applicable
@@ -309,25 +296,24 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-    const handleTypeSelect = async (type: TypeOption) => {
+    const handleTypeSelect = async (type: DrugType) => {
         if (!selectedDrug) return;
         try {
-            setSelectedType(type.type);
+            setSelectedType(type);
             setIsBrandSearching(true);
             setIsWeightSearching(true);
 
             // Reset previous selections
             setSelectedWeight(null);
             setSelectedBrand(null);
-            setSelectedBrandName(null);
             setBrands([]);
             setWeights([]);
 
-            if (type.type === 'Tablet') {
+            if (type === 'Tablet') {
                 // For tablets, first fetch weights
                 const weights = await getWeightByBrand({
-                    drugID: selectedDrug,
-                    type: type.type
+                    drugID: selectedDrug.id,
+                    type: type
                 });
                 setWeights(weights);
                 setIsWeightSearching(false);
@@ -335,8 +321,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             } else {
                 // For non-tablets, directly fetch brands
                 const drugBrands = await getBrandByDrugWeightType({
-                    drugID: selectedDrug,
-                    type: type.type,
+                    drugID: selectedDrug.id,
+                    type: type,
                     weightID: 0
                 });
                 setBrands(drugBrands);
@@ -350,37 +336,33 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             setWeights([]);
             setSelectedWeight(null);
             setSelectedBrand(null);
-            setSelectedBrandName(null);
         } finally {
             setIsBrandSearching(false);
             setIsWeightSearching(false);
         }
     };
 
-    const handleWeightSelect = async (selectedID: number) => {
+    const handleWeightSelect = async (selected: WeightOption) => {
         if (selectedType !== 'Tablet') return;
-        setSelectedWeight(selectedID);
-        const selectedWeight = weights.find(weight => weight.id === selectedID);
-        if (selectedWeight) {
-            showWarnings(selectedWeight);
-            try {
-                const drugBrands = await getBrandByDrugWeightType({
-                    drugID: selectedDrug!,
-                    weightID: selectedID,
-                    type: selectedType,
-                });
-                setBrands(drugBrands);
-            } catch (error) {
-                console.error(error);
-                setError("Error fetching brands");
-            }
+        setSelectedWeight(selected);
+        if (!selectedWeight || !selectedDrug) return;
+        showWarnings(selectedWeight);
+        try {
+            const drugBrands = await getBrandByDrugWeightType({
+                drugID: selectedDrug.id,
+                weightID: selected.id,
+                type: selectedType,
+            });
+            setBrands(drugBrands);
+        } catch (error) {
+            console.error(error);
+            setError("Error fetching brands");
         }
+
     };
 
-    const handleBrandSelect = (selectedID: number) => {
-        setSelectedBrand(selectedID);
-        const selectedBrand = brands.find(brand => brand.id === selectedID);
-        setSelectedBrandName(selectedBrand?.name || null);
+    const handleBrandSelect = (selected: BrandOption) => {
+        setSelectedBrand(selected);
         if (selectedBrand) {
             showWarnings(selectedBrand);
         }
@@ -444,7 +426,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     <div className="flex items-center space-x-4">
                         <DrugCombobox
                             options={drugs}
-                            onChange={(id) => handleDrugSelect(Number(id))}
+                            onChange={(drug) => handleDrugSelect(drug)}
                             onSearch={handleDrugSearch}
                             isSearching={isDrugSearching}
                             value={selectedDrug}
@@ -463,7 +445,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             />
                             <WeightComboBox
                                 options={weights}
-                                onChange={(id) => handleWeightSelect(Number(id))}
+                                onChange={(weight) => handleWeightSelect(weight)}
                                 isSearching={isWeightSearching}
                                 value={selectedWeight}
                                 placeholder="Select weight"
@@ -474,9 +456,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         </div>
                         <BrandCombobox
                             options={brands}
-                            onChange={(id) => handleBrandSelect(Number(id))}
-                            onSearch={() => {
-                            }}
+                            onChange={(id) => handleBrandSelect(id)}
                             isSearching={isBrandSearching}
                             value={selectedBrand}
                             placeholder="Select brand"
@@ -505,16 +485,17 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     />
 
                     {/* Dosage & Duration Card */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center space-x-2">
-                                <ClipboardCheck className="h-6 w-6 text-blue-500"/>
-                                <span>Dosage & Duration</span>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {strategy && strategy !== IssuingStrategy.SOS && strategy !== IssuingStrategy.OTHER ? (
-                                <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Dosage & Duration Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center space-x-2">
+                                    <ClipboardCheck className="h-6 w-6 text-blue-500"/>
+                                    <span>Dosage & Duration</span>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex flex-col gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="dose">Dosage</Label>
                                         <Input
@@ -523,90 +504,94 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                             min="0"
                                             step="0.5"
                                             value={dose || ""}
-                                            onChange={(e) => {
-                                                handleDoseChange(e.target.value);
-                                            }}
+                                            onChange={(e) => handleDoseChange(e.target.value)}
                                             placeholder="Enter dosage"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="forDays">For Days</Label>
-                                        <Input
-                                            id="forDays"
-                                            type="number"
-                                            min="0"
-                                            value={forDays || ""}
-                                            onChange={(e) => {
-                                                handleForDaysChange(e.target.value);
-                                            }}
-                                            placeholder="Enter number of days"
-                                        />
+
+                                    <div
+                                        key={strategy} // This forces a re-render when strategy changes
+                                        className="space-y-2 transition-all duration-300 animate-fade-in"
+                                    >
+                                        {strategy && strategy !== IssuingStrategy.SOS && strategy !== IssuingStrategy.OTHER ? (
+                                            <>
+                                                <Label htmlFor="forDays">For Days</Label>
+                                                <Input
+                                                    id="forDays"
+                                                    type="number"
+                                                    min="0"
+                                                    value={forDays || ""}
+                                                    onChange={(e) => handleForDaysChange(e.target.value)}
+                                                    placeholder="Enter number of days"
+                                                />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Label htmlFor="times">For Times</Label>
+                                                <Input
+                                                    id="times"
+                                                    type="number"
+                                                    min="0"
+                                                    value={times || ""}
+                                                    onChange={(e) => handleTimesChange(e.target.value)}
+                                                    placeholder="Enter number of times"
+                                                />
+                                            </>
+                                        )}
                                     </div>
                                 </div>
-                            ) : (
-                                strategy && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="quantity">Quantity</Label>
-                                        <Input
-                                            id="quantity"
-                                            type="number"
-                                            min="0"
-                                            value={quantity || ""}
-                                            onChange={(e) => {
-                                                handleQuantityChange(e.target.value);
-                                            }}
-                                            placeholder="Enter quantity"
-                                        />
-                                    </div>
-                                )
-                            )}
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
 
-                    {/* Meal Timing Card */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center space-x-2">
-                                <Utensils className="h-6 w-6 text-green-500"/>
-                                <span>Meal Timing</span>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <Label>No Meal Preference</Label>
-                                <Switch checked={skipMeal} onCheckedChange={(checked) => {
-                                    setSkipMeal(checked);
-                                    if (checked) setMealTiming(null);
-                                }}/>
-                            </div>
-                            {!skipMeal && (
-                                <RadioGroup
-                                    value={mealTiming || ""}
-                                    onValueChange={(value) => setMealTiming(value as MEAL)}
-                                    className="grid grid-cols-3 gap-4"
-                                >
+
+                        {/* Meal Timing Card */}
+                        <Card className={'flex flex-col'}>
+                            <CardHeader>
+                                <CardTitle className="flex justify-between items-center">
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value={MEAL.BEFORE} id="before"/>
-                                        <Label htmlFor="before">Before Meal</Label>
+                                        <Utensils className="h-6 w-6 text-green-500"/>
+                                        <span>Meal Timing</span>
                                     </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value={MEAL.WITH} id="with"/>
-                                        <Label htmlFor="with">With Meal</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value={MEAL.AFTER} id="after"/>
-                                        <Label htmlFor="after">After Meal</Label>
-                                    </div>
-                                </RadioGroup>
-                            )}
-                        </CardContent>
-                    </Card>
+                                    <Switch
+                                        checked={mealTiming !== null}
+                                        onCheckedChange={(checked) => setMealTiming(checked ? MEAL.BEFORE : null)}
+                                    />
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex items-center justify-center h-full">
+                                {mealTiming !== null ? (
+                                    <RadioGroup
+                                        value={mealTiming || ""}
+                                        onValueChange={(value) => setMealTiming(value as MEAL)}
+                                        className="space-y-3 w-full animate-fade-in"
+                                    >
+                                        {[
+                                            {value: MEAL.BEFORE, label: "Before Meal"},
+                                            {value: MEAL.WITH, label: "With Meal"},
+                                            {value: MEAL.AFTER, label: "After Meal"},
+                                        ].map(({value, label}) => (
+                                            <div
+                                                key={value}
+                                                className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-100 transition"
+                                            >
+                                                <RadioGroupItem value={value} id={value}/>
+                                                <Label htmlFor={value} className="cursor-pointer">{label}</Label>
+                                            </div>
+                                        ))}
+                                    </RadioGroup>
+                                ) : (
+                                    <p className="text-gray-500 text-sm animate-fade-in">Enable meal timing to choose an
+                                        option</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+
 
                     <Textarea
                         placeholder="Additional Details"
                         value={details}
                         onChange={(e) => setDetails(e.target.value)}
-                        className="resize-none"
                     />
                 </div>
                 <DialogFooter>

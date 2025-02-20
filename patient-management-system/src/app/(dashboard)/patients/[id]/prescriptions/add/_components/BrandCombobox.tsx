@@ -19,13 +19,12 @@ import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 interface BrandComboboxProps {
     options: BrandOption[];
-    value?: string | number | null;
-    onChange: (value: string | number) => void;
+    value: BrandOption | null;
+    onChange: (value: BrandOption) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     noOptionsMessage?: string;
     isSearching?: boolean;
-    onSearch?: (searchTerm: string) => void;
     className?: string;
     disabled?: boolean;
 }
@@ -38,22 +37,15 @@ const BrandCombobox = ({
                            searchPlaceholder = "Search brands...",
                            noOptionsMessage = "No brands found.",
                            isSearching = false,
-                           onSearch,
                            className,
                            disabled = false,
                        }: BrandComboboxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const handleSelect = (selectedValue: string) => {
+    const handleSelect = (selectedValue: BrandOption) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
-
-    const handleSearch = (searchTerm: string) => {
-        onSearch?.(searchTerm);
-    };
-
-    const selectedOption = options.find((option) => option.id === value);
 
     const formatExpiry = (expiryDate: Date) => {
         const now = new Date();
@@ -83,7 +75,7 @@ const BrandCombobox = ({
                         className
                     )}
                 >
-                    {selectedOption ? selectedOption.name : placeholder}
+                    {value ? value.name : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -91,7 +83,6 @@ const BrandCombobox = ({
                 <Command>
                     <CommandInput
                         placeholder={searchPlaceholder}
-                        onValueChange={handleSearch}
                     />
                     <CommandList>
                         <CommandEmpty className="p-4 text-center">
@@ -109,7 +100,7 @@ const BrandCombobox = ({
                                 <CommandItem
                                     key={option.id}
                                     value={option.name}
-                                    onSelect={() => handleSelect(String(option.id))}
+                                    onSelect={() => handleSelect(option)}
                                     className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
                                     <div className="flex items-center min-w-24 w-full gap-2">
@@ -143,7 +134,7 @@ const BrandCombobox = ({
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",
-                                            value === option.id ? "opacity-100" : "opacity-0"
+                                            value === option ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                 </CommandItem>

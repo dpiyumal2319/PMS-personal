@@ -65,7 +65,6 @@ const MedicationStrategyTabs = ({selectedStrategy}: MedicationStrategyTabsProps)
 
     const handleTabChange = (strategy: IssuingStrategy) => {
         selectedStrategy.setSelectedStrategy(strategy);
-        console.log(strategy);
     }
 
     return (

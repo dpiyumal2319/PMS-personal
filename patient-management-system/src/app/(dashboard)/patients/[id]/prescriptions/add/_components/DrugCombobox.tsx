@@ -17,8 +17,8 @@ import type {DrugOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add
 
 interface PopoverSelectProps {
     options: DrugOption[];
-    value?: string | number | null;
-    onChange: (value: string | number) => void;
+    value: DrugOption | null;
+    onChange: (value: DrugOption) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     noOptionsMessage?: string;
@@ -42,7 +42,7 @@ const DrugCombobox = ({
                       }: PopoverSelectProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const handleSelect = (selectedValue: string) => {
+    const handleSelect = (selectedValue: DrugOption) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
@@ -50,8 +50,6 @@ const DrugCombobox = ({
     const handleSearch = (searchTerm: string) => {
         onSearch?.(searchTerm);
     };
-
-    const selectedOption = options.find((option) => option.id === value);
 
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -69,7 +67,7 @@ const DrugCombobox = ({
                         className
                     )}
                 >
-                    {selectedOption ? selectedOption.name : placeholder}
+                    {value ? value.name : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -95,14 +93,14 @@ const DrugCombobox = ({
                                 <CommandItem
                                     key={option.id}
                                     value={String(option.id)}
-                                    onSelect={() => handleSelect(String(option.id))}
+                                    onSelect={() => handleSelect(option)}
                                     className="flex items-center justify-between"
                                 >
                                     <span>{option.name} - in ({option.weightCount} dosages)</span>
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",
-                                            value === option.id ? "opacity-100" : "opacity-0"
+                                            value === option ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                 </CommandItem>
