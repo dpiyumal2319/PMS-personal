@@ -149,7 +149,7 @@ export function DrugWeightField({
 
       {showModal && (
         <div className="absolute right-0 top-0 mt-16 bg-white w-80 p-4 rounded-lg shadow-lg border z-10">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-1">
             <h3 className="text-lg font-semibold">Add New Weight</h3>
             <button
               onClick={() => setShowModal(false)}
@@ -179,7 +179,7 @@ export function DrugWeightField({
               />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 ">
               <Button
                 onClick={handleAddWeight}
                 className="bg-primary-500 hover:bg-primary-600"
@@ -188,9 +188,9 @@ export function DrugWeightField({
               </Button>
             </div>
           </form>
-          <div className="mt-4">
+          <div className="mt-1">
             <h4 className="text-sm font-medium mb-2">Existing Weights</h4>
-            <div className="max-h-40 overflow-y-auto">
+            <div className="max-h-20 overflow-y-auto border rounded-md p-2">
               {uniqueWeights.map((weight) => (
                 <div
                   key={weight.id}
