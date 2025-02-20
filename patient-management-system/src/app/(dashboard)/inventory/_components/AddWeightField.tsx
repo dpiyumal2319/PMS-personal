@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, X } from "lucide-react";
 import { DrugWeightDataSuggestion } from "@/app/lib/definitions";
 import { addNewWeight, addDrugWeight } from "@/app/lib/actions";
+import { handleServerAction } from "@/app/lib/utils"; // Import handleServerAction
 
 interface DrugWeightFieldProps {
   weights: DrugWeightDataSuggestion[];
@@ -11,7 +12,7 @@ interface DrugWeightFieldProps {
   drugId?: number;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onWeightAdded: (weight: DrugWeightDataSuggestion) => void;
-  refetch: () => void; // Added refetch function
+  refetch: () => void;
 }
 
 export function DrugWeightField({
@@ -20,7 +21,7 @@ export function DrugWeightField({
   drugId,
   onChange,
   onWeightAdded,
-  refetch, // Destructure refetch
+  refetch,
 }: DrugWeightFieldProps) {
   const [showModal, setShowModal] = useState(false);
   const [newWeight, setNewWeight] = useState<string>("");
@@ -50,24 +51,34 @@ export function DrugWeightField({
     }
 
     try {
-      // Add new weight to Weights table
-      const addedWeight = await addNewWeight(weightValue);
+      // Wrap the weight addition logic in handleServerAction
+      const result = await handleServerAction(
+        async () => {
+          const addedWeight = await addNewWeight(weightValue);
 
-      // If drug is selected, create relationship
-      if (drugId) {
-        await addDrugWeight(drugId, addedWeight.id);
+          if (drugId) {
+            await addDrugWeight(drugId, addedWeight.id);
+          }
+
+          await refetch();
+          onWeightAdded(addedWeight);
+
+          return {
+            success: true,
+            message: `Successfully added weight: ${weightValue}mg`,
+          };
+        },
+        {
+          loadingMessage: "Adding new weight...",
+          position: "bottom-right",
+        }
+      );
+
+      if (result.success) {
+        setNewWeight("");
+        setError("");
+        setShowModal(false);
       }
-
-      // Step 3: Trigger refetch to update weight dropdown
-      await refetch();
-
-      // Update parent component
-      onWeightAdded(addedWeight);
-
-      // Reset and close modal
-      setNewWeight("");
-      setError("");
-      setShowModal(false);
     } catch (error) {
       setError("Failed to add weight");
     }
@@ -140,13 +151,6 @@ export function DrugWeightField({
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <div className="flex justify-end gap-2">
-              {/* <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </Button> */}
               <Button
                 onClick={handleAddWeight}
                 className="bg-primary-500 hover:bg-primary-600"
@@ -160,3 +164,5 @@ export function DrugWeightField({
     </div>
   );
 }
+
+export default DrugWeightField;
