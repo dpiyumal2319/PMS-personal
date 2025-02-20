@@ -276,14 +276,26 @@ export function DrugForm() {
                   visible={showDrugSuggestions}
                 />
               </div>
-              <DrugWeightField
-                weights={drugWeights}
-                selectedWeightId={formData.weightId}
-                drugId={formData.drugId}
-                onChange={handleChange}
-                onWeightAdded={handleWeightAdded}
-                refetch={fetchDrugWeights}
-              />
+
+              <div>
+                <label
+                  htmlFor="drugType"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Drug Type
+                </label>
+                <select
+                  id="drugType"
+                  value={formData.drugType}
+                  onChange={handleChange}
+                  name="drugType"
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="Tablet">Tablet</option>
+                  <option value="Syrup">Syrup</option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label
@@ -301,24 +313,14 @@ export function DrugForm() {
                   />
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="drugType"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Drug Type
-                  </label>
-                  <select
-                    id="drugType"
-                    value={formData.drugType}
-                    onChange={handleChange}
-                    name="drugType"
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="Tablet">Tablet</option>
-                    <option value="Syrup">Syrup</option>
-                  </select>
-                </div>
+                <DrugWeightField
+                  weights={drugWeights}
+                  selectedWeightId={formData.weightId}
+                  drugId={formData.drugId}
+                  onChange={handleChange}
+                  onWeightAdded={handleWeightAdded}
+                  refetch={fetchDrugWeights}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
