@@ -618,15 +618,22 @@ export async function getBrandByDrugWeightType({
     type: DrugType;
 }): Promise<BrandOption[]> {
     const whereCondition: Prisma.DrugBrandWhereInput = {
-        Batch: {
-            some: {
-                drugId: drugID,
-                status: 'AVAILABLE',
-                type,
-                ...(type === 'Tablet' && {drug: {DrugWeight: {some: {weightId: weightID}}}}),
+            Batch: {
+                some: {
+                    drugId: drugID,
+                    status: 'AVAILABLE',
+                    type,
+                    drug: {
+                        DrugWeight: {
+                            some: {
+                                weightId: weightID
+                            }
+                        }
+                    }
+                },
             },
-        },
-    };
+        }
+    ;
 
     const brands = await prisma.drugBrand.findMany({
         where: whereCondition,

@@ -146,7 +146,6 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         try {
             const drugs = await searchAvailableDrugs(term);
             setDrugs(drugs);
-            console.log(drugs);
         } catch (error) {
             setError("Error searching drugs");
             console.error(error);
@@ -178,7 +177,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 getCachedStrategy(selected.id),
                 getDrugTypesByDrug(selected.id)
             ]);
-
+            
             if (!types.length) {
                 throw new Error("No drug types available");
             }
@@ -190,52 +189,38 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             const selectedDrugType = hasValidCachedType ? cachedStrategy.lastDrugType : 'Tablet';
             setSelectedType(selectedDrugType);
 
-            if (selectedDrugType === 'Tablet') {
-                const weights = await getWeightByBrand({
-                    drugID: selected.id,
-                    type: selectedDrugType
-                });
-                setWeights(weights);
+            const weights = await getWeightByBrand({
+                drugID: selected.id,
+                type: selectedDrugType
+            });
+            setWeights(weights);
 
-                // Handle weight selection for tablets
-                const cachedWeightID = cachedStrategy?.weight?.id;
-                const availableWeightIDs = weights.map(weight => weight.id);
-                const isValidCachedWeight = cachedWeightID && availableWeightIDs.includes(cachedWeightID);
+            const cachedWeightID = cachedStrategy?.weight?.id;
+            const availableWeightIDs = weights.map(weight => weight.id);
+            const isValidCachedWeight = cachedWeightID && availableWeightIDs.includes(cachedWeightID);
 
-                if (isValidCachedWeight && cachedStrategy) {
-                    const cachedWeight: WeightOption = weights.find(weight => weight.id === cachedWeightID)!;
-                    setSelectedWeight(cachedWeight);
-                    const selectedWeight = weights.find(weight => weight.id === cachedWeightID);
-                    if (selectedWeight) {
-                        showWarnings(selectedWeight);
-                    }
+            if (isValidCachedWeight && cachedStrategy) {
+                const cachedWeight: WeightOption = weights.find(weight => weight.id === cachedWeightID)!;
+                setSelectedWeight(cachedWeight);
+                const selectedWeight = weights.find(weight => weight.id === cachedWeightID);
 
-                    // Fetch brands for selected weight
-                    const drugBrands = await getBrandByDrugWeightType({
-                        drugID: selected.id,
-                        weightID: cachedWeightID,
-                        type: selectedDrugType
-                    });
-                    setBrands(drugBrands);
-
-                    await handleCachedBrandStrategy(drugBrands, cachedStrategy);
-                } else {
-                    // If no valid cached weight, just set the weights and wait for user selection
-                    setWeights(weights);
-                    setBrands([]);
+                if (selectedWeight) {
+                    showWarnings(selectedWeight);
                 }
-            } else {
-                // Handle non-tablet drug types
+
+                // Fetch brands for selected weight
                 const drugBrands = await getBrandByDrugWeightType({
                     drugID: selected.id,
-                    type: selectedDrugType,
-                    weightID: 0
+                    weightID: cachedWeightID,
+                    type: selectedDrugType
                 });
-                setBrands(drugBrands);
 
-                if (cachedStrategy) {
-                    await handleCachedBrandStrategy(drugBrands, cachedStrategy);
-                }
+                setBrands(drugBrands);
+                await handleCachedBrandStrategy(drugBrands, cachedStrategy);
+            } else {
+                // If no valid cached weight, just set the weights and wait for user selection
+                setWeights(weights);
+                setBrands([]);
             }
         } catch (error) {
             console.error('Error in handleDrugSelect:', error);
@@ -309,24 +294,13 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             setBrands([]);
             setWeights([]);
 
-            if (type === 'Tablet') {
-                // For tablets, first fetch weights
-                const weights = await getWeightByBrand({
-                    drugID: selectedDrug.id,
-                    type: type
-                });
-                setWeights(weights);
-                setIsWeightSearching(false);
-                // Brands will be fetched after weight selection
-            } else {
-                // For non-tablets, directly fetch brands
-                const drugBrands = await getBrandByDrugWeightType({
-                    drugID: selectedDrug.id,
-                    type: type,
-                    weightID: 0
-                });
-                setBrands(drugBrands);
-            }
+            // For tablets, first fetch weights
+            const weights = await getWeightByBrand({
+                drugID: selectedDrug.id,
+                type: type
+            });
+            setWeights(weights);
+            setIsWeightSearching(false);
         } catch (error) {
             console.error('Error in handleTypeSelect:', error);
             setError(error instanceof Error ? error.message : "Error fetching drug data");

@@ -34,6 +34,7 @@ enum VisitStatus {
   COMPLETED
 }
 
+// If change this remember to update the prescription type in IssueFromInventory
 enum DrugType {
   Tablet
   Syrup

@@ -34,12 +34,20 @@ const DrugTypeComboBox = ({
                               disabled = false,
                           }: TypeComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
-
     const handleSelect = (selectedValue: DrugType) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
     const selectedOption = options.find((option) => option === value);
+
+    function DrugTypeCombobox(options: DrugType[]) {
+        options.forEach(drug => {
+            console.log(`Drug: ${DrugType[drug]}`);
+            console.log(`is Syrup: ${drug === DrugType.Syrup}`);
+        });
+    }
+
+    DrugTypeCombobox(options);
 
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -70,13 +78,13 @@ const DrugTypeComboBox = ({
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
-                                    key={option}
-                                    value={option}
+                                    key={option === DrugType.Tablet ? 'Tablet' : 'Syrup'}
+                                    value={option === DrugType.Tablet ? 'Tablet' : 'Syrup'}
                                     onSelect={() => handleSelect(option)}
                                     className="rounded-md hover:bg-gray-100"
                                 >
-                                    <span className="font-medium">{option}</span>
-
+                                    <span
+                                        className="font-medium">{option === DrugType.Tablet ? 'Tablet' : 'Syrup'}</span>
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",
