@@ -27,32 +27,26 @@ interface WeightComboBoxProps {
     searchPlaceholder?: string;
     noOptionsMessage?: string;
     isSearching?: boolean;
-    onSearch?: (searchTerm: string) => void;
     className?: string;
     disabled?: boolean;
 }
 
-const WeightComboBox= ({
-                           options,
-                           value,
-                           onChange,
-                           placeholder = "Select a brand...",
-                           searchPlaceholder = "Search brands...",
-                           noOptionsMessage = "No brands found.",
-                           isSearching = false,
-                           onSearch,
-                           className,
-                           disabled = false,
-                       }: WeightComboBoxProps) => {
+const WeightComboBox = ({
+                            options,
+                            value,
+                            onChange,
+                            placeholder = "Select a brand...",
+                            searchPlaceholder = "Search brands...",
+                            noOptionsMessage = "No brands found.",
+                            isSearching = false,
+                            className,
+                            disabled = false,
+                        }: WeightComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const handleSelect = (selectedValue: string) => {
         onChange(selectedValue);
         setPopoverOpen(false);
-    };
-
-    const handleSearch = (searchTerm: string) => {
-        onSearch?.(searchTerm);
     };
 
     const selectedOption = options.find((option) => option.id === value);
@@ -93,7 +87,6 @@ const WeightComboBox= ({
                 <Command>
                     <CommandInput
                         placeholder={searchPlaceholder}
-                        onValueChange={handleSearch}
                     />
                     <CommandList>
                         <CommandEmpty className="p-4 text-center">

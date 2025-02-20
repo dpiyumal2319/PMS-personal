@@ -2,12 +2,12 @@
 
 import {myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
-import {ChargeType} from "@prisma/client";
+import {ChargeType, DrugType, Prisma} from "@prisma/client";
 import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {
-    BrandOption, DrugOption,
+    BrandOption, DrugOption, TypeOption,
     WeightOption
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
@@ -465,6 +465,7 @@ export async function getCachedStrategy(drugID: number) {
             issueId: true,
             issue: true,
             weight: true,
+            lastDrugType: true,
             brand: {
                 select: {
                     id: true,
@@ -562,7 +563,7 @@ export async function searchBrandByDrug({
         );
 }
 
-export async function getWeightByBrand({drugID}: { drugID: number }): Promise<WeightOption[]> {
+export async function getWeightByBrand({drugID, type}: { drugID: number, type: DrugType }): Promise<WeightOption[]> {
     return prisma.drugWeight.findMany({
         where: {
             drugId: drugID,
@@ -570,7 +571,8 @@ export async function getWeightByBrand({drugID}: { drugID: number }): Promise<We
                 batch: {
                     some: {
                         drugId: drugID,
-                        status: 'AVAILABLE'
+                        status: 'AVAILABLE',
+                        type
                     }
                 }
             }
@@ -582,7 +584,8 @@ export async function getWeightByBrand({drugID}: { drugID: number }): Promise<We
                     batch: {
                         where: {
                             drugId: drugID,
-                            status: 'AVAILABLE'
+                            status: 'AVAILABLE',
+                            type
                         },
                         select: {
                             remainingQuantity: true,
@@ -605,47 +608,57 @@ export async function getWeightByBrand({drugID}: { drugID: number }): Promise<We
     });
 }
 
-export async function getBrandByDrugAndWeight({drugID, weightID}: {
-    drugID: number,
-    weightID: number
+export async function getBrandByDrugWeightType({
+                                                   drugID,
+                                                   weightID,
+                                                   type,
+                                               }: {
+    drugID: number;
+    weightID: number;
+    type: DrugType;
 }): Promise<BrandOption[]> {
-    const brands = await prisma.drugBrand.findMany({
-        where: {
-            Batch: {
-                some: {
-                    drugId: drugID,
-                    status: 'AVAILABLE',
-                    drug: {
-                        DrugWeight: {
-                            some: {
-                                weightId: weightID
-                            }
-                        }
-                    }
-                }
-            }
+    const whereCondition: Prisma.DrugBrandWhereInput = {
+        Batch: {
+            some: {
+                drugId: drugID,
+                status: 'AVAILABLE',
+                type,
+                ...(type === 'Tablet' && {drug: {DrugWeight: {some: {weightId: weightID}}}}),
+            },
         },
+    };
+
+    const brands = await prisma.drugBrand.findMany({
+        where: whereCondition,
         include: {
             Batch: {
-                where: {
-                    drugId: drugID,
-                    status: 'AVAILABLE'
-                },
-                select: {
-                    remainingQuantity: true,
-                    expiry: true
-                }
-            }
-        }
+                where: {drugId: drugID, status: 'AVAILABLE', type},
+                select: {remainingQuantity: true, expiry: true},
+            },
+        },
     });
 
-    return brands.map(brand => ({
+    return brands.map((brand) => ({
         id: brand.id,
         name: brand.name,
         batchCount: brand.Batch.length,
         totalRemainingQuantity: brand.Batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
-        farthestExpiry: brand.Batch.reduce((latest, batch) =>
-            batch.expiry > latest ? batch.expiry : latest, new Date(0) // Initialize with oldest possible date
-        )
+        farthestExpiry: brand.Batch.reduce(
+            (latest, batch) => (batch.expiry > latest ? batch.expiry : latest),
+            new Date(0)
+        ),
     }));
+}
+
+export async function getDrugTypesByDrug(drugID: number): Promise<TypeOption[]> {
+    return prisma.batch.findMany({
+        where: {
+            drugId: drugID,
+            status: 'AVAILABLE'
+        },
+        distinct: ['type'], // Correct way to use distinct
+        select: {
+            type: true, // Ensures only the type field is returned
+        }
+    })
 }

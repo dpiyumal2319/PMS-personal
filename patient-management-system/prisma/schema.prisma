@@ -309,15 +309,16 @@ model ReportValue {
 }
 
 model StratergyHistory {
-  id        Int       @id @default(autoincrement())
-  drug      Drug      @relation(fields: [drugId], references: [id])
-  drugId    Int       @unique
-  brand     DrugBrand @relation(fields: [brandId], references: [id])
-  brandId   Int
-  weight    Weights   @relation(fields: [weightsId], references: [id])
-  issue     Issue     @relation(fields: [issueId], references: [id])
-  issueId   Int
-  weightsId Int
+  id           Int       @id @default(autoincrement())
+  drug         Drug      @relation(fields: [drugId], references: [id])
+  drugId       Int       @unique
+  brand        DrugBrand @relation(fields: [brandId], references: [id])
+  lastDrugType DrugType
+  brandId      Int
+  weight       Weights   @relation(fields: [weightsId], references: [id])
+  issue        Issue     @relation(fields: [issueId], references: [id])
+  issueId      Int
+  weightsId    Int
 }
 
 model BatchHistory {
