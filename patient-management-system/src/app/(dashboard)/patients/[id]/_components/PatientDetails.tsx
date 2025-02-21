@@ -5,6 +5,7 @@ import {notFound} from "next/navigation";
 import {calcAge, getInitials} from "@/app/lib/utils";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import EditPatientForm from "@/app/(dashboard)/patients/[id]/_components/EditPatientDataForm";
+import { MedicalCertificateExport } from "./MedicalCertificateExport";
 
 const PatientDetails = async ({id}: { id: number }) => {
     const patient = await getPatientDetails(id);
@@ -78,6 +79,7 @@ const PatientDetails = async ({id}: { id: number }) => {
                                 height: patient.height ? patient.height.toString() : '',
                                 weight: patient.weight ? patient.weight.toString() : ''
                             }} id={id}/>
+                            <MedicalCertificateExport/>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6">
                             <DetailRow
