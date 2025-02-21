@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileText } from "lucide-react";
+import { fetchPatientData } from "@/app/lib/actions";
 
-export function MedicalCertificateExport() {
+export function MedicalCertificateExport({ patientId }: { patientId?: number }) {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
         patientName: "",
@@ -22,6 +23,43 @@ export function MedicalCertificateExport() {
         sickDate: "",
         reportDate: new Date().toISOString().split('T')[0],
     });
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        // Fetch patient data if patientId is provided
+        if (patientId) {
+            loadPatientData(patientId);
+        }
+    }, [patientId]);
+
+    const loadPatientData = async (id: number) => {
+        try {
+            setIsLoading(true);
+            const patientData = await fetchPatientData(id);
+            
+            if (patientData) {
+                // Calculate age from birthDate if available
+                let age = "";
+                if (patientData.birthDate) {
+                    const birthDate = new Date(patientData.birthDate);
+                    const today = new Date();
+                    age = Math.floor((today.getTime() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)).toString();
+                }
+                
+                // Update form with patient data
+                setFormData(prev => ({
+                    ...prev,
+                    patientName: patientData.name || "",
+                    address: patientData.address || "",
+                    age: age
+                }));
+            }
+        } catch (error) {
+            console.error("Error loading patient data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<any>) => {
         const { name, value } = e.target;
@@ -82,9 +120,6 @@ export function MedicalCertificateExport() {
         pdf.line(marginLeft, yPos, pageWidth - marginRight, yPos);
         yPos += 8;
         
-
-
-        
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(10);  // Increased from 8
         
@@ -102,7 +137,7 @@ export function MedicalCertificateExport() {
         yPos += (addressLines.length * 5) + 1;  // Increased line spacing
         
         // Workplace
-        const workplaceText = `Name and Adress of the Eork Place: ${formData.workPlace || "[Not Provided]"}`;
+        const workplaceText = `Name and Adress of the Work Place: ${formData.workPlace || "[Not Provided]"}`;
         const workplaceLines = pdf.splitTextToSize(workplaceText, contentWidth);
         pdf.text(workplaceLines, marginLeft, yPos);
         yPos += (workplaceLines.length * 5) + 1 ;  // Increased line spacing
@@ -184,147 +219,153 @@ export function MedicalCertificateExport() {
 
                 {/* Scrollable content */}
                 <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-                    <div className="space-y-6 max-w-lg mx-auto">
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <h3 className="text-blue-700 font-medium mb-3 flex items-center">
-                                <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">1</span>
-                                Patient Information
-                            </h3>
-
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700">Patient Name</label>
-                                    <Input
-                                        name="patientName"
-                                        value={formData.patientName}
-                                        onChange={handleChange}
-                                        placeholder="Full name"
-                                        className="border-gray-300 focus:ring-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700">Age</label>
-                                    <Input
-                                        name="age"
-                                        value={formData.age}
-                                        onChange={handleChange}
-                                        type="number"
-                                        placeholder="Years"
-                                        className="border-gray-300 focus:ring-blue-500"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="text-sm font-medium text-gray-700">Address</label>
-                                <Input
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    placeholder="Full address"
-                                    className="border-gray-300 focus:ring-blue-500"
-                                />
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="text-sm font-medium text-gray-700">Name & Adress of the Work Place</label>
-                                <Input
-                                    name="workPlace"
-                                    value={formData.workPlace}
-                                    onChange={handleChange}
-                                    placeholder="Company/Organization name and Address"
-                                    className="border-gray-300 focus:ring-blue-500"
-                                />
-                            </div>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-full">
+                            <div className="text-blue-600">Loading patient data...</div>
                         </div>
+                    ) : (
+                        <div className="space-y-6 max-w-lg mx-auto">
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                                <h3 className="text-blue-700 font-medium mb-3 flex items-center">
+                                    <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">1</span>
+                                    Patient Information
+                                </h3>
 
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <h3 className="text-blue-700 font-medium mb-3 flex items-center">
-                                <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">2</span>
-                                Medical Details
-                            </h3>
-
-                            <div className="mb-4">
-                                <label className="text-sm font-medium text-gray-700">Condition/Disease</label>
-                                <Input
-                                    name="disease"
-                                    value={formData.disease}
-                                    onChange={handleChange}
-                                    placeholder="Medical condition"
-                                    className="border-gray-300 focus:ring-blue-500"
-                                />
-                            </div>
-
-                            <div className="mb-4">
-                                <label className="text-sm font-medium text-gray-700">Medical Recommendation</label>
-                                <Textarea
-                                    name="recommendation"
-                                    value={formData.recommendation}
-                                    onChange={handleChange}
-                                    placeholder="Detailed recommendation"
-                                    className="border-gray-300 focus:ring-blue-500 min-h-20"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                            <h3 className="text-blue-700 font-medium mb-3 flex items-center">
-                                <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">3</span>
-                                Fitness Assessment
-                            </h3>
-
-                            <div className="mb-4">
-                                <label className="text-sm font-medium text-gray-700">Fit for Duty?</label>
-                                <select
-                                    name="fitForDuty"
-                                    value={formData.fitForDuty}
-                                    onChange={handleChange}
-                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                </select>
-                            </div>
-
-                            {formData.fitForDuty === "No" && (
-                                <>
-                                    <div className="mb-4">
-                                        <label className="text-sm font-medium text-gray-700">Date of Sickness</label>
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700">Patient Name</label>
                                         <Input
-                                            name="sickDate"
-                                            value={formData.sickDate}
+                                            name="patientName"
+                                            value={formData.patientName}
                                             onChange={handleChange}
-                                            type="date"
+                                            placeholder="Full name"
                                             className="border-gray-300 focus:ring-blue-500"
                                         />
                                     </div>
-
-                                    <div className="mb-4">
-                                        <label className="text-sm font-medium text-gray-700">Days of Leave Recommended</label>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700">Age</label>
                                         <Input
-                                            name="sickDaysCount"
-                                            value={formData.sickDaysCount}
+                                            name="age"
+                                            value={formData.age}
                                             onChange={handleChange}
                                             type="number"
-                                            placeholder="Number of days"
+                                            placeholder="Years"
                                             className="border-gray-300 focus:ring-blue-500"
                                         />
                                     </div>
-                                </>
-                            )}
+                                </div>
 
-                            <div className="mb-4">
-                                <label className="text-sm font-medium text-gray-700">Report Issue Date</label>
-                                <Input
-                                    name="reportDate"
-                                    value={formData.reportDate}
-                                    onChange={handleChange}
-                                    type="date"
-                                    className="border-gray-300 focus:ring-blue-500"
-                                />
+                                <div className="mb-4">
+                                    <label className="text-sm font-medium text-gray-700">Address</label>
+                                    <Input
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                        placeholder="Full address"
+                                        className="border-gray-300 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="text-sm font-medium text-gray-700">Name & Adress of the Work Place</label>
+                                    <Input
+                                        name="workPlace"
+                                        value={formData.workPlace}
+                                        onChange={handleChange}
+                                        placeholder="Company/Organization name and Address"
+                                        className="border-gray-300 focus:ring-blue-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                                <h3 className="text-blue-700 font-medium mb-3 flex items-center">
+                                    <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">2</span>
+                                    Medical Details
+                                </h3>
+
+                                <div className="mb-4">
+                                    <label className="text-sm font-medium text-gray-700">Condition/Disease</label>
+                                    <Input
+                                        name="disease"
+                                        value={formData.disease}
+                                        onChange={handleChange}
+                                        placeholder="Medical condition"
+                                        className="border-gray-300 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="text-sm font-medium text-gray-700">Medical Recommendation</label>
+                                    <Textarea
+                                        name="recommendation"
+                                        value={formData.recommendation}
+                                        onChange={handleChange}
+                                        placeholder="Detailed recommendation"
+                                        className="border-gray-300 focus:ring-blue-500 min-h-20"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                                <h3 className="text-blue-700 font-medium mb-3 flex items-center">
+                                    <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">3</span>
+                                    Fitness Assessment
+                                </h3>
+
+                                <div className="mb-4">
+                                    <label className="text-sm font-medium text-gray-700">Fit for Duty?</label>
+                                    <select
+                                        name="fitForDuty"
+                                        value={formData.fitForDuty}
+                                        onChange={handleChange}
+                                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </div>
+
+                                {formData.fitForDuty === "No" && (
+                                    <>
+                                        <div className="mb-4">
+                                            <label className="text-sm font-medium text-gray-700">Date of Sickness</label>
+                                            <Input
+                                                name="sickDate"
+                                                value={formData.sickDate}
+                                                onChange={handleChange}
+                                                type="date"
+                                                className="border-gray-300 focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <div className="mb-4">
+                                            <label className="text-sm font-medium text-gray-700">Days of Leave Recommended</label>
+                                            <Input
+                                                name="sickDaysCount"
+                                                value={formData.sickDaysCount}
+                                                onChange={handleChange}
+                                                type="number"
+                                                placeholder="Number of days"
+                                                className="border-gray-300 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="mb-4">
+                                    <label className="text-sm font-medium text-gray-700">Report Issue Date</label>
+                                    <Input
+                                        name="reportDate"
+                                        value={formData.reportDate}
+                                        onChange={handleChange}
+                                        type="date"
+                                        className="border-gray-300 focus:ring-blue-500"
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Submit button */}
@@ -332,6 +373,7 @@ export function MedicalCertificateExport() {
                     <Button
                         onClick={exportToPDF}
                         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2 shadow-md transition-all duration-200"
+                        disabled={isLoading}
                     >
                         <FileText className="w-5 h-5 mr-2" /> Generate A5 Certificate
                     </Button>
