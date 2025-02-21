@@ -12,12 +12,12 @@ import {
     CommandList,
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
-import {DrugType} from "@prisma/client";
+import {CustomDrugType} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
 interface TypeComboBoxProps {
-    options: DrugType[];
-    value?: DrugType
-    onChange: (value: DrugType) => void;
+    options: CustomDrugType[];
+    value: CustomDrugType | null;
+    onChange: (value: CustomDrugType) => void;
     placeholder?: string;
     noOptionsMessage?: string;
     className?: string;
@@ -34,20 +34,14 @@ const DrugTypeComboBox = ({
                               disabled = false,
                           }: TypeComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const handleSelect = (selectedValue: DrugType) => {
+    const handleSelect = (selectedValue: CustomDrugType) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
     const selectedOption = options.find((option) => option === value);
 
-    function DrugTypeCombobox(options: DrugType[]) {
-        options.forEach(drug => {
-            console.log(`Drug: ${DrugType[drug]}`);
-            console.log(`is Syrup: ${drug === DrugType.Syrup}`);
-        });
-    }
-
-    DrugTypeCombobox(options);
+    console.log("DrugTypeComboBox.tsx: selectedOption: ", selectedOption);
+    console.log("DrugTypeComboBox.tsx: options: ", options);
 
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -65,7 +59,7 @@ const DrugTypeComboBox = ({
                         className
                     )}
                 >
-                    {selectedOption ? selectedOption : placeholder}
+                    {selectedOption?.name ? selectedOption.name : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -78,13 +72,13 @@ const DrugTypeComboBox = ({
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
-                                    key={option === DrugType.Tablet ? 'Tablet' : 'Syrup'}
-                                    value={option === DrugType.Tablet ? 'Tablet' : 'Syrup'}
+                                    key={option.name}
+                                    value={option.name}
                                     onSelect={() => handleSelect(option)}
                                     className="rounded-md hover:bg-gray-100"
                                 >
                                     <span
-                                        className="font-medium">{option === DrugType.Tablet ? 'Tablet' : 'Syrup'}</span>
+                                        className="font-medium">{option.name}</span>
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",

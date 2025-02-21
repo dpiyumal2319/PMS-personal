@@ -20,7 +20,6 @@ type DrugType = "Tablet" | "Syrup";
 interface InventoryFormData {
     brandId?: number;
     brandName: string;
-
     drugId?: number;
     drugName: string;
     batchNumber: string;

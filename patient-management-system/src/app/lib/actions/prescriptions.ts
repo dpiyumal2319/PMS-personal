@@ -7,7 +7,7 @@ import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {
-    BrandOption, DrugOption, TypeOption,
+    BrandOption, CustomDrugType, DrugOption,
     WeightOption
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
@@ -563,7 +563,12 @@ export async function searchBrandByDrug({
         );
 }
 
-export async function getWeightByBrand({drugID, type}: { drugID: number, type: DrugType }): Promise<WeightOption[]> {
+export async function getWeightByBrand({drugID, type}: {
+    drugID: number,
+    type: CustomDrugType
+}): Promise<WeightOption[]> {
+    console.log("getWeightByBrand: drugID: ", drugID);
+    console.log("getWeightByBrand: type: ", type);
     return prisma.drugWeight.findMany({
         where: {
             drugId: drugID,
@@ -572,7 +577,7 @@ export async function getWeightByBrand({drugID, type}: { drugID: number, type: D
                     some: {
                         drugId: drugID,
                         status: 'AVAILABLE',
-                        type
+                        type: type.name === 'Tablet' ? 'Tablet' : 'Syrup'
                     }
                 }
             }
@@ -585,7 +590,7 @@ export async function getWeightByBrand({drugID, type}: { drugID: number, type: D
                         where: {
                             drugId: drugID,
                             status: 'AVAILABLE',
-                            type
+                            type: type.name === 'Tablet' ? 'Tablet' : 'Syrup'
                         },
                         select: {
                             remainingQuantity: true,
@@ -657,7 +662,7 @@ export async function getBrandByDrugWeightType({
     }));
 }
 
-export async function getDrugTypesByDrug(drugID: number): Promise<TypeOption[]> {
+export async function getDrugTypesByDrug(drugID: number): Promise<CustomDrugType[]> {
     return prisma.batch.findMany({
         where: {
             drugId: drugID,
@@ -667,5 +672,10 @@ export async function getDrugTypesByDrug(drugID: number): Promise<TypeOption[]> 
         select: {
             type: true, // Ensures only the type field is returned
         }
-    })
+    }).then((types) => {
+        return types.map((type) => ({
+            name: type.type.toString(),
+            type: type
+        }));
+    });
 }

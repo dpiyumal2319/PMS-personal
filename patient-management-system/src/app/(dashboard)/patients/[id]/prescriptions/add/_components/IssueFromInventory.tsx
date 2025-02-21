@@ -37,6 +37,10 @@ export type DrugOption = {
     weightCount: number;
 }
 
+export type CustomDrugType = {
+    name: string,
+    type: DrugType
+}
 
 export interface WeightOption {
     id: number;
@@ -65,8 +69,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [drugs, setDrugs] = useState<DrugOption[]>([]);
     const [selectedDrug, setSelectedDrug] = useState<DrugOption | null>(null);
 
-    const [types, setTypes] = useState<DrugType[]>([]);
-    const [selectedType, setSelectedType] = useState<DrugType>("Tablet");
+    const [types, setTypes] = useState<CustomDrugType[]>([]);
+    const [selectedType, setSelectedType] = useState<CustomDrugType | null>(null);
 
     const [weights, setWeights] = useState<WeightOption[]>([]);
     const [selectedWeight, setSelectedWeight] = useState<WeightOption | null>(null);
@@ -156,6 +160,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
     const handleDrugSelect = async (selected: DrugOption) => {
         if (selected === selectedDrug) return;
+
         try {
             // Reset states before fetching new data
             setSelectedDrug(selected);
@@ -175,55 +180,64 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             // Fetch initial data
             const [cachedStrategy, types] = await Promise.all([
                 getCachedStrategy(selected.id),
-                getDrugTypesByDrug(selected.id)
+                getDrugTypesByDrug(selected.id),
             ]);
-            
+
             if (!types.length) {
                 throw new Error("No drug types available");
             }
 
             setTypes(types);
 
-            // Handle drug type selection
-            const hasValidCachedType = cachedStrategy && types.map(type => type.type).includes(cachedStrategy.lastDrugType);
-            const selectedDrugType = hasValidCachedType ? cachedStrategy.lastDrugType : 'Tablet';
-            setSelectedType(selectedDrugType);
+            // Check if cached drug type is valid
+            const hasValidCachedType =
+                cachedStrategy && types.some(type => type.name === cachedStrategy.lastDrugType);
+
+            if (!hasValidCachedType) {
+                console.warn("No valid cached drug type found, stopping further fetching.");
+                return; // **Early exit**
+            }
+
+            const selectedDrugType = cachedStrategy.lastDrugType;
+            const newSelect = types.find(type => type.type === selectedDrugType) || null;
+            setSelectedType(newSelect);
+
+            // Fetch weights
+            if (!newSelect) {
+                return; // **Early exit**
+            }
 
             const weights = await getWeightByBrand({
                 drugID: selected.id,
-                type: selectedDrugType
+                type: newSelect,
             });
+
             setWeights(weights);
 
             const cachedWeightID = cachedStrategy?.weight?.id;
-            const availableWeightIDs = weights.map(weight => weight.id);
-            const isValidCachedWeight = cachedWeightID && availableWeightIDs.includes(cachedWeightID);
+            const isValidCachedWeight = cachedWeightID && weights.some(weight => weight.id === cachedWeightID);
 
-            if (isValidCachedWeight && cachedStrategy) {
+            if (isValidCachedWeight) {
                 const cachedWeight: WeightOption = weights.find(weight => weight.id === cachedWeightID)!;
                 setSelectedWeight(cachedWeight);
-                const selectedWeight = weights.find(weight => weight.id === cachedWeightID);
+                showWarnings(cachedWeight);
 
-                if (selectedWeight) {
-                    showWarnings(selectedWeight);
-                }
-
-                // Fetch brands for selected weight
+                // Fetch brands
                 const drugBrands = await getBrandByDrugWeightType({
                     drugID: selected.id,
                     weightID: cachedWeightID,
-                    type: selectedDrugType
+                    type: selectedDrugType,
                 });
 
                 setBrands(drugBrands);
                 await handleCachedBrandStrategy(drugBrands, cachedStrategy);
             } else {
-                // If no valid cached weight, just set the weights and wait for user selection
+                // No valid cached weight, stop fetching brands
                 setWeights(weights);
                 setBrands([]);
             }
         } catch (error) {
-            console.error('Error in handleDrugSelect:', error);
+            console.error("Error in handleDrugSelect:", error);
             setError(error instanceof Error ? error.message : "Error fetching drug data");
 
             // Reset states on error
@@ -281,7 +295,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-    const handleTypeSelect = async (type: DrugType) => {
+    const handleTypeSelect = async (type: CustomDrugType) => {
         if (!selectedDrug) return;
         try {
             setSelectedType(type);
@@ -299,6 +313,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 drugID: selectedDrug.id,
                 type: type
             });
+
             setWeights(weights);
             setIsWeightSearching(false);
         } catch (error) {
@@ -317,7 +332,6 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     };
 
     const handleWeightSelect = async (selected: WeightOption) => {
-        if (selectedType !== 'Tablet') return;
         setSelectedWeight(selected);
         if (!selectedWeight || !selectedDrug) return;
         showWarnings(selectedWeight);
@@ -343,42 +357,42 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     };
 
     const handleAddIssue = () => {
-        if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName || !selectedWeight) {
-            const missingFields = [
-                !selectedDrug && "Drug",
-                !selectedWeight && "Weight",
-                !selectedBrand && "Brand",
-                !strategy && "Strategy"
-            ].filter(Boolean);
-
-            setError(`Please fill all required fields: ${missingFields.join(", ")}`);
-            return;
-        }
-
-        const calculatedQuantity = calculateQuantity({
-            dose: dose || 0,
-            strategy,
-            forDays: forDays || 0,
-            times: times || 0
-        });
-
-        const newIssue: IssueInForm = {
-            drugId: selectedDrug,
-            drugName: selectedDrugName,
-            details,
-            brandId: selectedBrand,
-            brandName: selectedBrandName,
-            strategy,
-            dose: dose || 0,
-            forDays: forDays || 0,
-            quantity: calculatedQuantity,
-            meal: mealTiming,
-            forTimes: times || 0,
-        };
-
-        onAddIssue(newIssue);
-        setOpen(false);
-        resetForm();
+        // if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName || !selectedWeight) {
+        //     const missingFields = [
+        //         !selectedDrug && "Drug",
+        //         !selectedWeight && "Weight",
+        //         !selectedBrand && "Brand",
+        //         !strategy && "Strategy"
+        //     ].filter(Boolean);
+        //
+        //     setError(`Please fill all required fields: ${missingFields.join(", ")}`);
+        //     return;
+        // }
+        //
+        // const calculatedQuantity = calculateQuantity({
+        //     dose: dose || 0,
+        //     strategy,
+        //     forDays: forDays || 0,
+        //     times: times || 0
+        // });
+        //
+        // const newIssue: IssueInForm = {
+        //     drugId: selectedDrug,
+        //     drugName: selectedDrugName,
+        //     details,
+        //     brandId: selectedBrand,
+        //     brandName: selectedBrandName,
+        //     strategy,
+        //     dose: dose || 0,
+        //     forDays: forDays || 0,
+        //     quantity: calculatedQuantity,
+        //     meal: mealTiming,
+        //     forTimes: times || 0,
+        // };
+        //
+        // onAddIssue(newIssue);
+        // setOpen(false);
+        // resetForm();
     };
 
     return (
@@ -425,7 +439,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                 placeholder="Select weight"
                                 noOptionsMessage="No weights found"
                                 searchPlaceholder="Search weights"
-                                disabled={!selectedDrug || selectedType !== 'Tablet'}
+                                disabled={!selectedDrug}
                             />
                         </div>
                         <BrandCombobox
@@ -436,7 +450,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             placeholder="Select brand"
                             searchPlaceholder="Search brand"
                             noOptionsMessage="No brands found"
-                            disabled={!selectedType || (selectedType === DrugType.Tablet && !selectedWeight)}
+                            disabled={!selectedType}
                         />
                     </div>
 
