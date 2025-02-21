@@ -38,10 +38,7 @@ const DrugTypeComboBox = ({
         onChange(selectedValue);
         setPopoverOpen(false);
     };
-    const selectedOption = options.find((option) => option === value);
-
-    console.log("DrugTypeComboBox.tsx: selectedOption: ", selectedOption);
-    console.log("DrugTypeComboBox.tsx: options: ", options);
+    const selectedOption = options.find((option) => option === value)
 
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>

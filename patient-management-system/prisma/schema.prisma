@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -163,13 +163,12 @@ model QueueEntry {
 }
 
 model DrugBrand {
-  id               Int                @id @default(autoincrement())
-  name             String
-  description      String?
-  Batch            Batch[]
-  Issue            Issue[]
-  StratergyHistory StratergyHistory[]
-  BatchHistory     BatchHistory[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String?
+  Batch        Batch[]
+  Issue        Issue[]
+  BatchHistory BatchHistory[]
 }
 
 model Drug {
@@ -179,42 +178,34 @@ model Drug {
   stratergyHistory StratergyHistory[]
   Issue            Issue[]
   BatchHistory     BatchHistory[]
-  DrugWeight       DrugWeight[]
 }
 
 model Batch {
-  id                Int            @id @default(autoincrement())
-  number            String
-  drugId            Int
-  drug              Drug           @relation(fields: [drugId], references: [id])
-  drugBrandId       Int
-  drugBrand         DrugBrand      @relation(fields: [drugBrandId], references: [id])
-  type              DrugType
-  fullAmount        Float
-  expiry            DateTime
-  stockDate         DateTime       @default(now())
-  remainingQuantity Float
-  wholesalePrice    Float
-  retailPrice       Float
-  status            BatchStatus
-  Issue             Issue[]
-  BatchHistory      BatchHistory[]
+  id                  Int               @id @default(autoincrement())
+  number              String
+  drugId              Int
+  drug                Drug              @relation(fields: [drugId], references: [id])
+  drugBrandId         Int
+  drugBrand           DrugBrand         @relation(fields: [drugBrandId], references: [id])
+  type                DrugType
+  fullAmount          Float
+  expiry              DateTime
+  stockDate           DateTime          @default(now())
+  remainingQuantity   Float
+  wholesalePrice      Float
+  retailPrice         Float
+  status              BatchStatus
+  Issue               Issue[]
+  BatchHistory        BatchHistory[]
+  unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
+  unitConcentrationId Int
 }
 
-model Weights {
-  id               Int                @id @default(autoincrement())
-  weight           Float              @unique
-  DrugWeight       DrugWeight[]
-  Issue            Issue[]
-  StratergyHistory StratergyHistory[]
-}
-
-model DrugWeight {
-  id       Int     @id @default(autoincrement())
-  drugId   Int
-  drug     Drug    @relation(fields: [drugId], references: [id])
-  weightId Int
-  weight   Weights @relation(fields: [weightId], references: [id])
+model UnitConcentration {
+  id     Int     @id @default(autoincrement())
+  weight Float   @unique
+  Issue  Issue[]
+  Batch  Batch[]
 }
 
 model Prescription {
@@ -252,23 +243,24 @@ model OffRecordMeds {
 }
 
 model Issue {
-  id               Int                @id @default(autoincrement())
-  prescription     Prescription       @relation(fields: [prescriptionId], references: [id])
-  prescriptionId   Int
-  batch            Batch?             @relation(fields: [batchId], references: [id])
-  batchId          Int?
-  drug             Drug               @relation(fields: [drugId], references: [id])
-  drugId           Int
-  brand            DrugBrand          @relation(fields: [brandId], references: [id])
-  brandId          Int
-  strategy         IssuingStrategy
-  weight           Weights            @relation(fields: [weightsId], references: [id])
-  quantity         Float
-  dose             Float
-  details          String?
-  meal             MEAL?
-  stratergyHistory StratergyHistory[]
-  weightsId        Int
+  id                  Int                @id @default(autoincrement())
+  prescription        Prescription       @relation(fields: [prescriptionId], references: [id])
+  prescriptionId      Int
+  batch               Batch?             @relation(fields: [batchId], references: [id])
+  batchId             Int?
+  drug                Drug               @relation(fields: [drugId], references: [id])
+  drugId              Int
+  brand               DrugBrand          @relation(fields: [brandId], references: [id])
+  brandId             Int
+  strategy            IssuingStrategy
+  quantity            Float
+  dose                Float
+  details             String?
+  meal                MEAL?
+  stratergyHistory    StratergyHistory[]
+  weightsId           Int
+  UnitConcentration   UnitConcentration? @relation(fields: [unitConcentrationId], references: [id])
+  unitConcentrationId Int?
 }
 
 model ReportParameter {
@@ -309,16 +301,11 @@ model ReportValue {
 }
 
 model StratergyHistory {
-  id           Int       @id @default(autoincrement())
-  drug         Drug      @relation(fields: [drugId], references: [id])
-  drugId       Int       @unique
-  brand        DrugBrand @relation(fields: [brandId], references: [id])
-  lastDrugType DrugType
-  brandId      Int
-  weight       Weights   @relation(fields: [weightsId], references: [id])
-  issue        Issue     @relation(fields: [issueId], references: [id])
-  issueId      Int
-  weightsId    Int
+  id      Int   @id @default(autoincrement())
+  drug    Drug  @relation(fields: [drugId], references: [id])
+  drugId  Int   @unique
+  issue   Issue @relation(fields: [issueId], references: [id])
+  issueId Int
 }
 
 model BatchHistory {

@@ -577,7 +577,7 @@ export async function getWeightByBrand({drugID, type}: {
                     some: {
                         drugId: drugID,
                         status: 'AVAILABLE',
-                        type: type.name === 'Tablet' ? 'Tablet' : 'Syrup'
+                        type: 'Syrup'
                     }
                 }
             }
@@ -590,17 +590,22 @@ export async function getWeightByBrand({drugID, type}: {
                         where: {
                             drugId: drugID,
                             status: 'AVAILABLE',
-                            type: type.name === 'Tablet' ? 'Tablet' : 'Syrup'
+                            type: 'Syrup'
                         },
                         select: {
                             remainingQuantity: true,
-                            expiry: true
+                            expiry: true,
+                            type: true
                         }
                     }
                 }
             }
         }
     }).then((drugWeights) => {
+        drugWeights.forEach(dw => {
+            console.log(dw);
+            console.log(dw.drug)
+        })
         return drugWeights.map(dw => ({
             id: dw.id,
             weight: dw.weight.weight.toString(), // Convert weight (Float) to string
@@ -675,7 +680,7 @@ export async function getDrugTypesByDrug(drugID: number): Promise<CustomDrugType
     }).then((types) => {
         return types.map((type) => ({
             name: type.type.toString(),
-            type: type
+            type: type.type
         }));
     });
 }

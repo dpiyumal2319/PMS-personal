@@ -183,6 +183,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 getDrugTypesByDrug(selected.id),
             ]);
 
+            console.log(types);
+
             if (!types.length) {
                 throw new Error("No drug types available");
             }
@@ -313,6 +315,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 drugID: selectedDrug.id,
                 type: type
             });
+
+            console.log(weights);
 
             setWeights(weights);
             setIsWeightSearching(false);
