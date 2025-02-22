@@ -16,7 +16,7 @@ import {
 import { prisma } from "./prisma";
 import { verifySession } from "./sessions";
 import bcrypt from "bcryptjs";
-import { $Enums, BatchStatus, DrugType, Prisma, Role } from "@prisma/client";
+import { $Enums, BatchStatus, DrugType, Prisma, Role, MedicalCertificateStatus } from "@prisma/client";
 import { PrescriptionFormData } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import { BrandOption } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {
@@ -2991,3 +2991,50 @@ export async function fetchPatientData(patientId: number): Promise<PatientData |
         throw new Error("Failed to fetch patient data");
     }
 }
+
+interface MedicalCertificateData {
+    patientId: number;
+    nameOfThePatient: string;
+    addressOfThePatient: string;
+    fitForDuty: string;
+    dateOfSickness: string;
+    recommendedLeaveDays: string;
+    natureOfTheDisease: string;
+    ageOfThePatient: string;
+    reccomendations: string;
+}
+
+export async function storeMedicalCertificate(data: MedicalCertificateData) {
+    try {
+        const certificate = await prisma.medicalCertificate.create({
+            data: {
+                patientId: data.patientId,
+                nameOfThePatient: data.nameOfThePatient,
+                addressOfThePatient: data.addressOfThePatient,
+                fitForDuty: data.fitForDuty === 'Yes' ? MedicalCertificateStatus.FIT : MedicalCertificateStatus.UNFIT,
+                dateOfSickness: new Date(data.dateOfSickness),
+                recommendedLeaveDays: parseInt(data.recommendedLeaveDays),
+                natureOfTheDisease: data.natureOfTheDisease,
+                ageOfThePatient: parseInt(data.ageOfThePatient),
+                reccomendations: data.reccomendations,
+                time: new Date(),
+            },
+        });
+
+        return certificate;
+    } catch (error) {
+        console.error('Error storing medical certificate:', error);
+        throw new Error('Failed to store medical certificate');
+    }
+}
+
+const getNextMedicalCertificateId = async (): Promise<number> => {
+    const latestCertificate = await prisma.medicalCertificate.findFirst({
+        orderBy: { id: "desc" },
+        select: { id: true },
+    });
+
+    return latestCertificate ? latestCertificate.id + 1 : 1;
+};
+
+export default getNextMedicalCertificateId;
