@@ -1,5 +1,6 @@
 import type {LucideIcon} from "lucide-react";
 import {Role} from '@prisma/client';
+import type {DrugType} from "@prisma/client";
 
 export type SessionPayload = {
     id: number;
@@ -62,15 +63,15 @@ export type InventoryFormData = {
     brandName: string;
     brandDescription?: string;
     batchNumber: string;
-    drugType: string;
+    drugType: DrugType;
     quantity: number | string;
     expiry: string;
     retailPrice: number | string;
     wholesalePrice: number | string;
     brandId?: number; // Add brandId property
     drugId?: number;  // Add drugId property
-    weightId?: number;
-    weight?: number;
+    concentrationId?: number;
+    concentration?: number;
 
 }
 
@@ -227,13 +228,13 @@ export type Bill = {
 //types of income for day 
 
 export interface DailyIncome {
-  date: string;
-  totalIncome: number;
-  patientCount: number;
+    date: string;
+    totalIncome: number;
+    patientCount: number;
 }
 
 export interface IncomeStats {
-  totalIncome: number;
-  patientCount: number;
-  averagePerPatient: number;
+    totalIncome: number;
+    patientCount: number;
+    averagePerPatient: number;
 }

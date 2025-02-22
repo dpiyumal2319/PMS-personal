@@ -1302,17 +1302,17 @@ export async function addNewItem({
             });
             
             // 4. Create drug weight relation if weight is selected
-            if (formData.weightId) {
+            if (formData.concentrationId) {
                 await tx.drugWeight.upsert({
                 where: {
                     id: drug.id,
                 },
                 update: {
-                    weightId: formData.weightId,
+                    weightId: formData.concentrationId,
                 },
                 create: {
                     drugId: drug.id,
-                    weightId: formData.weightId,
+                    weightId: formData.concentrationId,
                 },
                 });
             }
@@ -2327,7 +2327,7 @@ export async function searchDrugModels(query: string) {
     });
 }
 
-export async function getDrugWeights(drugId: number): Promise<DrugWeightDataSuggestion[]> {
+export async function getDrugConcentrations(drugId: number): Promise<DrugWeightDataSuggestion[]> {
   try {
     const weights = await prisma.drugWeight.findMany({
       where: {
@@ -2349,7 +2349,7 @@ export async function getDrugWeights(drugId: number): Promise<DrugWeightDataSugg
   }
 }
 
-export async function addNewWeight(weight: number): Promise<{ id: number; weight: number }> {
+export async function addNewConcentration(weight: number): Promise<{ id: number; weight: number }> {
   try {
     const newWeight = await prisma.weights.create({
       data: {
@@ -2380,7 +2380,7 @@ export async function addDrugWeight(drugId: number, weightId: number) {
   }
 }
 
-export async function deleteWeight(weightId: number) {
+export async function deleteConcentration(weightId: number) {
   try {
     // First delete all DrugWeight relationships
     await prisma.drugWeight.deleteMany({

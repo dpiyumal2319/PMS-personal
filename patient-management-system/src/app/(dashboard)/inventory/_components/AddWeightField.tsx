@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Trash2 } from "lucide-react";
 import { DrugWeightDataSuggestion } from "@/app/lib/definitions";
-import { addNewWeight, addDrugWeight, deleteWeight } from "@/app/lib/actions";
+import { addNewConcentration, addDrugWeight, deleteConcentration } from "@/app/lib/actions";
 import { handleServerAction } from "@/app/lib/utils";
 import {
   AlertDialog,
@@ -66,7 +66,7 @@ export function DrugWeightField({
     try {
       const result = await handleServerAction(
         async () => {
-          const addedWeight = await addNewWeight(weightValue);
+          const addedWeight = await addNewConcentration(weightValue);
 
           if (drugId) {
             await addDrugWeight(drugId, addedWeight.id);
@@ -100,7 +100,7 @@ export function DrugWeightField({
     if (selectedWeightToDelete !== null) {
       await handleServerAction(
         async () => {
-          const result = await deleteWeight(selectedWeightToDelete);
+          const result = await deleteConcentration(selectedWeightToDelete);
           if (result.success) {
             await refetch();
           }
