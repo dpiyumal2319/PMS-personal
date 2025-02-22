@@ -265,6 +265,7 @@ export type BillEntry = {
 }
 
 export type Bill = {
+    billID: number;
     prescriptionID: number;
     patientName: string;
     entries: BillEntry[];

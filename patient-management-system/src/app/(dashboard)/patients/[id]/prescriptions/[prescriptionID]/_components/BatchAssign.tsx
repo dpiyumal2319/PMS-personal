@@ -139,7 +139,7 @@ const BatchAssign = ({ issues, prescriptionID, patientID, role }: {
                         <BillExport
                             bill={bill}
                             trigger={
-                                <Button variant="outline" className="flex items-center gap-2 bg-primary text-white">
+                                <Button>
                                     <IoMdDownload className="w-5 h-5 text-white" />
                                 </Button>
                             }
