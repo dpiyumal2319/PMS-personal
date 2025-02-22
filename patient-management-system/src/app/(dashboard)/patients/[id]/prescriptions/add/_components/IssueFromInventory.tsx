@@ -660,7 +660,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                         ].map(({value, label}) => (
                                             <div
                                                 key={value}
-                                                className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-100 transition"
+                                                className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-100 transition cursor-pointer"
+                                                onClick={() => setMealTiming(value)} // Make the card clickable
                                             >
                                                 <RadioGroupItem value={value} id={value}/>
                                                 <Label htmlFor={value} className="cursor-pointer">{label}</Label>
