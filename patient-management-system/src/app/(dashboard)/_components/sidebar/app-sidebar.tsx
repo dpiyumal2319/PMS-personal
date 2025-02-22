@@ -8,12 +8,13 @@ import {Stethoscope} from 'lucide-react';
 import {Suspense} from "react";
 import AppSidebarLinksWrapper from "@/app/(dashboard)/_components/sidebar/app-sidebar-links-wrapper";
 import AppSidebarLinkSkeleton from "@/app/(dashboard)/_components/sidebar/app-sidebar-link-skeleton";
+import Link from "next/link";
 
 export async function AppSidebar() {
     return (
         <Sidebar className="h-screen">
             <SidebarHeader className="p-4">
-                <div className="flex items-center space-x-3">
+                <Link className="flex items-center space-x-3" href={"/"}>
                     <div className="bg-primary p-2 rounded-md">
                         <Stethoscope className="h-6 w-6 text-primary-foreground"/>
                     </div>
@@ -21,12 +22,12 @@ export async function AppSidebar() {
                         <h2 className="text-xl font-bold">MediPanel</h2>
                         <p className="text-sm">Healthcare Management</p>
                     </div>
-                </div>
+                </Link>
             </SidebarHeader>
             <SidebarSeparator/>
             <SidebarContent>
-                <Suspense fallback={<AppSidebarLinkSkeleton />}>
-                    <AppSidebarLinksWrapper />
+                <Suspense fallback={<AppSidebarLinkSkeleton/>}>
+                    <AppSidebarLinksWrapper/>
                 </Suspense>
 
             </SidebarContent>

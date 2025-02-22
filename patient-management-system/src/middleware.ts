@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { decrypt } from "@/app/lib/sessions";
-import { cookies } from "next/headers";
+import {NextRequest, NextResponse} from "next/server";
+import {decrypt} from "@/app/lib/sessions";
+import {cookies} from "next/headers";
 
 const publicRoutes = ["/login", "/", "/signup"];
 const doctorOnlyRoutes = [
-    "/patients/[id]/prescriptions",
     "/patients/[id]/prescriptions/add",
     "/patients/[id]/reports",
     "/patients/[id]/notes",
@@ -13,6 +12,26 @@ const doctorOnlyRoutes = [
     "/admin/fees",
     "/inventory/cost-management",
 ];
+
+// Helper function to check if a path matches a route pattern
+function matchRoute(path: string, pattern: string): boolean {
+    const pathParts = path.split('/');
+    const patternParts = pattern.split('/');
+
+    if (pathParts.length !== patternParts.length) {
+        return false;
+    }
+
+    return patternParts.every((part, i) => {
+        // If the pattern part is wrapped in [], it's a parameter
+        if (part.startsWith('[') && part.endsWith(']')) {
+            // Check if the corresponding path part exists and isn't empty
+            return pathParts[i] && pathParts[i].length > 0;
+        }
+        // Otherwise, check for exact match
+        return part === pathParts[i];
+    });
+}
 
 export default async function middleware(req: NextRequest) {
     const path = req.nextUrl.pathname;
@@ -27,8 +46,8 @@ export default async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/login", req.nextUrl));
     }
 
-    // Restrict doctor-only routes
-    const isDoctorOnlyRoute = doctorOnlyRoutes.includes(path);
+    // Restrict doctor-only routes using pattern matching
+    const isDoctorOnlyRoute = doctorOnlyRoutes.some(route => matchRoute(path, route));
     if (isDoctorOnlyRoute && role !== 'DOCTOR') {
         return NextResponse.redirect(new URL("/unauthorized", req.nextUrl));
     }
