@@ -107,7 +107,8 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                                 ))}
                             </div>
                         )}
-                        <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id} role={session.role}/>
+                        <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id}
+                                     role={session.role}/>
                     </>
                 )}
             </CardContent>

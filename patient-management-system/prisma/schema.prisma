@@ -48,60 +48,17 @@ enum BatchStatus {
 }
 
 enum IssuingStrategy {
-  /**
-   * TDS (ter die sumendum) - Three times a day
-   */
-  TDS
-
-  /**
-   * BD (bis die) - Twice a day
-   */
-  BD
-
-  /**
-   * OD (omni die) - Once daily
-   */
-  OD
-
-  /**
-   * QDS (quater die sumendum) - Four times a day (every 6 hours)
-   */
-  QDS
-
-  /**
-   * SOS (si opus sit) - Take only when needed
-   */
-  SOS
-
-  /**
-   * NOCTE - Take at night
-   */
-  NOCTE
-
-  /**
-   * MANE - Take in the morning
-   */
-  MANE
-
-  /**
-   * VESPE - Take in the evening
-   */
-  VESPE
-
-  /**
-   * NOON - Take in the afternoon
-   */
-  NOON
-
-  /**
-   * WEEKLY - Take once a week
-   */
-  WEEKLY
-
-  /**
-   * OTHER - Any other prescription strategy
-   */
-  OTHER
+  TDS // Ter die sumendum - Three times a day
+  BD // Bis die - Twice a day
+  OD // Omne die - Once a day
+  QDS // Quater die sumendum - Four times a day
+  SOS // Si opus sit - If needed
+  NOCTE // At night
+  MANE // In the morning
+  VESPE // In the evening
+  NOON // At noon
+  WEEKLY // Once a week
+  OTHER //
 }
 
 enum MEAL {
@@ -202,10 +159,11 @@ model Batch {
 }
 
 model UnitConcentration {
-  id            Int     @id @default(autoincrement())
-  concentration Float   @unique
-  Issue         Issue[]
+  id            Int            @id @default(autoincrement())
+  concentration Float          @unique
   Batch         Batch[]
+  Issue         Issue[]
+  BatchHistory  BatchHistory[]
 }
 
 model Prescription {
@@ -257,10 +215,10 @@ model Issue {
   dose                Float
   details             String?
   meal                MEAL?
+  type                DrugType
+  unitConcentration   UnitConcentration  @relation(fields: [unitConcentrationId], references: [id])
+  unitConcentrationId Int
   stratergyHistory    StratergyHistory[]
-  weightsId           Int
-  UnitConcentration   UnitConcentration? @relation(fields: [unitConcentrationId], references: [id])
-  unitConcentrationId Int?
 }
 
 model ReportParameter {
@@ -309,15 +267,18 @@ model StratergyHistory {
 }
 
 model BatchHistory {
-  id          Int       @id @default(autoincrement())
-  drug        Drug      @relation(fields: [drugId], references: [id])
-  brand       DrugBrand @relation(fields: [drugBrandId], references: [id])
-  drugId      Int
-  drugBrandId Int
-  batchId     Int
-  batch       Batch     @relation(fields: [batchId], references: [id])
+  id                  Int               @id @default(autoincrement())
+  drug                Drug              @relation(fields: [drugId], references: [id])
+  drugId              Int
+  type                DrugType
+  unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
+  unitConcentrationId Int
+  brand               DrugBrand         @relation(fields: [drugBrandId], references: [id])
+  drugBrandId         Int
+  batchId             Int
+  batch               Batch             @relation(fields: [batchId], references: [id])
 
-  @@unique([drugId, drugBrandId])
+  @@unique([drugId, drugBrandId, type, unitConcentrationId])
 }
 
 enum ChargeType {

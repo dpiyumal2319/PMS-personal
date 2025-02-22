@@ -7,6 +7,7 @@ interface MedicationStrategyTabsProps {
         selectedStrategy: IssuingStrategy | null;
         setSelectedStrategy: (strategy: IssuingStrategy) => void;
     }
+    disabled?: boolean;
 }
 
 type issueData = {
@@ -61,7 +62,7 @@ const issues: issueData[] = [
     },
 ]
 
-const MedicationStrategyTabs = ({selectedStrategy}: MedicationStrategyTabsProps) => {
+const MedicationStrategyTabs = ({selectedStrategy, disabled = false}: MedicationStrategyTabsProps) => {
 
     const handleTabChange = (strategy: IssuingStrategy) => {
         selectedStrategy.setSelectedStrategy(strategy);
@@ -74,7 +75,7 @@ const MedicationStrategyTabs = ({selectedStrategy}: MedicationStrategyTabsProps)
             <div className="h-10">
                 <TabsList className="w-full">
                     {issues.map((issue) => (
-                        <TabsTrigger value={issue.name} key={issue.name}
+                        <TabsTrigger value={issue.name} key={issue.name} disabled={disabled}
                                      className="flex items-center">
                             {issue.name}
                         </TabsTrigger>

@@ -16,7 +16,7 @@ import {
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
 import bcrypt from "bcryptjs";
-import { BatchStatus, DrugType, Prisma, Role} from "@prisma/client";
+import {BatchStatus, DrugType, Prisma, Role} from "@prisma/client";
 import {ChangePasswordFormData} from "@/app/(dashboard)/admin/_components/ChangePasswordDialog";
 import {EditUserProfileFormData} from "@/app/(dashboard)/admin/_components/EditProfileDialog";
 import {validateEmail, validateMobile} from "@/app/lib/utils";
@@ -1357,8 +1357,8 @@ export async function getBatchData(batchId: number) {
 export async function handleConfirmationOfBatchStatusChange(
     batchId: number,
     action: "completed" | "trashed"
-): Promise<void> {
-    if (!batchId) return;
+): Promise<myError> {
+    if (!batchId) return {success: false, message: "Batch ID not provided"};
 
     const newStatus = action === "completed" ? "COMPLETED" : "TRASHED";
 
@@ -1368,9 +1368,10 @@ export async function handleConfirmationOfBatchStatusChange(
             data: {status: newStatus},
         });
 
-        console.log(`Batch ${batchId} updated to ${newStatus}.`);
+        return {success: true, message: "Batch status updated successfully"};
     } catch (error) {
         console.error("Error updating batch status:", error);
+        return {success: false, message: "An error occurred while updating batch status"};
     }
 }
 

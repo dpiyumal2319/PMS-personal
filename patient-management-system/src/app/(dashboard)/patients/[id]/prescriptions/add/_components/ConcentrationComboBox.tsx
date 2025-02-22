@@ -107,7 +107,7 @@ const ConcentrationComboBox = ({
                                     className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
                                     <div className="flex items-center min-w-24 w-full gap-2">
-                                        <span className="font-medium">{option.concentration}</span>
+                                        <span className="font-medium">{option.concentration} mg/unit</span>
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">

@@ -1,41 +1,44 @@
-import {PrismaClient, Gender, Role} from '@prisma/client';
-import {faker} from '@faker-js/faker';
+import {PrismaClient, DrugType, BatchStatus, Gender, Role} from '@prisma/client'
+import {faker} from '@faker-js/faker'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
-async function main() {
-    console.log('Seeding database...');
+// Common drug names (generic names)
+const drugNames = [
+    'Paracetamol',
+    'Ibuprofen',
+    'Amoxicillin',
+    'Omeprazole',
+    'Metformin',
+    'Amlodipine',
+    'Cetirizine',
+    'Azithromycin',
+    'Metronidazole',
+    'Gabapentin'
+]
 
-    //Add two patients
-    const patient1 = await prisma.patient.create({
-        data: {
-            telephone: '0771234567',
-            name: 'Kasun Perera',
-            birthDate: new Date('1990-05-15'),
-            address: 'Colombo, Sri Lanka',
-            height: 175,
-            weight: 70,
-            gender: Gender.MALE,
-            NIC: '199056789V',
-        },
-    });
-    await prisma.patient.create({
-        data: {
-            telephone: '0719876543',
-            name: 'Nimal Rajapaksa',
-            birthDate: new Date('1985-08-21'),
-            address: 'Kandy, Sri Lanka',
-            height: 168,
-            weight: 68,
-            gender: Gender.MALE,
-            NIC: '198578954V',
-        },
-    });
+// Common concentrations in mg
+const tabletConcentrations = [100, 200, 250, 325, 400, 500, 600, 650, 750, 1000]
+const syrupConcentrations = [100, 125, 150, 200, 250] // mg/5ml typically
+
+async function createUnitConcentrations() {
+    console.log('\n--- Creating Unit Concentrations ---')
+    const allConcentrations = [...new Set([...tabletConcentrations, ...syrupConcentrations])]
+
+    for (const concentration of allConcentrations) {
+        await prisma.unitConcentration.create({
+            data: {concentration}
+        })
+        console.log(`Created concentration: ${concentration}mg`)
+    }
+}
+
+async function createUsersAndPatients() {
+    console.log('\n--- Creating Users and Patients ---')
+
     // Generate 50 random patients
     const patients = Array.from({length: 50}).map(() => ({
-        telephone: faker.phone.number({
-            style: 'national',
-        }),
+        telephone: faker.phone.number({style: 'national'}),
         name: faker.person.fullName(),
         birthDate: faker.date.birthdate({min: 18, max: 80, mode: 'age'}),
         address: `${faker.location.city()}, Sri Lanka`,
@@ -43,231 +46,276 @@ async function main() {
         weight: faker.number.int({min: 50, max: 100}),
         gender: faker.helpers.arrayElement([Gender.MALE, Gender.FEMALE]),
         NIC: `${faker.number.int({min: 190000000, max: 209999999})}V`,
-    }));
+    }))
 
     // Insert the random patients into the database
-    await prisma.patient.createMany({data: patients});
+    await prisma.patient.createMany({data: patients})
+    console.log(`Created ${patients.length} patients`)
 
-    //Add doctor and nurse
-    await prisma.user.create({
-        data: {
+    // Create staff users
+    const staffUsers = [
+        {
             email: 'doctor1@srilanka.com',
             mobile: '0765432189',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.DOCTOR,
             gender: Gender.MALE,
-            name: 'Dr. Pubudu'
+            name: 'Dasun Piyumal'
         },
-    });
-
-    await prisma.user.create({
-        data: {
+        {
             email: 'nurse1@srilanka.com',
             mobile: '0775671234',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.NURSE,
             gender: Gender.FEMALE,
-            name: 'Pubudu Nona'
+            name: 'Kasuni Nimali'
         },
-    });
-
-    await prisma.user.create({
-        data: {
+        {
             email: 'nurse2@srilanka.com',
             mobile: '0775677890',
             password: '$2a$10$uQpRRBUzSZWg6vqcVHE3HeDiuN5aJcvM5dXaU.IBnFNYuaxniCE.a',
             role: Role.NURSE,
             gender: Gender.FEMALE,
-            name: 'Dasun Nona'
-        },
-    });
+            name: 'Dilini Perera'
+        }
+    ]
 
-    await prisma.drug.createMany({
-        data: [
-            {name: 'Paracetamol'},
-            {name: 'Brufen'},
-            {name: 'Amoxil'},
-        ]
+    for (const user of staffUsers) {
+        await prisma.user.create({data: user})
+        console.log(`Created ${user.role.toLowerCase()}: ${user.name}`)
+    }
+}
+
+async function generateBatchData(drugType: DrugType, createdAt: Date) {
+    const expiryDate = new Date(createdAt)
+    expiryDate.setDate(expiryDate.getDate() + faker.number.int({min: 1, max: 730})) // 1 day to 2 years
+
+    const concentrations = drugType === DrugType.Tablet ? tabletConcentrations : syrupConcentrations
+    const concentration = concentrations[Math.floor(Math.random() * concentrations.length)]
+
+    const fullAmount = faker.number.int({min: 50, max: 1000})
+    const wholesalePrice = faker.number.float({min: 10, max: 100, fractionDigits: 2})
+
+    // Get the concentration ID instead of the value
+    const unitConcentration = await prisma.unitConcentration.findFirst({
+        where: {concentration}
     })
 
-    await prisma.unitConcentration.createMany({
-        data: [
-            {concentration: 500},
-            {concentration: 1000},
-            {concentration: 250},
-            {concentration: 50},
-        ]
-    })
+    if (!unitConcentration) {
+        throw new Error(`Concentration ${concentration} not found in database`)
+    }
 
-    // Add Drugs
-    await prisma.drugBrand.create({
-        data: {
-            name: 'Penadol',
-            description: 'Pain relief tablet',
-            Batch: {
-                create: [{
-                    unitConcentrationId: 1,
-                    number: 'B123',
-                    type: 'Tablet',
-                    fullAmount: 100,
-                    expiry: new Date('2025-12-01'),
-                    remainingQuantity: 100,
-                    wholesalePrice: 2,
-                    retailPrice: 3,
-                    status: 'AVAILABLE',
-                    drugId: 1
-                }]
+    return {
+        number: faker.string.alphanumeric(8).toUpperCase(),
+        type: drugType,
+        fullAmount,
+        remainingQuantity: fullAmount,
+        expiry: expiryDate,
+        wholesalePrice,
+        retailPrice: wholesalePrice * 1.3, // 30% markup
+        status: BatchStatus.AVAILABLE,
+        unitConcentrationId: unitConcentration.id // Pass the ID instead of concentration value
+    }
+}
+
+// Add this function to create a pool of pharmaceutical brands
+async function createDrugBrands(count: number) {
+    console.log('\n--- Creating Drug Brands ---')
+    const brands = []
+
+    for (let i = 0; i < count; i++) {
+        const brand = await prisma.drugBrand.create({
+            data: {
+                name: faker.company.name() + ' Pharmaceuticals',
+                description: faker.company.catchPhrase()
+            }
+        })
+        console.log(`Created brand: ${brand.name}`)
+        brands.push(brand)
+    }
+
+    return brands
+}
+
+async function createDrugsAndBatches() {
+    console.log('\n--- Creating Drugs and Batches ---')
+
+    // Create a pool of brands first (20 pharmaceutical companies)
+    const allBrands = await createDrugBrands(20)
+
+    // Create drugs and their batches
+    for (const drugName of drugNames) {
+        console.log(`\nProcessing drug: ${drugName}`)
+
+        // Create drug
+        const drug = await prisma.drug.create({
+            data: {name: drugName}
+        })
+        console.log(`Created drug: ${drug.name} (ID: ${drug.id})`)
+
+        // Randomly select 2-4 brands that will manufacture this drug
+        const brandCount = faker.number.int({min: 2, max: 4})
+        const selectedBrands = faker.helpers.shuffle([...allBrands]).slice(0, brandCount)
+
+        for (const brand of selectedBrands) {
+            console.log(`Assigning ${brand.name} to produce ${drugName}`)
+
+            // Create 3-10 batches for each brand-drug combination
+            const batchCount = faker.number.int({min: 2, max: 5})
+            const syrupCount = faker.number.int({min: 0, max: 1}) // 0-2 syrups
+
+            for (let i = 0; i < batchCount; i++) {
+                const drugType = i < syrupCount ? DrugType.Syrup : DrugType.Tablet
+                const batchData = await generateBatchData(drugType, new Date())
+
+                const batch = await prisma.batch.create({
+                    data: {
+                        ...batchData,
+                        drugId: drug.id,
+                        drugBrandId: brand.id
+                    }
+                })
+
+                console.log(`Created batch: ${batch.number} (${batch.type}, Brand: ${brand.name})`)
             }
         }
-    });
+    }
+}
 
-    await prisma.drugBrand.create({
-        data: {
-            name: 'Penadene',
-            description: 'Pain relief tablet',
-            Batch: {
-                create: [{
-                    unitConcentrationId: 2,
-                    number: 'B3456',
-                    type: 'Tablet',
-                    fullAmount: 100,
-                    expiry: new Date('2025-12-10'),
-                    remainingQuantity: 80,
-                    wholesalePrice: 2.5,
-                    retailPrice: 3,
-                    status: 'AVAILABLE',
-                    drugId: 1
-                }]
+async function createReportTypes() {
+    console.log('\n--- Creating Report Types and Parameters ---')
+
+    const reportTypes = [
+        {
+            name: 'Full Blood Count (FBC)',
+            description: 'Complete blood cell count analysis',
+            parameters: [
+                {name: 'WBC', units: '×10^9/L'},
+                {name: 'RBC', units: '×10^12/L'},
+                {name: 'Hemoglobin', units: 'g/dL'},
+                {name: 'Platelets', units: '×10^9/L'},
+                {name: 'Hematocrit', units: '%'}
+            ]
+        },
+        {
+            name: 'Liver Function Test (LFT)',
+            description: 'Assessment of liver function and health',
+            parameters: [
+                {name: 'ALT', units: 'U/L'},
+                {name: 'AST', units: 'U/L'},
+                {name: 'Bilirubin', units: 'mg/dL'},
+                {name: 'Albumin', units: 'g/dL'}
+            ]
+        },
+        {
+            name: 'Lipid Profile',
+            description: 'Cholesterol and triglycerides measurement',
+            parameters: [
+                {name: 'Total Cholesterol', units: 'mg/dL'},
+                {name: 'HDL', units: 'mg/dL'},
+                {name: 'LDL', units: 'mg/dL'},
+                {name: 'Triglycerides', units: 'mg/dL'}
+            ]
+        },
+        {
+            name: 'Kidney Function Test',
+            description: 'Assessment of kidney function',
+            parameters: [
+                {name: 'Creatinine', units: 'mg/dL'},
+                {name: 'BUN', units: 'mg/dL'},
+                {name: 'eGFR', units: 'mL/min/1.73m²'}
+            ]
+        },
+        {
+            name: 'Thyroid Function Test',
+            description: 'Evaluation of thyroid hormone levels',
+            parameters: [
+                {name: 'TSH', units: 'mIU/L'},
+                {name: 'T3', units: 'ng/dL'},
+                {name: 'T4', units: 'µg/dL'}
+            ]
+        },
+        {
+            name: 'Blood Glucose Test',
+            description: 'Blood sugar level measurement',
+            parameters: [
+                {name: 'Fasting Blood Sugar', units: 'mg/dL'},
+                {name: 'Post Prandial Blood Sugar', units: 'mg/dL'},
+                {name: 'HbA1c', units: '%'}
+            ]
+        },
+        {
+            name: 'Electrolyte Panel',
+            description: 'Measurement of blood electrolyte levels',
+            parameters: [
+                {name: 'Sodium', units: 'mEq/L'},
+                {name: 'Potassium', units: 'mEq/L'},
+                {name: 'Chloride', units: 'mEq/L'},
+                {name: 'Bicarbonate', units: 'mEq/L'}
+            ]
+        },
+        {
+            name: 'CRP Test',
+            description: 'C-Reactive Protein inflammation marker test',
+            parameters: [
+                {name: 'CRP Level', units: 'mg/L'},
+                {name: 'ESR', units: 'mm/hr'},
+                {name: 'PCT', units: 'ng/mL'}
+            ]
+        },
+        {
+            name: 'Urinalysis',
+            description: 'Physical and chemical examination of urine',
+            parameters: [
+                {name: 'pH', units: null},
+                {name: 'Specific Gravity', units: null},
+                {name: 'Protein', units: 'mg/dL'},
+                {name: 'Glucose', units: 'mg/dL'}
+            ]
+        },
+        {
+            name: 'Cardiac Markers',
+            description: 'Heart function and damage indicators',
+            parameters: [
+                {name: 'Troponin I', units: 'ng/mL'},
+                {name: 'CK-MB', units: 'ng/mL'},
+                {name: 'BNP', units: 'pg/mL'}
+            ]
+        }
+    ]
+
+    for (const reportType of reportTypes) {
+        const created = await prisma.reportType.create({
+            data: {
+                name: reportType.name,
+                description: reportType.description,
+                parameters: {
+                    create: reportType.parameters
+                }
             }
-        }
-    });
-
-    await prisma.drugBrand.create({
-        data: {
-            name: 'Ibuprofen',
-            description: 'Anti-inflammatory pain reliever',
-            Batch: {
-                create: [{
-                    unitConcentrationId: 3,
-                    number: 'B456',
-                    type: 'Tablet',
-                    fullAmount: 200,
-                    expiry: new Date('2026-06-15'),
-                    remainingQuantity: 200,
-                    wholesalePrice: 3,
-                    retailPrice: 4,
-                    status: 'AVAILABLE',
-                    drugId: 2
-                }]
-            }
-        }
-    });
-
-    await prisma.drugBrand.create({
-        data: {
-            name: 'Amoxicillin',
-            description: 'Antibiotic for bacterial infections',
-            Batch: {
-                create: [{
-                    unitConcentrationId: 4,
-                    number: 'B789',
-                    type: 'Tablet',
-                    fullAmount: 150,
-                    expiry: new Date('2025-09-30'),
-                    remainingQuantity: 150,
-                    wholesalePrice: 5,
-                    retailPrice: 6,
-                    status: 'AVAILABLE',
-                    drugId: 3
-                }]
-            }
-        }
-    });
+        })
+        console.log(`Created report type: ${created.name} with ${reportType.parameters.length} parameters`)
+    }
+}
 
 
-    // Add Reports
-    const fbcReport = await prisma.reportType.create({
-        data: {
-            name: "Full Blood Count",
-            description: "A full blood count (FBC) is a common blood test that measures the number and status of different types of blood cells.",
-            parameters: {
-                create: [
-                    {name: "Hemoglobin", units: "g/dL"},
-                    {name: "WBC Count", units: "cells/µL"},
-                ],
-            },
-        },
-    });
+async function main() {
+    console.log('Starting database seeding...')
 
-    const lftReport = await prisma.reportType.create({
-        data: {
-            name: "Liver Function Test",
-            description: "A liver function test is a blood test that checks your liver function.",
-            parameters: {
-                create: [
-                    {name: "ALT", units: "U/L"},
-                    {name: "AST", units: "U/L"},
-                ],
-            },
-        },
-    });
+    // Create all data in sequence
+    await createUnitConcentrations()
+    await createUsersAndPatients()
+    await createDrugsAndBatches()
+    await createReportTypes()
 
-    const report1 = await prisma.patientReport.create({
-        data: {
-            patientId: patient1.id,
-            reportTypeId: fbcReport.id,
-            time: new Date(),
-        },
-    });
-
-    const report2 = await prisma.patientReport.create({
-        data: {
-            patientId: patient1.id,
-            reportTypeId: lftReport.id,
-            time: new Date(),
-        },
-    });
-
-    await prisma.reportValue.create({
-        data: {
-            patientReportId: report1.id,
-            reportParameterId: 1,
-            value: "12.5"
-        }
-    })
-
-    await prisma.reportValue.create({
-        data: {
-            patientReportId: report1.id,
-            reportParameterId: 2,
-            value: "5000"
-        }
-    })
-
-    await prisma.reportValue.create({
-        data: {
-            patientReportId: report2.id,
-            reportParameterId: 3,
-            value: "50"
-        }
-    })
-
-    await prisma.reportValue.create({
-        data: {
-            patientReportId: report2.id,
-            reportParameterId: 4,
-            value: "40"
-        }
-    })
-
-    console.log('Seeding complete!');
+    console.log('\nDatabase seeding completed successfully!')
 }
 
 main()
     .catch((e) => {
-        console.error(e);
-        process.exit(1);
+        console.error('Error during seeding:', e)
+        process.exit(1)
     })
     .finally(async () => {
-        await prisma.$disconnect();
-    });
+        await prisma.$disconnect()
+    })

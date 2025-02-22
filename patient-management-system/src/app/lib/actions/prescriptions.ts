@@ -2,7 +2,6 @@
 
 import {myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
-import {ChargeType, Prisma} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
 import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
@@ -101,27 +100,25 @@ export async function completePrescription(
     }
 }
 
-export async function getCharges() {
-    return prisma.charge.findMany({
-        where: {
-            OR: [{name: ChargeType.DISPENSARY}, {name: ChargeType.DOCTOR}],
-        },
-    });
-}
-
 export async function getCachedBatch({
                                          drugId,
                                          brandId,
+                                         type,
+                                         unitConcentrationId
                                      }: {
     drugId: number;
     brandId: number;
+    unitConcentrationId: number;
+    type: DrugType;
 }) {
     return prisma.batchHistory.findUnique({
         where: {
-            drugId_drugBrandId: {
+            drugId_drugBrandId_type_unitConcentrationId: {
+                unitConcentrationId,
+                type,
                 drugId,
                 drugBrandId: brandId,
-            },
+            }
         },
         select: {
             batchId: true,
@@ -132,15 +129,21 @@ export async function getCachedBatch({
 export async function getBatches({
                                      drugID,
                                      brandID,
+                                     type,
+                                     concentrationID,
                                  }: {
     drugID: number;
     brandID: number;
+    type: DrugType;
+    concentrationID: number;
 }) {
     return prisma.batch.findMany({
         where: {
             drugId: drugID,
             drugBrandId: brandID,
             status: "AVAILABLE",
+            type: type,
+            unitConcentrationId: concentrationID,
         },
         select: {
             id: true,
@@ -168,6 +171,7 @@ export async function getPrescription(
                     drug: true,
                     brand: true,
                     batch: true,
+                    unitConcentration: true,
                 },
             },
             OffRecordMeds: true,
@@ -376,8 +380,11 @@ export async function addPrescription({
                             details: issue.details,
                             brandId: issue.brandId,
                             strategy: issue.strategy,
-                            strategyDetails: issue.strategyDetails,
                             quantity: issue.quantity,
+                            meal: issue.meal,
+                            dose: issue.dose,
+                            type: issue.drugType,
+                            unitConcentrationId: issue.concentrationID,
                         })),
                     },
                     // Create off-record medications
@@ -403,7 +410,6 @@ export async function addPrescription({
                 },
             });
 
-            console.log(queueEntry);
 
             if (queueEntry) {
                 revalidatePath(`/queue/${queueEntry.id}`);
@@ -427,12 +433,10 @@ export async function addPrescription({
                             drugId: issue.drugId,
                         },
                         update: {
-                            brandId: issue.brandId,
                             issueId: createdIssue.id,
                         },
                         create: {
                             drugId: issue.drugId,
-                            brandId: issue.brandId,
                             issueId: createdIssue.id,
                         },
                     });
@@ -472,13 +476,8 @@ export async function getCachedStrategy(drugID: number) {
                     meal: true,
                     details: true,
                     quantity: true,
-                    batch: {
-                        select: {
-                            id: true,
-                            type: true,
-                            unitConcentrationId: true,
-                        }
-                    }
+                    unitConcentrationId: true,
+                    type: true,
                 }
             }
         },
@@ -522,61 +521,6 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
         );
 }
 
-
-export async function searchBrandByDrug({
-                                            drugID,
-                                        }: {
-    drugID: number;
-}): Promise<BrandOption[]> {
-    return prisma.drugBrand
-        .findMany({
-            where: {
-                Batch: {
-                    some: {
-                        status: "AVAILABLE",
-                        drugId: drugID,
-                    },
-                },
-            },
-            select: {
-                id: true,
-                name: true,
-                Batch: {
-                    where: {
-                        status: "AVAILABLE",
-                        drugId: drugID,
-                    },
-                    select: {
-                        remainingQuantity: true,
-                        expiry: true,
-                        type: true,
-                    },
-                },
-            },
-        })
-        .then((brands) =>
-            brands.map((brand) => {
-                const batchCount = brand.Batch.length;
-                const totalRemainingQuantity = brand.Batch.reduce(
-                    (sum, batch) => sum + batch.remainingQuantity,
-                    0
-                );
-                const farthestExpiry = brand.Batch.reduce(
-                    (maxDate, batch) =>
-                        batch.expiry > maxDate ? batch.expiry : maxDate,
-                    new Date(0) // Initialize with the oldest possible date
-                );
-                return {
-                    id: brand.id,
-                    name: brand.name,
-                    batchCount,
-                    totalRemainingQuantity,
-                    farthestExpiry,
-                };
-            })
-        );
-}
-
 export async function getConcentrationByDrug({
                                                  drugID,
                                                  type
@@ -589,6 +533,7 @@ export async function getConcentrationByDrug({
         where: {
             drugId: drugID,
             type: type,
+            status: 'AVAILABLE',
         },
         _max: {
             expiry: true,
@@ -639,6 +584,7 @@ export async function getBrandByDrugConcentrationType({
             drugId: drugID,
             unitConcentrationId: concentrationID,
             type: type,
+            status: 'AVAILABLE',
         },
         _max: {
             expiry: true,

@@ -102,10 +102,12 @@ export async function calculateBill({
                     // Updating or creating the cache
                     await prisma.batchHistory.upsert({
                         where: {
-                            drugId_drugBrandId: {
+                            drugId_drugBrandId_type_unitConcentrationId: {
                                 drugId: batch.drugId,
                                 drugBrandId: batch.drugBrandId,
-                            },
+                                type: batch.type,
+                                unitConcentrationId: batch.unitConcentrationId,
+                            }
                         },
                         update: {
                             batchId: assign.batchID,
@@ -114,6 +116,8 @@ export async function calculateBill({
                             drugId: batch.drugId,
                             drugBrandId: batch.drugBrandId,
                             batchId: assign.batchID,
+                            type: batch.type,
+                            unitConcentrationId: batch.unitConcentrationId,
                         },
                     });
 

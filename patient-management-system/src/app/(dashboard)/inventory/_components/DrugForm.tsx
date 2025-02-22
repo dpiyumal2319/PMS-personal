@@ -61,7 +61,7 @@ export function DrugForm() {
 
         if (name === "brandName") {
             if (value.length >= 2) {
-                handleBrandSearch(value);
+                handleBrandSearch(value).then();
                 setShowBrandSuggestions(true);
             } else {
                 setBrandSuggestions([]);
@@ -69,7 +69,7 @@ export function DrugForm() {
             }
         } else if (name === "drugName") {
             if (value.length >= 2) {
-                handleDrugSearch(value);
+                handleDrugSearch(value).then();
                 setShowDrugSuggestions(true);
             } else {
                 setDrugSuggestions([]);

@@ -108,14 +108,15 @@ export function calculateQuantity({
             if (times) return dose * times;
             throw new Error(`Times must be provided for SOS strategy`);
 
+        case 'WEEKLY': // Once per week times is required
+            if (times) return dose * times;
+            throw new Error(`Times must be provided for WEEKLY strategy`);
+
         case IssuingStrategy.NOCTE: // At night
         case IssuingStrategy.MANE: // In the morning
         case IssuingStrategy.VESPE : // In the evening
         case IssuingStrategy.NOON: // At noon
             return dose * forDays;
-
-        case 'WEEKLY': // Once per week
-            return dose * Math.ceil(forDays / 7);
 
         case 'OTHER':
             if (times) return dose * times;
@@ -131,13 +132,12 @@ export function calculateForDays({
                                      strategy,
                                      dose,
                                      quantity,
-                                     times,
                                  }: {
     strategy: IssuingStrategy;
     dose: number;
     quantity: number;
     times?: number;
-}): number {
+}): number | null {
     switch (strategy) {
         case IssuingStrategy.TDS: // Three times a day
             return Math.floor(quantity / (dose * 3));
@@ -153,8 +153,7 @@ export function calculateForDays({
 
         case 'SOS': // When needed
         case 'OTHER':
-            if (times) return Math.floor(quantity / (dose * times));
-            throw new Error(`Times must be provided for ${strategy} strategy`);
+            return null;
 
         case IssuingStrategy.NOCTE: // At night
         case IssuingStrategy.MANE: // In the morning

@@ -27,6 +27,7 @@ import {Input} from "@/components/ui/input";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Switch} from "@/components/ui/switch";
 import DrugTypeComboBox from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/DrugTypeCombobox";
+import {toast} from "react-toastify";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
@@ -67,6 +68,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [isBrandSearching, setIsBrandSearching] = useState(false);
     const [isConcentrationSearching, setIsConcentrationSearching] = useState(false);
     const [isTypeSearching, setIsTypeSearching] = useState(false);
+    const [cacheFetching, setCacheFetching] = useState(false);
 
     const [drugs, setDrugs] = useState<DrugOption[]>([]);
     const [selectedDrug, setSelectedDrug] = useState<DrugOption | null>(null);
@@ -88,7 +90,6 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [warning, setWarning] = useState<string | null>(null);
 
     const [dose, setDose] = useState<number | null>(null);
-    const [quantity, setQuantity] = useState<number | null>(null);
     const [times, setTimes] = useState<number | null>(null);
     const [forDays, setForDays] = useState<number | null>(null);
     const [mealTiming, setMealTiming] = useState<MEAL | null>(null);
@@ -111,7 +112,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const handleTimesChange = (value: string) => {
         const numValue = parseInt(value);
         if (!isNaN(numValue) && numValue >= 0) {
-            setQuantity(numValue);
+            setTimes(numValue);
         }
     };
 
@@ -129,6 +130,12 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         setSelectedConcentration(null);
         setSelectedBrand(null);
         setSelectedType(null);
+        setTypes([]);
+        setConcentrations([]);
+        setBrands([]);
+        resetStrategy();
+        setError(null);
+        setWarning(null);
     };
 
     const showWarnings = (item: ConcentrationOption | BrandOption) => {
@@ -161,101 +168,118 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     }, 700);
 
     const handleDrugSelect = async (selected: DrugOption) => {
-        if (selected === selectedDrug || !selected) return;
+        if (!selected || selectedDrug?.id === selected.id) return;
+
         setError(null);
         setWarning(null);
+
+        // Reset selections related to drug change
+        setSelectedConcentration(null);
+        setSelectedType(null);
+        setSelectedBrand(null);
+        resetStrategy();
+
+        const id = toast.loading("Fetching drug data...", {position: "bottom-right", pauseOnFocusLoss: false});
+
         try {
-            // Reset states before fetching new data
+            // Set initial states
             setSelectedDrug(selected);
             setIsBrandSearching(true);
             setIsConcentrationSearching(true);
             setIsTypeSearching(true);
+            setCacheFetching(true);
 
-            // Clear previous selections
-            setSelectedConcentration(null);
-            setSelectedBrand(null);
-            setStrategy(null);
-            setDose(null);
-            setForDays(null);
-            setMealTiming(null);
-            setDetails("");
-            setTimes(null);
+            toast.update(id, {render: "Fetching cached strategy and types...", isLoading: true});
 
-            // Fetch initial data
+            // Fetch cached strategy & types
             const [cachedStrategy, types] = await Promise.all([
                 getCachedStrategy(selected.id),
                 getDrugTypesByDrug(selected.id),
             ]);
 
             if (!types.length) {
-                throw new Error("No drug types available");
+                setError("No types found for this drug");
+                toast.update(id, {
+                    render: "No types found for this drug",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                return;
             }
 
             setTypes(types);
 
-            if (!cachedStrategy || !cachedStrategy.issue.batch || !types.some(type => type.name === cachedStrategy.issue.batch?.type)) {
-                console.warn("No cached strategy or cached strategy is invalid");
-                setConcentrations([]);
-                setBrands([]);
-                setSelectedType(null);
-                setSelectedConcentration(null);
-                setSelectedBrand(null);
-                return; // **Early exit**
+            toast.update(id, {render: "Validating cached strategy & type...", isLoading: true});
+
+            // Validate cached strategy & type
+            const selectedDrugType = types.find(type => cachedStrategy?.issue.type === type.name) || null;
+            setSelectedType(selectedDrugType);
+
+            if (!selectedDrugType) {
+                toast.update(id, {
+                    render: "No valid type found. Please select manually.",
+                    type: "warning",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                return;
             }
 
+            toast.update(id, {render: "Fetching concentrations...", isLoading: true});
 
-            const selectedDrugType = types.find(type => type.name === cachedStrategy.issue.batch?.type) || null;
-            setSelectedType(selectedDrugType);
-            if (!selectedDrugType) return;
-
-
+            // Fetch concentrations
             const concentrations = await getConcentrationByDrug({
                 drugID: selected.id,
                 type: selectedDrugType.type,
             });
 
             setConcentrations(concentrations);
-            const cacheConcentrationID = cachedStrategy?.issue.batch?.unitConcentrationId;
-            const isValidCachedConcentration = cacheConcentrationID && concentrations.some(concentration => concentration.id === cacheConcentrationID);
 
+            const cachedConcentration = concentrations.find(c => c.id === cachedStrategy?.issue.unitConcentrationId) || null;
 
-            if (!isValidCachedConcentration) {
+            if (!cachedConcentration) {
                 console.warn("Cached concentration is invalid");
-                setBrands([]);
-                setSelectedConcentration(null);
-                setSelectedBrand(null);
-                return; // **Early exit**
+                toast.update(id, {
+                    render: "Cached concentration invalid. Please select manually.",
+                    type: "warning",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                return;
             }
 
-
-            const cachedConcentration: ConcentrationOption = concentrations.find(concentration => concentration.id === cacheConcentrationID)!;
             setSelectedConcentration(cachedConcentration);
             showWarnings(cachedConcentration);
+
+            toast.update(id, {render: "Fetching brands...", isLoading: true});
 
             // Fetch brands
             const drugBrands = await getBrandByDrugConcentrationType({
                 drugID: selected.id,
-                concentrationID: cacheConcentrationID,
+                concentrationID: cachedConcentration.id,
                 type: selectedDrugType.type,
             });
 
             setBrands(drugBrands);
+
+            toast.update(id, {render: "Applying cached brand and strategy...", isLoading: true});
+
             await handleCachedBrandStrategy(drugBrands, cachedStrategy);
+
+            toast.update(id, {render: "Drug selection complete!", type: "success", isLoading: false, autoClose: 1000});
         } catch (error) {
             console.error("Error in handleDrugSelect:", error);
-            setError(error instanceof Error ? error.message : "Error fetching drug data");
-
-            // Reset states on error
-            setBrands([]);
-            setConcentrations([]);
-            setSelectedConcentration(null);
-            setSelectedBrand(null);
+            setError("Error fetching drug data");
+            toast.update(id, {render: "Error fetching drug data", type: "error", isLoading: false, autoClose: 3000});
         } finally {
             setIsBrandSearching(false);
             setIsConcentrationSearching(false);
             setIsTypeSearching(false);
+            setCacheFetching(false);
         }
     };
+
 
     // Helper function to handle cached brand strategy
     const handleCachedBrandStrategy = async (
@@ -287,7 +311,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         setStrategy(issue.strategy);
         setDose(issue.dose);
         setMealTiming(issue.meal);
-        setDetails(issue.strategy);
+        setDetails(issue.details || "");
 
         // Handle OTHER strategy specific logic
         if (issue.strategy === IssuingStrategy.OTHER || issue.strategy === IssuingStrategy.SOS) {
@@ -307,6 +331,10 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         if (selectedType === type || !selectedDrug || !type) return;
         setError(null);
         setWarning(null);
+
+        setSelectedConcentration(null);
+        setSelectedBrand(null);
+        resetStrategy();
         try {
             setSelectedType(type);
             setIsBrandSearching(true);
@@ -345,6 +373,9 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         if (selectedConcentration === selected) return;
         setError(null);
         setWarning(null);
+        setSelectedBrand(null);
+        resetStrategy();
+
         setSelectedConcentration(selected);
         if (!selectedDrug || !selectedType || !selected) return;
         showWarnings(selected);
@@ -369,48 +400,70 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         if (selectedBrand === selected) return;
         setError(null);
         setWarning(null);
+        resetStrategy();
         setSelectedBrand(selected);
         if (!selected || !selectedConcentration || !selectedDrug || !selectedType) return;
         showWarnings(selected);
     };
 
     const handleAddIssue = () => {
-        // if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName || !selectedConcentration) {
-        //     const missingFields = [
-        //         !selectedDrug && "Drug",
-        //         !selectedConcentration && "Concentration",
-        //         !selectedBrand && "Brand",
-        //         !strategy && "Strategy"
-        //     ].filter(Boolean);
-        //
-        //     setError(`Please fill all required fields: ${missingFields.join(", ")}`);
-        //     return;
-        // }
-        //
-        // const calculatedQuantity = calculateQuantity({
-        //     dose: dose || 0,
-        //     strategy,
-        //     forDays: forDays || 0,
-        //     times: times || 0
-        // });
-        //
-        // const newIssue: IssueInForm = {
-        //     drugId: selectedDrug,
-        //     drugName: selectedDrugName,
-        //     details,
-        //     brandId: selectedBrand,
-        //     brandName: selectedBrandName,
-        //     strategy,
-        //     dose: dose || 0,
-        //     forDays: forDays || 0,
-        //     quantity: calculatedQuantity,
-        //     meal: mealTiming,
-        //     forTimes: times || 0,
-        // };
-        //
-        // onAddIssue(newIssue);
-        // setOpen(false);
-        // resetForm();
+        try {
+            if (!selectedDrug || !selectedConcentration || !selectedBrand || !strategy || !dose || !selectedType) {
+                const missingFields = [
+                    !selectedDrug && "Drug",
+                    !selectedConcentration && "Concentration",
+                    !selectedBrand && "Brand",
+                    !strategy && "Strategy",
+                    !dose && "Dose",
+                ].filter(Boolean);
+
+                setError(`Missing fields: ${missingFields.join(", ")}`);
+                return;
+            }
+
+            if (strategy === IssuingStrategy.OTHER || strategy === IssuingStrategy.SOS || strategy === IssuingStrategy.WEEKLY) {
+                if (!times) {
+                    setError("Missing fields: Times");
+                    return;
+                }
+            } else {
+                if (!forDays) {
+                    setError("Missing fields: For Days");
+                    return;
+                }
+            }
+
+            const calculatedQuantity = calculateQuantity({
+                dose: dose || 0,
+                strategy,
+                forDays: forDays || 0,
+                times: times || 0
+            });
+
+            const newIssue: IssueInForm = {
+                strategy,
+                dose,
+                meal: mealTiming,
+                forDays,
+                forTimes: times,
+                details,
+                brandId: selectedBrand.id,
+                brandName: selectedBrand.name,
+                quantity: calculatedQuantity,
+                drugName: selectedDrug.name,
+                drugId: selectedDrug.id,
+                concentration: selectedConcentration.concentration,
+                drugType: selectedType.type,
+                concentrationID: selectedConcentration.id,
+            };
+
+            onAddIssue(newIssue);
+            setOpen(false);
+            resetForm();
+        } catch (error) {
+            console.error("Error in handleAddIssue:", error);
+            setError("Error adding issue");
+        }
     };
 
     return (
@@ -439,6 +492,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             placeholder="Select drug"
                             searchPlaceholder="Search drug"
                             noOptionsMessage="No drugs found"
+                            disabled={cacheFetching}
                         />
                         <div className={'flex gap-4'}>
                             <DrugTypeComboBox
@@ -447,7 +501,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                 value={selectedType}
                                 placeholder={'Select a type'}
                                 noOptionsMessage={'No types'}
-                                disabled={!selectedDrug}
+                                disabled={!selectedDrug || cacheFetching}
+                                isSearching={isTypeSearching}
                             />
                             <ConcentrationComboBox
                                 options={concentrations}
@@ -457,7 +512,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                 placeholder="Select concentration"
                                 noOptionsMessage="No concentrations found"
                                 searchPlaceholder="Search concentrations"
-                                disabled={!selectedDrug}
+                                disabled={!selectedType || cacheFetching}
                             />
                         </div>
                         <BrandCombobox
@@ -468,7 +523,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             placeholder="Select brand"
                             searchPlaceholder="Search brand"
                             noOptionsMessage="No brands found"
-                            disabled={!selectedType}
+                            disabled={!selectedType || cacheFetching}
                         />
                     </div>
 
@@ -500,6 +555,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             selectedStrategy: strategy,
                             setSelectedStrategy: setStrategy
                         }}
+                        disabled={!selectedDrug || !selectedConcentration || !selectedBrand || !selectedType || cacheFetching}
                     />
 
                     <div className="flex justify-end">
@@ -534,13 +590,14 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                             value={dose || ""}
                                             onChange={(e) => handleDoseChange(e.target.value)}
                                             placeholder="Enter dosage"
+                                            disabled={!strategy || cacheFetching}
                                         />
                                     </div>
 
                                     <div
                                         className="space-y-2"
                                     >
-                                        {strategy && strategy !== IssuingStrategy.SOS && strategy !== IssuingStrategy.OTHER ? (
+                                        {strategy && strategy !== IssuingStrategy.SOS && strategy !== IssuingStrategy.OTHER && strategy !== IssuingStrategy.WEEKLY ? (
                                             <>
                                                 <Label htmlFor="forDays">For Days</Label>
                                                 <Input
@@ -550,6 +607,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                                     value={forDays || ""}
                                                     onChange={(e) => handleForDaysChange(e.target.value)}
                                                     placeholder="Enter number of days"
+                                                    disabled={!strategy || cacheFetching}
                                                 />
                                             </>
                                         ) : (
@@ -562,6 +620,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                                     value={times || ""}
                                                     onChange={(e) => handleTimesChange(e.target.value)}
                                                     placeholder="Enter number of times"
+                                                    disabled={!strategy || cacheFetching}
                                                 />
                                             </>
                                         )}
@@ -582,6 +641,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                     <Switch
                                         checked={mealTiming !== null}
                                         onCheckedChange={(checked) => setMealTiming(checked ? MEAL.BEFORE : null)}
+                                        disabled={!strategy || cacheFetching}
                                     />
                                 </CardTitle>
                             </CardHeader>
@@ -591,6 +651,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                         value={mealTiming || ""}
                                         onValueChange={(value) => setMealTiming(value as MEAL)}
                                         className="space-y-3 w-full animate-fade-in"
+                                        disabled={!strategy || cacheFetching}
                                     >
                                         {[
                                             {value: MEAL.BEFORE, label: "Before Meal"},
@@ -607,7 +668,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                         ))}
                                     </RadioGroup>
                                 ) : (
-                                    <p className="text-gray-500 text-sm animate-fade-in">Enable meal timing to choose an
+                                    <p className="text-gray-500 text-sm animate-fade-in">Enable meal timing to
+                                        choose an
                                         option</p>
                                 )}
                             </CardContent>
@@ -619,6 +681,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         placeholder="Additional Details"
                         value={details}
                         onChange={(e) => setDetails(e.target.value)}
+                        disabled={cacheFetching || !strategy}
                     />
                 </div>
                 <DialogFooter>
@@ -633,7 +696,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     </Button>
                     <Button
                         onClick={handleAddIssue}
-                        disabled={!selectedDrug || !selectedBrand || !strategy}
+                        disabled={!selectedDrug || !selectedConcentration || !selectedBrand || !strategy || !dose}
                     >
                         Add
                     </Button>
