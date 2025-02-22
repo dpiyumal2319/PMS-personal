@@ -1,15 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import React, {useState, useRef, useEffect} from "react";
+import {ChevronDown} from "lucide-react";
+import {DrugConcentrationDataSuggestion} from "@/app/lib/definitions";
 
-interface Concentration {
-    id: string;
-    concentration: number;
-}
 
 interface CustomConcentrationSelectProps {
-    value: string;
-    onValueChange: (value: string) => void;
-    concentrations: Concentration[];
+    value: number;
+    onValueChange: (value: number) => void;
+    concentrations: DrugConcentrationDataSuggestion[];
     className?: string;
 }
 
@@ -33,7 +30,7 @@ const CustomConcentrationSelect: React.FC<CustomConcentrationSelectProps> = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleSelect = (id: string) => {
+    const handleSelect = (id: number) => {
         onValueChange(id);
         setIsOpen(false);
     };
@@ -45,16 +42,19 @@ const CustomConcentrationSelect: React.FC<CustomConcentrationSelectProps> = ({
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex h-10 w-full items-center justify-between rounded-md border border-input bg-card px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`flex h-8 w-full items-center justify-between rounded-md border border-input bg-card p-1 shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${
                     isOpen ? "ring-2 ring-primary" : ""
                 } ${className}`}
             >
-                <span className={`text-sm ${value ? "text-black" : "text-gray-500"}`}>{selectedLabel} mg</span>
-                <ChevronDown className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                <div className={`flex items-center gap-2`}>
+                    <span className={`text-sm ${value ? "text-black" : "text-gray-500"}`}>{selectedLabel}</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? "rotate-180" : ""}`}/>
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 w-full mt-1 rounded-md border bg-popover shadow-md animate-in fade-in-0 zoom-in-95">
+                <div
+                    className="absolute z-50 w-full mt-1 rounded-md border bg-popover shadow-md animate-in fade-in-0 zoom-in-95 overflow-y-auto max-h-52">
                     <div className="p-1">
                         {concentrations.map((concentration) => (
                             <button
@@ -62,7 +62,7 @@ const CustomConcentrationSelect: React.FC<CustomConcentrationSelectProps> = ({
                                 onClick={() => handleSelect(concentration.id)}
                                 className="w-full text-left px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground"
                             >
-                                {concentration.concentration} mg
+                                {concentration.concentration} mg/unit
                             </button>
                         ))}
                     </div>

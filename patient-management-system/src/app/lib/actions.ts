@@ -2,10 +2,8 @@
 
 import {revalidatePath} from "next/cache";
 import {
-    Bill,
     DateRange,
     InventoryFormData,
-    myBillError,
     myError,
     PatientFormData,
     SortOption,
@@ -1284,8 +1282,23 @@ export async function addNewItem({
             });
 
             // 3. Create batch with both drug and brand relationships
-            if (formData.concentrationId === undefined) {
+            if (formData.concentrationId === undefined || formData.concentration === undefined) {
                 return {success: false, message: "Please select a concentration"};
+            }
+
+            let newConcentrationId: number;
+
+            if (formData.concentrationId === -1) {
+                const newConcentration = await tx.unitConcentration.upsert({
+                    where: {concentration: formData.concentration},
+                    update: {},
+                    create: {
+                        concentration: formData.concentration,
+                    },
+                })
+                newConcentrationId = newConcentration.id;
+            } else {
+                newConcentrationId = formData.concentrationId;
             }
 
             await tx.batch.create({
@@ -1306,7 +1319,7 @@ export async function addNewItem({
                         formData.wholesalePrice.toString()
                     ),
                     unitConcentration: {
-                        connect: {id: formData.concentrationId},
+                        connect: {id: newConcentrationId},
                     },
                     status: "AVAILABLE",
                 },
@@ -1316,7 +1329,9 @@ export async function addNewItem({
             return {success: true, message: "Item added successfully"};
         });
     } catch (e) {
-        console.error(e);
+        if (e instanceof Error) {
+            console.error(e.message);
+        }
         return {success: false, message: "Failed to add item"};
     }
 }

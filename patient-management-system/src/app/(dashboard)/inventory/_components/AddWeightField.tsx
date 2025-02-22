@@ -11,12 +11,15 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
+import CustomConcentrationSelect
+    from "@/app/(dashboard)/inventory/available-stocks/_components/CustomConcentrationSelect";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 interface DrugConcentrationFieldProps {
     concentrations: DrugConcentrationDataSuggestion[];
     selectedConcentrationId?: number;
     drugId?: number;
-    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    onChange: (e: number) => void;
     onConcentrationAdded: (concentration: DrugConcentrationDataSuggestion) => void;
     onConcentrationDeleted: (concentrationId: DrugConcentrationDataSuggestion) => void;
 }
@@ -81,97 +84,73 @@ export function DrugConcentrationField({
                     <label htmlFor="concentration" className="block text-sm font-medium mb-1">
                         Drug Concentration
                     </label>
-                    <select
-                        id="concentration"
-                        value={selectedConcentrationId || ""}
-                        onChange={onChange}
-                        name="concentrationId"
-                        className="w-full p-2 border rounded"
-                        required
-                    >
-                        <option value="">Select Concentration</option>
-                        {concentrations.map((concentration) => (
-                            <option key={concentration.id} value={concentration.id}>
-                                {concentration.concentration} mg
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <Button
-                    type="button"
-                    onClick={() => setShowModal(true)}
-                    className="bg-primary-500 hover:bg-primary-600"
-                >
-                    <Plus className="w-4 h-4"/>
-                </Button>
-            </div>
-
-            {showModal && (
-                <div className="absolute right-0 top-0 mt-16 bg-white w-80 p-4 rounded-lg shadow-lg border z-10">
-                    <div className="flex justify-between items-center mb-1">
-                        <h3 className="text-lg font-semibold">Add New Concentration</h3>
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="text-gray-500 hover:text-gray-700"
-                        >
-                            <X className="w-5 h-5"/>
-                        </button>
-                    </div>
-
-                    <div className="space-y-4">
-                        <label
-                            htmlFor="newConcentration"
-                            className="block text-sm font-medium mb-1"
-                        >
-                            Concentration (mg)
-                        </label>
-                        <Input
-                            id="newConcentration"
-                            type="number"
-                            value={newConcentration}
-                            onChange={(e) => setNewConcentration(e.target.value)}
-                            min="0"
-                            step="0.1"
-                            className="w-full"
+                    <div className={`flex gap-2 items-center`}>
+                        <CustomConcentrationSelect
+                            value={selectedConcentrationId || 0}
+                            onValueChange={onChange}
+                            concentrations={uniqueConcentrations}
                         />
-                    </div>
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <div className="flex justify-end gap-2 ">
-                        <Button
-                            onClick={handleAddConcentration}
-                            className="bg-primary-500 hover:bg-primary-600"
-                        >
-                            Add
-                        </Button>
-                    </div>
-                    <div className="mt-1">
-                        <h4 className="text-sm font-medium mb-2">Existing Concentrations</h4>
-                        <div className="max-h-20 overflow-y-auto border rounded-md p-2">
-                            {uniqueConcentrations.map((concentration) => (
-                                <div
-                                    key={concentration.id}
-                                    className="flex justify-between items-center py-2 border-b"
-                                >
-                                    <span>{concentration.concentration} mg</span>
-                                    {concentration.id < 0 && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            className="text-red-500 hover:text-red-700 p-1"
-                                            onClick={() => {
-                                                setSelectedConcentrationToDelete(concentration);
-                                                setDeleteDialogOpen(true);
-                                            }}
-                                        >
-                                            <Trash2 className="w-4 h-4"/>
+                        <Dialog open={showModal} onOpenChange={setShowModal}>
+                            <DialogTrigger asChild>
+                                <Button className="bg-primary-500 hover:bg-primary-600 h-8 w-8"
+                                        onClick={() => setShowModal(true)}>
+                                    <Plus/>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="w-96">
+                                <DialogHeader>
+                                    <DialogTitle>Add New Concentration</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-2">
+                                    <label htmlFor="newConcentration" className="block text-sm font-medium">
+                                        Concentration (mg/unit)
+                                    </label>
+                                    <div className={`flex gap-2 items-center`}>
+                                        <Input
+                                            id="newConcentration"
+                                            type="number"
+                                            value={newConcentration}
+                                            onChange={(e) => setNewConcentration(e.target.value)}
+                                            min="0"
+                                            step="0.1"
+                                            className="w-ful h-8"
+                                        />
+                                        <Button onClick={handleAddConcentration}
+                                                className="bg-primary-500 hover:bg-primary-600">
+                                            Add
                                         </Button>
-                                    )}
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
+                                {error && <p className="text-red-500 text-sm">{error}</p>}
+                                <div className="mt-1">
+                                    <h4 className="text-sm font-medium mb-2">Existing Concentrations</h4>
+                                    <div className="max-h-52 overflow-y-auto border rounded-md p-2">
+                                        {uniqueConcentrations.map((concentration) => (
+                                            <div key={concentration.id}
+                                                 className="flex justify-between items-center py-2 border-b">
+                                                <span>{concentration.concentration} mg</span>
+                                                {concentration.id < 0 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        className="text-red-500 hover:text-red-700 p-1"
+                                                        onClick={() => {
+                                                            setSelectedConcentrationToDelete(concentration);
+                                                            setDeleteDialogOpen(true);
+                                                        }}
+                                                    >
+                                                        <Trash2 className="w-4 h-4"/>
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
-            )}
+            </div>
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

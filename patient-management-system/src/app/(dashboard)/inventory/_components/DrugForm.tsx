@@ -8,7 +8,7 @@ import {
     searchDrugModels,
     getDrugConcentrations,
 } from "@/app/lib/actions";
-import {Plus, X} from "lucide-react";
+import {Plus} from "lucide-react";
 import {handleServerAction} from "@/app/lib/utils";
 import {
     DrugBrandSuggestion,
@@ -48,20 +48,23 @@ export function DrugForm() {
     const [showDrugSuggestions, setShowDrugSuggestions] = useState(false);
 
     const handleConcentrationAdded = (newWeight: DrugConcentrationDataSuggestion) => {
-        // Update the weights list and select the new weight
         setDrugConcentrations((prev) => {
             const exists = prev.some((w) => w.id === newWeight.id);
-            if (!exists) {
-                return [...prev, newWeight];
+            if (exists) {
+                // If the ID exists, update the concentration value
+                return prev.map((w) =>
+                    w.id === newWeight.id ? {...w, concentration: newWeight.concentration} : w
+                );
             }
-            return prev;
+            // Otherwise, add the new weight
+            return [...prev, newWeight];
         });
 
         // Update the form data with the new weight
         setFormData((prev) => ({
             ...prev,
-            weightId: newWeight.id,
-            weight: newWeight.concentration,
+            concentrationId: newWeight.id,
+            concentration: newWeight.concentration,
         }));
     };
     const handleConcentrationDeleted = (deleteWeight: DrugConcentrationDataSuggestion) => {
@@ -78,6 +81,19 @@ export function DrugForm() {
                 weight: 0,
             }));
         }
+    }
+
+    const handleConcentrationChange = (newID: number) => {
+        setFormData((prev) => {
+            const selectedWeight = drugConcentrations.find(
+                (weight) => weight.id === newID
+            );
+            return {
+                ...prev,
+                concentrationId: newID,
+                concentration: selectedWeight ? selectedWeight.concentration : 0,
+            };
+        });
     }
 
 
@@ -210,9 +226,9 @@ export function DrugForm() {
     };
 
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-primary-500 hover:bg-primary-600 text-white">
+                <Button className="bg-primary-500 hover:bg-primary-600 text-white" onClick={() => setIsOpen(true)}>
                     <Plus className="w-4 h-4 mr-2"/> Add New Item
                 </Button>
             </DialogTrigger>
@@ -249,7 +265,7 @@ export function DrugForm() {
                                    name="batchNumber" className={'h-8'}/>
                         </div>
                         <DrugConcentrationField concentrations={drugConcentrations} drugId={formData.drugId}
-                                                onChange={handleChange}
+                                                onChange={handleConcentrationChange}
                                                 onConcentrationDeleted={handleConcentrationDeleted}
                                                 onConcentrationAdded={handleConcentrationAdded}
                                                 selectedConcentrationId={formData.concentrationId}/>
