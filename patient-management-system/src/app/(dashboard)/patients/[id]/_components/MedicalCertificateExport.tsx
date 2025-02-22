@@ -61,12 +61,11 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<any>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value,
-            // If fitForDuty changes to "Yes", set sickDaysCount to 0
             ...(name === 'fitForDuty' && value === 'Yes' ? { sickDaysCount: '0' } : {})
         }));
     };

@@ -1,7 +1,7 @@
 import { getBill, getPrescription } from "@/app/lib/actions";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CustomBadge } from "@/app/(dashboard)/_components/CustomBadge";
-import { Activity, Heart, HeartPulse, FileText } from "lucide-react";
+import { Activity, Heart, HeartPulse } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import {

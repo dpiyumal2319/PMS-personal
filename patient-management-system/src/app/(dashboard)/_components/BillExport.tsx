@@ -5,7 +5,7 @@ import { Bill } from "@/app/lib/definitions";
 import { BillComponent } from "./Bill";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { IoMdDownload } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 
