@@ -12,6 +12,7 @@ import {
     StockAnalysis,
     StockData,
     StockQueryParams,
+    DrugWeightDataSuggestion
 } from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
@@ -1299,6 +1300,22 @@ export async function addNewItem({
                     status: "AVAILABLE",
                 },
             });
+            
+            // 4. Create drug weight relation if weight is selected
+            if (formData.weightId) {
+                await tx.drugWeight.upsert({
+                where: {
+                    id: drug.id,
+                },
+                update: {
+                    weightId: formData.weightId,
+                },
+                create: {
+                    drugId: drug.id,
+                    weightId: formData.weightId,
+                },
+                });
+            }
 
             revalidatePath("/inventory/available-stocks");
             return {success: true, message: "Item added successfully"};
@@ -2308,6 +2325,88 @@ export async function searchDrugModels(query: string) {
         },
         take: 8,
     });
+}
+
+export async function getDrugWeights(drugId: number): Promise<DrugWeightDataSuggestion[]> {
+  try {
+    const weights = await prisma.drugWeight.findMany({
+      where: {
+        drugId: drugId
+      },
+      include: {
+        weight: true
+      },
+      distinct: ['weightId'] // Ensure unique weightIds
+    });
+    
+    return weights.map(dw => ({
+      id: dw.weightId,
+      weight: dw.weight.weight
+    }));
+  } catch (error) {
+    console.error('Error fetching drug weights:', error);
+    throw new Error('Failed to fetch drug weights');
+  }
+}
+
+export async function addNewWeight(weight: number): Promise<{ id: number; weight: number }> {
+  try {
+    const newWeight = await prisma.weights.create({
+      data: {
+        weight: weight,
+      },
+    });
+    
+    return { id: newWeight.id, weight: newWeight.weight };
+  } catch (error) {
+    console.error('Error adding weight:', error);
+    throw new Error('Failed to add weight');
+  }
+}
+
+// Add drug weight relationship
+export async function addDrugWeight(drugId: number, weightId: number) {
+  try {
+    await prisma.drugWeight.create({
+      data: {
+        drugId: drugId,
+        weightId: weightId,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding drug weight:', error);
+    throw new Error('Failed to add drug weight relationship');
+  }
+}
+
+export async function deleteWeight(weightId: number) {
+  try {
+    // First delete all DrugWeight relationships
+    await prisma.drugWeight.deleteMany({
+      where: {
+        weightId: weightId
+      }
+    });
+
+    // Then delete the weight itself
+    await prisma.weights.delete({
+      where: {
+        id: weightId
+      }
+    });
+
+    return {
+      success: true,
+      message: "Weight deleted successfully"
+    };
+  } catch (error) {
+    console.error("Failed to delete weight:", error);
+    return {
+      success: false,
+      message: "Failed to delete weight"
+    };
+  }
 }
 
 // export async function getPriceOfDrugModel({

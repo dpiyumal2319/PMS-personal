@@ -69,6 +69,9 @@ export type InventoryFormData = {
     wholesalePrice: number | string;
     brandId?: number; // Add brandId property
     drugId?: number;  // Add drugId property
+    weightId?: number;
+    weight?: number;
+
 }
 
 
