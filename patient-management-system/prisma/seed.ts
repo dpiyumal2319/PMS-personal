@@ -90,27 +90,12 @@ async function main() {
         ]
     })
 
-    await prisma.weights.createMany({
+    await prisma.unitConcentration.createMany({
         data: [
-            {weight: 500},
-            {weight: 1000},
-            {weight: 250},
-            {weight: 50},
-        ]
-    })
-
-    await prisma.drugWeight.createMany({
-        data: [
-            {drugId: 1, weightId: 1},
-            {drugId: 1, weightId: 2},
-            {drugId: 2, weightId: 1},
-            {drugId: 2, weightId: 2},
-            {drugId: 2, weightId: 3},
-            {drugId: 2, weightId: 4},
-            {drugId: 3, weightId: 1},
-            {drugId: 3, weightId: 2},
-            {drugId: 3, weightId: 3},
-            {drugId: 3, weightId: 4},
+            {concentration: 500},
+            {concentration: 1000},
+            {concentration: 250},
+            {concentration: 50},
         ]
     })
 
@@ -121,6 +106,7 @@ async function main() {
             description: 'Pain relief tablet',
             Batch: {
                 create: [{
+                    unitConcentrationId: 1,
                     number: 'B123',
                     type: 'Tablet',
                     fullAmount: 100,
@@ -141,6 +127,7 @@ async function main() {
             description: 'Pain relief tablet',
             Batch: {
                 create: [{
+                    unitConcentrationId: 2,
                     number: 'B3456',
                     type: 'Tablet',
                     fullAmount: 100,
@@ -161,6 +148,7 @@ async function main() {
             description: 'Anti-inflammatory pain reliever',
             Batch: {
                 create: [{
+                    unitConcentrationId: 3,
                     number: 'B456',
                     type: 'Tablet',
                     fullAmount: 200,
@@ -181,6 +169,7 @@ async function main() {
             description: 'Antibiotic for bacterial infections',
             Batch: {
                 create: [{
+                    unitConcentrationId: 4,
                     number: 'B789',
                     type: 'Tablet',
                     fullAmount: 150,

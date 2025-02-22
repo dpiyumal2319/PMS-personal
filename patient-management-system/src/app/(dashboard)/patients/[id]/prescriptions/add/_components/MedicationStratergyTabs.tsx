@@ -71,7 +71,7 @@ const MedicationStrategyTabs = ({selectedStrategy}: MedicationStrategyTabsProps)
         <Tabs defaultValue="MEAL" className="w-full mx-auto"
               value={selectedStrategy.selectedStrategy ? selectedStrategy.selectedStrategy : ''}
               onValueChange={(value) => handleTabChange(value as IssuingStrategy)}>
-            <div className="h-10 mb-6">
+            <div className="h-10">
                 <TabsList className="w-full">
                     {issues.map((issue) => (
                         <TabsTrigger value={issue.name} key={issue.name}

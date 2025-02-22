@@ -3,7 +3,7 @@
 import React, {useState} from 'react';
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popoverModified";
 import {Button} from "@/components/ui/button";
-import {Check, ChevronsUpDown} from "lucide-react";
+import {Check, ChevronsUpDown, Loader2} from "lucide-react";
 import {
     Command,
     CommandEmpty,
@@ -20,6 +20,7 @@ interface TypeComboBoxProps {
     onChange: (value: CustomDrugType) => void;
     placeholder?: string;
     noOptionsMessage?: string;
+    isSearching?: boolean;
     className?: string;
     disabled?: boolean;
 }
@@ -31,6 +32,7 @@ const DrugTypeComboBox = ({
                               placeholder = "Select a drug type...",
                               noOptionsMessage = "No brands found.",
                               className,
+                              isSearching = false,
                               disabled = false,
                           }: TypeComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
@@ -64,7 +66,14 @@ const DrugTypeComboBox = ({
                 <Command>
                     <CommandList>
                         <CommandEmpty className="p-4 text-center">
-                            {noOptionsMessage}
+                            {isSearching ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin"/>
+                                    <span>Searching...</span>
+                                </div>
+                            ) : (
+                                noOptionsMessage
+                            )}
                         </CommandEmpty>
                         <CommandGroup>
                             {options.map((option) => (

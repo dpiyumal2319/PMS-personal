@@ -96,7 +96,7 @@ const DrugCombobox = ({
                                     onSelect={() => handleSelect(option)}
                                     className="flex items-center justify-between"
                                 >
-                                    <span>{option.name} - in ({option.weightCount} dosages)</span>
+                                    <span>{option.name} - in ({option.concentrationCount} concentration)</span>
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",

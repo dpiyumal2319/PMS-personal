@@ -2,13 +2,14 @@
 
 import {myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
-import {ChargeType, DrugType, Prisma} from "@prisma/client";
+import {ChargeType, Prisma} from "@prisma/client";
+import type {DrugType} from "@prisma/client";
 import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
 import {
     BrandOption, CustomDrugType, DrugOption,
-    WeightOption
+    ConcentrationOption
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
 export async function completePrescription(
@@ -463,15 +464,23 @@ export async function getCachedStrategy(drugID: number) {
         },
         select: {
             issueId: true,
-            issue: true,
-            weight: true,
-            lastDrugType: true,
-            brand: {
+            issue: {
                 select: {
-                    id: true,
-                    name: true,
-                },
-            },
+                    strategy: true,
+                    brandId: true,
+                    dose: true,
+                    meal: true,
+                    details: true,
+                    quantity: true,
+                    batch: {
+                        select: {
+                            id: true,
+                            type: true,
+                            unitConcentrationId: true,
+                        }
+                    }
+                }
+            }
         },
     });
 }
@@ -482,6 +491,7 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
             where: {
                 name: {
                     startsWith: term,
+                    mode: "insensitive",
                 },
                 batch: {
                     some: {
@@ -493,9 +503,12 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
             select: {
                 id: true,
                 name: true,
-                DrugWeight: {
+                batch: {
+                    where: {
+                        status: "AVAILABLE",
+                    },
                     select: {
-                        weightId: true, // Get unique weight IDs
+                        unitConcentrationId: true,
                     },
                 },
             },
@@ -504,10 +517,11 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
             drugs.map((drug) => ({
                 id: drug.id,
                 name: drug.name,
-                weightCount: new Set(drug.DrugWeight.map((dw) => dw.weightId)).size, // Count unique weights
+                concentrationCount: new Set(drug.batch.map((b) => b.unitConcentrationId)).size, // Count unique concentrations
             }))
         );
 }
+
 
 export async function searchBrandByDrug({
                                             drugID,
@@ -563,108 +577,101 @@ export async function searchBrandByDrug({
         );
 }
 
-export async function getWeightByBrand({drugID, type}: {
-    drugID: number,
-    type: CustomDrugType
-}): Promise<WeightOption[]> {
-    console.log("getWeightByBrand: drugID: ", drugID);
-    console.log("getWeightByBrand: type: ", type);
-    return prisma.drugWeight.findMany({
+export async function getConcentrationByDrug({
+                                                 drugID,
+                                                 type
+                                             }: {
+    drugID: number;
+    type: DrugType;
+}): Promise<ConcentrationOption[]> {
+    const results = await prisma.batch.groupBy({
+        by: ['unitConcentrationId'],
         where: {
             drugId: drugID,
-            drug: {
-                batch: {
-                    some: {
-                        drugId: drugID,
-                        status: 'AVAILABLE',
-                        type: 'Syrup'
-                    }
-                }
-            }
+            type: type,
         },
-        include: {
-            weight: true,
-            drug: {
-                select: {
-                    batch: {
-                        where: {
-                            drugId: drugID,
-                            status: 'AVAILABLE',
-                            type: 'Syrup'
-                        },
-                        select: {
-                            remainingQuantity: true,
-                            expiry: true,
-                            type: true
-                        }
-                    }
-                }
-            }
+        _max: {
+            expiry: true,
+        },
+        _count: {
+            drugBrandId: true,
+        },
+        _sum: {
+            remainingQuantity: true,
+        },
+    });
+
+    const concentrations = await prisma.unitConcentration.findMany({
+        where: {
+            id: {in: results.map(r => r.unitConcentrationId)}
+        },
+        select: {
+            id: true,
+            concentration: true,
         }
-    }).then((drugWeights) => {
-        drugWeights.forEach(dw => {
-            console.log(dw);
-            console.log(dw.drug)
-        })
-        return drugWeights.map(dw => ({
-            id: dw.id,
-            weight: dw.weight.weight.toString(), // Convert weight (Float) to string
-            brandCount: dw.drug.batch.length,
-            totalRemainingQuantity: dw.drug.batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
-            farthestExpiry: dw.drug.batch.reduce((latest, batch) =>
-                batch.expiry > latest ? batch.expiry : latest, new Date(0) // Initialize with the oldest possible date
-            )
-        }));
+    });
+
+    return results.map(result => {
+        const concentration = concentrations.find(c => c.id === result.unitConcentrationId);
+        return {
+            id: result.unitConcentrationId,
+            concentration: concentration ? concentration.concentration.toString() : "Unknown",
+            brandCount: result._count.drugBrandId,
+            totalRemainingQuantity: result._sum.remainingQuantity || 0,
+            farthestExpiry: result._max.expiry!,
+        };
     });
 }
 
-export async function getBrandByDrugWeightType({
-                                                   drugID,
-                                                   weightID,
-                                                   type,
-                                               }: {
+
+export async function getBrandByDrugConcentrationType({
+                                                          drugID,
+                                                          concentrationID,
+                                                          type,
+                                                      }: {
     drugID: number;
-    weightID: number;
+    concentrationID: number;
     type: DrugType;
 }): Promise<BrandOption[]> {
-    const whereCondition: Prisma.DrugBrandWhereInput = {
-            Batch: {
-                some: {
-                    drugId: drugID,
-                    status: 'AVAILABLE',
-                    type,
-                    drug: {
-                        DrugWeight: {
-                            some: {
-                                weightId: weightID
-                            }
-                        }
-                    }
-                },
-            },
-        }
-    ;
-
-    const brands = await prisma.drugBrand.findMany({
-        where: whereCondition,
-        include: {
-            Batch: {
-                where: {drugId: drugID, status: 'AVAILABLE', type},
-                select: {remainingQuantity: true, expiry: true},
-            },
+    const results = await prisma.batch.groupBy({
+        by: ['drugBrandId'],
+        where: {
+            drugId: drugID,
+            unitConcentrationId: concentrationID,
+            type: type,
         },
+        _max: {
+            expiry: true,
+        },
+        _sum: {
+            remainingQuantity: true,
+        },
+        _count: {
+            id: true,
+        }
     });
 
-    return brands.map((brand) => ({
-        id: brand.id,
-        name: brand.name,
-        batchCount: brand.Batch.length,
-        totalRemainingQuantity: brand.Batch.reduce((sum, batch) => sum + batch.remainingQuantity, 0),
-        farthestExpiry: brand.Batch.reduce(
-            (latest, batch) => (batch.expiry > latest ? batch.expiry : latest),
-            new Date(0)
-        ),
-    }));
+    const brands = await prisma.drugBrand.findMany({
+        where: {
+            id: {in: results.map(r => r.drugBrandId)}
+        },
+        select: {
+            id: true,
+            name: true,
+        }
+    });
+
+
+    return results.map(result => {
+        const brand = brands.find(b => b.id === result.drugBrandId);
+        return {
+            id: result.drugBrandId,
+            name: brand ? brand.name : "Unknown",
+            totalRemainingQuantity: result._sum.remainingQuantity || 0,
+            batchCount: result._count.id,
+            farthestExpiry: result._max.expiry!,
+        };
+    });
 }
 
 export async function getDrugTypesByDrug(drugID: number): Promise<CustomDrugType[]> {
@@ -673,9 +680,9 @@ export async function getDrugTypesByDrug(drugID: number): Promise<CustomDrugType
             drugId: drugID,
             status: 'AVAILABLE'
         },
-        distinct: ['type'], // Correct way to use distinct
+        distinct: ['type'],
         select: {
-            type: true, // Ensures only the type field is returned
+            type: true,
         }
     }).then((types) => {
         return types.map((type) => ({

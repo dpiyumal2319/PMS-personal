@@ -202,10 +202,10 @@ model Batch {
 }
 
 model UnitConcentration {
-  id     Int     @id @default(autoincrement())
-  weight Float   @unique
-  Issue  Issue[]
-  Batch  Batch[]
+  id            Int     @id @default(autoincrement())
+  concentration Float   @unique
+  Issue         Issue[]
+  Batch         Batch[]
 }
 
 model Prescription {

@@ -7,20 +7,21 @@ import {useDebouncedCallback} from "use-debounce";
 import {
     getCachedStrategy,
     searchAvailableDrugs,
-    getWeightByBrand,
-    getBrandByDrugWeightType, getDrugTypesByDrug
+    getConcentrationByDrug,
+    getBrandByDrugConcentrationType, getDrugTypesByDrug
 } from "@/app/lib/actions/prescriptions";
 import DrugCombobox from "./DrugCombobox";
 import BrandCombobox from "./BrandCombobox";
 import MedicationStrategyTabs from "./MedicationStratergyTabs";
 import {Button} from "@/components/ui/button";
-import {DrugType, IssuingStrategy, MEAL} from "@prisma/client";
+import {IssuingStrategy, MEAL} from "@prisma/client";
+import type {DrugType} from "@prisma/client";
 import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
-import {calculateForDays, calculateQuantity} from "@/app/lib/utils";
-import {ClipboardCheck, Plus, Utensils} from "lucide-react";
+import {calculateForDays, calculateQuantity, calculateTimes} from "@/app/lib/utils";
+import {CircleAlert, ClipboardCheck, Plus, TriangleAlert, Utensils} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";
 import {differenceInDays} from "date-fns";
-import WeightComboBox from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/WeightComboBox";
+import ConcentrationComboBox from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/ConcentrationComboBox";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
@@ -34,7 +35,7 @@ interface IssuesListProps {
 export type DrugOption = {
     id: number;
     name: string;
-    weightCount: number;
+    concentrationCount: number;
 }
 
 export type CustomDrugType = {
@@ -42,9 +43,9 @@ export type CustomDrugType = {
     type: DrugType
 }
 
-export interface WeightOption {
+export interface ConcentrationOption {
     id: number;
-    weight: string;
+    concentration: string;
     brandCount: number;
     totalRemainingQuantity: number;
     farthestExpiry: Date;
@@ -64,7 +65,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [open, setOpen] = useState(false);
     const [isDrugSearching, setIsDrugSearching] = useState(false);
     const [isBrandSearching, setIsBrandSearching] = useState(false);
-    const [isWeightSearching, setIsWeightSearching] = useState(false);
+    const [isConcentrationSearching, setIsConcentrationSearching] = useState(false);
+    const [isTypeSearching, setIsTypeSearching] = useState(false);
 
     const [drugs, setDrugs] = useState<DrugOption[]>([]);
     const [selectedDrug, setSelectedDrug] = useState<DrugOption | null>(null);
@@ -72,8 +74,8 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [types, setTypes] = useState<CustomDrugType[]>([]);
     const [selectedType, setSelectedType] = useState<CustomDrugType | null>(null);
 
-    const [weights, setWeights] = useState<WeightOption[]>([]);
-    const [selectedWeight, setSelectedWeight] = useState<WeightOption | null>(null);
+    const [concentrations, setConcentrations] = useState<ConcentrationOption[]>([]);
+    const [selectedConcentration, setSelectedConcentration] = useState<ConcentrationOption | null>(null);
 
     const [brands, setBrands] = useState<BrandOption[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<BrandOption | null>(null);
@@ -113,23 +115,23 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-    const resetForm = () => {
-        setSelectedDrug(null);
-        setSelectedWeight(null);
-        setSelectedBrand(null);
-        setDetails("");
-        setError(null);
-        setWarning(null);
+    const resetStrategy = () => {
         setStrategy(null);
         setDose(null);
-        setQuantity(null);
-        setTimes(null);
         setForDays(null);
         setMealTiming(null);
-        setSelectedType('Tablet');
+        setDetails("");
+        setTimes(null);
+    }
+
+    const resetForm = () => {
+        setSelectedDrug(null);
+        setSelectedConcentration(null);
+        setSelectedBrand(null);
+        setSelectedType(null);
     };
 
-    const showWarnings = (item: WeightOption | BrandOption) => {
+    const showWarnings = (item: ConcentrationOption | BrandOption) => {
         const expiry = item.farthestExpiry;
         const remainingQuantity = item.totalRemainingQuantity;
         const daysUntilExpiry = differenceInDays(new Date(expiry), new Date());
@@ -159,16 +161,18 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     }, 700);
 
     const handleDrugSelect = async (selected: DrugOption) => {
-        if (selected === selectedDrug) return;
-
+        if (selected === selectedDrug || !selected) return;
+        setError(null);
+        setWarning(null);
         try {
             // Reset states before fetching new data
             setSelectedDrug(selected);
             setIsBrandSearching(true);
-            setIsWeightSearching(true);
+            setIsConcentrationSearching(true);
+            setIsTypeSearching(true);
 
             // Clear previous selections
-            setSelectedWeight(null);
+            setSelectedConcentration(null);
             setSelectedBrand(null);
             setStrategy(null);
             setDose(null);
@@ -183,73 +187,73 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 getDrugTypesByDrug(selected.id),
             ]);
 
-            console.log(types);
-
             if (!types.length) {
                 throw new Error("No drug types available");
             }
 
             setTypes(types);
 
-            // Check if cached drug type is valid
-            const hasValidCachedType =
-                cachedStrategy && types.some(type => type.name === cachedStrategy.lastDrugType);
-
-            if (!hasValidCachedType) {
-                console.warn("No valid cached drug type found, stopping further fetching.");
+            if (!cachedStrategy || !cachedStrategy.issue.batch || !types.some(type => type.name === cachedStrategy.issue.batch?.type)) {
+                console.warn("No cached strategy or cached strategy is invalid");
+                setConcentrations([]);
+                setBrands([]);
+                setSelectedType(null);
+                setSelectedConcentration(null);
+                setSelectedBrand(null);
                 return; // **Early exit**
             }
 
-            const selectedDrugType = cachedStrategy.lastDrugType;
-            const newSelect = types.find(type => type.type === selectedDrugType) || null;
-            setSelectedType(newSelect);
 
-            // Fetch weights
-            if (!newSelect) {
-                return; // **Early exit**
-            }
+            const selectedDrugType = types.find(type => type.name === cachedStrategy.issue.batch?.type) || null;
+            setSelectedType(selectedDrugType);
+            if (!selectedDrugType) return;
 
-            const weights = await getWeightByBrand({
+
+            const concentrations = await getConcentrationByDrug({
                 drugID: selected.id,
-                type: newSelect,
+                type: selectedDrugType.type,
             });
 
-            setWeights(weights);
+            setConcentrations(concentrations);
+            const cacheConcentrationID = cachedStrategy?.issue.batch?.unitConcentrationId;
+            const isValidCachedConcentration = cacheConcentrationID && concentrations.some(concentration => concentration.id === cacheConcentrationID);
 
-            const cachedWeightID = cachedStrategy?.weight?.id;
-            const isValidCachedWeight = cachedWeightID && weights.some(weight => weight.id === cachedWeightID);
 
-            if (isValidCachedWeight) {
-                const cachedWeight: WeightOption = weights.find(weight => weight.id === cachedWeightID)!;
-                setSelectedWeight(cachedWeight);
-                showWarnings(cachedWeight);
-
-                // Fetch brands
-                const drugBrands = await getBrandByDrugWeightType({
-                    drugID: selected.id,
-                    weightID: cachedWeightID,
-                    type: selectedDrugType,
-                });
-
-                setBrands(drugBrands);
-                await handleCachedBrandStrategy(drugBrands, cachedStrategy);
-            } else {
-                // No valid cached weight, stop fetching brands
-                setWeights(weights);
+            if (!isValidCachedConcentration) {
+                console.warn("Cached concentration is invalid");
                 setBrands([]);
+                setSelectedConcentration(null);
+                setSelectedBrand(null);
+                return; // **Early exit**
             }
+
+
+            const cachedConcentration: ConcentrationOption = concentrations.find(concentration => concentration.id === cacheConcentrationID)!;
+            setSelectedConcentration(cachedConcentration);
+            showWarnings(cachedConcentration);
+
+            // Fetch brands
+            const drugBrands = await getBrandByDrugConcentrationType({
+                drugID: selected.id,
+                concentrationID: cacheConcentrationID,
+                type: selectedDrugType.type,
+            });
+
+            setBrands(drugBrands);
+            await handleCachedBrandStrategy(drugBrands, cachedStrategy);
         } catch (error) {
             console.error("Error in handleDrugSelect:", error);
             setError(error instanceof Error ? error.message : "Error fetching drug data");
 
             // Reset states on error
             setBrands([]);
-            setWeights([]);
-            setSelectedWeight(null);
+            setConcentrations([]);
+            setSelectedConcentration(null);
             setSelectedBrand(null);
         } finally {
             setIsBrandSearching(false);
-            setIsWeightSearching(false);
+            setIsConcentrationSearching(false);
+            setIsTypeSearching(false);
         }
     };
 
@@ -261,110 +265,120 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         if (!cachedStrategy) return;
 
         const availableBrandIDs = drugBrands.map(brand => brand.id);
-
-        if (availableBrandIDs.includes(cachedStrategy.brand.id)) {
-            const {brand, issue} = cachedStrategy;
-
-            // Set brand information
-            setSelectedBrand(drugBrands.find(b => b.id === brand.id) || null);
-            // Set issue details
-            setStrategy(issue.strategy);
-            setDose(issue.dose);
-            setMealTiming(issue.meal);
-            setDetails(issue.strategy);
-
-            // Handle OTHER strategy specific logic
-            if (issue.strategy === IssuingStrategy.OTHER || issue.strategy === IssuingStrategy.SOS) {
-                const {quantity, dose} = issue;
-                setTimes(dose > 0 && quantity != null ? quantity / dose : null);
-            } else {
-                setForDays(calculateForDays({strategy: issue.strategy, dose: issue.dose, quantity: issue.quantity}));
-            }
-
-            // Show warnings if applicable
-            const selectedBrand = drugBrands.find(b => b.id === brand.id);
-            if (selectedBrand) {
-                showWarnings(selectedBrand);
-            }
-        } else {
+        if (!availableBrandIDs.includes(cachedStrategy.issue.brandId)) {
             // Reset strategy-related states if cached brand is not available
+            console.warn("Cached brand is not available");
             setStrategy(null);
             setDose(null);
             setForDays(null);
             setMealTiming(null);
             setDetails("");
             setTimes(null);
+            setSelectedBrand(null);
+            return;
+        }
+
+        const {issue} = cachedStrategy;
+        const selectedBrand_local = drugBrands.find(b => b.id === issue.brandId) || null;
+
+        // Set brand information
+        setSelectedBrand(selectedBrand_local);
+        // Set issue details
+        setStrategy(issue.strategy);
+        setDose(issue.dose);
+        setMealTiming(issue.meal);
+        setDetails(issue.strategy);
+
+        // Handle OTHER strategy specific logic
+        if (issue.strategy === IssuingStrategy.OTHER || issue.strategy === IssuingStrategy.SOS) {
+            const {quantity, dose} = issue;
+            setTimes(calculateTimes({strategy: issue.strategy, dose: dose, quantity: quantity}));
+        } else {
+            setForDays(calculateForDays({strategy: issue.strategy, dose: issue.dose, quantity: issue.quantity}));
+        }
+
+        // Show warnings if applicable
+        if (selectedBrand_local) {
+            showWarnings(selectedBrand_local);
         }
     };
 
     const handleTypeSelect = async (type: CustomDrugType) => {
-        if (!selectedDrug) return;
+        if (selectedType === type || !selectedDrug || !type) return;
+        setError(null);
+        setWarning(null);
         try {
             setSelectedType(type);
             setIsBrandSearching(true);
-            setIsWeightSearching(true);
+            setIsConcentrationSearching(true);
 
             // Reset previous selections
-            setSelectedWeight(null);
+            setSelectedConcentration(null);
             setSelectedBrand(null);
             setBrands([]);
-            setWeights([]);
+            setConcentrations([]);
 
-            // For tablets, first fetch weights
-            const weights = await getWeightByBrand({
+            // For tablets, first fetch concentrations
+            const concentrations = await getConcentrationByDrug({
                 drugID: selectedDrug.id,
-                type: type
+                type: type.type,
             });
 
-            console.log(weights);
-
-            setWeights(weights);
-            setIsWeightSearching(false);
+            setConcentrations(concentrations);
+            setIsConcentrationSearching(false);
         } catch (error) {
             console.error('Error in handleTypeSelect:', error);
             setError(error instanceof Error ? error.message : "Error fetching drug data");
 
             // Reset states on error
             setBrands([]);
-            setWeights([]);
-            setSelectedWeight(null);
+            setConcentrations([]);
+            setSelectedConcentration(null);
             setSelectedBrand(null);
         } finally {
             setIsBrandSearching(false);
-            setIsWeightSearching(false);
+            setIsConcentrationSearching(false);
         }
     };
 
-    const handleWeightSelect = async (selected: WeightOption) => {
-        setSelectedWeight(selected);
-        if (!selectedWeight || !selectedDrug) return;
-        showWarnings(selectedWeight);
+    const handleConcentrationSelect = async (selected: ConcentrationOption) => {
+        if (selectedConcentration === selected) return;
+        setError(null);
+        setWarning(null);
+        setSelectedConcentration(selected);
+        if (!selectedDrug || !selectedType || !selected) return;
+        showWarnings(selected);
         try {
-            const drugBrands = await getBrandByDrugWeightType({
+            setIsBrandSearching(true);
+            const drugBrands = await getBrandByDrugConcentrationType({
                 drugID: selectedDrug.id,
-                weightID: selected.id,
-                type: selectedType,
+                concentrationID: selected.id,
+                type: selectedType.type,
             });
             setBrands(drugBrands);
         } catch (error) {
             console.error(error);
             setError("Error fetching brands");
+        } finally {
+            setIsBrandSearching(false);
         }
 
     };
 
     const handleBrandSelect = (selected: BrandOption) => {
+        if (selectedBrand === selected) return;
+        setError(null);
+        setWarning(null);
         setSelectedBrand(selected);
-        if (selectedBrand) {
-            showWarnings(selectedBrand);
-        }
+        if (!selected || !selectedConcentration || !selectedDrug || !selectedType) return;
+        showWarnings(selected);
     };
 
     const handleAddIssue = () => {
-        // if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName || !selectedWeight) {
+        // if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName || !selectedConcentration) {
         //     const missingFields = [
         //         !selectedDrug && "Drug",
-        //         !selectedWeight && "Weight",
+        //         !selectedConcentration && "Concentration",
         //         !selectedBrand && "Brand",
         //         !strategy && "Strategy"
         //     ].filter(Boolean);
@@ -414,7 +428,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 <DialogHeader>
                     <DialogTitle>Add Issue</DialogTitle>
                 </DialogHeader>
-                <div className="flex flex-col space-y-4">
+                <div className="flex flex-col space-y-2">
                     <div className="flex items-center space-x-4">
                         <DrugCombobox
                             options={drugs}
@@ -435,14 +449,14 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                 noOptionsMessage={'No types'}
                                 disabled={!selectedDrug}
                             />
-                            <WeightComboBox
-                                options={weights}
-                                onChange={(weight) => handleWeightSelect(weight)}
-                                isSearching={isWeightSearching}
-                                value={selectedWeight}
-                                placeholder="Select weight"
-                                noOptionsMessage="No weights found"
-                                searchPlaceholder="Search weights"
+                            <ConcentrationComboBox
+                                options={concentrations}
+                                onChange={(concentration) => handleConcentrationSelect(concentration)}
+                                isSearching={isConcentrationSearching}
+                                value={selectedConcentration}
+                                placeholder="Select concentration"
+                                noOptionsMessage="No concentrations found"
+                                searchPlaceholder="Search concentrations"
                                 disabled={!selectedDrug}
                             />
                         </div>
@@ -458,16 +472,28 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                         />
                     </div>
 
-                    <div className="flex justify-between">
-                        <span className="text-red-500 text-sm">{warning}</span>
-                        <span className="text-red-500 text-sm">{error}</span>
-                        <button
-                            onClick={resetForm}
-                            className="text-red-500 cursor-pointer text-sm hover:underline"
-                        >
-                            X Clear
-                        </button>
+                    <div className={'flex flex-col gap-2 animate-fade-in'}>
+                        {warning && (
+                            <span
+                                className="text-yellow-500 text-sm flex items-center"
+                                aria-live="polite"
+                                role="status"
+                            >
+                                <TriangleAlert className="mr-1" aria-hidden="true" size={18}/>
+                                {warning}
+                            </span>
+                        )}
+                        {error && (
+                            <span
+                                className="text-red-500 text-sm flex items-center mt-2"
+                                role="alert"
+                            >
+                                <CircleAlert className="mr-1" aria-hidden="true" size={18}/>
+                                {error}
+                            </span>
+                        )}
                     </div>
+
 
                     <MedicationStrategyTabs
                         selectedStrategy={{
@@ -475,6 +501,16 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                             setSelectedStrategy: setStrategy
                         }}
                     />
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={resetStrategy}
+                            className="text-red-400 cursor-pointer text-sm hover:underline focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
+                            aria-label="Clear strategy"
+                        >
+                            Clear Strategy
+                        </button>
+                    </div>
 
                     {/* Dosage & Duration Card */}
                     <div className="grid grid-cols-2 gap-4">
@@ -487,7 +523,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 animate-fade-in" key={strategy}>
                                     <div className="space-y-2">
                                         <Label htmlFor="dose">Dosage</Label>
                                         <Input
@@ -502,8 +538,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                                     </div>
 
                                     <div
-                                        key={strategy} // This forces a re-render when strategy changes
-                                        className="space-y-2 transition-all duration-300 animate-fade-in"
+                                        className="space-y-2"
                                     >
                                         {strategy && strategy !== IssuingStrategy.SOS && strategy !== IssuingStrategy.OTHER ? (
                                             <>

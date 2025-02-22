@@ -15,14 +15,14 @@ import {
 import {cn} from "@/lib/utils";
 import {differenceInDays, differenceInMonths} from "date-fns";
 import type {
-    WeightOption
+    ConcentrationOption,
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
-interface WeightComboBoxProps {
-    options: WeightOption[];
-    value?: WeightOption | null;
-    onChange: (value: WeightOption) => void;
+interface ConcentrationComboBoxProps {
+    options: ConcentrationOption[];
+    value?: ConcentrationOption | null;
+    onChange: (value: ConcentrationOption) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     noOptionsMessage?: string;
@@ -31,7 +31,7 @@ interface WeightComboBoxProps {
     disabled?: boolean;
 }
 
-const WeightComboBox = ({
+const ConcentrationComboBox = ({
                             options,
                             value,
                             onChange,
@@ -41,10 +41,10 @@ const WeightComboBox = ({
                             isSearching = false,
                             className,
                             disabled = false,
-                        }: WeightComboBoxProps) => {
+                        }: ConcentrationComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const handleSelect = (selectedValue: WeightOption) => {
+    const handleSelect = (selectedValue: ConcentrationOption) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
@@ -78,7 +78,7 @@ const WeightComboBox = ({
                         className
                     )}
                 >
-                    {value ? value.weight : placeholder}
+                    {value ? value.concentration : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -102,12 +102,12 @@ const WeightComboBox = ({
                             {options.map((option) => (
                                 <CommandItem
                                     key={option.id}
-                                    value={option.weight}
+                                    value={option.concentration}
                                     onSelect={() => handleSelect(option)}
                                     className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
                                     <div className="flex items-center min-w-24 w-full gap-2">
-                                        <span className="font-medium">{option.weight}</span>
+                                        <span className="font-medium">{option.concentration}</span>
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
@@ -151,4 +151,4 @@ const WeightComboBox = ({
     );
 };
 
-export default WeightComboBox;
+export default ConcentrationComboBox;
