@@ -29,7 +29,7 @@ export default function IncomeHeader({ start, end }: IncomeHeaderProps) {
 
   return (
     <div className="flex justify-between items-center mb-6">
-      <h1 className="text-2xl font-bold text-primary-500">
+      <h1 className="text-2xl font-bold text-primary-700">
         Income by Patients
       </h1>
       <DatePicker

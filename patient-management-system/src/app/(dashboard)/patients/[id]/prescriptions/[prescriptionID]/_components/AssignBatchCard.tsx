@@ -22,9 +22,8 @@ import {
     AlertDialogCancel,
     AlertDialogAction
 } from "@/components/ui/alert-dialog";
-import {AlertCircle, Loader2} from "lucide-react";
+import {AlertCircle} from "lucide-react";
 import {handleConfirmationOfBatchStatusChange} from "@/app/lib/actions";
-import Spinner from "@/app/(dashboard)/_components/LoadingSpinner";
 import {Skeleton} from "@/components/ui/skeleton"; // Added for warning icon
 
 interface AssignBatchCardProps {

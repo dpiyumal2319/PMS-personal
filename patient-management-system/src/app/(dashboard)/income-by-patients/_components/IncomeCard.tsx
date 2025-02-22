@@ -1,54 +1,68 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 
 interface IncomeCardProps {
-  date: string;
-  totalIncome: number;
-  patientCount: number;
+    date: Date;
+    totalIncome: number;
+    patientCount: number;
 }
+
+import {CalendarDays, Users, DollarSign} from "lucide-react";
+import {format, isSameDay} from "date-fns";
 
 export default function IncomeCard({
-  date,
-  totalIncome,
-  patientCount,
-}: IncomeCardProps) {
-  const formattedDate = new Date(date).toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+                                       date,
+                                       totalIncome,
+                                       patientCount,
+                                   }: IncomeCardProps) {
+    const formattedDate = format(new Date(date), "eeee, MMMM dd, yyyy");
+    const isToday = isSameDay(new Date(), date);
+    console.log(`date: ${date}, isToday: ${isToday}`);
 
-  const formattedIncome = new Intl.NumberFormat("en-LK", {
-    style: "currency",
-    currency: "LKR",
-  }).format(totalIncome);
+    const formattedIncome = new Intl.NumberFormat("en-LK", {
+        style: "currency",
+        currency: "LKR",
+    }).format(totalIncome);
 
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-lg">{formattedDate}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Total Income:</span>
-            <span className="text-xl font-bold">{formattedIncome}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Patients:</span>
-            <span className="text-lg">{patientCount}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Average per Patient:</span>
-            <span className="text-lg">
-              {new Intl.NumberFormat("en-LK", {
+    const averagePerPatient =
+        patientCount > 0
+            ? new Intl.NumberFormat("en-LK", {
                 style: "currency",
                 currency: "LKR",
-              }).format(totalIncome / patientCount)}
-            </span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+            }).format(totalIncome / patientCount)
+            : "N/A";
+
+    return (
+        <Card className={`border-2 ${isToday ? "border-primary" : "border-transparent"}`}>
+            <CardHeader className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <CalendarDays className="w-5 h-5 text-primary"/>
+                    <CardTitle className="text-md">{formattedDate}</CardTitle>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <div className="flex justify-between items-center border-b pb-2">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <DollarSign className="w-5 h-5 text-green-600"/>
+                        <span>Total Income:</span>
+                    </div>
+                    <span className="text-lg text-primary-700 font-bold">{formattedIncome}</span>
+                </div>
+                <div className="flex justify-between items-center border-b pb-2">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <Users className="w-5 h-5 text-blue-600"/>
+                        <span>Patients:</span>
+                    </div>
+                    <span className="text-md font-semibold">{patientCount}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <DollarSign className="w-5 h-5 text-yellow-600"/>
+                        <span>Avg. per Patient:</span>
+                    </div>
+                    <span className="text-md font-semibold">{averagePerPatient}</span>
+                </div>
+            </CardContent>
+        </Card>
+    );
 }
+

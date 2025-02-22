@@ -46,7 +46,7 @@ export default async function AvailableStockPageTable({
                     <DrugListByBrand brands={filteredDrugsByBrand}/>
                 </div>
                 <div className="mt-auto flex justify-center py-4 sticky bottom-0">
-                    {/* <Pagination totalPages={totalPages} itemsPerPage={9} /> */}
+                    <Pagination totalPages={totalPages} itemsPerPage={9}/>
                 </div>
             </div>
         );
@@ -68,7 +68,7 @@ export default async function AvailableStockPageTable({
                     <DrugListByModel drugs={filteredDrugsByModel}/>
                 </div>
                 <div className="mt-auto flex justify-center py-4 sticky bottom-0">
-                    {/* <Pagination totalPages={totalPages} itemsPerPage={9} /> */}
+                    <Pagination totalPages={totalPages} itemsPerPage={9}/>
                 </div>
             </div>
         );

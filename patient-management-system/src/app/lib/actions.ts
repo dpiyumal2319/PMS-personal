@@ -2359,56 +2359,6 @@ export async function getDrugConcentrations(drugId: number): Promise<DrugConcent
     }
 }
 
-export async function addNewConcentration(weight: number): Promise<DrugConcentrationDataSuggestion> {
-    try {
-        const newWeight = await prisma.unitConcentration.create({
-            data: {
-                concentration: weight
-            },
-        });
-
-        return {id: newWeight.id, concentration: newWeight.concentration};
-    } catch (error) {
-        console.error('Error adding weight:', error);
-        throw new Error('Failed to add weight');
-    }
-}
-
-export async function deleteConcentration(weightId: number): Promise<myError> {
-    try {
-        // First delete all DrugWeight relationships
-        const batches = await prisma.batch.findMany({
-            where: {
-                unitConcentrationId: weightId
-            }
-        })
-
-        if (batches.length > 0) {
-            return {
-                success: false,
-                message: "Cannot delete concentration already in use"
-            };
-        }
-
-        // Then delete the weight itself
-        await prisma.unitConcentration.delete({
-            where: {
-                id: weightId
-            }
-        });
-
-        return {
-            success: true,
-            message: "Weight deleted successfully"
-        };
-    } catch (error) {
-        console.error("Failed to delete weight:", error);
-        return {
-            success: false,
-            message: "Failed to delete weight"
-        };
-    }
-}
 
 // export async function getPriceOfDrugModel({
 //     query,

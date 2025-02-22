@@ -1,6 +1,5 @@
 "use client"
 
-import {ChevronRight, HandCoins} from "lucide-react"
 import {
     Collapsible,
     CollapsibleContent,
@@ -17,7 +16,7 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import {Clock, LayoutDashboard, Package, Shield, Users, UserPen} from "lucide-react"
+import {Clock, LayoutDashboard, Package, Shield, Users, UserPen, ChevronRight, CircleDollarSign} from "lucide-react"
 import {Role} from '@prisma/client';
 import {SidebarItem} from "@/app/lib/definitions";
 import {usePathname} from "next/navigation";
@@ -35,6 +34,13 @@ export const DoctorLinks: SidebarItem[] = [
         title: "Patients",
         url: "/patients",
         icon: Users,
+        isActive: false,
+    },
+    {
+        type: "link",
+        title: "Daily Income",
+        url: "/income-by-patients",
+        icon: CircleDollarSign,
         isActive: false,
     },
     {
@@ -105,61 +111,61 @@ export const DoctorLinks: SidebarItem[] = [
 ];
 
 export const NurseLinks: SidebarItem[] = [
-  {
-    type: "link",
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-    isActive: false,
-  },
-  {
-    type: "link",
-    title: "Patients",
-    url: "/patients",
-    icon: Users,
-    isActive: false,
-  },
-  {
-    type: "link",
-    title: "Queue",
-    url: "/queue",
-    icon: Clock,
-    isActive: false,
-  },
-  {
-    type: "link",
-    title: "Profile",
-    url: "/admin/profile",
-    icon: UserPen,
-    isActive: false,
-  },
-  {
-    type: "link",
-    title: "Income",
-    url: "/income-by-patients",
-    icon: HandCoins,
-    isActive: false,
-  },
-  {
-    type: "expandable",
-    title: "Inventory",
-    icon: Package,
-    initiallyExpanded: true,
-    items: [
-      {
+    {
         type: "link",
-        title: "Available Stocks",
-        url: "/inventory/available-stocks",
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: LayoutDashboard,
         isActive: false,
-      },
-      {
+    },
+    {
         type: "link",
-        title: "Completed Stocks",
-        url: "/inventory/completed-stocks",
+        title: "Patients",
+        url: "/patients",
+        icon: Users,
         isActive: false,
-      },
-    ],
-  },
+    },
+    {
+        type: "link",
+        title: "Queue",
+        url: "/queue",
+        icon: Clock,
+        isActive: false,
+    },
+    {
+        type: "link",
+        title: "Profile",
+        url: "/admin/profile",
+        icon: UserPen,
+        isActive: false,
+    },
+    {
+        type: "link",
+        title: "Daily Income",
+        url: "/income-by-patients",
+        icon: CircleDollarSign,
+        isActive: false,
+    },
+    {
+        type: "expandable",
+        title: "Inventory",
+        icon: Package,
+        initiallyExpanded: true,
+        items: [
+            {
+                type: "link",
+                title: "Available Stocks",
+                url: "/inventory/available-stocks",
+                isActive: false,
+            },
+            {
+                type: "link",
+                title: "Completed Stocks",
+                url: "/inventory/completed-stocks",
+                isActive: false,
+            },
+        ],
+    },
 ];
 
 const AppSidebarLinks = ({role}: { role: Role }) => {
