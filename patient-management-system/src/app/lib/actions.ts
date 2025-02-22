@@ -12,7 +12,7 @@ import {
     StockAnalysis,
     StockData,
     StockQueryParams,
-    DrugWeightDataSuggestion
+    DrugConcentrationDataSuggestion
 } from "@/app/lib/definitions";
 import {prisma} from "./prisma";
 import {verifySession} from "./sessions";
@@ -1259,6 +1259,10 @@ export async function addNewItem({
     formData: InventoryFormData;
 }): Promise<myError> {
     try {
+        if (!formData.drugId || !formData.brandId || !formData.concentrationId) {
+            return {success: false, message: "Please fill all fields"};
+        }
+
         return await prisma.$transaction(async (tx) => {
             // 1. Create or connect drug brand
             const brand = await tx.drugBrand.upsert({
@@ -1280,6 +1284,10 @@ export async function addNewItem({
             });
 
             // 3. Create batch with both drug and brand relationships
+            if (formData.concentrationId === undefined) {
+                return {success: false, message: "Please select a concentration"};
+            }
+
             await tx.batch.create({
                 data: {
                     number: formData.batchNumber,
@@ -1297,25 +1305,12 @@ export async function addNewItem({
                     wholesalePrice: parseFloat(
                         formData.wholesalePrice.toString()
                     ),
+                    unitConcentration: {
+                        connect: {id: formData.concentrationId},
+                    },
                     status: "AVAILABLE",
                 },
             });
-            
-            // 4. Create drug weight relation if weight is selected
-            if (formData.concentrationId) {
-                await tx.drugWeight.upsert({
-                where: {
-                    id: drug.id,
-                },
-                update: {
-                    weightId: formData.concentrationId,
-                },
-                create: {
-                    drugId: drug.id,
-                    weightId: formData.concentrationId,
-                },
-                });
-            }
 
             revalidatePath("/inventory/available-stocks");
             return {success: true, message: "Item added successfully"};
@@ -2327,86 +2322,77 @@ export async function searchDrugModels(query: string) {
     });
 }
 
-export async function getDrugConcentrations(drugId: number): Promise<DrugWeightDataSuggestion[]> {
-  try {
-    const weights = await prisma.drugWeight.findMany({
-      where: {
-        drugId: drugId
-      },
-      include: {
-        weight: true
-      },
-      distinct: ['weightId'] // Ensure unique weightIds
-    });
-    
-    return weights.map(dw => ({
-      id: dw.weightId,
-      weight: dw.weight.weight
-    }));
-  } catch (error) {
-    console.error('Error fetching drug weights:', error);
-    throw new Error('Failed to fetch drug weights');
-  }
+export async function getDrugConcentrations(drugId: number): Promise<DrugConcentrationDataSuggestion[]> {
+    try {
+        const weights = await prisma.batch.findMany({
+            where: {
+                drugId: drugId
+            },
+            include: {
+                unitConcentration: true
+            },
+            distinct: ['unitConcentrationId'] // Ensure unique weightIds
+        });
+
+        return weights.map(dw => ({
+            id: dw.unitConcentration.id,
+            concentration: dw.unitConcentration.concentration
+        }));
+    } catch (error) {
+        console.error('Error fetching drug weights:', error);
+        throw new Error('Failed to fetch drug weights');
+    }
 }
 
-export async function addNewConcentration(weight: number): Promise<{ id: number; weight: number }> {
-  try {
-    const newWeight = await prisma.weights.create({
-      data: {
-        weight: weight,
-      },
-    });
-    
-    return { id: newWeight.id, weight: newWeight.weight };
-  } catch (error) {
-    console.error('Error adding weight:', error);
-    throw new Error('Failed to add weight');
-  }
+export async function addNewConcentration(weight: number): Promise<DrugConcentrationDataSuggestion> {
+    try {
+        const newWeight = await prisma.unitConcentration.create({
+            data: {
+                concentration: weight
+            },
+        });
+
+        return {id: newWeight.id, concentration: newWeight.concentration};
+    } catch (error) {
+        console.error('Error adding weight:', error);
+        throw new Error('Failed to add weight');
+    }
 }
 
-// Add drug weight relationship
-export async function addDrugWeight(drugId: number, weightId: number) {
-  try {
-    await prisma.drugWeight.create({
-      data: {
-        drugId: drugId,
-        weightId: weightId,
-      },
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error adding drug weight:', error);
-    throw new Error('Failed to add drug weight relationship');
-  }
-}
+export async function deleteConcentration(weightId: number): Promise<myError> {
+    try {
+        // First delete all DrugWeight relationships
+        const batches = await prisma.batch.findMany({
+            where: {
+                unitConcentrationId: weightId
+            }
+        })
 
-export async function deleteConcentration(weightId: number) {
-  try {
-    // First delete all DrugWeight relationships
-    await prisma.drugWeight.deleteMany({
-      where: {
-        weightId: weightId
-      }
-    });
+        if (batches.length > 0) {
+            return {
+                success: false,
+                message: "Cannot delete concentration already in use"
+            };
+        }
 
-    // Then delete the weight itself
-    await prisma.weights.delete({
-      where: {
-        id: weightId
-      }
-    });
+        // Then delete the weight itself
+        await prisma.unitConcentration.delete({
+            where: {
+                id: weightId
+            }
+        });
 
-    return {
-      success: true,
-      message: "Weight deleted successfully"
-    };
-  } catch (error) {
-    console.error("Failed to delete weight:", error);
-    return {
-      success: false,
-      message: "Failed to delete weight"
-    };
-  }
+        return {
+            success: true,
+            message: "Weight deleted successfully"
+        };
+    } catch (error) {
+        console.error("Failed to delete weight:", error);
+        return {
+            success: false,
+            message: "Failed to delete weight"
+        };
+    }
 }
 
 // export async function getPriceOfDrugModel({

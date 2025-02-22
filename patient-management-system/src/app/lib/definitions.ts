@@ -210,6 +210,11 @@ export interface DrugModelSuggestion {
     name: string;
 }
 
+export interface DrugConcentrationDataSuggestion {
+    id: number;
+    concentration: number;
+}
+
 export type BillEntry = {
     drugName: string;
     brandName: string;
