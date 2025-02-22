@@ -5,15 +5,12 @@ import {
     Clock,
     Calendar,
     AlertCircle,
-    Utensils,
-    Timer,
-    Repeat,
     Info,
-    X, FileText
+    X, FileText, Moon, Sun, Sunset, Milk, Tally3, Tally4, Tally2, Tally1
 } from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {IssueingStrategy} from "@prisma/client";
-import {MealStrategy, OtherStrategy, PeriodicStrategy, WhenNeededStrategy} from "@/app/lib/definitions";
+import {IssuingStrategy, MEAL} from "@prisma/client";
+import type {DrugType} from "@prisma/client";
 import type {
     IssueInForm,
     OffRecordMeds
@@ -28,121 +25,151 @@ import {
 } from "@/components/ui/alert-dialog";
 import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
 
-export interface StrategyDetails {
-    name: IssueingStrategy;
-    strategy: MealStrategy | WhenNeededStrategy | PeriodicStrategy | OtherStrategy;
-}
 
 export interface StrategyIconProps {
-    strategy: IssueingStrategy;
+    strategy: IssuingStrategy;
 }
 
 export interface StrategyDetailsProps {
-    strategy: IssueingStrategy;
-    details: StrategyDetails;
+    strategy: IssuingStrategy;
+    details: {
+        strategy: string;
+        dose: number;
+        forDays: number | null;
+        forTimes: number | null;
+        meal: MEAL | null;
+    };
 }
 
-export const StrategyIcon: React.FC<StrategyIconProps> = ({strategy}) => {
-    switch (strategy) {
-        case IssueingStrategy.MEAL:
-            return <Utensils className="h-5 w-5 text-green-600"/>;
-        case IssueingStrategy.WHEN_NEEDED:
-            return <AlertCircle className="h-5 w-5 text-amber-600"/>;
-        case IssueingStrategy.PERIODIC:
-            return <Repeat className="h-5 w-5 text-blue-600"/>;
-        case IssueingStrategy.OTHER:
-            return <Info className="h-5 w-5 text-purple-600"/>;
+// Tablet or Syrup
+export const DrugIcon: React.FC<{ drugType: DrugType }> = ({drugType}) => {
+    switch (drugType) {
+        case 'Tablet':
+            return <Pill
+                className="text-green-600"
+                size={20}
+            />;
+        case 'Syrup':
+            return <Milk className="text-blue-600" size={20}/>;
         default:
             return null;
     }
-};
+}
 
-export const StrategyDetails: React.FC<StrategyDetailsProps> = ({strategy, details}) => {
-    switch (strategy) {
-        case IssueingStrategy.MEAL: {
-            const mealStrategy = details.strategy as MealStrategy;
-            return (
-                <div className="space-y-2">
-                    <div className="flex space-x-3">
-                        {mealStrategy.breakfast.active && (
-                            <CustomBadge text={`Morning: ${mealStrategy.breakfast.dose}`}
-                                         color={'fuchsia'}/>
-                        )}
-                        {mealStrategy.lunch.active && (
-                            <CustomBadge text={`Afternoon: ${mealStrategy.lunch.dose}`}
-                                         color={'cyan'}/>
-                        )}
-                        {mealStrategy.dinner.active && (
-                            <CustomBadge text={`Evening: ${mealStrategy.dinner.dose}`}
-                                         color={'pink'}/>
-                        )}
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm text-slate-600">
-                        <Clock className="h-4 w-4"/>
-                        <span>{mealStrategy.minutesBeforeAfterMeal} mins {mealStrategy.afterMeal ? 'after' : 'before'} meal</span>
-                        <Calendar className="h-4 w-4 ml-2"/>
-                        <span>for {mealStrategy.forDays} days</span>
-                    </div>
-                </div>
-            );
-        }
-        case IssueingStrategy.WHEN_NEEDED: {
-            const whenNeededStrategy = details.strategy as WhenNeededStrategy;
-            return (
-                <div className="flex items-center space-x-2 text-sm text-slate-600">
-                    <Pill className="h-4 w-4"/>
-                    <span>{whenNeededStrategy.dose} units</span>
-                    <Timer className="h-4 w-4 ml-2"/>
-                    <span>up to {whenNeededStrategy.times} times</span>
-                </div>
-            );
-        }
-        case IssueingStrategy.PERIODIC: {
-            const periodicStrategy = details.strategy as PeriodicStrategy;
-            return (
-                <div className="flex items-center space-x-2 text-sm text-slate-600">
-                    <Clock className="h-4 w-4"/>
-                    <span>Every {periodicStrategy.interval} hours</span>
-                    <Pill className="h-4 w-4 ml-2"/>
-                    <span>{periodicStrategy.dose} units</span>
-                    <Calendar className="h-4 w-4 ml-2"/>
-                    <span>for {periodicStrategy.forDays} days</span>
-                </div>
-            );
-        }
-        case IssueingStrategy.OTHER: {
-            const otherStrategy = details.strategy as OtherStrategy;
-            return (
-                <div className="flex items-center space-x-2 text-sm text-slate-600">
-                    <Info className="h-4 w-4"/>
-                    <span>{otherStrategy.details}</span>
-                    <Pill className="h-4 w-4 ml-2"/>
-                    <span>{otherStrategy.dose} units × {otherStrategy.times} times</span>
-                </div>
-            );
-        }
-        default:
-            return null;
-    }
-};
 
-export const getStrategyBadgeColor = (strategy: IssueingStrategy) => {
+export const getStrategyBadgeColor = (strategy: IssuingStrategy) => {
     switch (strategy) {
-        case IssueingStrategy.MEAL:
-            return 'green'
-        case IssueingStrategy.WHEN_NEEDED:
-            return 'amber'
-        case IssueingStrategy.PERIODIC:
-            return 'blue'
-        case IssueingStrategy.OTHER:
-            return 'purple'
+        case IssuingStrategy.TDS:
+            return 'green';
+        case IssuingStrategy.BD:
+            return 'amber';
+        case IssuingStrategy.OD:
+            return 'blue';
+        case IssuingStrategy.QDS:
+            return 'yellow';
+        case IssuingStrategy.SOS:
+            return 'red';
+        case IssuingStrategy.NOCTE:
+            return 'indigo';
+        case IssuingStrategy.MANE:
+            return 'orange';
+        case IssuingStrategy.VESPE:
+            return 'pink';
+        case IssuingStrategy.NOON:
+            return 'gray';
+        case IssuingStrategy.WEEKLY:
+            return 'teal';
+        case IssuingStrategy.OTHER:
+            return 'purple';
         default:
             return 'gray';
     }
+};
+
+const strategyIconMap: Record<IssuingStrategy, React.ComponentType<{ className: string, size: number }>> = {
+    [IssuingStrategy.TDS]: Tally3,
+    [IssuingStrategy.BD]: Tally2,
+    [IssuingStrategy.OD]: Tally1,
+    [IssuingStrategy.QDS]: Tally4,
+    [IssuingStrategy.SOS]: AlertCircle,
+    [IssuingStrategy.NOCTE]: Moon,
+    [IssuingStrategy.MANE]: Sun,
+    [IssuingStrategy.VESPE]: Sunset,
+    [IssuingStrategy.NOON]: Clock,
+    [IssuingStrategy.WEEKLY]: Calendar,
+    [IssuingStrategy.OTHER]: Info,
+};
+
+export const StrategyIcon: React.FC<StrategyIconProps> = ({strategy}) => {
+    const IconComponent = strategyIconMap[strategy];
+    if (!IconComponent) return null;
+
+    return <IconComponent className={`text-${getStrategyBadgeColor(strategy)}-600`} size={18}/>;
+};
+
+function formatMeal(meal: MEAL | null) {
+    switch (meal) {
+        case MEAL.BEFORE:
+            return <span className="font-semibold text-red-600">before meal</span>;
+        case MEAL.AFTER:
+            return <span className="font-semibold text-green-600">after meal</span>;
+        case MEAL.WITH:
+            return <span className="font-semibold text-blue-600">with meal</span>;
+        default:
+            return null;
+    }
 }
 
+export const StrategyDetails: React.FC<StrategyDetailsProps> = ({ strategy, details }) => {
+    return (
+        <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+                <StrategyIcon strategy={strategy} /> {/* Adding the StrategyIcon here */}
+                {(() => {
+                    const highlightedDose = <span className="font-bold text-green-700">{details.dose} units</span>;
 
-interface PrescriptionIssuesListProps {
+                    switch (strategy) {
+                        case IssuingStrategy.TDS:
+                        case IssuingStrategy.BD:
+                        case IssuingStrategy.OD:
+                        case IssuingStrategy.QDS:
+                        case IssuingStrategy.NOCTE:
+                        case IssuingStrategy.MANE:
+                        case IssuingStrategy.VESPE:
+                        case IssuingStrategy.NOON:
+                            return (
+                                <span>
+                                    {details.strategy} - {highlightedDose} for {details.forDays} days {formatMeal(details.meal)}
+                                </span>
+                            );
+                        case IssuingStrategy.SOS:
+                            return (
+                                <span>
+                                    {details.strategy} - {highlightedDose} as needed for {details.forTimes} times {formatMeal(details.meal)}
+                                </span>
+                            );
+                        case IssuingStrategy.WEEKLY:
+                            return (
+                                <span>
+                                    Weekly: {highlightedDose} × {details.forTimes} times {formatMeal(details.meal)}
+                                </span>
+                            );
+                        case IssuingStrategy.OTHER:
+                            return (
+                                <span>
+                                    {details.strategy} - {highlightedDose} × {details.forTimes} days {formatMeal(details.meal)}
+                                </span>
+                            );
+                        default:
+                            return null;
+                    }
+                })()}
+            </div>
+        </div>
+    );
+};
+
+export interface PrescriptionIssuesListProps {
     issues: IssueInForm[];
     onRemove: (index: number) => void;
 }
@@ -155,24 +182,23 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
                     <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
                             <div className="mt-1">
-                                <StrategyIcon strategy={issue.strategy}/>
+                                <DrugIcon drugType={issue.drugType}/>
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center space-x-2">
-                                    <h3 className="font-medium">{issue.drugName}</h3>
+                                    <h3 className="font-medium">{issue.drugName} - {issue.concentration} mg/unit - </h3>
                                     <CustomBadge
-                                        text={issue.strategy}
-                                        color={getStrategyBadgeColor(issue.strategy)}
-                                    />
+                                        text={issue.strategy} color={getStrategyBadgeColor(issue.strategy)}/>
                                 </div>
                                 <div>
                                     <span className="text-sm text-slate-500">{issue.details}</span>
                                 </div>
 
                                 <div className="text-sm text-slate-500">
-                                    Drug: {issue.drugName} • Brand: {issue.brandName}  • Quantity: {issue.quantity}
+                                    Drug: {issue.drugName} • Concentration: {issue.concentration} mg/unit •
+                                    Brand: {issue.brandName} • Quantity: {issue.quantity}
                                 </div>
-                                <StrategyDetails strategy={issue.strategy} details={issue.strategyDetails}/>
+                                <StrategyDetails strategy={issue.strategy} details={issue}/>
                             </div>
                         </div>
                         <AlertDialog>
@@ -189,9 +215,9 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Remove Medicine {index + 1}?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Are you sure you want to remove {issue.drugName} ({issue.brandName}) from the
-                                        list?
-                                        This action cannot be undone.
+                                        Are you sure you want to remove {issue.drugName} ({issue.brandName}) from
+                                        the
+                                        list? This action cannot be undone.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -258,7 +284,8 @@ const OffRecordMedsList: React.FC<OffRecordMedsListProps> = ({meds, onRemove}) =
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => onRemove(index)} className={'bg-red-600 text-white hover:bg-red-700'}>
+                                    <AlertDialogAction onClick={() => onRemove(index)}
+                                                       className={'bg-red-600 text-white hover:bg-red-700'}>
                                         Remove
                                     </AlertDialogAction>
                                 </AlertDialogFooter>

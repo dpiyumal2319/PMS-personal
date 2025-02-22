@@ -39,7 +39,7 @@ export default function AllPatientsTable({ id }: { id: number }) {
     }, [id]); // Only recreates if `id` changes
 
     useEffect(() => {
-        fetchData(); // Fetch initial data
+        fetchData().then(() => {}); // Fetch initial data
 
         const interval = setInterval(fetchData, 45000); // Refetch every 45 seconds
         return () => clearInterval(interval); // Cleanup interval on unmount

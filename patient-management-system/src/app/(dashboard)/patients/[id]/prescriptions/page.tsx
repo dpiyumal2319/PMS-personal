@@ -1,5 +1,5 @@
 import React, {Suspense} from 'react';
-import {getPrescriptionsCount, searchPrescriptionCount} from "@/app/lib/actions";
+import {getPrescriptionsCount, searchPrescriptionCount} from "@/app/lib/actions/prescriptions";
 import Search from "@/app/(dashboard)/_components/Search";
 import SearchDropdown from "@/app/(dashboard)/_components/Dropdown";
 import PrescriptionList from "@/app/(dashboard)/patients/[id]/prescriptions/_components/PrescriptionList";

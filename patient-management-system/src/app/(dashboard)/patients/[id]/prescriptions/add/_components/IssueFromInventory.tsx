@@ -2,148 +2,146 @@
 
 import React, {useState} from 'react';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import {Card} from "@/components/ui/card";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {useDebouncedCallback} from "use-debounce";
-import {getCachedStrategy, searchAvailableDrugs, searchBrandByDrug} from "@/app/lib/actions";
+import {
+    getCachedStrategy,
+    searchAvailableDrugs,
+    getConcentrationByDrug,
+    getBrandByDrugConcentrationType, getDrugTypesByDrug
+} from "@/app/lib/actions/prescriptions";
 import DrugCombobox from "./DrugCombobox";
 import BrandCombobox from "./BrandCombobox";
 import MedicationStrategyTabs from "./MedicationStratergyTabs";
 import {Button} from "@/components/ui/button";
-import type {
-    MealStrategy,
-    StrategyJson,
-    WhenNeededStrategy,
-    PeriodicStrategy,
-    OtherStrategy
-} from "@/app/lib/definitions";
-import {StrategyJsonSchema} from "@/app/lib/definitions";
-import {IssueingStrategy} from "@prisma/client";
+import {IssuingStrategy, MEAL} from "@prisma/client";
+import type {DrugType} from "@prisma/client";
 import type {IssueInForm} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
-import {calculateQuantity} from "@/app/lib/utils";
-import {Plus} from "lucide-react";
+import {calculateForDays, calculateQuantity, calculateTimes} from "@/app/lib/utils";
+import {CircleAlert, ClipboardCheck, Plus, TriangleAlert, Utensils} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";
 import {differenceInDays} from "date-fns";
+import ConcentrationComboBox from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/ConcentrationComboBox";
+import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {Switch} from "@/components/ui/switch";
+import DrugTypeComboBox from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/DrugTypeCombobox";
+import {toast} from "react-toastify";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
 }
 
-export type drug = {
+export type DrugOption = {
     id: number;
     name: string;
+    concentrationCount: number;
+}
+
+export type CustomDrugType = {
+    name: string,
+    type: DrugType
+}
+
+export interface ConcentrationOption {
+    id: number;
+    concentration: string;
     brandCount: number;
+    totalRemainingQuantity: number;
+    farthestExpiry: Date;
 }
 
 export interface BrandOption {
-    id: string | number;
+    id: number;
     name: string;
     batchCount: number;
     totalRemainingQuantity: number;
     farthestExpiry: Date;
 }
 
+type CachedStrategy = Awaited<ReturnType<typeof getCachedStrategy>>
+
 const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const [open, setOpen] = useState(false);
     const [isDrugSearching, setIsDrugSearching] = useState(false);
     const [isBrandSearching, setIsBrandSearching] = useState(false);
-    const [drugs, setDrugs] = useState<drug[]>([]);
-    const [selectedDrug, setSelectedDrug] = useState<number | null>(null);
-    const [selectedDrugName, setSelectedDrugName] = useState<string | null>(null);
+    const [isConcentrationSearching, setIsConcentrationSearching] = useState(false);
+    const [isTypeSearching, setIsTypeSearching] = useState(false);
+    const [cacheFetching, setCacheFetching] = useState(false);
+
+    const [drugs, setDrugs] = useState<DrugOption[]>([]);
+    const [selectedDrug, setSelectedDrug] = useState<DrugOption | null>(null);
+
+    const [types, setTypes] = useState<CustomDrugType[]>([]);
+    const [selectedType, setSelectedType] = useState<CustomDrugType | null>(null);
+
+    const [concentrations, setConcentrations] = useState<ConcentrationOption[]>([]);
+    const [selectedConcentration, setSelectedConcentration] = useState<ConcentrationOption | null>(null);
+
     const [brands, setBrands] = useState<BrandOption[]>([]);
-    const [details, setDetails] = useState<string | null>(null);
-    const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
-    const [selectedBrandName, setSelectedBrandName] = useState<string | null>(null);
-    const [strategy, setStrategy] = useState<IssueingStrategy | null>(null);
+    const [selectedBrand, setSelectedBrand] = useState<BrandOption | null>(null);
+
+    const [details, setDetails] = useState<string>("");
+
+    const [strategy, setStrategy] = useState<IssuingStrategy | null>(null);
+
     const [error, setError] = useState<string | null>(null);
     const [warning, setWarning] = useState<string | null>(null);
 
-    const [mealStrategy, setMealStrategy] = useState<MealStrategy>({
-        dinner: {
-            active: true,
-            dose: 0
-        },
-        breakfast: {
-            active: true,
-            dose: 0
-        },
-        lunch: {
-            active: true,
-            dose: 0
-        },
-        forDays: 0,
-        afterMeal: true,
-        minutesBeforeAfterMeal: 0
-    });
+    const [dose, setDose] = useState<number | null>(null);
+    const [times, setTimes] = useState<number | null>(null);
+    const [forDays, setForDays] = useState<number | null>(null);
+    const [mealTiming, setMealTiming] = useState<MEAL | null>(null);
 
-    const [whenNeededStrategy, setWhenNeededStrategy] = useState<WhenNeededStrategy>({
-        dose: 0,
-        times: 0
-    });
 
-    const [periodicStrategy, setPeriodicStrategy] = useState<PeriodicStrategy>({
-        interval: 0,
-        dose: 0,
-        forDays: 0
-    });
+    const handleDoseChange = (value: string) => {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+            setDose(numValue);
+        }
+    };
 
-    const [otherStrategy, setOtherStrategy] = useState<OtherStrategy>({
-        details: "",
-        dose: 0,
-        times: 0
-    });
+    const handleForDaysChange = (value: string) => {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+            setForDays(numValue);
+        }
+    };
 
-    const resetStrategies = () => {
-        setMealStrategy({
-            dinner: {
-                active: true,
-                dose: 0
-            },
-            breakfast: {
-                active: true,
-                dose: 0
-            },
-            lunch: {
-                active: true,
-                dose: 0
-            },
-            forDays: 0,
-            afterMeal: true,
-            minutesBeforeAfterMeal: 0
-        });
-        setWhenNeededStrategy({
-            dose: 0,
-            times: 0
-        });
-        setPeriodicStrategy({
-            interval: 0,
-            dose: 0,
-            forDays: 0
-        });
-        setOtherStrategy({
-            details: "",
-            dose: 0,
-            times: 0
-        });
+    const handleTimesChange = (value: string) => {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+            setTimes(numValue);
+        }
+    };
+
+    const resetStrategy = () => {
         setStrategy(null);
+        setDose(null);
+        setForDays(null);
+        setMealTiming(null);
+        setDetails("");
+        setTimes(null);
     }
-
 
     const resetForm = () => {
         setSelectedDrug(null);
-        setSelectedDrugName(null);
+        setSelectedConcentration(null);
         setSelectedBrand(null);
-        setDetails("");
-        setSelectedBrandName(null);
+        setSelectedType(null);
+        setTypes([]);
+        setConcentrations([]);
+        setBrands([]);
+        resetStrategy();
         setError(null);
-        setStrategy(null);
+        setWarning(null);
     };
 
-    const showWarnings = (brand: BrandOption) => {
-        const expiry = brand.farthestExpiry;
-        const remainingQuantity = brand.totalRemainingQuantity;
-        const currentDate = new Date();
-        const expiryDate = new Date(expiry);
-        const daysUntilExpiry = differenceInDays(expiryDate, currentDate);
+    const showWarnings = (item: ConcentrationOption | BrandOption) => {
+        const expiry = item.farthestExpiry;
+        const remainingQuantity = item.totalRemainingQuantity;
+        const daysUntilExpiry = differenceInDays(new Date(expiry), new Date());
 
         if (daysUntilExpiry < 120 && remainingQuantity < 150) {
             setWarning(`Warning: Expiry in ${daysUntilExpiry} days (${expiry}) and stock is ${remainingQuantity} units`);
@@ -156,216 +154,549 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         }
     };
 
-
     const handleDrugSearch = useDebouncedCallback(async (term: string) => {
         setIsDrugSearching(true);
         try {
             const drugs = await searchAvailableDrugs(term);
             setDrugs(drugs);
+        } catch (error) {
+            setError("Error searching drugs");
+            console.error(error);
         } finally {
             setIsDrugSearching(false);
         }
     }, 700);
 
-    const handleDrugSelect = async (selectedID: number) => {
-        if (selectedID !== selectedDrug) {
-            setSelectedDrug(selectedID);
-            setSelectedDrugName(drugs.find(drug => drug.id === selectedID)?.name || null);
+    const handleDrugSelect = async (selected: DrugOption) => {
+        if (!selected || selectedDrug?.id === selected.id) return;
+
+        setError(null);
+        setWarning(null);
+
+        // Reset selections related to drug change
+        setSelectedConcentration(null);
+        setSelectedType(null);
+        setSelectedBrand(null);
+        resetStrategy();
+
+        const id = toast.loading("Fetching drug data...", {position: "bottom-right", pauseOnFocusLoss: false});
+
+        try {
+            // Set initial states
+            setSelectedDrug(selected);
             setIsBrandSearching(true);
-            try {
-                const brands = await searchBrandByDrug({drugID: selectedID});
-                setBrands(brands);
-                const cachedBrand = await getCachedStrategy(selectedID);
-                const availableBrandIDs = brands.map(brand => brand.id);
-                if (cachedBrand && cachedBrand.brandId && availableBrandIDs.includes(cachedBrand.brandId)) {
-                    setSelectedBrand(cachedBrand.brandId);
-                    setSelectedBrandName(cachedBrand.brand.name);
-                    setStrategy(cachedBrand.issue.strategy);
-                    setDetails(cachedBrand.issue.details);
-                    const selectedBrand = brands.find(brand => brand.id === cachedBrand.brandId);
-                    if (selectedBrand) {
-                        showWarnings(selectedBrand);
-                    }
-                    const parsedData = StrategyJsonSchema.parse(cachedBrand.issue.strategyDetails);
-                    switch (cachedBrand.issue.strategy) {
-                        case IssueingStrategy.MEAL:
-                            setMealStrategy(parsedData.strategy as MealStrategy);
-                            setStrategy(IssueingStrategy.MEAL);
-                            break;
-                        case IssueingStrategy.WHEN_NEEDED:
-                            setWhenNeededStrategy(parsedData.strategy as WhenNeededStrategy);
-                            setStrategy(IssueingStrategy.WHEN_NEEDED);
-                            break;
-                        case IssueingStrategy.PERIODIC:
-                            setPeriodicStrategy(parsedData.strategy as PeriodicStrategy);
-                            setStrategy(IssueingStrategy.PERIODIC);
-                            break;
-                        case IssueingStrategy.OTHER:
-                            setOtherStrategy(parsedData.strategy as OtherStrategy);
-                            setStrategy(IssueingStrategy.OTHER);
-                            break;
-                    }
-                } else {
-                    resetStrategies();
-                }
-            } catch (e) {
-                console.error(e);
-                setError("Error fetching brands");
-            } finally {
-                setIsBrandSearching(false);
+            setIsConcentrationSearching(true);
+            setIsTypeSearching(true);
+            setCacheFetching(true);
+
+            toast.update(id, {render: "Fetching cached strategy and types...", isLoading: true});
+
+            // Fetch cached strategy & types
+            const [cachedStrategy, types] = await Promise.all([
+                getCachedStrategy(selected.id),
+                getDrugTypesByDrug(selected.id),
+            ]);
+
+            if (!types.length) {
+                setError("No types found for this drug");
+                toast.update(id, {
+                    render: "No types found for this drug",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                return;
             }
+
+            setTypes(types);
+
+            toast.update(id, {render: "Validating cached strategy & type...", isLoading: true});
+
+            // Validate cached strategy & type
+            const selectedDrugType = types.find(type => cachedStrategy?.issue.type === type.name) || null;
+            setSelectedType(selectedDrugType);
+
+            if (!selectedDrugType) {
+                toast.update(id, {
+                    render: "No valid type found. Please select manually.",
+                    type: "warning",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                return;
+            }
+
+            toast.update(id, {render: "Fetching concentrations...", isLoading: true});
+
+            // Fetch concentrations
+            const concentrations = await getConcentrationByDrug({
+                drugID: selected.id,
+                type: selectedDrugType.type,
+            });
+
+            setConcentrations(concentrations);
+
+            const cachedConcentration = concentrations.find(c => c.id === cachedStrategy?.issue.unitConcentrationId) || null;
+
+            if (!cachedConcentration) {
+                console.warn("Cached concentration is invalid");
+                toast.update(id, {
+                    render: "Cached concentration invalid. Please select manually.",
+                    type: "warning",
+                    isLoading: false,
+                    autoClose: 3000
+                });
+                return;
+            }
+
+            setSelectedConcentration(cachedConcentration);
+            showWarnings(cachedConcentration);
+
+            toast.update(id, {render: "Fetching brands...", isLoading: true});
+
+            // Fetch brands
+            const drugBrands = await getBrandByDrugConcentrationType({
+                drugID: selected.id,
+                concentrationID: cachedConcentration.id,
+                type: selectedDrugType.type,
+            });
+
+            setBrands(drugBrands);
+
+            toast.update(id, {render: "Applying cached brand and strategy...", isLoading: true});
+
+            await handleCachedBrandStrategy(drugBrands, cachedStrategy);
+
+            toast.update(id, {render: "Drug selection complete!", type: "success", isLoading: false, autoClose: 1000});
+        } catch (error) {
+            console.error("Error in handleDrugSelect:", error);
+            setError("Error fetching drug data");
+            toast.update(id, {render: "Error fetching drug data", type: "error", isLoading: false, autoClose: 3000});
+        } finally {
+            setIsBrandSearching(false);
+            setIsConcentrationSearching(false);
+            setIsTypeSearching(false);
+            setCacheFetching(false);
         }
     };
 
-    const handleBrandSelect = (selectedID: number) => {
-        setSelectedBrand(selectedID);
-        const selectedBrand = brands.find(brand => brand.id === selectedID);
-        setSelectedBrandName(selectedBrand?.name || null);
-        if (selectedBrand) {
-            showWarnings(selectedBrand);
-        }
-    };
 
-    const handleAddIssue = async () => {
-        if (!selectedDrug || !selectedBrand || !strategy || !selectedDrugName || !selectedBrandName) {
-            const missingFields = [];
-            if (!selectedDrug) missingFields.push("Drug");
-            if (!selectedBrand) missingFields.push("Brand");
-            if (!strategy) missingFields.push("Strategy");
-            setError(`Please fill all the fields, missing: ${missingFields.join(", ")}`);
+    // Helper function to handle cached brand strategy
+    const handleCachedBrandStrategy = async (
+        drugBrands: BrandOption[],
+        cachedStrategy: CachedStrategy
+    ) => {
+        if (!cachedStrategy) return;
+
+        const availableBrandIDs = drugBrands.map(brand => brand.id);
+        if (!availableBrandIDs.includes(cachedStrategy.issue.brandId)) {
+            // Reset strategy-related states if cached brand is not available
+            console.warn("Cached brand is not available");
+            setStrategy(null);
+            setDose(null);
+            setForDays(null);
+            setMealTiming(null);
+            setDetails("");
+            setTimes(null);
+            setSelectedBrand(null);
             return;
         }
 
-        let newStrategy: StrategyJson;
+        const {issue} = cachedStrategy;
+        const selectedBrand_local = drugBrands.find(b => b.id === issue.brandId) || null;
 
-        switch (strategy) {
-            case IssueingStrategy.MEAL:
-                newStrategy = {
-                    name: IssueingStrategy.MEAL,
-                    strategy: mealStrategy
-                }
-                break;
-            case IssueingStrategy.WHEN_NEEDED:
-                newStrategy = {
-                    name: IssueingStrategy.WHEN_NEEDED,
-                    strategy: whenNeededStrategy
-                }
-                break;
-            case IssueingStrategy.PERIODIC:
-                newStrategy = {
-                    name: IssueingStrategy.PERIODIC,
-                    strategy: periodicStrategy
-                }
-                break;
-            case IssueingStrategy.OTHER:
-                newStrategy = {
-                    name: IssueingStrategy.OTHER,
-                    strategy: otherStrategy
-                }
-                break;
-            default:
-                throw new Error("Invalid strategy");
+        // Set brand information
+        setSelectedBrand(selectedBrand_local);
+        // Set issue details
+        setStrategy(issue.strategy);
+        setDose(issue.dose);
+        setMealTiming(issue.meal);
+        setDetails(issue.details || "");
+
+        // Handle OTHER strategy specific logic
+        if (issue.strategy === IssuingStrategy.OTHER || issue.strategy === IssuingStrategy.SOS) {
+            const {quantity, dose} = issue;
+            setTimes(calculateTimes({strategy: issue.strategy, dose: dose, quantity: quantity}));
+        } else {
+            setForDays(calculateForDays({strategy: issue.strategy, dose: issue.dose, quantity: issue.quantity}));
         }
 
-        const parsedData = StrategyJsonSchema.parse(newStrategy);
-        const quantity = calculateQuantity(parsedData);
-        const newIssue: IssueInForm = {
-            drugId: selectedDrug,
-            drugName: selectedDrugName,
-            details: details,
-            brandId: selectedBrand,
-            brandName: selectedBrandName,
-            strategy: strategy,
-            strategyDetails: parsedData,
-            quantity: quantity
-        };
-
-        onAddIssue(newIssue);
-        setOpen(false);
-        resetForm();
+        // Show warnings if applicable
+        if (selectedBrand_local) {
+            showWarnings(selectedBrand_local);
+        }
     };
 
-    const handleClose = () => {
-        setOpen(false);
-        resetForm();
-    }
+    const handleTypeSelect = async (type: CustomDrugType) => {
+        if (selectedType === type || !selectedDrug || !type) return;
+        setError(null);
+        setWarning(null);
+
+        setSelectedConcentration(null);
+        setSelectedBrand(null);
+        resetStrategy();
+        try {
+            setSelectedType(type);
+            setIsBrandSearching(true);
+            setIsConcentrationSearching(true);
+
+            // Reset previous selections
+            setSelectedConcentration(null);
+            setSelectedBrand(null);
+            setBrands([]);
+            setConcentrations([]);
+
+            // For tablets, first fetch concentrations
+            const concentrations = await getConcentrationByDrug({
+                drugID: selectedDrug.id,
+                type: type.type,
+            });
+
+            setConcentrations(concentrations);
+            setIsConcentrationSearching(false);
+        } catch (error) {
+            console.error('Error in handleTypeSelect:', error);
+            setError(error instanceof Error ? error.message : "Error fetching drug data");
+
+            // Reset states on error
+            setBrands([]);
+            setConcentrations([]);
+            setSelectedConcentration(null);
+            setSelectedBrand(null);
+        } finally {
+            setIsBrandSearching(false);
+            setIsConcentrationSearching(false);
+        }
+    };
+
+    const handleConcentrationSelect = async (selected: ConcentrationOption) => {
+        if (selectedConcentration === selected) return;
+        setError(null);
+        setWarning(null);
+        setSelectedBrand(null);
+        resetStrategy();
+
+        setSelectedConcentration(selected);
+        if (!selectedDrug || !selectedType || !selected) return;
+        showWarnings(selected);
+        try {
+            setIsBrandSearching(true);
+            const drugBrands = await getBrandByDrugConcentrationType({
+                drugID: selectedDrug.id,
+                concentrationID: selected.id,
+                type: selectedType.type,
+            });
+            setBrands(drugBrands);
+        } catch (error) {
+            console.error(error);
+            setError("Error fetching brands");
+        } finally {
+            setIsBrandSearching(false);
+        }
+
+    };
+
+    const handleBrandSelect = (selected: BrandOption) => {
+        if (selectedBrand === selected) return;
+        setError(null);
+        setWarning(null);
+        resetStrategy();
+        setSelectedBrand(selected);
+        if (!selected || !selectedConcentration || !selectedDrug || !selectedType) return;
+        showWarnings(selected);
+    };
+
+    const handleAddIssue = () => {
+        try {
+            if (!selectedDrug || !selectedConcentration || !selectedBrand || !strategy || !dose || !selectedType) {
+                const missingFields = [
+                    !selectedDrug && "Drug",
+                    !selectedConcentration && "Concentration",
+                    !selectedBrand && "Brand",
+                    !strategy && "Strategy",
+                    !dose && "Dose",
+                ].filter(Boolean);
+
+                setError(`Missing fields: ${missingFields.join(", ")}`);
+                return;
+            }
+
+            if (strategy === IssuingStrategy.OTHER || strategy === IssuingStrategy.SOS || strategy === IssuingStrategy.WEEKLY) {
+                if (!times) {
+                    setError("Missing fields: Times");
+                    return;
+                }
+            } else {
+                if (!forDays) {
+                    setError("Missing fields: For Days");
+                    return;
+                }
+            }
+
+            const calculatedQuantity = calculateQuantity({
+                dose: dose || 0,
+                strategy,
+                forDays: forDays || 0,
+                times: times || 0
+            });
+
+            const newIssue: IssueInForm = {
+                strategy,
+                dose,
+                meal: mealTiming,
+                forDays,
+                forTimes: times,
+                details,
+                brandId: selectedBrand.id,
+                brandName: selectedBrand.name,
+                quantity: calculatedQuantity,
+                drugName: selectedDrug.name,
+                drugId: selectedDrug.id,
+                concentration: selectedConcentration.concentration,
+                drugType: selectedType.type,
+                concentrationID: selectedConcentration.id,
+            };
+
+            onAddIssue(newIssue);
+            setOpen(false);
+            resetForm();
+        } catch (error) {
+            console.error("Error in handleAddIssue:", error);
+            setError("Error adding issue");
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Card
-                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 group"
-                >
+                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 group">
                     <div className="flex items-center space-x-2 text-slate-500 group-hover:text-slate-800">
                         <Plus className="h-5 w-5 transition-transform duration-200 group-hover:scale-110"/>
                         <span className="font-medium">Issue from Inventory</span>
                     </div>
                 </Card>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl overflow-y-scroll max-h-screen">
+            <DialogContent className="max-w-5xl overflow-y-auto max-h-screen overflow-x-visible">
                 <DialogHeader>
                     <DialogTitle>Add Issue</DialogTitle>
                 </DialogHeader>
-                <div className="flex flex-col space-y-4">
+                <div className="flex flex-col space-y-2">
                     <div className="flex items-center space-x-4">
                         <DrugCombobox
                             options={drugs}
-                            onChange={(selectedID) => handleDrugSelect(Number(selectedID))}
+                            onChange={(drug) => handleDrugSelect(drug)}
                             onSearch={handleDrugSearch}
                             isSearching={isDrugSearching}
                             value={selectedDrug}
                             placeholder="Select drug"
                             searchPlaceholder="Search drug"
                             noOptionsMessage="No drugs found"
+                            disabled={cacheFetching}
                         />
+                        <div className={'flex gap-4'}>
+                            <DrugTypeComboBox
+                                options={types}
+                                onChange={(type) => handleTypeSelect(type)}
+                                value={selectedType}
+                                placeholder={'Select a type'}
+                                noOptionsMessage={'No types'}
+                                disabled={!selectedDrug || cacheFetching}
+                                isSearching={isTypeSearching}
+                            />
+                            <ConcentrationComboBox
+                                options={concentrations}
+                                onChange={(concentration) => handleConcentrationSelect(concentration)}
+                                isSearching={isConcentrationSearching}
+                                value={selectedConcentration}
+                                placeholder="Select concentration"
+                                noOptionsMessage="No concentrations found"
+                                searchPlaceholder="Search concentrations"
+                                disabled={!selectedType || cacheFetching}
+                            />
+                        </div>
                         <BrandCombobox
                             options={brands}
-                            onChange={(selectedID) => handleBrandSelect(Number(selectedID))}
-                            onSearch={() => {
-                            }}
+                            onChange={(id) => handleBrandSelect(id)}
                             isSearching={isBrandSearching}
                             value={selectedBrand}
                             placeholder="Select brand"
                             searchPlaceholder="Search brand"
                             noOptionsMessage="No brands found"
-                            disabled={!selectedDrug}
+                            disabled={!selectedType || cacheFetching}
                         />
                     </div>
 
-                    {/*Clear Button and error*/}
-                    <div className={'flex justify-between'}>
-                        <span className="text-red-500 text-sm">{warning}</span>
-                        <span className="text-red-500 text-sm">{error}</span>
-                        <span onClick={resetForm} className="text-red-500 cursor-pointer text-sm hover:underline">
-                            X Clear
-                        </span>
+                    <div className={'flex flex-col gap-2 animate-fade-in'}>
+                        {warning && (
+                            <span
+                                className="text-yellow-500 text-sm flex items-center"
+                                aria-live="polite"
+                                role="status"
+                            >
+                                <TriangleAlert className="mr-1" aria-hidden="true" size={18}/>
+                                {warning}
+                            </span>
+                        )}
+                        {error && (
+                            <span
+                                className="text-red-500 text-sm flex items-center mt-2"
+                                role="alert"
+                            >
+                                <CircleAlert className="mr-1" aria-hidden="true" size={18}/>
+                                {error}
+                            </span>
+                        )}
                     </div>
+
 
                     <MedicationStrategyTabs
-                        mealStrategy={{mealStrategy, setMealStrategy}}
-                        whenNeededStrategy={{whenNeededStrategy, setWhenNeededStrategy}}
-                        periodicStrategy={{periodicStrategy, setPeriodicStrategy}}
-                        otherStrategy={{otherStrategy, setOtherStrategy}}
-                        selectedStrategy={{selectedStrategy: strategy, setSelectedStrategy: setStrategy}}
+                        selectedStrategy={{
+                            selectedStrategy: strategy,
+                            setSelectedStrategy: setStrategy
+                        }}
+                        disabled={!selectedDrug || !selectedConcentration || !selectedBrand || !selectedType || cacheFetching}
                     />
 
-
-                    {/*Text Area*/}
-                    <div className="flex items-start justify-start">
-                        <Textarea
-                            placeholder="Additional Details"
-                            value={details || ""}
-                            onChange={(e) => setDetails(e.target.value)}
-                        />
+                    <div className="flex justify-end">
+                        <button
+                            onClick={resetStrategy}
+                            className="text-red-400 cursor-pointer text-sm hover:underline focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
+                            aria-label="Clear strategy"
+                        >
+                            Clear Strategy
+                        </button>
                     </div>
+
+                    {/* Dosage & Duration Card */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Dosage & Duration Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center space-x-2">
+                                    <ClipboardCheck className="h-6 w-6 text-blue-500"/>
+                                    <span>Dosage & Duration</span>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex flex-col gap-4 animate-fade-in" key={strategy}>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="dose">Dosage</Label>
+                                        <Input
+                                            id="dose"
+                                            type="number"
+                                            min="0"
+                                            step="0.5"
+                                            value={dose || ""}
+                                            onChange={(e) => handleDoseChange(e.target.value)}
+                                            placeholder="Enter dosage"
+                                            disabled={!strategy || cacheFetching}
+                                        />
+                                    </div>
+
+                                    <div
+                                        className="space-y-2"
+                                    >
+                                        {strategy && strategy !== IssuingStrategy.SOS && strategy !== IssuingStrategy.OTHER && strategy !== IssuingStrategy.WEEKLY ? (
+                                            <>
+                                                <Label htmlFor="forDays">For Days</Label>
+                                                <Input
+                                                    id="forDays"
+                                                    type="number"
+                                                    min="0"
+                                                    value={forDays || ""}
+                                                    onChange={(e) => handleForDaysChange(e.target.value)}
+                                                    placeholder="Enter number of days"
+                                                    disabled={!strategy || cacheFetching}
+                                                />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Label htmlFor="times">For Times</Label>
+                                                <Input
+                                                    id="times"
+                                                    type="number"
+                                                    min="0"
+                                                    value={times || ""}
+                                                    onChange={(e) => handleTimesChange(e.target.value)}
+                                                    placeholder="Enter number of times"
+                                                    disabled={!strategy || cacheFetching}
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+
+                        {/* Meal Timing Card */}
+                        <Card className={'flex flex-col'}>
+                            <CardHeader>
+                                <CardTitle className="flex justify-between items-center">
+                                    <div className="flex items-center space-x-2">
+                                        <Utensils className="h-6 w-6 text-green-500"/>
+                                        <span>Meal Timing</span>
+                                    </div>
+                                    <Switch
+                                        checked={mealTiming !== null}
+                                        onCheckedChange={(checked) => setMealTiming(checked ? MEAL.BEFORE : null)}
+                                        disabled={!strategy || cacheFetching}
+                                    />
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex items-center justify-center h-full">
+                                {mealTiming !== null ? (
+                                    <RadioGroup
+                                        value={mealTiming || ""}
+                                        onValueChange={(value) => setMealTiming(value as MEAL)}
+                                        className="space-y-3 w-full animate-fade-in"
+                                        disabled={!strategy || cacheFetching}
+                                    >
+                                        {[
+                                            {value: MEAL.BEFORE, label: "Before Meal"},
+                                            {value: MEAL.WITH, label: "With Meal"},
+                                            {value: MEAL.AFTER, label: "After Meal"},
+                                        ].map(({value, label}) => (
+                                            <div
+                                                key={value}
+                                                className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-100 transition"
+                                            >
+                                                <RadioGroupItem value={value} id={value}/>
+                                                <Label htmlFor={value} className="cursor-pointer">{label}</Label>
+                                            </div>
+                                        ))}
+                                    </RadioGroup>
+                                ) : (
+                                    <p className="text-gray-500 text-sm animate-fade-in">Enable meal timing to
+                                        choose an
+                                        option</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+
+
+                    <Textarea
+                        placeholder="Additional Details"
+                        value={details}
+                        onChange={(e) => setDetails(e.target.value)}
+                        disabled={cacheFetching || !strategy}
+                    />
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={handleClose}>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            setOpen(false);
+                            resetForm();
+                        }}
+                    >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleAddIssue}
-                        disabled={!selectedDrug || !selectedBrand || !strategy}
+                        disabled={!selectedDrug || !selectedConcentration || !selectedBrand || !strategy || !dose}
                     >
                         Add
                     </Button>

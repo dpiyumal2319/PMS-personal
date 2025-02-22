@@ -14,13 +14,15 @@ import {
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
 import {differenceInDays, differenceInMonths} from "date-fns";
-import type {BrandOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import type {
+    ConcentrationOption,
+} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
-interface BrandComboboxProps {
-    options: BrandOption[];
-    value: BrandOption | null;
-    onChange: (value: BrandOption) => void;
+interface ConcentrationComboBoxProps {
+    options: ConcentrationOption[];
+    value?: ConcentrationOption | null;
+    onChange: (value: ConcentrationOption) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     noOptionsMessage?: string;
@@ -29,23 +31,24 @@ interface BrandComboboxProps {
     disabled?: boolean;
 }
 
-const BrandCombobox = ({
-                           options,
-                           value,
-                           onChange,
-                           placeholder = "Select a brand...",
-                           searchPlaceholder = "Search brands...",
-                           noOptionsMessage = "No brands found.",
-                           isSearching = false,
-                           className,
-                           disabled = false,
-                       }: BrandComboboxProps) => {
+const ConcentrationComboBox = ({
+                            options,
+                            value,
+                            onChange,
+                            placeholder = "Select a brand...",
+                            searchPlaceholder = "Search brands...",
+                            noOptionsMessage = "No brands found.",
+                            isSearching = false,
+                            className,
+                            disabled = false,
+                        }: ConcentrationComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const handleSelect = (selectedValue: BrandOption) => {
+    const handleSelect = (selectedValue: ConcentrationOption) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
+
 
     const formatExpiry = (expiryDate: Date) => {
         const now = new Date();
@@ -75,7 +78,7 @@ const BrandCombobox = ({
                         className
                     )}
                 >
-                    {value ? value.name : placeholder}
+                    {value ? value.concentration : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
@@ -99,17 +102,17 @@ const BrandCombobox = ({
                             {options.map((option) => (
                                 <CommandItem
                                     key={option.id}
-                                    value={option.name}
+                                    value={option.concentration}
                                     onSelect={() => handleSelect(option)}
                                     className="flex flex-col rounded-md hover:bg-gray-100"
                                 >
                                     <div className="flex items-center min-w-24 w-full gap-2">
-                                        <span className="font-medium">{option.name}</span>
+                                        <span className="font-medium">{option.concentration} mg/unit</span>
                                     </div>
                                     <div
                                         className="flex items-center justify-between  gap-2 w-full text-sm text-gray-600">
                                         <CustomBadge
-                                            text={option.batchCount > 1 ? `${option.batchCount} batches` : "1 batch"}
+                                            text={option.brandCount > 1 ? `${option.brandCount} brands` : `${option.brandCount} brand`}
                                             color={"gray"}/>
                                         <CustomBadge
                                             text={`Total: ${option.totalRemainingQuantity}`}
@@ -148,4 +151,4 @@ const BrandCombobox = ({
     );
 };
 
-export default BrandCombobox;
+export default ConcentrationComboBox;

@@ -8,48 +8,39 @@ import {
     Command,
     CommandEmpty,
     CommandGroup,
-    CommandInput,
     CommandItem,
     CommandList,
 } from "@/components/ui/command";
 import {cn} from "@/lib/utils";
-import type {DrugOption} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {CustomDrugType} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 
-interface PopoverSelectProps {
-    options: DrugOption[];
-    value: DrugOption | null;
-    onChange: (value: DrugOption) => void;
+interface TypeComboBoxProps {
+    options: CustomDrugType[];
+    value: CustomDrugType | null;
+    onChange: (value: CustomDrugType) => void;
     placeholder?: string;
-    searchPlaceholder?: string;
     noOptionsMessage?: string;
     isSearching?: boolean;
-    onSearch?: (searchTerm: string) => void;
     className?: string;
     disabled?: boolean;
 }
 
-const DrugCombobox = ({
-                          options,
-                          value,
-                          onChange,
-                          placeholder = "Select an option...",
-                          searchPlaceholder = "Search options...",
-                          noOptionsMessage = "No options found.",
-                          isSearching = false,
-                          onSearch,
-                          className,
-                          disabled = false,
-                      }: PopoverSelectProps) => {
+const DrugTypeComboBox = ({
+                              options,
+                              value,
+                              onChange,
+                              placeholder = "Select a drug type...",
+                              noOptionsMessage = "No brands found.",
+                              className,
+                              isSearching = false,
+                              disabled = false,
+                          }: TypeComboBoxProps) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
-
-    const handleSelect = (selectedValue: DrugOption) => {
+    const handleSelect = (selectedValue: CustomDrugType) => {
         onChange(selectedValue);
         setPopoverOpen(false);
     };
-
-    const handleSearch = (searchTerm: string) => {
-        onSearch?.(searchTerm);
-    };
+    const selectedOption = options.find((option) => option === value)
 
     return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -60,23 +51,19 @@ const DrugCombobox = ({
                     aria-expanded={popoverOpen}
                     disabled={disabled}
                     className={cn(
-                        "w-full justify-between h-10 rounded-lg border-2 transition-all duration-200",
+                        "w-full justify-between h-10 rounded-lg border-2",
                         value
                             ? "border-primary-500 shadow-sm"
                             : "border-gray-300 hover:border-gray-400",
                         className
                     )}
                 >
-                    {value ? value.name : placeholder}
+                    {selectedOption?.name ? selectedOption.name : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
-                <Command shouldFilter={false}>
-                    <CommandInput
-                        placeholder={searchPlaceholder}
-                        onValueChange={handleSearch}
-                    />
+                <Command>
                     <CommandList>
                         <CommandEmpty className="p-4 text-center">
                             {isSearching ? (
@@ -91,12 +78,13 @@ const DrugCombobox = ({
                         <CommandGroup>
                             {options.map((option) => (
                                 <CommandItem
-                                    key={option.id}
-                                    value={String(option.id)}
+                                    key={option.name}
+                                    value={option.name}
                                     onSelect={() => handleSelect(option)}
-                                    className="flex items-center justify-between"
+                                    className="rounded-md hover:bg-gray-100"
                                 >
-                                    <span>{option.name} - in ({option.concentrationCount} concentration)</span>
+                                    <span
+                                        className="font-medium">{option.name}</span>
                                     <Check
                                         className={cn(
                                             "ml-auto h-4 w-4 text-primary",
@@ -113,4 +101,4 @@ const DrugCombobox = ({
     );
 };
 
-export default DrugCombobox;
+export default DrugTypeComboBox;

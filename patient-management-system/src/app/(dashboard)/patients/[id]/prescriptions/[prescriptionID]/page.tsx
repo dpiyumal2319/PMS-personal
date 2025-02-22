@@ -1,4 +1,5 @@
-import {getBill, getPrescription} from "@/app/lib/actions";
+import {getBill} from "@/app/lib/actions/bills";
+import {getPrescription} from "@/app/lib/actions/prescriptions";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {Activity, Heart, HeartPulse} from "lucide-react";
@@ -106,7 +107,8 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                                 ))}
                             </div>
                         )}
-                        <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id} role={session.role}/>
+                        <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id}
+                                     role={session.role}/>
                     </>
                 )}
             </CardContent>
