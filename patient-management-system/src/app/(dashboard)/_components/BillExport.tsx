@@ -32,7 +32,7 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
         const contentWidth = pageWidth - (margin * 2);
 
         // Helper function for text alignment
-        const centerText = (text: string, y: number) => {
+        const centerText = (text: string) => {
             const textWidth = pdf.getTextWidth(text);
             return (pageWidth - textWidth) / 2;
         };
@@ -44,7 +44,7 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(16);
         pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
-        pdf.text("Thoduwawa Medical Center", centerText("Thoduwawa Medical Center", yPos), yPos);
+        pdf.text("Thoduwawa Medical Center", centerText("Thoduwawa Medical Center"), yPos);
 
 
 
@@ -145,7 +145,7 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
         yPos = pdf.internal.pageSize.height - 20;
         pdf.setFontSize(8);
         pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
-        pdf.text("Thank you for choosing Thoduwawa Medical Center", centerText("Thank you for choosing Thoduwawa Medical Center", yPos), yPos);
+        pdf.text("Thank you for choosing Thoduwawa Medical Center", centerText("Thank you for choosing Thoduwawa Medical Center"), yPos);
 
         // Save PDF
         const formattedDate = new Date().toISOString().split('T')[0];
