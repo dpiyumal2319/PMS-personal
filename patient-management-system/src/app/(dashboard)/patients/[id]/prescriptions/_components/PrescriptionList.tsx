@@ -36,7 +36,8 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-xl font-semibold">{prescription.presentingSymptoms || "No Symptoms"}</h3>
                                         <CustomBadge text={`#${prescription.id}`} color="blue"/>
-                                        <CustomBadge text={prescription.status} color={prescription.status === 'PENDING' ? "amber" : "green"}/>
+                                        <CustomBadge text={prescription.status}
+                                                     color={prescription.status === 'PENDING' ? "amber" : "green"}/>
                                     </div>
                                     <p className="text-gray-500 text-sm">{formatDistanceToNow(new Date(prescription.time), {addSuffix: true})}</p>
                                 </div>
