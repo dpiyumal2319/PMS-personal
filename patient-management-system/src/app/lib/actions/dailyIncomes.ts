@@ -4,9 +4,20 @@
 
 import {DateRange} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
+import {verifySession} from "@/app/lib/sessions";
 
 export async function getDailyIncomes(dateRange: DateRange) {
     const {startDate, endDate} = dateRange;
+    // Only tomorrow to one day back for the nurse
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        const today = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+        endDate.setDate(today.getDate() + 1);
+        startDate.setDate(today.getDate() - 4);
+    }
+
     const bills = await prisma.bill.findMany({
         where: {
             Prescription: {
