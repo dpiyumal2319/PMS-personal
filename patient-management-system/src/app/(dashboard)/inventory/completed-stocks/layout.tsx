@@ -1,9 +1,15 @@
 import React from "react";
 import NextBreadcrumb from "@/app/(dashboard)/inventory/completed-stocks/_components/BreadCrumb";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Completed Stocks",
+    description: "Manage and view completed stocks.",
+};
 
 export default function Layout({
-    children,
-}: {
+                                   children,
+                               }: {
     children: React.ReactNode;
 }) {
     return (

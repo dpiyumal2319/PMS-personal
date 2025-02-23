@@ -2,6 +2,12 @@ import AddUserDialog from "@/app/(dashboard)/admin/staff/_components/AddUserDial
 import AllUsers from "@/app/(dashboard)/admin/staff/_components/AllUsers";
 import {Suspense} from "react";
 import StaffSkeleton from "@/app/(dashboard)/admin/staff/_components/StaffCardSkeleton";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Staff Management",
+    description: "Manage and configure medical staff.",
+};
 
 // Awaited type of get staff
 

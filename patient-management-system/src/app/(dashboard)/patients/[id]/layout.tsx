@@ -1,9 +1,16 @@
 import React from "react";
 import TopCard from "@/app/(dashboard)/patients/[id]/_components/TopCard";
 
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Patient Profile",
+    description: "View and manage patient profile.",
+};
+
 export default async function Layout({
-    children, params
-}: {
+                                         children, params
+                                     }: {
     children: React.ReactNode,
     params: Promise<{ id: string }>
 }) {

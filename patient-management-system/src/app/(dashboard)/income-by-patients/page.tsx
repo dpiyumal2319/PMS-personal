@@ -11,6 +11,12 @@ import {IoIosPeople} from "react-icons/io";
 import {FaRegMoneyBillAlt} from "react-icons/fa";
 import {AiOutlineUser} from "react-icons/ai";
 import {verifySession} from "@/app/lib/sessions";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "Daily Income",
+    description: "View daily income and patient count.",
+};
 
 async function IncomeContent({
                                  start,

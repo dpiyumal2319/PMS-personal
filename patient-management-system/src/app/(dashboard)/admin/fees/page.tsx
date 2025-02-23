@@ -2,6 +2,13 @@ import React from 'react';
 import FeeForm from "@/app/(dashboard)/admin/fees/_components/FeeForm";
 import {getCharges} from "@/app/lib/actions/charges";
 import {ChargeType} from "@prisma/client";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Fees Management",
+    description: "Manage and configure patient fees and charges.",
+};
+
 
 const Page = async () => {
     const fees = await getCharges();

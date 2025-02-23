@@ -2,6 +2,12 @@ import React from 'react';
 import Link from "next/link";
 import LoginForm from "@/app/(auth)/login/_componets/LoginForm";
 import {Stethoscope} from "lucide-react";
+import type {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Login",
+    description: "Patient Management System - Login",
+};
 
 export default function LoginPage() {
     return (
@@ -30,7 +36,7 @@ export default function LoginPage() {
                     <div className="mt-6 space-y-4">
                         <div className="text-center">
                             <Link
-                                href="#"
+                                href="/forgot-password"
                                 className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
                             >
                                 Forgot your password?
