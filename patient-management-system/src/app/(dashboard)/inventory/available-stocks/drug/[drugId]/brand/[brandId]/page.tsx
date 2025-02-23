@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, {Suspense} from "react";
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 import AvailableStockPageTable from "@/app/(dashboard)/inventory/available-stocks/_components/AvailableStockPageTable";
@@ -6,8 +6,8 @@ import DrugListSkeleton from "@/app/(dashboard)/inventory/available-stocks/_comp
 
 
 export default async function Page({
-    searchParams, params
-}: {
+                                       searchParams, params
+                                   }: {
     searchParams: Promise<{
         query?: string;
         page?: string;
@@ -19,7 +19,7 @@ export default async function Page({
         brandId: number;
     }>
 }) {
-    const { drugId, brandId } = await params;
+    const {drugId, brandId} = await params;
     const searchParamsAwaited = await searchParams;
 
     const query = searchParamsAwaited?.query || "";
@@ -27,23 +27,21 @@ export default async function Page({
     const selection = searchParamsAwaited?.selection || "batch";
     const sort = searchParamsAwaited?.sort || "alphabetically";
     return (
-        <div className="flex h-full flex-col w-full">
-            <div className="sticky top-0 p-4 bg-white border-b shadow-md flex flex-wrap gap-4 z-20">
-                <div className="relative w-[200px]">
-                    <SearchPanel placeholder="Search Batch..." />
-                </div>
+        <div className="flex flex-col w-full">
+            <div className="flex p-2 sticky top-0 bg-white border-b shadow-md gap-2 overflow-x-auto">
+                <SearchPanel placeholder="Search Batch..."/>
                 <Dropdown
                     items={[
-                        { label: "Expiry Date", value: "expiryDate" },
-                        { label: "Newly Added", value: "newlyAdded" },
-                        { label: "Alphabetically", value: "alphabetically" },
+                        {label: "Expiry Date", value: "expiryDate"},
+                        {label: "Newly Added", value: "newlyAdded"},
+                        {label: "Alphabetically", value: "alphabetically"},
                     ]}
                     urlParameterName="sort"
                 />
 
             </div>
-            <div className="flex-grow overflow-auto">
-                <Suspense fallback={<DrugListSkeleton isLoading={true} />}>
+            <div className="flex-grow overflow-y-auto">
+                <Suspense fallback={<DrugListSkeleton isLoading={true}/>}>
                     <AvailableStockPageTable
                         query={query}
                         currentPage={currentPage}

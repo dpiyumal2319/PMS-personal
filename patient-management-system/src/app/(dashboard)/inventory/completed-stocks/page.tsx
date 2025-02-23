@@ -30,10 +30,12 @@ export default async function InventoryAvailable({
     const toDate = params?.to || "";      // Get to date
 
     return (
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col">
             <div
-                className="flex p-2 h-14 sticky top-0 bg-white border-b shadow-md gap-4 overflow-x-auto">
-                <SearchPanel placeholder="Search..."/>
+                className="flex p-2 h-14 sticky top-0 bg-white border-b shadow-md gap-2 overflow-x-auto">
+                <div className="flex">
+                    <SearchPanel placeholder="Search..."/>
+                </div>
                 <Dropdown
                     items={[
                         {label: "Search by Model", value: "model"},

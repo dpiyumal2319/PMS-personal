@@ -21,7 +21,7 @@ export default function DrugListByBatch({ batches }: { batches: Batch[] }) {
     return (
         <div className="space-y-6 p-4">
             {batches.length > 0 ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {batches.map((batch) => (
                         <Card key={batch.id} className="hover:shadow-lg transition-all duration-200">
                             <CardHeader className="flex flex-col items-center text-center">
