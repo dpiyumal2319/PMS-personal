@@ -30,7 +30,7 @@ export default function DashboardPage() {
                     </h1>
 
                     <p className="text-gray-600 mb-8 text-lg">
-                        We're crafting an intelligent analytics dashboard that will transform your healthcare data into
+                        We&#39;re crafting an intelligent analytics dashboard that will transform your healthcare data into
                         actionable insights.
                     </p>
 
