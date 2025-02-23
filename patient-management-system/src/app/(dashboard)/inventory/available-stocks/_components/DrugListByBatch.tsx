@@ -15,6 +15,8 @@ interface Batch {
     remainingAmount: number;
     fullAmount: number;
     status: string;
+    unitConcentration: number;
+    type: string;
 }
 
 export default function DrugListByBatch({ batches }: { batches: Batch[] }) {
@@ -52,7 +54,7 @@ export default function DrugListByBatch({ batches }: { batches: Batch[] }) {
                                     {/* Model Name */}
                                     <div className="flex items-center gap-2 text-gray-700 dark:text-white font-medium">
                                         <AiOutlineMedicineBox className="size-6 text-blue-500" />
-                                        <span>{batch.modelName}</span>
+                                        <span>{batch.modelName} - {batch.unitConcentration}mg</span>
                                     </div>
 
                                     {/* Brand Name */}

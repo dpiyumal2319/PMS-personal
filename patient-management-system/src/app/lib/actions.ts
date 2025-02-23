@@ -668,6 +668,7 @@ export async function getFilteredDrugsByBatch({
         include: {
             drug: true,
             drugBrand: true,
+            unitConcentration: true,
         },
     });
 
@@ -681,6 +682,8 @@ export async function getFilteredDrugsByBatch({
         remainingAmount: batch.remainingQuantity,
         fullAmount: batch.fullAmount,
         status: batch.status,
+        unitConcentration: batch.unitConcentration.concentration,
+        type: batch.type,
     }));
 
     // Sorting logic
@@ -1325,6 +1328,7 @@ export async function getBatchData(batchId: number) {
                         name: true,
                     },
                 },
+                unitConcentration: true,
             },
         });
 
@@ -1344,6 +1348,7 @@ export async function getBatchData(batchId: number) {
             retailPrice: batchData.retailPrice,
             wholesalePrice: batchData.wholesalePrice,
             status: batchData.status,
+            unitConcetration: batchData.unitConcentration.concentration,
         };
     } catch (error) {
         console.error(error);
@@ -2001,6 +2006,7 @@ export async function getCompletedFilteredDrugsByModel({
         include: {
             drug: true,
             drugBrand: true,
+            unitConcentration: true,
         },
     });
 
@@ -2014,6 +2020,8 @@ export async function getCompletedFilteredDrugsByModel({
         remainingAmount: batch.remainingQuantity,
         fullAmount: batch.fullAmount,
         status: batch.status,
+        unitConcentration: batch.unitConcentration.concentration,
+        type: batch.type,
     }));
 
     return sortAndPaginateBatches(formattedBatches, sort, page);
@@ -2086,6 +2094,7 @@ export async function getCompletedFilteredDrugsByBrand({
         include: {
             drug: true,
             drugBrand: true,
+            unitConcentration: true,
         },
     });
 
@@ -2099,6 +2108,8 @@ export async function getCompletedFilteredDrugsByBrand({
         remainingAmount: batch.remainingQuantity,
         fullAmount: batch.fullAmount,
         status: batch.status,
+        unitConcentration: batch.unitConcentration.concentration,
+        type: batch.type,
     }));
 
     return sortAndPaginateBatches(formattedBatches, sort, page);
@@ -2171,6 +2182,7 @@ export async function getCompletedFilteredDrugsByBatch({
         include: {
             drug: true,
             drugBrand: true,
+            unitConcentration: true,
         },
     });
 
@@ -2184,6 +2196,9 @@ export async function getCompletedFilteredDrugsByBatch({
         remainingAmount: batch.remainingQuantity,
         fullAmount: batch.fullAmount,
         status: batch.status,
+        unitConcentration: batch.unitConcentration.concentration,
+        type: batch.type,
+
     }));
 
     return sortAndPaginateBatches(formattedBatches, sort, page);
@@ -2200,6 +2215,8 @@ function sortAndPaginateBatches(
         remainingAmount: number;
         fullAmount: number;
         status: string;
+        unitConcentration: number;
+        type: string;
     }[],
     sort: string,
     page: number
