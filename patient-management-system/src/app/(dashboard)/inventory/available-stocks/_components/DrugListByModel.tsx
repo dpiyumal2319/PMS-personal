@@ -1,7 +1,7 @@
-import { AiOutlineMedicineBox } from "react-icons/ai";
-import { MdOutlineBrandingWatermark } from "react-icons/md";
-import { MdEventAvailable } from "react-icons/md";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {AiOutlineMedicineBox} from "react-icons/ai";
+import {MdOutlineBrandingWatermark} from "react-icons/md";
+import {MdEventAvailable} from "react-icons/md";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import AppendButton from "./AppendButton";
 
 interface Drug {
@@ -11,11 +11,11 @@ interface Drug {
     brandCount: number;
 }
 
-export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
+export default function DrugListMyModel({drugs}: { drugs: Drug[] }) {
     return (
         <div className="space-y-6 p-4">
             {drugs.length > 0 ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {drugs.map((drug) => {
                         const isLowStock = drug.totalRemainingQuantity < 25;
 
@@ -27,7 +27,7 @@ export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
                                 {/* Icon and Name */}
                                 <CardHeader className="flex gap-4">
                                     <CardTitle className="flex items-center justify-start gap-4">
-                                        <AiOutlineMedicineBox className="size-10 text-primary-500" />
+                                        <AiOutlineMedicineBox className="size-10 text-primary-500"/>
                                         <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
                                             {drug.name}
                                         </h3>
@@ -51,7 +51,7 @@ export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
 
                                         {/* Brand Count */}
                                         <div className="flex items-center gap-2">
-                                            <MdOutlineBrandingWatermark className="text-primary-500 w-5 h-5" />
+                                            <MdOutlineBrandingWatermark className="text-primary-500 w-5 h-5"/>
                                             <span className="text-lg font-medium text-gray-600 dark:text-gray-300">
                                                 {drug.brandCount} Brands
                                             </span>
@@ -59,7 +59,7 @@ export default function DrugListMyModel({ drugs }: { drugs: Drug[] }) {
                                     </div>
 
                                     {/* View Details Button */}
-                                    <AppendButton append={`drug/${drug.id}`} />
+                                    <AppendButton append={`drug/${drug.id}`}/>
 
                                 </CardContent>
                             </Card>

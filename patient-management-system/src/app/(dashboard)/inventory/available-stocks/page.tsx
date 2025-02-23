@@ -25,7 +25,7 @@ export default async function InventoryAvailable({
   return (
     <div className="flex flex-col w-full">
       {/* Fixed header instead of sticky */}
-      <div className="flex p-2 h-14 sticky top-0 bg-white border-b shadow-md gap-4 overflow-x-auto">
+      <div className="flex p-2 h-14 sticky top-0 bg-white border-b shadow-md gap-2 overflow-x-auto">
         <SearchPanel placeholder="Search by Name" />
         <Dropdown
           items={[

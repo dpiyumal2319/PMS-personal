@@ -2,7 +2,7 @@ export default function DrugList({ isLoading }: { isLoading: boolean }) {
     return (
         <div className="space-y-6 p-4">
             {isLoading ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 h-screen">
+                <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 h-screen">
                     {/* Skeleton loader card */}
                     {Array(12)
                         .fill(0)
