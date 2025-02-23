@@ -36,7 +36,7 @@ export default function LoginPage() {
                     <div className="mt-6 space-y-4">
                         <div className="text-center">
                             <Link
-                                href="#"
+                                href="/forgot-password"
                                 className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
                             >
                                 Forgot your password?

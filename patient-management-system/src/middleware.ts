@@ -2,15 +2,16 @@ import {NextRequest, NextResponse} from "next/server";
 import {decrypt} from "@/app/lib/sessions";
 import {cookies} from "next/headers";
 
-const publicRoutes = ["/login", "/", "/signup"];
+const publicRoutes = ["/login", "/", '/forgot-password', '/reset-password'];
 const doctorOnlyRoutes = [
     "/patients/[id]/prescriptions/add",
+    "/patients/[id]/medicalCertificates",
     "/patients/[id]/reports",
     "/patients/[id]/notes",
     "/admin/staff",
     "/admin/reports",
     "/admin/fees",
-    "/inventory/cost-management",
+    "/inventory/cost-management"
 ];
 
 // Helper function to check if a path matches a route pattern
