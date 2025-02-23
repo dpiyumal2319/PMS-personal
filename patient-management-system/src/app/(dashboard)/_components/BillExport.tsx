@@ -145,7 +145,7 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
         yPos = pdf.internal.pageSize.height - 20;
         pdf.setFontSize(8);
         pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
-        pdf.text("Thank you for choosing Thoduwawa Medical Center", centerText("Thank you for choosing Thoduwawa Medical Center"), yPos);
+        pdf.text("Thank you", centerText("Thank you for choosing Thoduwawa Medical Center"), yPos);
 
         // Save PDF
         const formattedDate = new Date().toISOString().split('T')[0];

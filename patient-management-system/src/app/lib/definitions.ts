@@ -274,3 +274,17 @@ export type Bill = {
     dispensary_charge: number;
     doctor_charge: number
 }
+
+export type MedicalCertificate = {
+    id: number;
+    patientId: number;
+    nameOfThePatient: string;
+    addressOfThePatient: string;
+    fitForDuty: "FIT" | "UNFIT";
+    dateOfSickness: Date;
+    recommendedLeaveDays: number;
+    natureOfTheDisease: string;
+    ageOfThePatient: number;
+    reccomendations: string;
+    time: Date;
+  }

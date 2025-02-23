@@ -11,7 +11,7 @@ import {
     SortOption,
     StockAnalysis,
     StockData,
-    StockQueryParams
+    StockQueryParams,
 } from "@/app/lib/definitions";
 import { prisma } from "./prisma";
 import { verifySession } from "./sessions";
@@ -3196,3 +3196,29 @@ const getNextMedicalCertificateId = async (): Promise<number> => {
 };
 
 export default getNextMedicalCertificateId;
+
+export async function getMedicalCertificates(patientId: number) {
+    try {
+      const certificates = await prisma.medicalCertificate.findMany({
+        where: { patientId },
+        orderBy: { time: 'desc' }
+      });
+      return certificates;
+    } catch (error) {
+      console.error('Failed to fetch certificates:', error);
+      throw new Error('Failed to fetch certificates');
+    }
+  }
+  
+  export async function deleteMedicalCertificate(id: number) {
+    try {
+      await prisma.medicalCertificate.delete({
+        where: { id }
+      });
+      revalidatePath('/patients/[id]');
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to delete certificate:', error);
+      throw new Error('Failed to delete certificate');
+    }
+  }
