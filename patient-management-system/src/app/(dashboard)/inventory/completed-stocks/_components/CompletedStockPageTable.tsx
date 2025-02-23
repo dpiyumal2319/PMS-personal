@@ -2,7 +2,6 @@ import React from 'react'
 import { getCompletedFilteredDrugsByModel, getCompletedFilteredDrugsByBrand, getCompletedFilteredDrugsByBatch, getTotalPagesForCompletedFilteredDrugsByBrand, getTotalPagesForCompletedFilteredDrugsByModel, getTotalPagesForCompletedFilteredDrugsByBatch } from '@/app/lib/actions'
 import Pagination from '@/app/(dashboard)/_components/Pagination'
 import DrugListByBatch from '../../available-stocks/_components/DrugListByBatch';
-import { Drug, DrugType } from '@prisma/client';
 
 interface Batch {
     id: number;
