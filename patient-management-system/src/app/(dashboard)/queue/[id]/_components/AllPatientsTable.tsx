@@ -31,7 +31,6 @@ export default function AllPatientsTable({ id }: { id: number }) {
     const [role, setRole] = useState("");
 
     const fetchData = useCallback(async () => {
-        console.log("Fetching data");
         const session = await verifySession();
         setRole(session.role);
         const data = await queuePatients(id);

@@ -72,7 +72,6 @@ const AddPatientButton = ({id, refetch}: { id: number; refetch: () => void }) =>
         }
 
         fetchData().then(() => {
-            console.log("Search results fetched");
         });
     }, [debouncedSearchTerm, searchBy]);
 

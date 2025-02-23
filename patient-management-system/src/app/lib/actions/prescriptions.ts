@@ -402,7 +402,6 @@ export async function addPrescription({
             });
 
             //Check for queue entry
-            console.log(patientID);
             const queueEntry = await tx.queueEntry.findFirst({
                 where: {
                     patientId: patientID,

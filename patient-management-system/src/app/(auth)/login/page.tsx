@@ -21,14 +21,12 @@ export default function LoginPage() {
             {/* Main Content */}
             <div className="flex-1 flex items-center justify-center p-4">
                 <div
-                    className="max-w-sm w-full bg-white/70 backdrop-blur-md rounded-xl shadow-lg p-8 border border-white/20">
+                    className="max-w-sm w-full bg-white/70 rounded-xl shadow-lg p-8 border border-white/20">
                     <div className="mb-8 text-center">
                         <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
                         <p className="mt-2 text-gray-600">Please sign in to your account</p>
                     </div>
-
                     <LoginForm/>
-
                     <div className="mt-6 space-y-4">
                         <div className="text-center">
                             <Link

@@ -341,7 +341,7 @@ export async function getTotalQueueCount() {
 export async function getTotalPages(query = "", filter = "name") {
     const whereClause = query
         ? {
-            [filter]: {contains: query},
+            [filter]: {contains: query, mode: "insensitive"},
         }
         : {};
 
@@ -356,7 +356,7 @@ export async function getFilteredPatients(
 ) {
     const whereCondition = query
         ? {
-            [filter]: {contains: query},
+            [filter]: {contains: query, mode: "insensitive"},
         }
         : {};
 
@@ -384,6 +384,7 @@ export async function getTotalPagesForFilteredDrugsByModel({
         where: {
             name: {
                 contains: query,
+                mode: "insensitive",
             },
             batch: {
                 some: {
@@ -423,6 +424,7 @@ export async function getTotalPagesForFilteredDrugsByBrand({
         where: {
             name: {
                 contains: query,
+                mode: "insensitive",
             },
             Batch: {
                 some: {
@@ -439,6 +441,7 @@ interface whereCondition {
     status: BatchStatus;
     number: {
         contains: string;
+        mode: "insensitive";
     };
     drugId?: number;
     drugBrandId?: number;
@@ -458,6 +461,7 @@ export async function getTotalPagesForFilteredDrugsByBatch({
         status: "AVAILABLE",
         number: {
             contains: query,
+            mode: "insensitive",
         },
     };
 
@@ -486,6 +490,7 @@ export async function getFilteredDrugsByModel({
         where: {
             name: {
                 contains: query,
+                mode: "insensitive",
             },
             batch: {
                 some: {
@@ -586,16 +591,14 @@ export async function getFilteredDrugsByBrand({
         return Array.from(uniqueBrands.values());
     }
 
-    // Base query conditions
-    const brandWhereCondition = {
-        name: {
-            contains: query,
-        },
-    };
-
     // Fetch all drug brands with available batches
     const brands = await prisma.drugBrand.findMany({
-        where: brandWhereCondition,
+        where: {
+            name: {
+                contains: query,
+                mode: "insensitive",
+            },
+        },
         include: {
             Batch: {
                 where: {
@@ -651,6 +654,7 @@ export async function getFilteredDrugsByBatch({
         status: "AVAILABLE",
         number: {
             contains: query, // Search by batch number
+            mode: "insensitive",
         },
     };
 
@@ -850,6 +854,7 @@ export async function searchPatients(
         where: {
             [searchBy]: {
                 contains: query,
+                mode: "insensitive",
             },
         },
         take: 10, // Limit results
@@ -944,6 +949,7 @@ export async function getFilteredReports(query: string) {
         where: {
             name: {
                 contains: query,
+                mode: "insensitive",
             },
         },
         orderBy: {id: "asc"},
@@ -965,8 +971,6 @@ export async function addReportType(reportForm: ReportForm): Promise<myError> {
                 message: "At least one parameter is required",
             };
         }
-
-        console.log(reportForm.parameters);
 
         await prisma.reportType.create({
             data: {
@@ -1034,8 +1038,6 @@ export async function editReportType(
     reportId: number
 ): Promise<myError> {
     try {
-        console.log(reportForm);
-
         return await prisma.$transaction(async (tx) => {
             const report = await tx.reportType.findUnique({
                 where: {id: reportId},
@@ -1461,7 +1463,7 @@ export async function getPatientReportPages(
         where: {
             patientId: id,
             reportType: {
-                name: {contains: query},
+                name: {contains: query, mode: "insensitive"},
             },
             ...dateFilter,
         },
@@ -1489,7 +1491,7 @@ export async function getPatientReports(
             where: {
                 patientId: PatientId,
                 reportType: {
-                    name: {contains: query},
+                    name: {contains: query, mode: "insensitive"},
                 },
                 ...dateFilter,
             },
@@ -1531,6 +1533,7 @@ export const searchReportTypes = async (query: string) => {
         where: {
             name: {
                 startsWith: query,
+                mode: "insensitive",
             },
         },
         select: {
@@ -1680,7 +1683,7 @@ export async function getAvailableDrugsTotalPages(
         case "brand":
             count = await prisma.drugBrand.count({
                 where: {
-                    name: {contains: query},
+                    name: {contains: query, mode: "insensitive"},
                     Batch: {some: {status: "AVAILABLE"}},
                 },
             });
@@ -1688,7 +1691,7 @@ export async function getAvailableDrugsTotalPages(
         case "model":
             count = await prisma.drug.count({
                 where: {
-                    name: {contains: query},
+                    name: {contains: query, mode: "insensitive"},
                     batch: {some: {status: "AVAILABLE"}},
                 },
             });
@@ -1697,8 +1700,8 @@ export async function getAvailableDrugsTotalPages(
             count = await prisma.batch.count({
                 where: {
                     OR: [
-                        {drug: {name: {contains: query}}},
-                        {drugBrand: {name: {contains: query}}},
+                        {drug: {name: {contains: query, mode: "insensitive"}}},
+                        {drugBrand: {name: {contains: query, mode: "insensitive"}}},
                     ],
                     status: "AVAILABLE",
                 },
@@ -1719,7 +1722,7 @@ export async function getStockByModel({
                                       }: StockQueryParams): Promise<StockData[]> {
     const drugs = await prisma.drug.findMany({
         where: {
-            name: {contains: query},
+            name: {contains: query, mode: "insensitive"},
             batch: {
                 some: {
                     // status: "AVAILABLE",
@@ -1783,8 +1786,8 @@ export async function getStockByBatch({
     const batches = await prisma.batch.findMany({
         where: {
             OR: [
-                {drug: {name: {contains: query}}},
-                {drugBrand: {name: {contains: query}}},
+                {drug: {name: {contains: query, mode: "insensitive"}}},
+                {drugBrand: {name: {contains: query, mode: "insensitive"}}},
             ],
             // status: "AVAILABLE",
             ...(startDate && endDate
@@ -1828,7 +1831,7 @@ export async function getStockByBrand({
 
     const brands = await prisma.drugBrand.findMany({
         where: {
-            name: {contains: query},
+            name: {contains: query, mode: "insensitive"},
             Batch: {
                 some: {
                     AND: [
@@ -1987,7 +1990,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByModel({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drug: {name: {contains: query}},
+        drug: {name: {contains: query, mode: "insensitive"}},
     };
 
     if (status === "ALL") {
@@ -2022,7 +2025,7 @@ export async function getCompletedFilteredDrugsByModel({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drug: {name: {contains: query}},
+        drug: {name: {contains: query, mode: "insensitive"}},
     };
 
     if (status === "ALL") {
@@ -2072,7 +2075,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByBrand({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drugBrand: {name: {contains: query}},
+        drugBrand: {name: {contains: query, mode: "insensitive"}},
     };
 
     if (status === "ALL") {
@@ -2107,7 +2110,7 @@ export async function getCompletedFilteredDrugsByBrand({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drugBrand: {name: {contains: query}},
+        drugBrand: {name: {contains: query, mode: "insensitive"}},
     };
 
     if (status === "ALL") {
@@ -2157,7 +2160,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByBatch({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        number: {contains: query},
+        number: {contains: query, mode: "insensitive"},
     };
 
     if (status === "ALL") {
@@ -2192,7 +2195,7 @@ export async function getCompletedFilteredDrugsByBatch({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        number: {contains: query},
+        number: {contains: query, mode: "insensitive"},
     };
 
     if (status === "ALL") {
@@ -2309,6 +2312,7 @@ export async function searchDrugBrands(query: string) {
         where: {
             name: {
                 startsWith: query,
+                mode: "insensitive",
             },
         },
         select: {
@@ -2327,6 +2331,7 @@ export async function searchDrugModels(query: string) {
         where: {
             name: {
                 startsWith: query,
+                mode: "insensitive",
             },
         },
         select: {
@@ -2358,58 +2363,6 @@ export async function getDrugConcentrations(drugId: number): Promise<DrugConcent
         throw new Error('Failed to fetch drug weights');
     }
 }
-
-
-// export async function getPriceOfDrugModel({
-//     query,
-//     page = 1,
-//     startDate,
-//     endDate,
-// }: StockQueryParams){
-//     const take = 10;
-//     const skip = (page - 1) * take;
-
-//     const drugs = await prisma.drug.findMany({
-//         where: {
-//             name: {
-//                 contains: query,
-//             },
-//             batch: {
-//                 some: {
-//                     stockDate:{
-//                         gte: startDate,
-//                         lte: endDate,
-//                     },
-//                 },
-//             },
-//         },
-
-//         select: {
-//       id: true,
-//       name: true,
-//       batch: {
-//         where: {
-//           status: 'AVAILABLE',
-//         },
-//         select: {
-//           remainingQuantity: true,
-//           price: true,
-//         },
-//       },
-//     },
-//     skip,
-//     take,
-// });
-
-//     return drugs.map(drug => ({
-//     id: drug.id,
-//     name: drug.name,
-//     totalPrice: drug.batch.reduce((sum, batch) =>
-//       sum + (batch.price * batch.remainingQuantity), 0),
-//     remainingQuantity: drug.batch.reduce((sum, batch) =>
-//       sum + batch.remainingQuantity, 0),
-//   }));
-// }
 
 //show the info of one drug model
 export async function getDrugModelStats(drugId: number) {

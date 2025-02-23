@@ -142,7 +142,6 @@ export function DrugForm() {
         if (!formData.drugId) return;
 
         try {
-            console.log("Fetching drug weights");
             const weights = await getDrugConcentrations(formData.drugId);
             const uniqueWeights = Array.from(
                 new Map(weights.map((weight) => [weight.id, weight])).values()
@@ -198,7 +197,6 @@ export function DrugForm() {
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        console.log("Payload being sent:", formData);
         e.preventDefault();
 
         try {

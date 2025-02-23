@@ -16,7 +16,6 @@ export default function IncomeCard({
                                    }: IncomeCardProps) {
     const formattedDate = format(new Date(date), "eeee, MMMM dd, yyyy");
     const isToday = isSameDay(new Date(), date);
-    console.log(`date: ${date}, isToday: ${isToday}`);
 
     const formattedIncome = new Intl.NumberFormat("en-LK", {
         style: "currency",

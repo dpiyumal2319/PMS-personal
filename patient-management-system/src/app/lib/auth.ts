@@ -34,9 +34,6 @@ export async function login(message: string, formData: FormData) {
         role: user.role,
         id: user.id,
     });
-
-    console.log("Logged in as", user.role, user.id);
-
     redirect("/dashboard"); // Redirect only if valid
 }
 

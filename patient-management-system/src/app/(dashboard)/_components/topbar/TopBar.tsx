@@ -1,10 +1,9 @@
-import {logout} from "@/app/lib/auth";
 import PendingPatients from "@/app/(dashboard)/_components/topbar/PendingPatients";
-import {LogOut} from "lucide-react";
-import CustomIconButton from "@/app/(dashboard)/_components/topbar/CustomIconButton";
 import React, {Suspense} from "react";
 import CustomSideBarTrigger from "@/app/(dashboard)/_components/topbar/CustomSideBarTrigger";
 import UserDetails, {UserDetailsSkeleton} from "@/app/(dashboard)/_components/topbar/user-details";
+import Link from "next/link";
+import {LogOut} from "lucide-react";
 
 
 export default async function TopBar() {
@@ -20,7 +19,9 @@ export default async function TopBar() {
                     <Suspense fallback={<UserDetailsSkeleton/>}>
                         <UserDetails/>
                     </Suspense>
-                    <CustomIconButton icon={LogOut} onClick={logout} iconSize={18}/>
+                    <Link href={"/logout"} className={'flex items-center justify-center rounded-md p-2 transition-all hover:bg-gray-100'}>
+                        <LogOut className={"cursor-pointer"} size={18}/>
+                    </Link>
                 </div>
             </div>
         </div>

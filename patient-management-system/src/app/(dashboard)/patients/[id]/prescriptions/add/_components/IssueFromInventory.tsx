@@ -27,7 +27,7 @@ import {Input} from "@/components/ui/input";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Switch} from "@/components/ui/switch";
 import DrugTypeComboBox from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/DrugTypeCombobox";
-import {toast} from "react-toastify";
+import {Id, toast} from "react-toastify";
 
 interface IssuesListProps {
     onAddIssue: (issue: IssueInForm) => void;
@@ -218,10 +218,10 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
             if (!selectedDrugType) {
                 toast.update(id, {
-                    render: "No valid type found. Please select manually.",
+                    render: "Cached type invalid. Please select manually.",
                     type: "warning",
                     isLoading: false,
-                    autoClose: 3000
+                    autoClose: 1000
                 });
                 return;
             }
@@ -244,7 +244,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                     render: "Cached concentration invalid. Please select manually.",
                     type: "warning",
                     isLoading: false,
-                    autoClose: 3000
+                    autoClose: 1000
                 });
                 return;
             }
@@ -265,7 +265,7 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
             toast.update(id, {render: "Applying cached brand and strategy...", isLoading: true});
 
-            await handleCachedBrandStrategy(drugBrands, cachedStrategy);
+            await handleCachedBrandStrategy(drugBrands, cachedStrategy, id);
 
             toast.update(id, {render: "Drug selection complete!", type: "success", isLoading: false, autoClose: 1000});
         } catch (error) {
@@ -284,14 +284,21 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     // Helper function to handle cached brand strategy
     const handleCachedBrandStrategy = async (
         drugBrands: BrandOption[],
-        cachedStrategy: CachedStrategy
+        cachedStrategy: CachedStrategy,
+        id: Id
     ) => {
         if (!cachedStrategy) return;
 
         const availableBrandIDs = drugBrands.map(brand => brand.id);
         if (!availableBrandIDs.includes(cachedStrategy.issue.brandId)) {
             // Reset strategy-related states if cached brand is not available
-            console.warn("Cached brand is not available");
+            toast.update(id, {
+                render: "Cached brand not available. Please select manually.",
+                type: "warning",
+                isLoading: false,
+                autoClose: 1000
+            });
+
             setStrategy(null);
             setDose(null);
             setForDays(null);
