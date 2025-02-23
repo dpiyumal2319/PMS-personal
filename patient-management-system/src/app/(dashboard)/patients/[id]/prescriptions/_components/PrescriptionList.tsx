@@ -23,7 +23,7 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
     });
 
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {prescriptions.length > 0 ? (
                 prescriptions.map((prescription) => (
                     <Link
