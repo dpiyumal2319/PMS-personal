@@ -1,6 +1,5 @@
 import type {LucideIcon} from "lucide-react";
 import {Role} from '@prisma/client';
-import type {DrugType} from "@prisma/client";
 
 export type SessionPayload = {
     id: number;
