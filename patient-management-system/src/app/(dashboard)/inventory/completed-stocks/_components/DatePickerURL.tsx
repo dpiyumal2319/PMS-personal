@@ -14,7 +14,7 @@ const DatePickerURL = () => {
     const getDefaultDates = () => {
         const today = new Date();
         const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() - 30);
+        tomorrow.setDate(today.getDate() + 1);
         const thirtyDaysAgo = new Date(today);
         thirtyDaysAgo.setDate(today.getDate() - 30);
         return {
