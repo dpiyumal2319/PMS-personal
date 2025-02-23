@@ -52,7 +52,7 @@ const IssuedPatientsTable: React.FC<IssuedPatientsTableProps> = ({ batchId }) =>
                   <TableRow
                     key={patient.id}
                     className="border-b hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer"
-                    onClick={() => router.push(`/dashboard/patients/${patient.patientId}/prescriptions/${patient.prescriptionId}`)}
+                    onClick={() => router.push(`/patients/${patient.patientId}/prescriptions/${patient.prescriptionId}`)}
                   >
                     <TableCell className="p-4 text-gray-900 dark:text-white font-medium">{patient.patientName}</TableCell>
                     <TableCell className="p-4 text-gray-700 dark:text-gray-300">{patient.issuedAmount}</TableCell>

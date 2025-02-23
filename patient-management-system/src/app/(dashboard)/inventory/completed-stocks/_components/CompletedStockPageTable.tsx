@@ -13,6 +13,9 @@ interface Batch {
     remainingAmount: number;
     fullAmount: number;
     status: string;
+    unitConcentration: number;
+    type: string;
+
 }
 
 
