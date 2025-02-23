@@ -916,10 +916,7 @@ export async function addPatientToQueue(
         };
     } catch (e) {
         console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while adding patient to queue",
-        };
+        return {success: false, message: 'An error occurred while adding patient to queue'}
     }
 }
 
@@ -982,30 +979,20 @@ export async function addReportType(reportForm: ReportForm): Promise<myError> {
             },
         });
 
-        revalidatePath("/reports");
-        return {success: true, message: "Report type added successfully"};
+        revalidatePath('/reports');
+        return {success: true, message: 'Report type added successfully'};
     } catch (e) {
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
-            if (e.code === "P2002") {
-                return {
-                    success: false,
-                    message: "Report type name must be unique",
-                };
+            if (e.code === 'P2002') {
+                return {success: false, message: 'Report type name must be unique'};
             }
-            if (e.code === "P2003") {
-                return {
-                    success: false,
-                    message:
-                        "Invalid parameter reference (foreign key constraint failed)",
-                };
+            if (e.code === 'P2003') {
+                return {success: false, message: 'Invalid parameter reference (foreign key constraint failed)'};
             }
         }
         console.error(e);
 
-        return {
-            success: false,
-            message: "An unexpected error occurred while adding report type",
-        };
+        return {success: false, message: 'An unexpected error occurred while adding report type'};
     }
 }
 
@@ -1041,7 +1028,7 @@ export async function editReportType(
         return await prisma.$transaction(async (tx) => {
             const report = await tx.reportType.findUnique({
                 where: {id: reportId},
-                include: {parameters: true},
+                include: {parameters: true}
             });
 
             if (!report) {
@@ -1070,7 +1057,7 @@ export async function editReportType(
 
             for (const param of deletedParams) {
                 const reportValues = await tx.reportValue.findMany({
-                    where: {reportParameterId: param.id},
+                    where: {reportParameterId: param.id}
                 });
 
                 if (reportValues.length > 0) {
@@ -1080,7 +1067,7 @@ export async function editReportType(
                 }
 
                 await tx.reportParameter.delete({
-                    where: {id: param.id},
+                    where: {id: param.id}
                 });
             }
 
@@ -1115,11 +1102,8 @@ export async function editReportType(
                 },
             });
 
-            revalidatePath("/admin/reports");
-            return {
-                success: true,
-                message: "Report type updated successfully",
-            };
+            revalidatePath('/admin/reports');
+            return {success: true, message: 'Report type updated successfully'};
         });
     } catch (e) {
         if (e instanceof Error) {
@@ -1142,43 +1126,37 @@ export const deleteReportType = async (reportId: number): Promise<myError> => {
                 id: reportId,
             },
         });
-        revalidatePath("/admin/reports");
-        return {success: true, message: "Report type deleted successfully"};
+        revalidatePath('/admin/reports');
+        return {success: true, message: 'Report type deleted successfully'}
     } catch (e) {
         console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while deleting report type",
-        };
+        return {success: false, message: 'An error occurred while deleting report type'}
     }
 };
 
-export async function addPatient({
-                                     formData,
-                                 }: {
-    formData: PatientFormData;
-}): Promise<myError> {
+
+export async function addPatient({formData}: { formData: PatientFormData }): Promise<myError> {
     try {
         const floatHeight = parseFloat(formData.height);
 
         const floatWeight = parseFloat(formData.weight);
 
         if (formData.gender === "") {
-            return {success: false, message: "Select a valid Gender"};
+            return {success: false, message: 'Select a valid Gender'};
         }
 
         if (!formData.name || !formData.telephone) {
-            return {success: false, message: "Please fill all fields"};
+            return {success: false, message: 'Please fill all fields'};
         }
 
         if (formData.telephone.length !== 10) {
-            return {success: false, message: "Invalid telephone number"};
+            return {success: false, message: 'Invalid telephone number'};
         }
 
         const date = new Date(formData.birthDate);
 
         if (isNaN(date.getTime())) {
-            return {success: false, message: "Invalid birth date"};
+            return {success: false, message: 'Invalid birth date'};
         }
 
         await prisma.patient.create({
@@ -1194,14 +1172,11 @@ export async function addPatient({
             },
         });
 
-        revalidatePath("/patients");
-        return {success: true, message: "Patient added successfully"};
+        revalidatePath('/patients');
+        return {success: true, message: 'Patient added successfully'};
     } catch (e) {
         console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while adding patient",
-        };
+        return {success: false, message: 'An error occurred while adding patient'};
     }
 }
 
@@ -1214,17 +1189,17 @@ export async function updatePatient(
         const floatWeight = parseFloat(formData.weight);
 
         if (formData.gender === "") {
-            return {success: false, message: "Select a valid Gender"};
+            return {success: false, message: 'Select a valid Gender'};
         }
 
         if (!formData.name || !formData.telephone) {
-            return {success: false, message: "Please fill all fields"};
+            return {success: false, message: 'Please fill all fields'};
         }
 
         const date = new Date(formData.birthDate);
 
         if (isNaN(date.getTime())) {
-            return {success: false, message: "Invalid birth date"};
+            return {success: false, message: 'Invalid birth date'};
         }
 
         await prisma.patient.update({
@@ -1242,22 +1217,18 @@ export async function updatePatient(
         });
 
         revalidatePath(`/patients/${id}`);
-        return {success: true, message: "Patient updated successfully"};
+        return {success: true, message: 'Patient updated successfully'};
     } catch (e) {
         console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while updating patient",
-        };
+        return {success: false, message: 'An error occurred while updating patient'};
     }
 }
 
 //For adding drugs to the inventory
-export async function addNewItem({
-                                     formData,
-                                 }: {
-    formData: InventoryFormData;
-}): Promise<myError> {
+export async function addNewItem(
+    {formData}: {
+        formData: InventoryFormData
+    }): Promise<myError> {
     try {
         if (!formData.drugId || !formData.brandId || !formData.concentrationId) {
             return {success: false, message: "Please fill all fields"};
@@ -1307,10 +1278,10 @@ export async function addNewItem({
                 data: {
                     number: formData.batchNumber,
                     drug: {
-                        connect: {id: drug.id},
+                        connect: {id: drug.id}
                     },
                     drugBrand: {
-                        connect: {id: brand.id},
+                        connect: {id: brand.id}
                     },
                     type: formData.drugType as DrugType,
                     fullAmount: parseFloat(formData.quantity.toString()),
@@ -1327,14 +1298,12 @@ export async function addNewItem({
                 },
             });
 
-            revalidatePath("/inventory/available-stocks");
-            return {success: true, message: "Item added successfully"};
+            revalidatePath('/inventory/available-stocks');
+            return {success: true, message: 'Item added successfully'};
         });
     } catch (e) {
-        if (e instanceof Error) {
-            console.error(e.message);
-        }
-        return {success: false, message: "Failed to add item"};
+        console.error(e);
+        return {success: false, message: 'Failed to add item'};
     }
 }
 
@@ -1409,7 +1378,7 @@ export async function getBrandName(id: number): Promise<string> {
     try {
         const brand = await prisma.drugBrand.findUnique({
             where: {id},
-            select: {name: true},
+            select: {name: true}
         });
         return brand?.name || `Brand-${id}`;
     } catch (error) {
@@ -1422,7 +1391,7 @@ export async function getDrugName(id: number): Promise<string> {
     try {
         const drug = await prisma.drug.findUnique({
             where: {id},
-            select: {name: true},
+            select: {name: true}
         });
         return drug?.name || `Drug-${id}`;
     } catch (error) {
@@ -1435,7 +1404,7 @@ export async function getBatchNumber(id: number): Promise<string> {
     try {
         const batch = await prisma.batch.findUnique({
             where: {id},
-            select: {number: true},
+            select: {number: true}
         });
         return batch?.number || `Batch-${id}`;
     } catch (error) {
@@ -1463,7 +1432,7 @@ export async function getPatientReportPages(
         where: {
             patientId: id,
             reportType: {
-                name: {contains: query, mode: "insensitive"},
+                name: {contains: query},
             },
             ...dateFilter,
         },
@@ -1491,7 +1460,7 @@ export async function getPatientReports(
             where: {
                 patientId: PatientId,
                 reportType: {
-                    name: {contains: query, mode: "insensitive"},
+                    name: {contains: query},
                 },
                 ...dateFilter,
             },
@@ -1557,30 +1526,23 @@ export const getReportParams = async (id: number) => {
     });
 };
 
-export async function addPatientReport({
-                                           patientID,
-                                           reportTypeID,
-                                           params,
-                                       }: {
-    patientID: number;
-    reportTypeID: number;
-    params: Record<number, { value: string; attention: boolean }>;
+export async function addPatientReport({patientID, reportTypeID, params}: {
+    patientID: number,
+    reportTypeID: number,
+    params: Record<number, { value: string, attention: boolean }>
 }): Promise<myError> {
     try {
         const reportType = await prisma.reportType.findUnique({
-            where: {id: reportTypeID},
+            where: {id: reportTypeID}
         });
 
         if (!reportType) {
-            return {success: false, message: "Report type not found"};
+            return {success: false, message: 'Report type not found'};
         }
 
         // check if all params have empty values
-        if (Object.values(params).every((param) => param.value === "")) {
-            return {
-                success: false,
-                message: "Please fill at least one parameter",
-            };
+        if (Object.values(params).every((param) => param.value === '')) {
+            return {success: false, message: 'Please fill at least one parameter'};
         }
 
         await prisma.patientReport.create({
@@ -1598,13 +1560,10 @@ export async function addPatientReport({
         });
 
         revalidatePath(`/patients/${patientID}/reports`);
-        return {success: true, message: "Report added successfully"};
+        return {success: true, message: 'Report added successfully'};
     } catch (e) {
         console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while adding report",
-        };
+        return {success: false, message: 'An error occurred while adding report'};
     }
 }
 
@@ -1620,13 +1579,10 @@ export async function deletePatientReport(
         });
 
         revalidatePath(`/patients/${patientID}/reports`);
-        return {success: true, message: "Report deleted successfully"};
+        return {success: true, message: 'Report deleted successfully'};
     } catch (e) {
         console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while deleting report",
-        };
+        return {success: false, message: 'An error occurred while deleting report'};
     }
 }
 
@@ -1635,9 +1591,8 @@ export async function getPendingPatientsCount() {
 
     return prisma.queueEntry.count({
         where: {
-            status:
-                session.role === "DOCTOR" ? "PENDING" : {not: "COMPLETED"},
-        },
+            status: session.role === 'DOCTOR' ? 'PENDING' : {not: 'COMPLETED'}
+        }
     });
 }
 
@@ -1683,7 +1638,7 @@ export async function getAvailableDrugsTotalPages(
         case "brand":
             count = await prisma.drugBrand.count({
                 where: {
-                    name: {contains: query, mode: "insensitive"},
+                    name: {contains: query},
                     Batch: {some: {status: "AVAILABLE"}},
                 },
             });
@@ -1691,7 +1646,7 @@ export async function getAvailableDrugsTotalPages(
         case "model":
             count = await prisma.drug.count({
                 where: {
-                    name: {contains: query, mode: "insensitive"},
+                    name: {contains: query},
                     batch: {some: {status: "AVAILABLE"}},
                 },
             });
@@ -1700,8 +1655,8 @@ export async function getAvailableDrugsTotalPages(
             count = await prisma.batch.count({
                 where: {
                     OR: [
-                        {drug: {name: {contains: query, mode: "insensitive"}}},
-                        {drugBrand: {name: {contains: query, mode: "insensitive"}}},
+                        {drug: {name: {contains: query}}},
+                        {drugBrand: {name: {contains: query}}},
                     ],
                     status: "AVAILABLE",
                 },
@@ -1718,11 +1673,11 @@ export async function getStockByModel({
                                           page = 1,
                                           sort = "alphabetically",
                                           startDate,
-                                          endDate,
+                                          endDate
                                       }: StockQueryParams): Promise<StockData[]> {
     const drugs = await prisma.drug.findMany({
         where: {
-            name: {contains: query, mode: "insensitive"},
+            name: {contains: query},
             batch: {
                 some: {
                     // status: "AVAILABLE",
@@ -1786,8 +1741,8 @@ export async function getStockByBatch({
     const batches = await prisma.batch.findMany({
         where: {
             OR: [
-                {drug: {name: {contains: query, mode: "insensitive"}}},
-                {drugBrand: {name: {contains: query, mode: "insensitive"}}},
+                {drug: {name: {contains: query}}},
+                {drugBrand: {name: {contains: query}}},
             ],
             // status: "AVAILABLE",
             ...(startDate && endDate
@@ -1831,7 +1786,7 @@ export async function getStockByBrand({
 
     const brands = await prisma.drugBrand.findMany({
         where: {
-            name: {contains: query, mode: "insensitive"},
+            name: {contains: query},
             Batch: {
                 some: {
                     AND: [
@@ -1990,7 +1945,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByModel({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drug: {name: {contains: query, mode: "insensitive"}},
+        drug: {name: {contains: query}},
     };
 
     if (status === "ALL") {
@@ -2025,7 +1980,7 @@ export async function getCompletedFilteredDrugsByModel({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drug: {name: {contains: query, mode: "insensitive"}},
+        drug: {name: {contains: query}},
     };
 
     if (status === "ALL") {
@@ -2075,7 +2030,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByBrand({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drugBrand: {name: {contains: query, mode: "insensitive"}},
+        drugBrand: {name: {contains: query}},
     };
 
     if (status === "ALL") {
@@ -2110,7 +2065,7 @@ export async function getCompletedFilteredDrugsByBrand({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        drugBrand: {name: {contains: query, mode: "insensitive"}},
+        drugBrand: {name: {contains: query}},
     };
 
     if (status === "ALL") {
@@ -2160,7 +2115,7 @@ export async function getTotalPagesForCompletedFilteredDrugsByBatch({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        number: {contains: query, mode: "insensitive"},
+        number: {contains: query},
     };
 
     if (status === "ALL") {
@@ -2195,7 +2150,7 @@ export async function getCompletedFilteredDrugsByBatch({
     toDate?: string;
 }) {
     const whereCondition: Record<string, unknown> = {
-        number: {contains: query, mode: "insensitive"},
+        number: {contains: query},
     };
 
     if (status === "ALL") {
@@ -2271,36 +2226,34 @@ function sortAndPaginateBatches(
 }
 
 export async function getIssuedPatients(batchId: number) {
-    return await prisma.issue
-        .findMany({
-            where: {batchId},
-            select: {
-                id: true,
-                quantity: true,
-                prescriptionId: true,
-                prescription: {
-                    select: {
-                        time: true,
-                        patientId: true,
-                        patient: {
-                            select: {
-                                name: true,
-                            },
+    return await prisma.issue.findMany({
+        where: {batchId},
+        select: {
+            id: true,
+            quantity: true,
+            prescriptionId: true,
+            prescription: {
+                select: {
+                    time: true,
+                    patientId: true,
+                    patient: {
+                        select: {
+                            name: true,
                         },
                     },
                 },
             },
-        })
-        .then((issues) =>
-            issues.map((issue) => ({
-                id: issue.id,
-                issuedDate: issue.prescription.time.toISOString().split("T")[0],
-                patientId: issue.prescription.patientId,
-                patientName: issue.prescription.patient.name,
-                prescriptionId: issue.prescriptionId,
-                issuedAmount: issue.quantity,
-            }))
-        );
+        },
+    }).then(issues =>
+        issues.map(issue => ({
+            id: issue.id,
+            issuedDate: issue.prescription.time.toISOString().split('T')[0],
+            patientId: issue.prescription.patientId,
+            patientName: issue.prescription.patient.name,
+            prescriptionId: issue.prescriptionId,
+            issuedAmount: issue.quantity,
+        }))
+    );
 }
 
 //Suggest the name when adding the drugs
@@ -2386,6 +2339,7 @@ export async function getDrugModelStats(drugId: number) {
             expired: {quantity: 0, value: 0},
             trashed: {quantity: 0, value: 0},
             errors: {quantity: 0, value: 0},
+
         };
 
         batches.forEach((batch) => {
@@ -2452,4 +2406,312 @@ export async function getDrugModelStats(drugId: number) {
         console.error("Error fetching stock analysis:", error);
         throw new Error("Failed to fetch stock analysis");
     }
+}
+
+interface PatientData {
+    id: number;
+    name: string;
+    birthDate?: Date | null;
+    address?: string | null;
+}
+
+/**
+ * Fetches patient data from the database
+ * @param patientId - The ID of the patient to fetch
+ * @returns Promise with patient data or null if not found
+ */
+export async function fetchPatientData(patientId: number): Promise<PatientData | null> {
+    try {
+        // Query the database for the patient with the given ID
+        const patient = await prisma.patient.findUnique({
+            where: {
+                id: patientId,
+            },
+            select: {
+                id: true,
+                name: true,
+                birthDate: true,
+                address: true,
+            },
+        });
+        return patient;
+    } catch (error) {
+        console.error("Error fetching patient data:", error);
+        throw new Error("Failed to fetch patient data");
+    }
+}
+
+interface MedicalCertificateData {
+    patientId: number;
+    nameOfThePatient: string;
+    addressOfThePatient: string;
+    fitForDuty: string;
+    dateOfSickness: string;
+    recommendedLeaveDays: string;
+    natureOfTheDisease: string;
+    ageOfThePatient: string;
+    reccomendations: string;
+}
+
+export async function storeMedicalCertificate(data: MedicalCertificateData) {
+    try {
+        const certificate = await prisma.medicalCertificate.create({
+            data: {
+                patientId: data.patientId,
+                nameOfThePatient: data.nameOfThePatient,
+                addressOfThePatient: data.addressOfThePatient,
+                fitForDuty: data.fitForDuty === 'Yes' ? MedicalCertificateStatus.FIT : MedicalCertificateStatus.UNFIT,
+                dateOfSickness: new Date(data.dateOfSickness),
+                recommendedLeaveDays: parseInt(data.recommendedLeaveDays),
+                natureOfTheDisease: data.natureOfTheDisease,
+                ageOfThePatient: parseInt(data.ageOfThePatient),
+                reccomendations: data.reccomendations,
+                time: new Date(),
+            },
+        });
+
+        return certificate;
+    } catch (error) {
+        console.error('Error storing medical certificate:', error);
+        throw new Error('Failed to store medical certificate');
+    }
+}
+
+const getNextMedicalCertificateId = async (): Promise<number> => {
+    const latestCertificate = await prisma.medicalCertificate.findFirst({
+        orderBy: { id: "desc" },
+        select: { id: true },
+    });
+
+    return latestCertificate ? latestCertificate.id + 1 : 1;
+};
+
+export default getNextMedicalCertificateId;
+
+export async function getMedicalCertificates(patientId: number) {
+    try {
+        const certificates = await prisma.medicalCertificate.findMany({
+            where: { patientId },
+            orderBy: { time: 'desc' }
+        });
+        return certificates;
+    } catch (error) {
+        console.error('Failed to fetch certificates:', error);
+        throw new Error('Failed to fetch certificates');
+    }
+}
+
+export async function deleteMedicalCertificate(id: number) {
+    try {
+        await prisma.medicalCertificate.delete({
+            where: { id }
+        });
+        revalidatePath('/patients/[id]');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to delete certificate:', error);
+        throw new Error('Failed to delete certificate');
+    }
+}
+
+export async function calculateBill({ prescriptionData }: {
+    prescriptionData: BatchAssignPayload
+}): Promise<myBillError> {
+    const prescriptionID = prescriptionData.prescriptionID;
+    const batchAssignments = prescriptionData.batchAssigns;
+
+    try {
+        return await prisma.$transaction(async (prisma): Promise<myBillError> => {
+            const prescription = await prisma.prescription.findUnique({
+                where: { id: prescriptionID },
+                include: {
+                    patient: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            });
+
+            if (!prescription) {
+                return { success: false, message: 'Prescription not found' };
+            }
+
+            if (prescription.status === 'COMPLETED') {
+                return { success: false, message: 'Prescription already completed' };
+            }
+
+            let dspFees: number = 0;
+            const dispensaryFee = await prisma.charge.findUnique({
+                where: {
+                    name: ChargeType.DISPENSARY
+                }
+            });
+
+            if (dispensaryFee) {
+                dspFees = dispensaryFee.value;
+            }
+
+            let dctFee: number = 0;
+            const doctorFee = await prisma.charge.findUnique({
+                where: {
+                    name: ChargeType.DOCTOR
+                }
+            });
+
+            if (doctorFee) {
+                dctFee = doctorFee.value;
+            }
+
+            // Create or update the bill in the database first to get the billID
+            const createdBill = await prisma.bill.upsert({
+                where: {
+                    prescriptionId: prescriptionID
+                },
+                create: {
+                    prescriptionId: prescriptionID,
+                    doctorCharge: dctFee + (prescription.extraDoctorCharge ?? 0),
+                    dispensaryCharge: dspFees,
+                    medicinesCharge: 0 // Will update this later
+                },
+                update: {
+                    doctorCharge: dctFee + (prescription.extraDoctorCharge ?? 0),
+                    dispensaryCharge: dspFees,
+                    medicinesCharge: 0 // Will update this later
+                }
+            });
+
+            // Initialize the bill object with the new structure
+            const bill: Bill = {
+                billID: createdBill.id,
+                prescriptionID,
+                patientName: prescription.patient.name,
+                patientID: prescriptionData.patientID,
+                dispensary_charge: dspFees,
+                doctor_charge: dctFee + (prescription.extraDoctorCharge ?? 0),
+                cost: 0,
+                entries: [],
+            };
+
+            for (let i = 0; i < batchAssignments.length; i++) {
+                const assign = batchAssignments[i];
+                if (!assign.batchID) {
+                    return { success: false, message: `Batch not found for a drug` };
+                }
+
+                const batch = await prisma.batch.findUnique({
+                    where: { id: assign.batchID },
+                    include: { drug: true, drugBrand: true },
+                });
+
+                if (!batch) {
+                    return { success: false, message: `Batch not found for drug ${assign.batchID}` };
+                }
+
+                const issue = await prisma.issue.findUnique({
+                    where: { id: assign.issueID },
+                });
+
+                if (!issue) {
+                    return { success: false, message: `Issue not found for drug ${assign.issueID}` };
+                }
+
+                // Updating or creating the cache
+                await prisma.batchHistory.upsert({
+                    where: {
+                        drugId_drugBrandId: {
+                            drugId: batch.drugId,
+                            drugBrandId: batch.drugBrandId
+                        }
+                    },
+                    update: {
+                        batchId: assign.batchID
+                    },
+                    create: {
+                        drugId: batch.drugId,
+                        drugBrandId: batch.drugBrandId,
+                        batchId: assign.batchID
+                    }
+                });
+
+                await prisma.issue.update({
+                    where: { id: assign.issueID },
+                    data: { batchId: assign.batchID },
+                });
+
+                const batchCost = issue.quantity * batch.retailPrice;
+                bill.cost += batchCost;
+
+                bill.entries.push({
+                    drugName: batch.drug.name,
+                    brandName: batch.drugBrand.name,
+                    quantity: issue.quantity,
+                    unitPrice: batch.retailPrice
+                });
+            }
+
+            // Update the final medicine charges
+            await prisma.bill.update({
+                where: {
+                    id: createdBill.id
+                },
+                data: {
+                    medicinesCharge: bill.cost
+                }
+            });
+
+            bill.cost += bill.doctor_charge + bill.dispensary_charge;
+            return { success: true, message: 'Bill calculated successfully', bill };
+        });
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            console.error(error.message);
+        }
+        return { success: false, message: 'An error occurred while calculating bill' };
+    }
+}
+
+export async function getBill(prescriptionID: number): Promise<Bill> {
+    const prescription = await prisma.prescription.findUnique({
+        where: { id: prescriptionID },
+        include: {
+            patient: {
+                select: {
+                    name: true
+                }
+            },
+            issues: {
+                include: {
+                    batch: true,
+                    drug: true,
+                    brand: true,
+                }
+            },
+            Bill: true
+        }
+    });
+
+    if (!prescription) {
+        throw new Error('Prescription not found');
+    }
+
+    if (prescription.status === 'PENDING' || !prescription.Bill || !prescription.issues.every(issue => issue.batch)) {
+        throw new Error('Prescription not completed');
+    }
+
+    return {
+        billID: prescription.Bill.id,
+        patientName: prescription.patient.name,
+        prescriptionID,
+        patientID: prescription.patientId,
+        dispensary_charge: prescription.Bill.dispensaryCharge,
+        doctor_charge: prescription.Bill.doctorCharge,
+        cost: (prescription.Bill.medicinesCharge + prescription.Bill.dispensaryCharge + prescription.Bill.doctorCharge),
+        entries: prescription.issues.map(issue => ({
+            drugName: issue.drug.name,
+            brandName: issue.brand.name,
+            quantity: issue.quantity,
+            unitPrice: issue.batch?.retailPrice ?? 0,
+        }))
+    };
 }

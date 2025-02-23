@@ -63,7 +63,7 @@ export type InventoryFormData = {
     brandName: string;
     brandDescription?: string;
     batchNumber: string;
-    drugType: DrugType;
+    drugType: string;
     quantity: number | string;
     expiry: string;
     retailPrice: number | string;
@@ -223,6 +223,9 @@ export type BillEntry = {
 }
 
 export type Bill = {
+    billID: number;
+    prescriptionID: number;
+    patientName: string;
     entries: BillEntry[];
     cost: number;
     patientID: number;
@@ -230,7 +233,21 @@ export type Bill = {
     doctor_charge: number
 }
 
-//types of income for day 
+export type MedicalCertificate = {
+    id: number;
+    patientId: number;
+    nameOfThePatient: string;
+    addressOfThePatient: string;
+    fitForDuty: "FIT" | "UNFIT";
+    dateOfSickness: Date;
+    recommendedLeaveDays: number;
+    natureOfTheDisease: string;
+    ageOfThePatient: number;
+    reccomendations: string;
+    time: Date;
+  }
+
+//types of income for day
 
 export interface DailyIncome {
     date: string;

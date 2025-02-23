@@ -1,5 +1,4 @@
-import {getBill} from "@/app/lib/actions/bills";
-import {getPrescription} from "@/app/lib/actions/prescriptions";
+import {getBill, getPrescription} from "@/app/lib/actions";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {Activity, Heart, HeartPulse} from "lucide-react";
@@ -9,9 +8,13 @@ import {
     PrescriptionIssueCard
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/MedicineCards";
 import BatchAssign from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
-import {BillComponent} from "@/app/(dashboard)/_components/Bill";
-import {Bill} from "@/app/lib/definitions";
-import {verifySession} from "@/app/lib/sessions";
+import { BillComponent } from "@/app/(dashboard)/_components/Bill";
+import { Bill } from "@/app/lib/definitions";
+import { verifySession } from "@/app/lib/sessions";
+import { BillExport } from "@/app/(dashboard)/_components/BillExport";
+import { IoMdDownload } from "react-icons/io";
+import {Button} from "@/components/ui/button";
+
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
     const resolvedParams = await params;
@@ -95,7 +98,17 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                                 ))}
                             </div>
                         )}
-                        <BillComponent bill={bill}/>
+                        <BillComponent bill={bill} />
+                        <div className="flex justify-end">
+                            <BillExport
+                                bill={bill}
+                                trigger={
+                                    <Button>
+                                        <IoMdDownload className="w-5 h-5 text-white" />
+                                    </Button>
+                                }
+                            />
+                        </div>
                     </>
                 ) : (
                     <>

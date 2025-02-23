@@ -72,6 +72,11 @@ enum PrescriptionStatus {
   COMPLETED
 }
 
+enum MedicalCertificateStatus {
+  FIT
+  UNFIT
+}
+
 model Patient {
   id           Int             @id @default(autoincrement())
   telephone    String
@@ -85,6 +90,7 @@ model Patient {
   queueEntry   QueueEntry[]
   prescription Prescription[]
   reports      PatientReport[]
+  medicalCert  MedicalCertificate[]
 }
 
 model User {
@@ -181,6 +187,21 @@ model Prescription {
   issues             Issue[]
   OffRecordMeds      OffRecordMeds[]
   Bill               Bill?
+}
+
+model MedicalCertificate {
+  id        Int     @id @default(autoincrement())
+  patient   Patient @relation(fields: [patientId], references: [id])
+  patientId Int
+  nameOfThePatient String
+  addressOfThePatient String
+  fitForDuty   MedicalCertificateStatus
+  dateOfSickness DateTime
+  recommendedLeaveDays Int
+  natureOfTheDisease String
+  ageOfThePatient Int
+  reccomendations String
+  time      DateTime 
 }
 
 model Bill {

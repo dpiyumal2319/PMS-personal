@@ -19,9 +19,12 @@ import {
     AlertDialogHeader,
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
-import {handleServerAction} from "@/app/lib/utils";
-import {useRouter} from "next/navigation";
+import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
+import { handleServerAction } from "@/app/lib/utils";
+import { useRouter } from "next/navigation";
+import { BillExport } from '@/app/(dashboard)/_components/BillExport';
+import { IoMdDownload } from "react-icons/io";
+
 
 export type BatchAssignment = {
     issueID: number;
@@ -121,17 +124,32 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
                     />
                 ))}
 
-                <div className="flex justify-between items-center">
-                    <div className="text-red-500">{error}</div>
-                    <Button
-                        className={'bg-primary-500'}
-                        onClick={generateBill}
-                    >
-                        Generate Bill
-                    </Button>
-                </div>
+            <div className="flex justify-between items-center">
+                <div className="text-red-500">{error}</div>
+                <Button
+                    className={'bg-primary-500'}
+                    onClick={generateBill}
+                >
+                    Generate Bill
+                </Button>
+            </div>
+            {bill && (
+                <>
+                    <BillComponent bill={bill} />
+                    <div className="flex justify-end">
+                        <BillExport
+                            bill={bill}
+                            trigger={
+                                <Button>
+                                    <IoMdDownload className="w-5 h-5 text-white" />
+                                </Button>
+                            }
+                        />
+                    </div>
+                </>
+            )}
 
-                {bill && <BillComponent bill={bill}/>}
+
 
 
                 <div>

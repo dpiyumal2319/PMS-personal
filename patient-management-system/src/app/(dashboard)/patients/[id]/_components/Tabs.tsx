@@ -2,7 +2,7 @@
 
 import {usePathname} from "next/navigation";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {ClipboardEdit, FileText, Pill, BriefcaseMedical} from "lucide-react";
+import { FileText, Pill, BriefcaseMedical, FileUser} from "lucide-react";
 import Link from "next/link";
 
 const PatientTabs = ({
@@ -64,7 +64,8 @@ const DoctorLinks = [
     {name: "Prescribe", value: "prescriptions/add", icon: BriefcaseMedical},
     {name: "Prescriptions", value: "prescriptions", icon: Pill},
     {name: "Reports", value: "reports", icon: FileText},
-    {name: "Notes", value: "notes", icon: ClipboardEdit},
+    // {name: "Notes", value: "notes", icon: ClipboardEdit},
+    {name: "Medical Certificates", value: "medicalCertificates", icon: FileUser}
 ]
 
 const NurseLinks = [
