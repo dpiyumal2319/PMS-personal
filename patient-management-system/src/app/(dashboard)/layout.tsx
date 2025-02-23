@@ -4,6 +4,12 @@ import React, {Suspense} from "react";
 import Loading from "@/app/(dashboard)/loading";
 import {SidebarProvider} from "@/components/ui/sidebar";
 import {AppSidebar} from "@/app/(dashboard)/_components/sidebar/app-sidebar";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS",
+    description: "Patient Management System",
+};
 
 export default function DashboardLayout({
                                             children,

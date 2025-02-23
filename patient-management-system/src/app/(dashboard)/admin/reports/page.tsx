@@ -4,6 +4,12 @@ import AllReportsTable from "@/app/(dashboard)/admin/reports/_components/AllRepo
 import AddReports from "@/app/(dashboard)/admin/reports/_components/AddReports";
 import {Suspense} from "react";
 import SkeletonLoader from "@/app/(dashboard)/admin/reports/_components/LoadingSkeleton";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Report templates",
+    description: "Manage and configure report templates.",
+};
 
 export default async function Page({
                                        searchParams,
@@ -23,7 +29,8 @@ export default async function Page({
             <div className="w-full p-4 flex-grow flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-primary-700">All Report Templates <span className="text-gray-500">({totalReports})</span></h1>
+                    <h1 className="text-2xl font-bold text-primary-700">All Report Templates <span
+                        className="text-gray-500">({totalReports})</span></h1>
                     <AddReports/>
                 </div>
 

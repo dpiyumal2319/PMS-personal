@@ -1,6 +1,12 @@
 import React from 'react';
 import {FileQuestion, ArrowLeft} from 'lucide-react';
 import Link from 'next/link';
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Page Not Found",
+    description: "Page Not Found",
+};
 
 export default function NotFoundApp() {
     return (
@@ -16,7 +22,8 @@ export default function NotFoundApp() {
                 </h1>
 
                 <p className="text-gray-600 mb-8">
-                    The page you&#39;re looking for doesn&#39;t exist or has been moved. Please check the URL and try again.
+                    The page you&#39;re looking for doesn&#39;t exist or has been moved. Please check the URL and try
+                    again.
                 </p>
 
                 <div className="space-y-4">

@@ -6,6 +6,13 @@ import Pagination from "../_components/Pagination";
 import {PatientsTableSkeleton} from "./_components/PatientsTableSkeleton";
 import SearchDropdown from "../_components/Dropdown";
 import AddPatientForm from "./_components/AddPatientForm";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - All Patients",
+    description: "List of all patients in the system.",
+};
+
 
 export default async function Page({
                                        searchParams,

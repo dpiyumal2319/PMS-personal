@@ -1,5 +1,11 @@
 import React from 'react';
 import TabsBar from "@/app/(dashboard)/inventory/cost-management/_components/TabBar";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Cost Management",
+    description: "Manage and view cost management.",
+};
 
 const InventoryLayout = ({children}: { children: React.ReactNode }) => {
     return (

@@ -1,5 +1,11 @@
 import React from "react";
 import NextBreadcrumb from "./_components/BreadCrumb";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Available Stocks",
+    description: "Manage and view available stocks.",
+};
 
 export default function Layout({
                                    children,
