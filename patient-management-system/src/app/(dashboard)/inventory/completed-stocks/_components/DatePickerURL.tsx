@@ -13,11 +13,13 @@ const DatePickerURL = () => {
     // Function to get default dates
     const getDefaultDates = () => {
         const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() - 30);
         const thirtyDaysAgo = new Date(today);
         thirtyDaysAgo.setDate(today.getDate() - 30);
         return {
             start: thirtyDaysAgo,
-            end: today
+            end: tomorrow
         };
     };
 
