@@ -35,18 +35,20 @@ const PatientTabs = () => {
     };
 
     return (
-        <Tabs onValueChange={handleTabChange} className="w-full h-10">
-            <TabsList className="grid grid-cols-2 w-full">
-                <TabsTrigger value="details" className="flex items-center gap-2">
-                    <LucidePackagePlus className="h-4 w-4"/>
-                    Batch Details
-                </TabsTrigger>
-                <TabsTrigger value="issuedPatients" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4"/>
-                    Issued Patients
-                </TabsTrigger>
-            </TabsList>
-        </Tabs>
+        <div className={'w-full bg-white p-2'}>
+            <Tabs onValueChange={handleTabChange} defaultValue={'details'} className="w-full h-10">
+                <TabsList className="grid grid-cols-2 w-full">
+                    <TabsTrigger value="details" className="flex items-center gap-2">
+                        <LucidePackagePlus className="h-4 w-4"/>
+                        Batch Details
+                    </TabsTrigger>
+                    <TabsTrigger value="issuedPatients" className="flex items-center gap-2">
+                        <FileText className="h-4 w-4"/>
+                        Issued Patients
+                    </TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </div>
     );
 };
 

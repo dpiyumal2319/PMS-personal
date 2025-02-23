@@ -5,7 +5,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {handleServerAction} from "@/app/lib/utils";
-import {updateCharges} from "@/app/lib/actions";
+import {updateCharges} from "@/app/lib/actions/charges";
 import {ChargeType} from "@prisma/client";
 
 interface FeeFormProps {

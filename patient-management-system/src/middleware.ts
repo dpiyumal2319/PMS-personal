@@ -1,32 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { decrypt } from "@/app/lib/sessions";
-import { cookies } from 'next/headers';
+import {NextRequest, NextResponse} from "next/server";
+import {decrypt} from "@/app/lib/sessions";
+import {cookies} from "next/headers";
 
-// 1. Specify only the public routes
-const publicRoutes = ['/login', '/', '/signup'];
+const publicRoutes = ["/login", "/", "/signup"];
+const doctorOnlyRoutes = [
+    "/patients/[id]/prescriptions/add",
+    "/patients/[id]/reports",
+    "/patients/[id]/notes",
+    "/admin/staff",
+    "/admin/reports",
+    "/admin/fees",
+    "/inventory/cost-management",
+];
 
-// 2. The rest of the routes are considered protected
-export default async function middleware(req: NextRequest) {
-    console.log('Middleware running');
+// Helper function to check if a path matches a route pattern
+function matchRoute(path: string, pattern: string): boolean {
+    const pathParts = path.split('/');
+    const patternParts = pattern.split('/');
 
-    // 3. Get the current path
-    const path = req.nextUrl.pathname;
-
-    // 4. Check if the current route is public
-    const isPublicRoute = publicRoutes.includes(path);
-
-    // 5. Decrypt the session from the cookie
-    const cookie = (await cookies()).get('session')?.value;
-    const session = await decrypt(cookie);
-
-    // 6. Redirect to /login if the user is not authenticated and trying to access a protected route
-    if (!isPublicRoute && !session?.id) {
-        return NextResponse.redirect(new URL('/login', req.nextUrl));
+    if (pathParts.length !== patternParts.length) {
+        return false;
     }
 
-    // 7. Redirect to /dashboard if the user is authenticated and trying to access a public route
-    if (isPublicRoute && session?.id && !req.nextUrl.pathname.startsWith('/dashboard')) {
-        return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
+    return patternParts.every((part, i) => {
+        // If the pattern part is wrapped in [], it's a parameter
+        if (part.startsWith('[') && part.endsWith(']')) {
+            // Check if the corresponding path part exists and isn't empty
+            return pathParts[i] && pathParts[i].length > 0;
+        }
+        // Otherwise, check for exact match
+        return part === pathParts[i];
+    });
+}
+
+export default async function middleware(req: NextRequest) {
+    const path = req.nextUrl.pathname;
+    const isPublicRoute = publicRoutes.includes(path);
+
+    const cookie = (await cookies()).get("session")?.value;
+    const session = await decrypt(cookie);
+    const role = session?.role;
+
+    // Redirect to /login if the user is not authenticated and trying to access a protected route
+    if (!isPublicRoute && !session?.id) {
+        return NextResponse.redirect(new URL("/login", req.nextUrl));
+    }
+
+    // Restrict doctor-only routes using pattern matching
+    const isDoctorOnlyRoute = doctorOnlyRoutes.some(route => matchRoute(path, route));
+    if (isDoctorOnlyRoute && role !== 'DOCTOR') {
+        return NextResponse.redirect(new URL("/unauthorized", req.nextUrl));
+    }
+
+    // Redirect authenticated users away from the login page
+    if (path === "/login" && session?.id) {
+        return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
     }
 
     return NextResponse.next();
@@ -34,5 +62,5 @@ export default async function middleware(req: NextRequest) {
 
 // Routes Middleware should not run on
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+    matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
 };

@@ -2,15 +2,18 @@ import React from "react";
 import NextBreadcrumb from "./_components/BreadCrumb";
 
 export default function Layout({
-    children,
-}: {
+                                   children,
+                               }: {
     children: React.ReactNode;
 }) {
     return (
-        <div className={'flex flex-col h-full'}>
-            <div className="flex flex-1">
+        <div className="flex flex-col h-full overflow-hidden">
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-y-auto min-h-0">
                 {children}
             </div>
+
+            {/* Fixed footer - no need for sticky */}
             <NextBreadcrumb
                 separator={<span className="text-gray-400 text-xs"> &gt; </span>}
                 activeClasses="text-blue-500 font-semibold text-sm"
@@ -19,5 +22,5 @@ export default function Layout({
                 capitalizeLinks
             />
         </div>
-    )
+    );
 }

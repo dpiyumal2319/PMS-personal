@@ -1,44 +1,72 @@
 'use client';
 
-import React, { useActionState } from 'react';
-import { login } from "@/app/lib/auth";
+import React from 'react';
+import {useActionState} from 'react';
+import {login} from "@/app/lib/auth";
+import {Mail, Lock} from 'lucide-react';
+import {Input} from "@/components/ui/input";
 
 function LoginForm() {
     const [state, action, pending] = useActionState(login, '');
 
     return (
-        <form action={action} className="space-y-4">
+        <form action={action} className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                    type="email"
-                    name="email" // ✅ Added name attribute
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                    placeholder="your@email.com"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Email
+                </label>
+                <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className="h-5 w-5 text-gray-400"/>
+                    </div>
+                    <Input
+                        type="email"
+                        name="email"
+                        required
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white/50"
+                        placeholder="your@email.com"
+                    />
+                </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input
-                    type="password"
-                    name="password" // ✅ Added name attribute
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                    placeholder="••••••••"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Password
+                </label>
+                <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-gray-400"/>
+                    </div>
+                    <input
+                        type="password"
+                        name="password"
+                        required
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white/50"
+                        placeholder="••••••••"
+                    />
+                </div>
             </div>
 
             {/* Error message */}
-            {state && <div className="text-red-500 text-sm">{state}</div>}
+            {state && (
+                <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 text-sm">
+                    {state}
+                </div>
+            )}
 
             <button
                 type="submit"
-                disabled={pending} // ✅ Disable button while submitting
-                className="w-full bg-primary hover:bg-primary-600 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                disabled={pending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50 relative overflow-hidden"
             >
-                {pending ? 'Loading...' : 'Login'}
+                <span className={`flex items-center justify-center ${pending ? 'opacity-0' : 'opacity-100'}`}>
+                    Sign In
+                </span>
+                {pending && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                    </div>
+                )}
             </button>
         </form>
     );

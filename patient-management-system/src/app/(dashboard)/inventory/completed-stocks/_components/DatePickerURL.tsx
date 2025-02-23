@@ -1,10 +1,10 @@
 "use client";
 
 import React, {useCallback, useEffect, useState} from 'react';
-import { Calendar as CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useRouter, useSearchParams } from 'next/navigation';
+import {Calendar as CalendarIcon} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {useRouter, useSearchParams} from 'next/navigation';
 
 const DatePickerURL = () => {
     const router = useRouter();
@@ -42,7 +42,7 @@ const DatePickerURL = () => {
     }, [router, searchParams]);
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         const newDate = new Date(value);
 
         const newDateRange = {
@@ -65,9 +65,9 @@ const DatePickerURL = () => {
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
-                        className="w-[300px] justify-start text-left font-normal"
+                        className="justify-start text-left font-normal bg-white hover:bg-white"
                     >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        <CalendarIcon className="mr-2 h-4 w-4"/>
                         {dateRange.startDate && dateRange.endDate ? (
                             `${formatDateForInput(dateRange.startDate)} - ${formatDateForInput(dateRange.endDate)}`
                         ) : (

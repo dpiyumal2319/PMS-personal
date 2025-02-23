@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import {searchPrescriptions} from "@/app/lib/actions";
+import {searchPrescriptions} from "@/app/lib/actions/prescriptions";
 import {Card, CardContent} from "@/components/ui/card";
 import {formatDistanceToNow} from "date-fns";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
@@ -23,7 +23,7 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
     });
 
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {prescriptions.length > 0 ? (
                 prescriptions.map((prescription) => (
                     <Link
@@ -36,7 +36,8 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-xl font-semibold">{prescription.presentingSymptoms || "No Symptoms"}</h3>
                                         <CustomBadge text={`#${prescription.id}`} color="blue"/>
-                                        <CustomBadge text={prescription.status} color={prescription.status === 'PENDING' ? "amber" : "green"}/>
+                                        <CustomBadge text={prescription.status}
+                                                     color={prescription.status === 'PENDING' ? "amber" : "green"}/>
                                     </div>
                                     <p className="text-gray-500 text-sm">{formatDistanceToNow(new Date(prescription.time), {addSuffix: true})}</p>
                                 </div>

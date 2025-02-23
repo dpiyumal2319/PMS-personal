@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -10,26 +10,40 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
     Tooltip,
-    TooltipContent, TooltipProvider,
-    TooltipTrigger
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {FaTrash, FaMedkit, FaTablets} from "react-icons/fa";
-import {removePatientFromQueue} from "@/app/lib/actions";
-import {handleServerAction} from "@/app/lib/utils"
-import {redirect} from "next/navigation";
+import { FaTrash, FaMedkit, FaTablets } from "react-icons/fa";
+import { removePatientFromQueue } from "@/app/lib/actions";
+import { handleServerAction } from "@/app/lib/utils";
+import { redirect } from "next/navigation";
 
 // Remove from Queue Button
-const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) => {
-    const handleRemove = () => {
-        const result = handleServerAction(() => removePatientFromQueue(queueId, token), {
-            loadingMessage: 'Removing from Queue...'
-        })
+const RemoveFromQueue = ({
+    token,
+    queueId,
+    refetch,
+}: {
+    token: number;
+    queueId: number;
+    refetch: () => void;
+}) => {
+    const handleRemove = async () => {
+        const result = await handleServerAction(
+            () => removePatientFromQueue(queueId, token),
+            {
+                loadingMessage: "Removing from Queue...",
+            }
+        );
 
-        console.log(result);
+        if (result.success) {
+            refetch();
+        }
     };
 
     return (
@@ -39,22 +53,20 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
                     <TooltipTrigger asChild>
                         <AlertDialogTrigger asChild>
                             <button className="p-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
-                                <FaTrash/>
+                                <FaTrash />
                             </button>
                         </AlertDialogTrigger>
                     </TooltipTrigger>
-                    <TooltipContent>
-                        Remove from Queue
-                    </TooltipContent>
+                    <TooltipContent>Remove from Queue</TooltipContent>
                 </Tooltip>
-            </ TooltipProvider>
+            </TooltipProvider>
 
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Remove from the Queue</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to remove this patient from the queue? This action cannot be
-                        undone.
+                        Are you sure you want to remove this patient from the
+                        queue? This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -74,51 +86,45 @@ const RemoveFromQueue = ({token, queueId}: { token: number, queueId: number }) =
 };
 
 // Prescribe Button (For Doctors)
-const PrescribeMedicine = ({id}: { id: number }) => {
+const PrescribeMedicine = ({ id }: { id: number }) => {
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <button
                         onClick={() => {
-                            redirect(`/patients/${id}/prescriptions/add`)
+                            redirect(`/patients/${id}/prescriptions/add`);
                         }}
                         className="p-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
                     >
-                        <FaMedkit/>
+                        <FaMedkit />
                     </button>
                 </TooltipTrigger>
-                <TooltipContent>
-                    Prescribe Medicine
-                </TooltipContent>
+                <TooltipContent>Prescribe Medicine</TooltipContent>
             </Tooltip>
-        </ TooltipProvider>
+        </TooltipProvider>
     );
 };
 
 // Issue Medicine Button (For Pharmacists)
-const IssueMedicine = ({id}: { id: number }) => {
+const IssueMedicine = ({ id }: { id: number }) => {
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <button
                         onClick={() => {
-                            redirect(`/patients/${id}/prescriptions`)
+                            redirect(`/patients/${id}/prescriptions`);
                         }}
                         className="p-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
                     >
-                        <FaTablets/>
+                        <FaTablets />
                     </button>
                 </TooltipTrigger>
-                <TooltipContent>
-                    Issue Medicine
-                </TooltipContent>
+                <TooltipContent>Issue Medicine</TooltipContent>
             </Tooltip>
-        </ TooltipProvider>
+        </TooltipProvider>
     );
 };
 
-export {
-    RemoveFromQueue, PrescribeMedicine, IssueMedicine
-};
+export { RemoveFromQueue, PrescribeMedicine, IssueMedicine };

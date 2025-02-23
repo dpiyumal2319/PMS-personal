@@ -1,6 +1,5 @@
 "use client"
 
-import {ChevronRight} from "lucide-react"
 import {
     Collapsible,
     CollapsibleContent,
@@ -17,7 +16,7 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
-import {Clock, LayoutDashboard, Package, Shield, Users, UserPen} from "lucide-react"
+import {Clock, LayoutDashboard, Package, Shield, Users, UserPen, ChevronRight, CircleDollarSign} from "lucide-react"
 import {Role} from '@prisma/client';
 import {SidebarItem} from "@/app/lib/definitions";
 import {usePathname} from "next/navigation";
@@ -35,6 +34,13 @@ export const DoctorLinks: SidebarItem[] = [
         title: "Patients",
         url: "/patients",
         icon: Users,
+        isActive: false,
+    },
+    {
+        type: "link",
+        title: "Daily Income",
+        url: "/income-by-patients",
+        icon: CircleDollarSign,
         isActive: false,
     },
     {
@@ -127,11 +133,18 @@ export const NurseLinks: SidebarItem[] = [
         isActive: false,
     },
     {
-        type: 'link',
-        title: 'Profile',
-        url: 'admin/profile',
+        type: "link",
+        title: "Profile",
+        url: "/admin/profile",
         icon: UserPen,
-        isActive: false
+        isActive: false,
+    },
+    {
+        type: "link",
+        title: "Daily Income",
+        url: "/income-by-patients",
+        icon: CircleDollarSign,
+        isActive: false,
     },
     {
         type: "expandable",
@@ -143,12 +156,6 @@ export const NurseLinks: SidebarItem[] = [
                 type: "link",
                 title: "Available Stocks",
                 url: "/inventory/available-stocks",
-                isActive: false,
-            },
-            {
-                type: "link",
-                title: "Cost Management",
-                url: "/inventory/cost-management",
                 isActive: false,
             },
             {

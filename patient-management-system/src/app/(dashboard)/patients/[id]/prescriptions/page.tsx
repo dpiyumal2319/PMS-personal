@@ -1,15 +1,15 @@
-import React, { Suspense } from 'react';
-import { getPrescriptionsCount, searchPrescriptionCount } from "@/app/lib/actions";
+import React, {Suspense} from 'react';
+import {getPrescriptionsCount, searchPrescriptionCount} from "@/app/lib/actions/prescriptions";
 import Search from "@/app/(dashboard)/_components/Search";
 import SearchDropdown from "@/app/(dashboard)/_components/Dropdown";
 import PrescriptionList from "@/app/(dashboard)/patients/[id]/prescriptions/_components/PrescriptionList";
 import Pagination from "@/app/(dashboard)/_components/Pagination";
 import PrescriptionListSkeleton from "@/app/(dashboard)/patients/[id]/prescriptions/_components/CardsSkeleton";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { verifySession } from "@/app/lib/sessions";
+import {Button} from "@/components/ui/button";
+import {verifySession} from "@/app/lib/sessions";
 
-const Page = async ({ searchParams, params }: {
+const Page = async ({searchParams, params}: {
     searchParams?: Promise<{
         query?: string;
         page?: string;
@@ -50,22 +50,22 @@ const Page = async ({ searchParams, params }: {
 
 
             <div className={'flex gap-4 items-center'}>
-                <Search placeholder={`Search Prescription by ${filter}...`} />
+                <Search placeholder={`Search Prescription by ${filter}...`}/>
                 <SearchDropdown items={[
-                    { label: "Symptom", value: "symptom" },
-                    { label: "Medicine", value: "drug" },
-                ]} urlParameterName="filter" />
+                    {label: "Symptom", value: "symptom"},
+                    {label: "Medicine", value: "drug"},
+                ]} urlParameterName="filter"/>
             </div>
 
             <div className="flex-grow overflow-y-auto w-full">
-                <Suspense fallback={<PrescriptionListSkeleton />}>
+                <Suspense fallback={<PrescriptionListSkeleton/>}>
                     <PrescriptionList currentPage={currentPage} query={query} patientID={id} perPage={recordsPerPage}
-                        filter={filter} />
+                                      filter={filter}/>
                 </Suspense>
             </div>
 
             <div className={'flex justify-center items-center sticky bottom-0'}>
-                <Pagination totalPages={Math.ceil(filteredCount / recordsPerPage)} itemsPerPage={recordsPerPage} />
+                <Pagination totalPages={Math.ceil(filteredCount / recordsPerPage)} itemsPerPage={recordsPerPage}/>
             </div>
         </div>
     );

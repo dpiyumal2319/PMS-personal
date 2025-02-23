@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { DateRange } from "@/app/lib/definitions";
-
+import { format } from "date-fns";
 interface DatePickerProps {
   startDate: Date;
   endDate: Date;
@@ -24,7 +24,7 @@ export default function DatePicker({
   action,
 }: DatePickerProps) {
   const formatDateForInput = (date: Date) => {
-    return date.toISOString().split("T")[0];
+    return format(date, "yyyy-MM-dd"); // Formats as YYYY-MM-DD (local date)
   };
 
   const handleDateChange = (e: { target: { name: string; value: string } }) => {

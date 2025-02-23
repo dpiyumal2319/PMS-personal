@@ -7,11 +7,11 @@ import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {Stethoscope, Heart, Activity, FileText, ChevronLeft} from "lucide-react";
 import IssueFromInventory from "./IssueFromInventory";
-import {StrategyJson} from "@/app/lib/definitions";
-import {IssueingStrategy} from "@prisma/client";
+import {IssuingStrategy, MEAL} from "@prisma/client";
+import type {DrugType} from "@prisma/client";
 import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/AddOffRecordDrugs";
 import {handleServerAction} from "@/app/lib/utils";
-import {addPrescription} from "@/app/lib/actions";
+import {addPrescription} from "@/app/lib/actions/prescriptions";
 import {
     PrescriptionIssuesList,
     OffRecordMedsList
@@ -26,9 +26,15 @@ export interface IssueInForm {
     details: string | null;
     brandId: number;
     brandName: string;
-    strategy: IssueingStrategy;
-    strategyDetails: StrategyJson;
+    meal: MEAL | null;
+    dose: number;
+    forDays: number | null;
+    forTimes: number | null;
+    strategy: IssuingStrategy;
     quantity: number;
+    drugType: DrugType;
+    concentration: number | string;
+    concentrationID: number;
 }
 
 export interface OffRecordMeds {

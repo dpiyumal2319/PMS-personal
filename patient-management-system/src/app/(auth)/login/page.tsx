@@ -1,51 +1,55 @@
+import React from 'react';
 import Link from "next/link";
 import LoginForm from "@/app/(auth)/login/_componets/LoginForm";
+import {Stethoscope} from "lucide-react";
 
 export default function LoginPage() {
-    // const [errorMessage, formAction, Pending] = useActionState(login, '');
-
-    // Rendered on client or server side
-    console.log(`Rendered on ${typeof window === 'undefined' ? 'server' : 'client'} side`);
-
     return (
-        // <form action={formAction} className="flex flex-col items-center justify-center h-screen">
-        //     <h1 className="text-2xl mb-4">Select Your Role</h1>
-        //
-        //     {/* Role Selection */}
-        //     <select name="role" className="p-2 border mb-4">
-        //         <option value="doctor">Doctor</option>
-        //         <option value="nurse">Nurse</option>
-        //     </select>
-        //
-        //     {/* User ID Input */}
-        //     <input
-        //         name="id"
-        //         placeholder="User ID"
-        //         className="p-2 border mb-4"
-        //         required
-        //     />
-        //
-        //     {/* Error Message Display */}
-        //     {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
-        //
-        //     {/* Submit Button */}
-        //     <button type="submit" className="bg-primary text-white p-2 rounded" disabled={Pending}>
-        //         {Pending ? 'Loading...' : 'Login'}
-        //     </button>
-        // </form>
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Sign In</h2>
-
-                <LoginForm />
-
-                <div className={'mt-2'}>
-                    <Link href={'#'} className={'text-sm text-primary-600 hover:text-primary-500 text-center'}
-                    >
-                        Forget Password?
+        <div className="min-h-screen w-full bg-gradient-to-b from-blue-50 to-white flex flex-col">
+            {/* Header */}
+            <header className="bg-white/70 backdrop-blur-md shadow-sm">
+                <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center">
+                    <Link href="/" className="flex items-center">
+                        <Stethoscope className="h-8 w-8 text-blue-600"/>
+                        <span className="ml-2 text-xl font-bold text-gray-900">
+                            MediPanel
+                        </span>
                     </Link>
+                </nav>
+            </header>
+
+            {/* Main Content */}
+            <div className="flex-1 flex items-center justify-center p-4">
+                <div
+                    className="max-w-sm w-full bg-white/70 rounded-xl shadow-lg p-8 border border-white/20">
+                    <div className="mb-8 text-center">
+                        <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+                        <p className="mt-2 text-gray-600">Please sign in to your account</p>
+                    </div>
+                    <LoginForm/>
+                    <div className="mt-6 space-y-4">
+                        <div className="text-center">
+                            <Link
+                                href="#"
+                                className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                                Forgot your password?
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {/* Footer */}
+            <footer className="bg-gray-50/80 backdrop-blur-sm">
+                <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <p className="text-sm text-gray-500">
+                            © 2025 ColorNovels. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
