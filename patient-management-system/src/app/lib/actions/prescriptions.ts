@@ -209,6 +209,7 @@ export async function searchPrescriptions({
             where = {
                 presentingSymptoms: {
                     contains: query,
+                    mode: 'insensitive',
                 },
             };
         }
@@ -221,6 +222,7 @@ export async function searchPrescriptions({
                                 drug: {
                                     name: {
                                         contains: query,
+                                        mode: 'insensitive',
                                     },
                                 },
                             },
@@ -231,6 +233,7 @@ export async function searchPrescriptions({
                             some: {
                                 name: {
                                     contains: query,
+                                    mode: 'insensitive',
                                 },
                             },
                         },
@@ -289,6 +292,7 @@ export async function searchPrescriptionCount({
             where = {
                 presentingSymptoms: {
                     contains: query,
+                    mode: 'insensitive',
                 },
             };
         }
@@ -301,6 +305,7 @@ export async function searchPrescriptionCount({
                                 drug: {
                                     name: {
                                         contains: query,
+                                        mode: 'insensitive',
                                     },
                                 },
                             },
@@ -311,6 +316,7 @@ export async function searchPrescriptionCount({
                             some: {
                                 name: {
                                     contains: query,
+                                    mode: 'insensitive',
                                 },
                             },
                         },
