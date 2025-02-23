@@ -1,5 +1,5 @@
 import React from 'react';
-import { getActiveQueue } from "@/app/lib/actions";
+import {getActiveQueue} from "@/app/lib/actions";
 import {redirect} from "next/navigation";
 
 const Page = async () => {
