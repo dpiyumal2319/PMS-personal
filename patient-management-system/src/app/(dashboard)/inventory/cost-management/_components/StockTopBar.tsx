@@ -43,35 +43,31 @@ export default function StockTopbar({
   };
 
   return (
-    <div className="flex h-full flex-col w-full ">
-      <div className="sticky top-0 p-4 bg-white z-20 border-b shadow-md flex gap-4">
-        <div className="relative w-[200px]">
-          <SearchPanel
-            placeholder="Search by Name"
-            //   defaultValue={query}
-          />
-        </div>
+    <div className="sticky top-0 p-4 bg-white z-5 border-b shadow-md flex gap-4 overflow-x-auto">
+      <SearchPanel
+        placeholder="Search by Name"
+        //   defaultValue={query}
+      />
 
-        <Dropdown
-          items={[
-            { label: "By Model", value: "model" },
-            { label: "By Brand", value: "brand" },
-            { label: "By Batch", value: "batch" },
-          ]}
-          urlParameterName="selection"
-          //   defaultValue={selection}
-        />
+      <Dropdown
+        items={[
+          { label: "By Model", value: "model" },
+          { label: "By Brand", value: "brand" },
+          { label: "By Batch", value: "batch" },
+        ]}
+        urlParameterName="selection"
+        //   defaultValue={selection}
+      />
 
-        <SortingDropdownCM
-          selection={selection}
-          // defaultValue={sort}
-        />
-        <DatePicker
-          startDate={startDate}
-          endDate={endDate}
-          action={handleDateChange}
-        />
-      </div>
+      <SortingDropdownCM
+        selection={selection}
+        // defaultValue={sort}
+      />
+      <DatePicker
+        startDate={startDate}
+        endDate={endDate}
+        action={handleDateChange}
+      />
     </div>
   );
 }

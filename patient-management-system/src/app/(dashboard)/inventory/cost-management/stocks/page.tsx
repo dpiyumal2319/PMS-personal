@@ -18,7 +18,7 @@ export default async function StockPage({
     endDate?: string;
   }>;
 }) {
-  //Await for the search
+  // Await for the search
   const resolvedSearchParams = await searchParams;
 
   const query = resolvedSearchParams?.query || "";
@@ -27,22 +27,24 @@ export default async function StockPage({
   const sort: SortOption =
     (resolvedSearchParams?.sort as SortOption) || "alphabetically";
 
-  // Default to last 30 days if no dates are provided
-  const defaultStartDate = new Date();
-  defaultStartDate.setHours(0, 1, 0, 0);
-  defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+  // Default to last month if no dates are provided
+  const defaultStartDate = new Date(
+    new Date().setMonth(new Date().getMonth() - 1)
+  );
+  const defaultEndDate = new Date();
+  defaultEndDate.setHours(0, 1, 0, 0);
 
   const startDate = resolvedSearchParams?.startDate
     ? new Date(resolvedSearchParams.startDate)
     : defaultStartDate;
   const endDate = resolvedSearchParams?.endDate
     ? new Date(resolvedSearchParams.endDate)
-    : new Date();
+    : defaultEndDate;
 
   const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 ">
       {/* Top Bar */}
 
       <StockTopbar
@@ -52,7 +54,7 @@ export default async function StockPage({
       />
 
       {/* Content */}
-      <div className="flex-grow overflow-y-auto mt-4">
+      <div className="flex-grow overflow-y-auto mt-4 p-4">
         <Suspense
           fallback={
             <div className="text-center">
