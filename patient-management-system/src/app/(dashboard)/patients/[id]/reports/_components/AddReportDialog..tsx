@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
-import { addPatientReport, getReportParams, searchReportTypes } from "@/app/lib/actions";
-import { useDebouncedCallback } from "use-debounce";
-import { handleServerAction } from "@/app/lib/utils";
+import React, {useEffect, useState} from "react";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import {Switch} from "@/components/ui/switch";
+import {addPatientReport, getReportParams, searchReportTypes} from "@/app/lib/actions";
+import {useDebouncedCallback} from "use-debounce";
+import {handleServerAction} from "@/app/lib/utils";
 import PopoverSelect from "@/app/(dashboard)/_components/PopOverSelect";
+import {Skeleton} from "@/components/ui/skeleton";
 
 interface Report {
     id: number;
@@ -27,7 +28,7 @@ interface AddReportDialogProps {
     id: number;
 }
 
-const AddReportDialog = ({ id }: AddReportDialogProps) => {
+const AddReportDialog = ({id}: AddReportDialogProps) => {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<number | null>(null);
     const [reports, setReports] = useState<Report[]>([]);
@@ -35,6 +36,7 @@ const AddReportDialog = ({ id }: AddReportDialogProps) => {
     const [isSearching, setIsSearching] = useState(false);
     const [paramValues, setParamValues] = useState<Record<number, { value: string; attention: boolean }>>({});
     const [error, setError] = useState<string | null>(null);
+    const [isParamsLoading, setIsParamsLoading] = useState(false);
 
     const handleSearch = useDebouncedCallback(async (term: string) => {
         setIsSearching(true);
@@ -46,6 +48,13 @@ const AddReportDialog = ({ id }: AddReportDialogProps) => {
         }
     }, 700);
 
+    const resetForm = () => {
+        setValue(null);
+        setParamValues({});
+        setError(null);
+        handleSearch("");
+    }
+
     useEffect(() => {
         if (open) {
             handleSearch("");
@@ -55,16 +64,17 @@ const AddReportDialog = ({ id }: AddReportDialogProps) => {
     const handleSelect = async (selectedId: number) => {
         setValue(selectedId === value ? null : selectedId);
         if (selectedId !== value) {
-            setIsSearching(true);
+            setIsParamsLoading(true);
             try {
                 const paramsData = await getReportParams(selectedId);
                 setParams(paramsData);
                 setParamValues({});
             } finally {
-                setIsSearching(false);
+                setIsParamsLoading(false);
             }
         }
     };
+
 
     const handleParamChange = (paramId: number, paramValue: string) => {
         setParamValues(prev => ({
@@ -121,7 +131,10 @@ const AddReportDialog = ({ id }: AddReportDialogProps) => {
 
                 <div className="py-6 space-y-6">
                     <div className="space-y-2">
-                        <Label>Report Type</Label>
+                        <div className={'flex justify-between'}>
+                            <Label>Report Type</Label>
+                            <Button onClick={resetForm} variant="ghost" className={'text-red-500'}>Reset</Button>
+                        </div>
                         <PopoverSelect
                             options={reports}
                             value={value}
@@ -137,7 +150,9 @@ const AddReportDialog = ({ id }: AddReportDialogProps) => {
 
                     {error && <p className="text-red-500">{error}</p>}
 
-                    {(value && params && params.length > 0) && (
+                    {isParamsLoading ? (
+                        <ParamsSkeleton/>
+                    ) : (value && params.length > 0) && (
                         <div className="space-y-4">
                             <Label>Parameters</Label>
                             <ScrollArea className="h-[240px]">
@@ -171,7 +186,8 @@ const AddReportDialog = ({ id }: AddReportDialogProps) => {
                                                     className="h-9 w-48"
                                                 />
                                                 {param.units && (
-                                                    <span className="text-sm text-gray-500 min-w-16">{param.units}</span>
+                                                    <span
+                                                        className="text-sm text-gray-500 min-w-16">{param.units}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -193,6 +209,35 @@ const AddReportDialog = ({ id }: AddReportDialogProps) => {
             </DialogContent>
         </Dialog>
     );
+};
+
+
+const ParamsSkeleton = () => {
+    return (
+        <div className="space-y-4">
+            <Label>Parameters</Label>
+            <div className="space-y-4 p-4">
+                {[...Array(3)].map((_, index) => (
+                    <div
+                        key={index}
+                        className="flex items-center justify-between border-b border-gray-300 pb-4"
+                    >
+                        <div className="flex items-center gap-8">
+                            <Skeleton className="h-6 w-32"/>
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-6 w-10"/>
+                                <Skeleton className="h-6 w-20"/>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <Skeleton className="h-9 w-48"/>
+                            <Skeleton className="h-6 w-16"/>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
 };
 
 export default AddReportDialog;

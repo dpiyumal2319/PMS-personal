@@ -25,9 +25,11 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
         <div className="flex flex-col gap-4">
             {reports.map((report) => (
                 <Card key={report.id} className="w-full">
-                    <CardHeader>
+                    <CardHeader className={'pb-2'}>
                         <CardTitle className="flex justify-between items-center">
-                            <span>{report.reportType.name}</span>
+                            <CardTitle className="text-lg font-semibold text-gray-900">
+                                {report.reportType.name}
+                            </CardTitle>
                             <div className="flex gap-2 items-center">
                             <span
                                 className="text-sm text-muted-foreground">{formatDistanceToNow(new Date(report.time), {addSuffix: true})}</span>
@@ -44,7 +46,7 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
                                     {param.reportParameter.units ? ` (${param.reportParameter.units})` : ''} :
                                 </span>
                                     {param.attention ?
-                                        <CustomBadge text={param.value} color={'red'} className={'text-sm'}/>
+                                        <CustomBadge text={param.value} color={'red'}/>
                                         : <span className="font-semibold text-sm">{param.value}</span>}
 
                                 </div>

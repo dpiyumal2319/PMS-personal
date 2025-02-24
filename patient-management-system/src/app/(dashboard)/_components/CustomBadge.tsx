@@ -1,6 +1,6 @@
 // ParameterBadge.tsx
-import { Badge } from "@/components/ui/badge";
-import { HTMLAttributes } from "react";
+import {Badge} from "@/components/ui/badge";
+import {HTMLAttributes} from "react";
 
 
 export type badgeColorsType = {
@@ -26,6 +26,8 @@ export type badgeColorsType = {
     fuchsia: string;
     pink: string;
     rose: string;
+    destructive: string;
+    okay: string;
 }
 
 interface ParameterBadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -57,15 +59,17 @@ export const badgeColors = {
     fuchsia: 'bg-fuchsia-100 text-fuchsia-800 hover:bg-fuchsia-200',
     pink: 'bg-pink-100 text-pink-800 hover:bg-pink-200',
     rose: 'bg-rose-100 text-rose-800 hover:bg-rose-200',
+    destructive: 'bg-red-500 text-white hover:bg-red-600',
+    okay: 'bg-green-500 text-white hover:bg-green-600',
 };
 
 
 export function CustomBadge({
-    text,
-    color,
-    className,
-    ...props
-}: ParameterBadgeProps) {
+                                text,
+                                color,
+                                className,
+                                ...props
+                            }: ParameterBadgeProps) {
 
 
     return (
@@ -86,9 +90,9 @@ export function getRandomColor() {
 
 
 export function RandomColorBadge({
-    text,
-    ...props
-}: ParameterBadgeProps) {
+                                     text,
+                                     ...props
+                                 }: ParameterBadgeProps) {
     return (
         <CustomBadge
             {...props}

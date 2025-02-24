@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import jsPDF from "jspdf";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { FileText } from "lucide-react";
-import getNextMedicalCertificateId, { fetchPatientData, storeMedicalCertificate } from "@/app/lib/actions";
+import {Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/ui/textarea";
+import {FileText} from "lucide-react";
+import getNextMedicalCertificateId, {fetchPatientData, storeMedicalCertificate} from "@/app/lib/actions";
 
-export function MedicalCertificateExport({ patientId }: { patientId?: number }) {
+export function MedicalCertificateExport({patientId}: { patientId?: number }) {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
         patientName: "",
@@ -28,7 +28,7 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
     useEffect(() => {
         // Fetch patient data if patientId is provided
         if (patientId) {
-            loadPatientData(patientId);
+            loadPatientData(patientId).then();
         }
     }, [patientId]);
 
@@ -62,11 +62,11 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value,
-            ...(name === 'fitForDuty' && value === 'Yes' ? { sickDaysCount: '0' } : {})
+            ...(name === 'fitForDuty' && value === 'Yes' ? {sickDaysCount: '0'} : {})
         }));
     };
 
@@ -114,7 +114,6 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
             let yPos = 10;
 
 
-
             // Add doctor information - INCREASED FONT SIZE
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(10);  // Increased from 9
@@ -134,7 +133,7 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
 
             pdf.setFontSize(14);  // Increased from 9
             pdf.setFont("helvetica", "bold");
-            pdf.text("Private Medical Certificate", centerX, yPos, { align: "center" });
+            pdf.text("Private Medical Certificate", centerX, yPos, {align: "center"});
             yPos += 13;
 
 
@@ -214,11 +213,11 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
             // Signature line
             pdf.line(pageWidth - 65, signatureY, pageWidth - marginRight, signatureY);
             pdf.setFontSize(9);  // Increased from 7
-            pdf.text("Signature", pageWidth - 38, signatureY + 5, { align: "center" });
+            pdf.text("Signature", pageWidth - 38, signatureY + 5, {align: "center"});
 
             // Footer with certificate ID
             pdf.setFontSize(8);  // Increased from 6
-            pdf.text(`Certificate ID: MC-${nextMCId}`, centerX, 190, { align: "center" });
+            pdf.text(`Certificate ID: MC-${nextMCId}`, centerX, 190, {align: "center"});
 
             // Save the PDF with a dynamic filename
             const filename = formData.patientName
@@ -237,17 +236,21 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2 bg-primary text-white">
-                    <FileText className="w-5 h-5 text-white" /> Generate Medical Certificate
+                <Button>
+                    <FileText className="w-5 h-5 text-white"/> Generate Medical Certificate
                 </Button>
             </DialogTrigger>
 
             <DialogContent className="max-w-xl h-[90vh] flex flex-col">
                 {/* Form Header */}
-                <div className="bg-primary text-white p-4 rounded-lg">
-                    <h2 className="text-xl font-bold text-center">Medical Certificate Generator</h2>
-                    <p className="text-center text-blue-100 text-sm">Complete the form below to generate certificate</p>
-                </div>
+                <DialogHeader>
+                    <div className="bg-primary text-white p-4 rounded-lg">
+                        <DialogTitle className="text-xl font-bold text-center">Medical Certificate
+                            Generator</DialogTitle>
+                        <p className="text-center text-blue-100 text-sm">Complete the form below to generate
+                            certificate</p>
+                    </div>
+                </DialogHeader>
 
                 {/* Scrollable content */}
                 <div className="flex-1 overflow-y-auto p-6 bg-gray-50 rounded-lg">
@@ -259,7 +262,8 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
                         <div className="space-y-6 max-w-lg mx-auto">
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                                 <h3 className="text-blue-700 font-medium mb-3 flex items-center">
-                                    <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">1</span>
+                                    <span
+                                        className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">1</span>
                                     Patient Information
                                 </h3>
 
@@ -299,7 +303,8 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
                                 </div>
 
                                 <div className="mb-4">
-                                    <label className="text-sm font-medium text-gray-700">Name & Adress of the Work Place</label>
+                                    <label className="text-sm font-medium text-gray-700">Name & Adress of the Work
+                                        Place</label>
                                     <Input
                                         name="workPlace"
                                         value={formData.workPlace}
@@ -312,7 +317,8 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
 
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                                 <h3 className="text-blue-700 font-medium mb-3 flex items-center">
-                                    <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">2</span>
+                                    <span
+                                        className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">2</span>
                                     Medical Details
                                 </h3>
 
@@ -341,7 +347,8 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
 
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                                 <h3 className="text-blue-700 font-medium mb-3 flex items-center">
-                                    <span className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">3</span>
+                                    <span
+                                        className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">3</span>
                                     Fitness Assessment
                                 </h3>
 
@@ -370,7 +377,8 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
                                 </div>
                                 {formData.fitForDuty === "No" ? (
                                     <div className="mb-4">
-                                        <label className="text-sm font-medium text-gray-700">Days of Leave Recommended</label>
+                                        <label className="text-sm font-medium text-gray-700">Days of Leave
+                                            Recommended</label>
                                         <Input
                                             name="sickDaysCount"
                                             value={formData.sickDaysCount}
@@ -412,7 +420,7 @@ export function MedicalCertificateExport({ patientId }: { patientId?: number }) 
                         className="w-full"
                         disabled={isLoading}
                     >
-                        <FileText className="w-5 h-5 mr-2" /> Generate Medical Certificate
+                        <FileText className="w-5 h-5 mr-2"/> Generate Medical Certificate
                     </Button>
                 </div>
             </DialogContent>

@@ -36,11 +36,9 @@ export default function DashboardLayout({
             <AppSidebar/>
             <main className="flex flex-col w-full h-full">
                 <TopBar/>
-                <div className="flex-1 overflow-y-auto min-h-0">
-                    <Suspense fallback={<Loading/>}>
-                        {children}
-                    </Suspense>
-                </div>
+                <Suspense fallback={<Loading/>}>
+                    {children}
+                </Suspense>
             </main>
         </SidebarProvider>
     );

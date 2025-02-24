@@ -33,7 +33,7 @@ const Page = async ({searchParams, params}: {
 
 
     return (
-        <div className={'flex flex-col flex-grow gap-4 h-full'}>
+        <div className={'flex flex-col gap-4 h-full'}>
             <div className={'flex justify-between items-center gap-4'}>
                 <span className={'text-md'}>There are total {prescriptionsCount} prescriptions</span>
                 <div>
@@ -57,7 +57,7 @@ const Page = async ({searchParams, params}: {
                 ]} urlParameterName="filter"/>
             </div>
 
-            <div className="flex-grow overflow-y-auto w-full">
+            <div className="flex-grow w-full">
                 <Suspense fallback={<PrescriptionListSkeleton/>}>
                     <PrescriptionList currentPage={currentPage} query={query} patientID={id} perPage={recordsPerPage}
                                       filter={filter}/>

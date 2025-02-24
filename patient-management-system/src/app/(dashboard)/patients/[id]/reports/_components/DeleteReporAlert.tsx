@@ -11,7 +11,7 @@ import {
     AlertDialogCancel,
     AlertDialogAction
 } from "@/components/ui/alert-dialog";
-import {Trash} from "lucide-react";
+import {Trash2} from "lucide-react";
 import {handleServerAction} from "@/app/lib/utils";
 import {deletePatientReport} from "@/app/lib/actions";
 import {Button} from "@/components/ui/button";
@@ -30,9 +30,8 @@ export function DeleteReport({id, patientId}: { id: number, patientId: number })
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 p-0"
                 >
-                    <Trash className="h-4 w-4 text-red-600"/>
+                    <Trash2 className="h-4 w-4 text-red-500"/>
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
