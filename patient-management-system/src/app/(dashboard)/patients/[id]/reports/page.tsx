@@ -8,6 +8,12 @@ import CardSkeleton from "@/app/(dashboard)/patients/[id]/reports/_components/Ca
 import AddReportDialog from "@/app/(dashboard)/patients/[id]/reports/_components/AddReportDialog.";
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Patient Reports",
+    description: "Patient Management System - Patient Reports",
+};
 
 const Page = async ({params, searchParams}: {
     searchParams?: Promise<{

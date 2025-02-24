@@ -8,6 +8,12 @@ import PrescriptionListSkeleton from "@/app/(dashboard)/patients/[id]/prescripti
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {verifySession} from "@/app/lib/sessions";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    title: "PMS - Patient's Prescriptions",
+    description: "Patient's Prescriptions",
+};
 
 const Page = async ({searchParams, params}: {
     searchParams?: Promise<{
