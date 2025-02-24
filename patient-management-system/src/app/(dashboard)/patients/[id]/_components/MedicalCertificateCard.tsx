@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { format } from 'date-fns';
-import { Trash2 } from 'lucide-react';
+import {useState} from 'react';
+import {format} from 'date-fns';
+import {Trash2} from 'lucide-react';
 import {
     Card,
     CardContent,
@@ -26,17 +26,18 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { MedicalCertificate } from '@/app/lib/definitions';
-import { deleteMedicalCertificate } from '@/app/lib/actions';
+import {Button} from '@/components/ui/button';
+import {Badge} from '@/components/ui/badge';
+import {MedicalCertificate} from '@/app/lib/definitions';
+import {deleteMedicalCertificate} from '@/app/lib/actions';
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 interface MedicalCertificateCardProps {
     certificate: MedicalCertificate;
-    fetchCertificates: () => void;
+    action: () => void;
 }
 
-export function MedicalCertificateCard({ certificate, fetchCertificates }: MedicalCertificateCardProps) {
+export function MedicalCertificateCard({certificate, action}: MedicalCertificateCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -44,7 +45,7 @@ export function MedicalCertificateCard({ certificate, fetchCertificates }: Medic
         try {
             await deleteMedicalCertificate(certificate.id);
             setIsDeleteDialogOpen(false);
-            fetchCertificates();
+            action();
         } catch (error) {
             console.error('Failed to delete certificate:', error);
         }
@@ -53,24 +54,23 @@ export function MedicalCertificateCard({ certificate, fetchCertificates }: Medic
     return (
         <>
             <Card
-                className="group relative hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+                className="hover:shadow-md transition-shadow duration-300 cursor-pointer"
                 onClick={() => setIsOpen(true)}
             >
-                <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
+                <CardHeader className={'pb-2'}>
+                    <div className="flex justify-between items-center">
                         <CardTitle className="text-lg font-semibold text-gray-900">
                             Medical Certificate
                         </CardTitle>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setIsDeleteDialogOpen(true);
                             }}
                         >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-red-500"/>
                         </Button>
                     </div>
                 </CardHeader>
@@ -80,11 +80,13 @@ export function MedicalCertificateCard({ certificate, fetchCertificates }: Medic
                             <span className="text-sm text-gray-500">
                                 {format(new Date(certificate.dateOfSickness), 'MMM dd, yyyy')}
                             </span>
-                            <Badge
-                                variant={certificate.fitForDuty === 'FIT' ? 'default' : 'destructive'}
-                            >
-                                {certificate.fitForDuty}
-                            </Badge>
+                            {/*<Badge*/}
+                            {/*    variant={certificate.fitForDuty === 'FIT' ? 'default' : 'destructive'}*/}
+                            {/*>*/}
+                            {/*    {certificate.fitForDuty}*/}
+                            {/*</Badge>*/}
+                            <CustomBadge text={certificate.fitForDuty}
+                                         color={certificate.fitForDuty === 'FIT' ? 'green' : 'red'}/>
                         </div>
                         <p className="text-sm font-medium text-gray-700 truncate">
                             {certificate.natureOfTheDisease}

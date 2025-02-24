@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import {searchPrescriptions} from "@/app/lib/actions/prescriptions";
-import {Card, CardContent} from "@/components/ui/card";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {formatDistanceToNow} from "date-fns";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {Activity, Heart, HeartPulse} from "lucide-react";
@@ -21,7 +21,6 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
         take: perPage,
         skip,
     });
-
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {prescriptions.length > 0 ? (
@@ -30,17 +29,20 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                         key={prescription.id}
                         href={`/patients/${patientID}/prescriptions/${prescription.id}`}
                     >
-                        <Card className="p-4 cursor-pointer hover:shadow-lg transition h-full">
-                            <CardContent className="flex flex-col gap-2">
+                        <Card className="cursor-pointer hover:shadow-lg transition h-full">
+                            <CardHeader className={'pb-2'}>
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-xl font-semibold">{prescription.presentingSymptoms || "No Symptoms"}</h3>
+                                        <CardTitle
+                                            className="text-lg font-semibold text-gray-900">{prescription.presentingSymptoms || "No Symptoms"}</CardTitle>
                                         <CustomBadge text={`#${prescription.id}`} color="blue"/>
                                         <CustomBadge text={prescription.status}
                                                      color={prescription.status === 'PENDING' ? "amber" : "green"}/>
                                     </div>
                                     <p className="text-gray-500 text-sm">{formatDistanceToNow(new Date(prescription.time), {addSuffix: true})}</p>
                                 </div>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2">
                                 <p className="text-gray-500 text-sm">{prescription.details}</p>
                                 <div className="grid grid-cols-2 gap-2">
                                     {prescription.bloodPressure && (
@@ -69,8 +71,7 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                         <span className="text-sm">Inventory Meds:</span>
                                         {prescription.issues.map((issue) => (
                                             issue.drug &&
-                                            <CustomBadge key={issue.drug.name} text={issue.drug.name} color="green"
-                                                         className="text-sm"/>
+                                            <CustomBadge key={issue.drug.name} text={issue.drug.name} color="rose"/>
                                         ))}
                                     </div>
                                 )}

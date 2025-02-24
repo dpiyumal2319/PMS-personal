@@ -1,8 +1,8 @@
 import {getBill} from "@/app/lib/actions/bills";
 import {getPrescription} from "@/app/lib/actions/prescriptions";
-import {Card, CardContent, CardHeader} from "@/components/ui/card";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
-import {Activity, Heart, HeartPulse} from "lucide-react";
+import {Activity, ChevronLeft, Heart, HeartPulse} from "lucide-react";
 import {formatDistanceToNow} from "date-fns";
 import {
     OffRecordMedCard,
@@ -15,6 +15,7 @@ import {verifySession} from "@/app/lib/sessions";
 import {BillExport} from "@/app/(dashboard)/_components/BillExport";
 import {IoMdDownload} from "react-icons/io";
 import {Button} from "@/components/ui/button";
+import Link from "next/link";
 
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
@@ -36,9 +37,14 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
 
     return (
         <Card className="p-4">
-            <CardHeader className={`flex-row justify-between`}>
+            <CardHeader className={`flex-row justify-between pb-2`}>
                 <div className="flex items-center gap-2 text-lg font-semibold">
-                    <span>{prescription.presentingSymptoms || "No Symptoms"}</span>
+                    <Link href={`/patients/${id}/prescriptions`}
+                          className={'cursor-pointer hover:bg-gray-100 p-1 rounded'}>
+                        <ChevronLeft size={24}/>
+                    </Link>
+                    <CardTitle
+                        className={'text-2xl font-semibold text-gray-900'}>{prescription.presentingSymptoms || "No Symptoms"}</CardTitle>
                     <CustomBadge text={`#${prescription.id}`} color="blue"/>
                     <CustomBadge
                         text={prescription.status}

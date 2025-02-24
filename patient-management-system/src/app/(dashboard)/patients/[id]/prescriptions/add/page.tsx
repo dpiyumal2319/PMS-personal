@@ -9,9 +9,7 @@ const Page = async ({
     const {id} = await params;
 
     return (
-        <div>
-            <PrescriptionForm patientID={Number(id)}/>
-        </div>
+        <PrescriptionForm patientID={Number(id)}/>
     );
 };
 
