@@ -43,7 +43,7 @@ export default async function Page({
 
             </div>
             <div className="flex-grow overflow-auto">
-                <Suspense fallback={<DrugListSkeleton isLoading={true} />}>
+                <Suspense fallback={<DrugListSkeleton/>}>
                     <AvailableStockPageTable
                         query={query}
                         currentPage={currentPage}

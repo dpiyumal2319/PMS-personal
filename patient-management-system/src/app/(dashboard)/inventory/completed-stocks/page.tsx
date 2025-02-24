@@ -64,7 +64,7 @@ export default async function InventoryAvailable({
                 <DatePickerURL/>
             </div>
             <div className="flex-grow overflow-y-auto">
-                <Suspense fallback={<DrugListSkeleton isLoading={true}/>}>
+                <Suspense fallback={<DrugListSkeleton/>}>
                     <CompletedStockPageTable
                         query={query}
                         currentPage={currentPage}
