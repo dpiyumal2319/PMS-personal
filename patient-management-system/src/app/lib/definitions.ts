@@ -72,7 +72,6 @@ export type InventoryFormData = {
     drugId?: number;  // Add drugId property
     concentrationId?: number;
     concentration?: number;
-
 }
 
 

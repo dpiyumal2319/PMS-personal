@@ -1234,7 +1234,9 @@ export async function addNewItem(
         formData: InventoryFormData
     }): Promise<myError> {
     try {
-        if (!formData.drugId || !formData.brandId || !formData.concentrationId) {
+
+        // Check all the required fields
+        if (!formData.drugId || !formData.concentrationId || !formData.concentration || !formData.batchNumber || !formData.drugType || !formData.quantity || !formData.expiry || !formData.retailPrice || !formData.wholesalePrice) {
             return {success: false, message: "Please fill all fields"};
         }
 
@@ -2494,8 +2496,8 @@ export async function storeMedicalCertificate(data: MedicalCertificateData) {
 
 const getNextMedicalCertificateId = async (): Promise<number> => {
     const latestCertificate = await prisma.medicalCertificate.findFirst({
-        orderBy: { id: "desc" },
-        select: { id: true },
+        orderBy: {id: "desc"},
+        select: {id: true},
     });
 
     return latestCertificate ? latestCertificate.id + 1 : 1;
@@ -2518,10 +2520,10 @@ export async function getMedicalCertificates(patientId: number) {
 export async function deleteMedicalCertificate(id: number) {
     try {
         await prisma.medicalCertificate.delete({
-            where: { id }
+            where: {id}
         });
         revalidatePath('/patients/[id]');
-        return { success: true };
+        return {success: true};
     } catch (error) {
         console.error('Failed to delete certificate:', error);
         throw new Error('Failed to delete certificate');
