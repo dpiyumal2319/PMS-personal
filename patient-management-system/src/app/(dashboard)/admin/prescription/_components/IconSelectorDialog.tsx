@@ -12,20 +12,20 @@ import {
 import {Input} from "@/components/ui/input";
 import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
 import iconSsrMapping, {IconName} from "@/app/lib/iconMapping";
-import type {basicColorType} from "@/app/(dashboard)/_components/CustomBadge";
+import type {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import CustomColorPicker from "@/app/(dashboard)/admin/prescription/_components/CustomColorPicker";
 import {ScrollArea} from "@/components/ui/scroll-area";
 
 interface IconSelectorDialogProps {
     buttonClassName?: string;
     children?: React.ReactNode;
-    onSelect: (icon: IconName, color: keyof basicColorType) => void; // Modified to return color
+    onSelect: (icon: IconName, color: keyof BasicColorType) => void; // Modified to return color
 }
 
 const IconSelectorDialog: React.FC<IconSelectorDialogProps> = ({buttonClassName, children, onSelect}) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedIcon, setSelectedIcon] = useState<IconName | null>(null);
-    const [selectedColor, setSelectedColor] = useState<keyof basicColorType>("slate");
+    const [selectedColor, setSelectedColor] = useState<keyof BasicColorType>("slate");
     const [open, setOpen] = useState(false);
 
     const filteredIcons = Object.keys(iconSsrMapping)

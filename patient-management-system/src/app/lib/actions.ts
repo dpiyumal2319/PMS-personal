@@ -22,6 +22,7 @@ import {validateEmail, validateMobile} from "@/app/lib/utils";
 import {AddUserFormData} from "@/app/(dashboard)/admin/staff/_components/AddUserDialog";
 import {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 import MedicalCertificateStatus = $Enums.MedicalCertificateStatus;
+import {ReportForm} from "@/app/(dashboard)/admin/reports/_components/EditReport";
 
 export async function changePassword({
                                          currentPassword,
@@ -1009,19 +1010,6 @@ export async function getReportType(reportId: number) {
             parameters: true,
         },
     });
-}
-
-interface Parameter {
-    name: string;
-    units: string;
-    id?: number;
-    isNew?: boolean;
-}
-
-interface ReportForm {
-    name: string;
-    description: string;
-    parameters: Parameter[];
 }
 
 export async function editReportType(

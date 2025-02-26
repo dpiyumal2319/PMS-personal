@@ -12,9 +12,7 @@ const Page = () => {
         <div className={'flex flex-col h-full w-full p-4'}>
             {/*Heading*/}
             <h1 className="text-2xl font-bold text-primary-700">Prescription Vitals</h1>
-            <div className={'flex flex-col items-center justify-center h-full'}>
-                <VitalsForm/>
-            </div>
+            <VitalsForm/>
         </div>
     );
 };

@@ -10,6 +10,7 @@ import {
     BrandOption, CustomDrugType, DrugOption,
     ConcentrationOption
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {Vital} from "@/app/(dashboard)/admin/prescription/_components/VitalsForm";
 
 export async function completePrescription(
     prescriptionID: number

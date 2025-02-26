@@ -9,14 +9,14 @@ import {handleServerAction} from "@/app/lib/utils";
 import {Edit} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";
 
-interface Parameter {
+export interface Parameter {
     name: string;
     units: string;
     id?: number;
     isNew?: boolean;
 }
 
-interface ReportForm {
+export interface ReportForm {
     name: string;
     description: string;
     parameters: Parameter[];

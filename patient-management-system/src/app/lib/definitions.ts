@@ -36,17 +36,6 @@ export type myBillError = {
     bill?: Bill | null
 }
 
-export interface Parameter {
-    name: string;
-    units: string;
-}
-
-export interface ReportForm {
-    name: string;
-    description: string;
-    parameters: Parameter[];
-}
-
 export type PatientFormData = {
     name: string;
     NIC: string;
