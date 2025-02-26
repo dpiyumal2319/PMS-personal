@@ -15,12 +15,13 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Pencil} from "lucide-react"; // Edit icon
-import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog";
+import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog_re-icons";
 import {Gender, VitalType} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
-import {handleServerAction} from "@/app/lib/utils";
+import type {IconName} from "@/app/lib/iconMapping";
+import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
 import {updateVital} from "@/app/lib/actions/prescriptions";
+import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
 
 export interface VitalFormData {
     id: number;
@@ -136,9 +137,13 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
                                 icon,
                                 color
                             });
-                        }} buttonClassName={'p-2 rounded-lg bg-white hover:bg-gray-200 h-full'}
-                                            selectedIconP={formData.icon} selectedColorP={formData.color}>
-                            <DynamicIcon name={formData.icon} className={`w-8 h-8 text-${formData.color}-500`}/>
+                        }}
+                                            buttonClassName={'flex items-center justify-center text-2xl p-2 rounded-lg bg-white hover:bg-gray-200 w-fit'}
+                                            selectedIconP={formData.icon}
+                                            selectedColorP={formData.color}
+                        >
+                            <DynamicIcon icon={formData.icon}
+                                         className={`${getTextColorClass(formData.color)}`}/>
                         </IconSelectorDialog>
                     </div>
 

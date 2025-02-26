@@ -19,8 +19,10 @@ import {
 import {FaHeadSideCough, FaMoneyBill} from "react-icons/fa";
 import {useRouter} from "next/navigation";
 import {Textarea} from "@/components/ui/textarea";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
+import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
+import {IconName} from "@/app/lib/iconMapping";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
+import {Separator} from "@/components/ui/separator";
 
 export interface IssueInForm {
     drugId: number;
@@ -168,7 +170,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         <h1 className="text-2xl font-semibold">Prescribe Medication</h1>
                     </div>
                     <span onClick={formReset} className="text-red-500 cursor-pointer text-sm hover:underline">
-                    X Clear
+                    X Clear (Refetch vitals)
                 </span>
                 </div>
                 <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
@@ -189,6 +191,8 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                             />
                         </div>
 
+                        <Separator/>
+
                         <h2 className="text-md font-semibold">Patient Vitals</h2>
 
                         {/* Grid for Vitals */}
@@ -196,8 +200,8 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                             {formData.vitals.map((vital, index) => (
                                 <div key={index} className="space-y-2">
                                     <div className="flex items-center space-x-2">
-                                        <DynamicIcon name={vital.icon as IconName} size={20}
-                                                     className={`${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
+                                        <DynamicIcon icon={vital.icon as IconName}
+                                                     className={`text-xl ${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
                                         <Label>{vital.name}</Label>
                                     </div>
                                     <Input
@@ -211,37 +215,40 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                             ))}
                         </div>
 
+                        <Separator/>
                         <h2 className="text-lg font-semibold">Additional Details</h2>
 
                         {/* Description Section - Moved Outside */}
-                        <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                                <FileText className="h-4 w-4 text-gray-500"/>
-                                <Label>Description</Label>
+                        <div className={'grid grid-cols-1 md:grid-cols-2 gap-4'}>
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <FileText className="h-4 w-4 text-gray-500"/>
+                                    <Label>Description</Label>
+                                </div>
+                                <Textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    className="w-full p-2 rounded-md"
+                                    placeholder="Additional details..."
+                                />
                             </div>
-                            <Textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                rows={3}
-                                className="w-full p-2 rounded-md"
-                                placeholder="Additional details..."
-                            />
-                        </div>
 
-                        {/* Extra Doctor Charges Section - Moved Outside */}
-                        <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                                <FaMoneyBill className="h-4 w-4 text-orange-500"/>
-                                <Label>Extra Doctor Charges</Label>
+                            {/* Extra Doctor Charges Section - Moved Outside */}
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <FaMoneyBill className="h-4 w-4 text-orange-500"/>
+                                    <Label>Extra Doctor Charges</Label>
+                                </div>
+                                <Input
+                                    type="number"
+                                    name="extraDoctorCharges"
+                                    value={formData.extraDoctorCharges}
+                                    onChange={handleChange}
+                                    placeholder="Enter extra charges..."
+                                />
                             </div>
-                            <Input
-                                type="number"
-                                name="extraDoctorCharges"
-                                value={formData.extraDoctorCharges}
-                                onChange={handleChange}
-                                placeholder="Enter extra charges..."
-                            />
                         </div>
                     </div>
                 </Card>
