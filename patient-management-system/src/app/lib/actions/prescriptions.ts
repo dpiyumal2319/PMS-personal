@@ -665,7 +665,11 @@ export async function getDrugTypesByDrug(drugID: number): Promise<CustomDrugType
 }
 
 export async function getAllVitals() {
-    return prisma.vitals.findMany();
+    return prisma.vitals.findMany({
+        orderBy: {
+            id: "asc",
+        }
+    });
 }
 
 export async function getPatientSpecificVitals(patientID: number) {
@@ -687,6 +691,9 @@ export async function getPatientSpecificVitals(patientID: number) {
                 {forGender: patient.gender}, // Include vitals specific to the patient's gender
             ],
         },
+        orderBy: {
+            id: "asc",
+        }
     });
 }
 
