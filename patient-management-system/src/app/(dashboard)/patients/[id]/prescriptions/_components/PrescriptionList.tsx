@@ -4,7 +4,8 @@ import {searchPrescriptions} from "@/app/lib/actions/prescriptions";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {formatDistanceToNow} from "date-fns";
 import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
+import {IconName} from "@/app/lib/iconMapping";
+import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import {getTextColorClass} from "@/app/lib/utils";
 
 const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}: {
@@ -49,8 +50,8 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                     {prescription.PrescriptionVitals.map((vital) => (
                                         <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
                                             <DynamicIcon
-                                                className={`h-5 w-5 ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}
-                                                name={vital.vital.icon as IconName}/>
+                                                className={`text-xl ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}
+                                                icon={vital.vital.icon as IconName}/>
                                             <span className="font-medium">{vital.vital.name}</span>
                                             <span className="font-semibold">{vital.value}</span>
                                         </div>

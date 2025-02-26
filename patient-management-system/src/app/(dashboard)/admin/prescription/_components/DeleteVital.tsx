@@ -13,7 +13,7 @@ import {
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import {Button} from "@/components/ui/button";
-import {Trash} from "lucide-react";
+import {Trash2} from "lucide-react";
 import {handleServerAction} from "@/app/lib/utils";
 import {deleteVital} from "@/app/lib/actions/prescriptions";
 
@@ -37,7 +37,7 @@ const DeleteVitalDialog: React.FC<DeleteVitalDialogProps> = ({id}) => {
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon">
-                    <Trash className="w-5 h-5" color={'red'}/>
+                    <Trash2 className="w-5 h-5" color={'red'}/>
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

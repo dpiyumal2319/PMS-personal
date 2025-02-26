@@ -16,16 +16,17 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Plus} from "lucide-react";
-import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog";
+import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog_re-icons";
 import {Gender, VitalType} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
+import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
 import {addVital} from "@/app/lib/actions/prescriptions";
 import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
+import type {IconName} from "@/app/lib/iconMapping";
 
 export interface VitalFormData {
     id?: number;
-    icon: IconName
+    icon: IconName;
     color: keyof BasicColorType;
     name: string;
     placeholder: string;
@@ -36,7 +37,7 @@ export interface VitalFormData {
 const AddVitalDialog = () => {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState<VitalFormData>({
-        icon: 'activity',
+        icon: 'BsActivity',
         color: 'red',
         name: '',
         placeholder: '',
@@ -47,7 +48,7 @@ const AddVitalDialog = () => {
 
     const reset = () => {
         setFormData({
-            icon: 'activity',
+            icon: 'BsActivity',
             color: 'red',
             name: '',
             placeholder: '',
@@ -91,14 +92,7 @@ const AddVitalDialog = () => {
             });
         if (result.success) {
             setOpen(false);
-            setFormData({
-                icon: 'activity',
-                color: 'red',
-                name: '',
-                placeholder: '',
-                forGender: null,
-                type: VitalType.TEXT
-            });
+            reset();
         } else {
             setError(result.message);
         }
@@ -107,11 +101,14 @@ const AddVitalDialog = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Card className="border-dashed cursor-pointer hover:bg-gray-50 transition-colors">
+                <Card
+                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:border-slate-400 transition-all duration-200 group">
                     <CardContent className="flex items-center justify-center h-full p-12">
                         <div className="flex flex-col items-center gap-2 text-gray-500">
-                            <Plus className="w-12 h-12"/>
-                            <p className="font-medium">Add New Vital</p>
+                            <Plus className="w-12 h-12 text-gray-500 group-hover:text-slate-700"/>
+                            <p className="font-medium text-sm group-hover:text-slate-700">
+                                Add New Vital
+                            </p>
                         </div>
                     </CardContent>
                 </Card>
@@ -155,9 +152,13 @@ const AddVitalDialog = () => {
                                 icon,
                                 color
                             });
-                        }} buttonClassName={'p-2 rounded-lg bg-white hover:bg-gray-200 h-full'}>
-                            <DynamicIcon name={formData.icon}
-                                         className={`w-8 h-8 ${getTextColorClass(formData.color)}`}/>
+                        }}
+                                            buttonClassName={'flex items-center justify-center text-2xl p-2 rounded-lg bg-white hover:bg-gray-200 w-fit'}
+                                            selectedIconP={formData.icon}
+                                            selectedColorP={formData.color}
+                        >
+                            <DynamicIcon icon={formData.icon}
+                                         className={`${getTextColorClass(formData.color)}`}/>
                         </IconSelectorDialog>
                     </div>
 
