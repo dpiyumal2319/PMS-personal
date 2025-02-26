@@ -78,7 +78,7 @@ enum MedicalCertificateStatus {
 }
 
 model Patient {
-  id           Int             @id @default(autoincrement())
+  id           Int                  @id @default(autoincrement())
   telephone    String
   name         String
   birthDate    DateTime?
@@ -173,35 +173,53 @@ model UnitConcentration {
 }
 
 model Prescription {
-  id                 Int                @id @default(autoincrement())
-  time               DateTime           @default(now())
+  id                 Int                  @id @default(autoincrement())
+  time               DateTime             @default(now())
   presentingSymptoms String
-  status             PrescriptionStatus @default(PENDING)
+  status             PrescriptionStatus   @default(PENDING)
   extraDoctorCharge  Float?
   details            String?
-  bloodPressure      String?
-  pulse              String?
-  cardiovascular     String?
-  patient            Patient            @relation(fields: [patientId], references: [id])
+  patient            Patient              @relation(fields: [patientId], references: [id])
   patientId          Int
   issues             Issue[]
   OffRecordMeds      OffRecordMeds[]
   Bill               Bill?
+  PrescriptionVitals PrescriptionVitals[]
+}
+
+model Vitals {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  icon               String
+  color              String
+  placeholder        String
+  forGender          Gender?
+  onlyNumber         Boolean
+  PrescriptionVitals PrescriptionVitals[]
+}
+
+model PrescriptionVitals {
+  id             Int          @id @default(autoincrement())
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int
+  vital          Vitals       @relation(fields: [vitalId], references: [id])
+  vitalId        Int
+  value          String
 }
 
 model MedicalCertificate {
-  id        Int     @id @default(autoincrement())
-  patient   Patient @relation(fields: [patientId], references: [id])
-  patientId Int
-  nameOfThePatient String
-  addressOfThePatient String
-  fitForDuty   MedicalCertificateStatus
-  dateOfSickness DateTime
+  id                   Int                      @id @default(autoincrement())
+  patient              Patient                  @relation(fields: [patientId], references: [id])
+  patientId            Int
+  nameOfThePatient     String
+  addressOfThePatient  String
+  fitForDuty           MedicalCertificateStatus
+  dateOfSickness       DateTime
   recommendedLeaveDays Int
-  natureOfTheDisease String
-  ageOfThePatient Int
-  reccomendations String
-  time      DateTime 
+  natureOfTheDisease   String
+  ageOfThePatient      Int
+  reccomendations      String
+  time                 DateTime
 }
 
 model Bill {

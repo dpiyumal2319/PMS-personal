@@ -1,0 +1,22 @@
+import React from 'react';
+import {Metadata} from "next";
+import VitalsForm from "@/app/(dashboard)/admin/prescription/_components/VitalsForm";
+
+export const metadata: Metadata = {
+    title: "PMS - Prescription Vitals",
+    description: "Add prescription vitals"
+};
+
+const Page = () => {
+    return (
+        <div className={'flex flex-col h-full w-full p-4'}>
+            {/*Heading*/}
+            <h1 className="text-2xl font-bold text-primary-700">Prescription Vitals</h1>
+            <div className={'flex flex-col items-center justify-center h-full'}>
+                <VitalsForm/>
+            </div>
+        </div>
+    );
+};
+
+export default Page;

@@ -96,6 +96,12 @@ export const DoctorLinks: SidebarItem[] = [
             },
             {
                 type: "link",
+                title: "Prescription Vitals",
+                url: "/admin/prescription",
+                isActive: false
+            },
+            {
+                type: "link",
                 title: "Profile",
                 url: "/admin/profile",
                 isActive: false,
