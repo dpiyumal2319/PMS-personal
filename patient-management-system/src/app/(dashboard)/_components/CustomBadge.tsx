@@ -3,7 +3,7 @@ import {Badge} from "@/components/ui/badge";
 import {HTMLAttributes} from "react";
 
 
-export type badgeColorsType = {
+export type basicColorType = {
     slate: string;
     gray: string;
     zinc: string;
@@ -26,13 +26,13 @@ export type badgeColorsType = {
     fuchsia: string;
     pink: string;
     rose: string;
-    destructive: string;
-    okay: string;
+    destructive?: string;
+    okay?: string;
 }
 
 interface ParameterBadgeProps extends HTMLAttributes<HTMLSpanElement> {
     text: string;
-    color?: keyof badgeColorsType;
+    color?: keyof basicColorType;
     className?: string;
 }
 
@@ -84,8 +84,8 @@ export function CustomBadge({
 
 //Get random colored badge without 'gray', 'zinc', 'slate', 'neutral', 'stone'
 export function getRandomColor() {
-    const colors = Object.keys(badgeColors).filter(color => !['gray', 'zinc', 'slate', 'neutral', 'stone'].includes(color));
-    return colors[Math.floor(Math.random() * colors.length)] as keyof badgeColorsType;
+    const colors = Object.keys(badgeColors).filter(color => !['gray', 'zinc', 'slate', 'neutral', 'stone', 'destructive', 'okay'].includes(color));
+    return colors[Math.floor(Math.random() * colors.length)] as keyof basicColorType;
 }
 
 

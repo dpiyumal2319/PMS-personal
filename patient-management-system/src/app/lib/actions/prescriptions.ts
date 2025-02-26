@@ -642,3 +642,7 @@ export async function getDrugTypesByDrug(drugID: number): Promise<CustomDrugType
         }));
     });
 }
+
+export async function getAllVitals() {
+    return prisma.vitals.findMany();
+}
