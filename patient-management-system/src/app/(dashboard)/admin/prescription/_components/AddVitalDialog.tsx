@@ -91,10 +91,11 @@ const AddVitalDialog = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Card className="border-dashed cursor-pointer hover:bg-gray-50 transition-colors">
+                <Card
+                    className="border-dashed border-2 p-4 flex justify-center items-center cursor-pointer hover:border-slate-400 transition-all duration-200 group">
                     <CardContent className="flex items-center justify-center h-full p-12">
                         <div className="flex flex-col items-center gap-2 text-gray-500">
-                            <Plus className="w-12 h-12"/>
+                            <Plus className="text-gray-500 group-hover:text-slate-500"/>
                             <p className="font-medium">Add New Vital</p>
                         </div>
                     </CardContent>

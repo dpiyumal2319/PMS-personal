@@ -19,6 +19,7 @@ import {
 import {FaHeadSideCough, FaMoneyBill} from "react-icons/fa";
 import {useRouter} from "next/navigation";
 import {Textarea} from "@/components/ui/textarea";
+import {Separator} from "@/components/ui/separator";
 
 export interface IssueInForm {
     drugId: number;
@@ -169,7 +170,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                     X Clear
                 </span>
                 </div>
-                <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
+                <Card className="bg-slate-100 p-4 ">
                     <div className="space-y-2.5">
                         <div className="space-y-2">
                             <div className="flex items-center space-x-2">
@@ -186,6 +187,8 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                 placeholder="Enter symptoms e.g., headache, fever"
                             />
                         </div>
+
+                        <Separator/>
 
                         <h2 className="text-md font-semibold">Patient Vitals</h2>
 
@@ -205,7 +208,9 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                             ))}
                         </div>
 
-                        <h2 className="text-lg font-semibold">Additional Details</h2>
+                        <Separator/>
+
+                        <h2 className="text-md font-semibold">Additional Details</h2>
 
                         {/* Description Section - Moved Outside */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -243,7 +248,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                     </div>
                 </Card>
 
-                <Card className='bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300'>
+                <Card className='bg-slate-100 p-4 '>
                     <div className="space-y-6">
                         <h2 className="text-lg font-semibold">Medications</h2>
                         <div className="space-y-4">
