@@ -19,11 +19,11 @@ import {
     AlertDialogHeader,
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
-import { handleServerAction } from "@/app/lib/utils";
-import { useRouter } from "next/navigation";
-import { BillExport } from '@/app/(dashboard)/_components/BillExport';
-import { IoMdDownload } from "react-icons/io";
+import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
+import {handleServerAction} from "@/app/lib/utils";
+import {useRouter} from "next/navigation";
+import {BillExport} from '@/app/(dashboard)/_components/BillExport';
+import {IoMdDownload} from "react-icons/io";
 
 
 export type BatchAssignment = {
@@ -114,7 +114,7 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
         return (
             <div className="space-y-4 border-t border-gray-200 pt-4">
                 <div className="flex justify-start items-center">
-                    <span className="text-lg font-semibold">Assign relevant Batches</span>
+                    <span className="text font-semibold">Assign relevant Batches</span>
                 </div>
                 {issues.map((issue) => (
                     <AssignBatchCard
@@ -124,32 +124,30 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
                     />
                 ))}
 
-            <div className="flex justify-between items-center">
-                <div className="text-red-500">{error}</div>
-                <Button
-                    className={'bg-primary-500'}
-                    onClick={generateBill}
-                >
-                    Generate Bill
-                </Button>
-            </div>
-            {bill && (
-                <>
-                    <BillComponent bill={bill} />
-                    <div className="flex justify-end">
-                        <BillExport
-                            bill={bill}
-                            trigger={
-                                <Button>
-                                    <IoMdDownload className="w-5 h-5 text-white" />
-                                </Button>
-                            }
-                        />
-                    </div>
-                </>
-            )}
-
-
+                <div className="flex justify-between items-center">
+                    <div className="text-red-500">{error}</div>
+                    <Button
+                        className={'bg-primary-500'}
+                        onClick={generateBill}
+                    >
+                        Generate Bill
+                    </Button>
+                </div>
+                {bill && (
+                    <>
+                        <BillComponent bill={bill}/>
+                        <div className="flex justify-end">
+                            <BillExport
+                                bill={bill}
+                                trigger={
+                                    <Button>
+                                        <IoMdDownload className="w-5 h-5 text-white"/>
+                                    </Button>
+                                }
+                            />
+                        </div>
+                    </>
+                )}
 
 
                 <div>
@@ -164,7 +162,8 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle className={'font-semibold text-lg'}>Confirm Prescription</AlertDialogTitle>
+                                <AlertDialogTitle className={'font-semibold text-lg'}>Confirm
+                                    Prescription</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     Are you sure you want to confirm this prescription?
                                     <br/>

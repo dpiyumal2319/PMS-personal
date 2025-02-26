@@ -5,6 +5,7 @@ import {DynamicIcon, IconName} from "lucide-react/dynamic";
 import EditVitalDialog from "@/app/(dashboard)/admin/prescription/_components/EditVitalDialog";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import DeleteVitalDialog from "@/app/(dashboard)/admin/prescription/_components/DeleteVital";
+import {getTextColorClass} from "@/app/lib/utils";
 
 const VitalsForm = async () => {
     const vitals = await getAllVitals();
@@ -14,7 +15,8 @@ const VitalsForm = async () => {
                 <Card key={vital.id || vital.name} className="overflow-hidden">
                     <CardHeader className="bg-gray-50 flex flex-row items-center justify-between p-4">
                         <div className="flex items-center gap-2">
-                            <DynamicIcon name={vital.icon as IconName} size={20} color={vital.color}/>
+                            <DynamicIcon name={vital.icon as IconName} size={20}
+                                         className={`${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
                             <CardTitle className="text-lg">{vital.name}</CardTitle>
                         </div>
                         <div className={"flex gap-2"}>

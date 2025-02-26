@@ -10,7 +10,7 @@ import IssueFromInventory from "./IssueFromInventory";
 import {IssuingStrategy, MEAL, Vitals} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
 import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/AddOffRecordDrugs";
-import {handleServerAction} from "@/app/lib/utils";
+import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
 import {addPrescription} from "@/app/lib/actions/prescriptions";
 import {
     PrescriptionIssuesList,
@@ -20,6 +20,7 @@ import {FaHeadSideCough, FaMoneyBill} from "react-icons/fa";
 import {useRouter} from "next/navigation";
 import {Textarea} from "@/components/ui/textarea";
 import {DynamicIcon, IconName} from "lucide-react/dynamic";
+import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 
 export interface IssueInForm {
     drugId: number;
@@ -171,11 +172,11 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                 </span>
                 </div>
                 <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
-                    <div className="space-y-6">
+                    <div className="space-y-2.5">
                         <div className="space-y-2">
                             <div className="flex items-center space-x-2">
                                 <FaHeadSideCough className="h-4 w-4 text-cyan-500"/>
-                                <Label>Presenting Symptoms<span className="text-red-500">*</span></Label>
+                                <Label>Presenting Complaint<span className="text-red-500">*</span></Label>
                             </div>
                             <Input
                                 type="text"
@@ -188,14 +189,15 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                             />
                         </div>
 
-                        <h2 className="text-lg font-semibold">Patient Vitals</h2>
+                        <h2 className="text-md font-semibold">Patient Vitals</h2>
 
                         {/* Grid for Vitals */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {formData.vitals.map((vital, index) => (
                                 <div key={index} className="space-y-2">
                                     <div className="flex items-center space-x-2">
-                                        <DynamicIcon name={vital.icon as IconName} size={20} color={vital.color}/>
+                                        <DynamicIcon name={vital.icon as IconName} size={20}
+                                                     className={`${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
                                         <Label>{vital.name}</Label>
                                     </div>
                                     <Input
@@ -208,6 +210,8 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                 </div>
                             ))}
                         </div>
+
+                        <h2 className="text-lg font-semibold">Additional Details</h2>
 
                         {/* Description Section - Moved Outside */}
                         <div className="space-y-2">
@@ -240,7 +244,6 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                             />
                         </div>
                     </div>
-
                 </Card>
 
                 <Card className='bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300'>

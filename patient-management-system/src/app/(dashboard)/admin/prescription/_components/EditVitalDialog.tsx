@@ -11,7 +11,6 @@ import {
     DialogTrigger
 } from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import {Card, CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
@@ -54,6 +53,11 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
         });
     };
 
+    const reset = () => {
+        setFormData(initialData);
+        setError(null);
+    }
+
     const handleGenderChange = (value: string) => {
         setFormData({
             ...formData,
@@ -89,7 +93,7 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" className="p-2">
-                    <DynamicIcon name="pencil" size={24} className="text-gray-500"/>
+                    <Pencil size={24} className="text-gray-500"/>
                 </Button>
             </DialogTrigger>
 
@@ -132,7 +136,8 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
                                 icon,
                                 color
                             });
-                        }} buttonClassName={'p-2 rounded-lg bg-white hover:bg-gray-200 h-full'}>
+                        }} buttonClassName={'p-2 rounded-lg bg-white hover:bg-gray-200 h-full'}
+                                            selectedIconP={formData.icon} selectedColorP={formData.color}>
                             <DynamicIcon name={formData.icon} className={`w-8 h-8 text-${formData.color}-500`}/>
                         </IconSelectorDialog>
                     </div>
@@ -197,7 +202,10 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
                 </div>
 
                 <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    <Button type="button" variant="outline" onClick={() => {
+                        setOpen(false);
+                        reset();
+                    }}>
                         Cancel
                     </Button>
                     <Button type="button" onClick={handleSubmit}>

@@ -21,7 +21,7 @@ import {Gender, VitalType} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import {DynamicIcon, IconName} from "lucide-react/dynamic";
 import {addVital} from "@/app/lib/actions/prescriptions";
-import {handleServerAction} from "@/app/lib/utils";
+import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
 
 export interface VitalFormData {
     id?: number;
@@ -44,6 +44,18 @@ const AddVitalDialog = () => {
         type: VitalType.TEXT
     });
     const [error, setError] = useState<string | null>(null);
+
+    const reset = () => {
+        setFormData({
+            icon: 'activity',
+            color: 'red',
+            name: '',
+            placeholder: '',
+            forGender: null,
+            type: VitalType.TEXT
+        })
+        setError(null);
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -144,7 +156,8 @@ const AddVitalDialog = () => {
                                 color
                             });
                         }} buttonClassName={'p-2 rounded-lg bg-white hover:bg-gray-200 h-full'}>
-                            <DynamicIcon name={formData.icon} className={`w-8 h-8 text-${formData.color}-500`}/>
+                            <DynamicIcon name={formData.icon}
+                                         className={`w-8 h-8 ${getTextColorClass(formData.color)}`}/>
                         </IconSelectorDialog>
                     </div>
 
@@ -211,7 +224,10 @@ const AddVitalDialog = () => {
                 </div>
 
                 <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                    <Button type="button" variant="outline" onClick={() => {
+                        setOpen(false);
+                        reset();
+                    }}>
                         Cancel
                     </Button>
                     <Button type="button" onClick={handleSubmit}>

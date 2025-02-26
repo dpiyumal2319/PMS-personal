@@ -1,8 +1,8 @@
 import {getBill} from "@/app/lib/actions/bills";
 import {getPrescription} from "@/app/lib/actions/prescriptions";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
-import {Activity, ChevronLeft, Heart, HeartPulse} from "lucide-react";
+import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import {ChevronLeft} from "lucide-react";
 import {formatDistanceToNow} from "date-fns";
 import {
     OffRecordMedCard,
@@ -17,6 +17,8 @@ import {IoMdDownload} from "react-icons/io";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {DynamicIcon, IconName} from "lucide-react/dynamic";
+import {getTextColorClass} from "@/app/lib/utils";
+import React from "react";
 
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
@@ -65,8 +67,8 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                 <div className="grid grid-cols-2 gap-4">
                     {prescription.PrescriptionVitals.map((vital) => (
                         <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
-                            <DynamicIcon className="h-5 w-5" name={vital.vital.icon as IconName}
-                                         color={vital.vital.color}/>
+                            <DynamicIcon size={20} name={vital.vital.icon as IconName}
+                                         className={`${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}/>
                             <span className="font-medium">{vital.vital.name}</span>
                             <span className="font-semibold">{vital.value}</span>
                         </div>
@@ -74,6 +76,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                 </div>
 
                 {/*Prescription Issues*/}
+                <h2 className="text-xl font-semibold italic">Rx</h2>
                 {prescription.status === "COMPLETED" ? (
                     <>
                         {prescription.issues.length > 0 && (

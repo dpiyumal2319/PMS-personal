@@ -1,6 +1,7 @@
 import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
 import {IssuingStrategy} from "@prisma/client";
+import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();
@@ -8,6 +9,38 @@ export function calcAge(birthDate: Date): number {
 
     return Math.abs(age_dt.getUTCFullYear() - 1970);
 }
+
+// Get the text color class based on the selected color
+export const getTextColorClass = (color: keyof BasicColorType) => {
+    const iconColorMap: Record<keyof BasicColorType, string> = {
+        slate: "text-slate-600",
+        gray: "text-gray-600",
+        zinc: "text-zinc-600",
+        neutral: "text-neutral-600",
+        stone: "text-stone-600",
+        red: "text-red-600",
+        orange: "text-orange-600",
+        amber: "text-amber-600",
+        yellow: "text-yellow-600",
+        lime: "text-lime-600",
+        green: "text-green-600",
+        emerald: "text-emerald-600",
+        teal: "text-teal-600",
+        cyan: "text-cyan-600",
+        sky: "text-sky-600",
+        blue: "text-blue-600",
+        indigo: "text-indigo-600",
+        violet: "text-violet-600",
+        purple: "text-purple-600",
+        fuchsia: "text-fuchsia-600",
+        pink: "text-pink-600",
+        rose: "text-rose-600",
+        destructive: "",
+        okay: ""
+    };
+
+    return iconColorMap[color] || "text-gray-600";
+};
 
 export const getInitials = (name: string) => {
     return name
