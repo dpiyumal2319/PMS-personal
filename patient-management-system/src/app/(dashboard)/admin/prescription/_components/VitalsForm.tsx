@@ -12,8 +12,8 @@ const VitalsForm = async () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {vitals.map(vital => (
-                <Card key={vital.id || vital.name} className="overflow-hidden">
-                    <CardHeader className="bg-gray-50 flex flex-row items-center justify-between p-4">
+                <Card key={vital.id || vital.name}>
+                    <CardHeader className="flex flex-row items-center justify-between p-4">
                         <div className="flex items-center gap-2">
                             <DynamicIcon name={vital.icon as IconName} size={20}
                                          className={`${getTextColorClass(vital.color as keyof BasicColorType)}`}/>

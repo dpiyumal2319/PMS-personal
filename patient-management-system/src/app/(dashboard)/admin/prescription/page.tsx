@@ -11,7 +11,7 @@ const Page = () => {
     return (
         <div className={'flex flex-col h-full w-full p-4'}>
             {/*Heading*/}
-            <h1 className="text-2xl font-bold text-primary-700">Prescription Vitals</h1>
+            <h1 className="text-2xl font-bold text-primary-700 mb-6">Prescription Vitals</h1>
             <VitalsForm/>
         </div>
     );
