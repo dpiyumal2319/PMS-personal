@@ -16,6 +16,7 @@ import {BillExport} from "@/app/(dashboard)/_components/BillExport";
 import {IoMdDownload} from "react-icons/io";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
+import {DynamicIcon, IconName} from "lucide-react/dynamic";
 
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
@@ -62,27 +63,14 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                     </div>
                 )}
                 <div className="grid grid-cols-2 gap-4">
-                    {prescription.bloodPressure && (
-                        <div className="flex items-center gap-2 text-gray-700">
-                            <HeartPulse className="h-5 w-5 text-red-500"/>
-                            <span className="font-medium">Blood Pressure:</span>
-                            <span className="font-semibold">{prescription.bloodPressure}</span>
+                    {prescription.PrescriptionVitals.map((vital) => (
+                        <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
+                            <DynamicIcon className="h-5 w-5" name={vital.vital.icon as IconName}
+                                         color={vital.vital.color}/>
+                            <span className="font-medium">{vital.vital.name}</span>
+                            <span className="font-semibold">{vital.value}</span>
                         </div>
-                    )}
-                    {prescription.pulse && (
-                        <div className="flex items-center gap-2 text-gray-700">
-                            <Activity className="h-5 w-5 text-blue-500"/>
-                            <span className="font-medium">Pulse Rate:</span>
-                            <span className="font-semibold">{prescription.pulse}</span>
-                        </div>
-                    )}
-                    {prescription.cardiovascular && (
-                        <div className="flex items-center gap-2 text-gray-700">
-                            <Heart className="h-5 w-5 text-pink-500"/>
-                            <span className="font-medium">Cardiovascular:</span>
-                            <span className="font-semibold">{prescription.cardiovascular}</span>
-                        </div>
-                    )}
+                    ))}
                 </div>
 
                 {/*Prescription Issues*/}

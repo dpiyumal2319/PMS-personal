@@ -4,7 +4,7 @@ import {searchPrescriptions} from "@/app/lib/actions/prescriptions";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {formatDistanceToNow} from "date-fns";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
-import {Activity, Heart, HeartPulse} from "lucide-react";
+import {DynamicIcon, IconName} from "lucide-react/dynamic";
 
 const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}: {
     currentPage: number;
@@ -45,26 +45,14 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                             <CardContent className="flex flex-col gap-2">
                                 <p className="text-gray-500 text-sm">{prescription.details}</p>
                                 <div className="grid grid-cols-2 gap-2">
-                                    {prescription.bloodPressure && (
-                                        <p className="flex items-center text-sm text-gray-600 space-x-1">
-                                            <HeartPulse className="h-4 w-4 text-red-500"/>
-                                            <span>BP: <span
-                                                className="font-semibold">{prescription.bloodPressure}</span></span>
-                                        </p>
-                                    )}
-                                    {prescription.pulse && (
-                                        <p className="flex items-center text-sm text-gray-600 space-x-1">
-                                            <Activity className="h-4 w-4 text-blue-500"/>
-                                            <span>PR: <span className="font-semibold">{prescription.pulse}</span></span>
-                                        </p>
-                                    )}
-                                    {prescription.cardiovascular && (
-                                        <p className="flex items-center text-sm text-gray-600 space-x-1">
-                                            <Heart className="h-4 w-4 text-pink-500"/>
-                                            <span>CV: <span
-                                                className="font-semibold">{prescription.cardiovascular}</span></span>
-                                        </p>
-                                    )}
+                                    {prescription.PrescriptionVitals.map((vital) => (
+                                        <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
+                                            <DynamicIcon className="h-5 w-5" name={vital.vital.icon as IconName}
+                                                         color={vital.vital.color}/>
+                                            <span className="font-medium">{vital.vital.name}</span>
+                                            <span className="font-semibold">{vital.value}</span>
+                                        </div>
+                                    ))}
                                 </div>
                                 {prescription.issues.length > 0 && (
                                     <div className="flex items-center flex-wrap gap-2">
@@ -75,7 +63,6 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                         ))}
                                     </div>
                                 )}
-
                                 {prescription.OffRecordMeds.length > 0 && (
                                     <div className="flex items-center flex-wrap gap-2">
                                         <span className="text-sm">Off Record Meds:</span>

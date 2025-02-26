@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Dialog,
     DialogContent,
@@ -15,17 +15,17 @@ import {Card, CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {Plus} from "lucide-react";
+import {Pencil} from "lucide-react"; // Edit icon
 import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog";
 import {Gender, VitalType} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import {DynamicIcon, IconName} from "lucide-react/dynamic";
-import {addVital} from "@/app/lib/actions/prescriptions";
 import {handleServerAction} from "@/app/lib/utils";
+import {updateVital} from "@/app/lib/actions/prescriptions";
 
 export interface VitalFormData {
-    id?: number;
-    icon: IconName
+    id: number;
+    icon: IconName;
     color: keyof BasicColorType;
     name: string;
     placeholder: string;
@@ -33,17 +33,18 @@ export interface VitalFormData {
     type: VitalType;
 }
 
-const AddVitalDialog = () => {
+interface EditVitalDialogProps {
+    initialData: VitalFormData;
+}
+
+const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState<VitalFormData>({
-        icon: 'activity',
-        color: 'red',
-        name: '',
-        placeholder: '',
-        forGender: null,
-        type: VitalType.TEXT
-    });
+    const [formData, setFormData] = useState<VitalFormData>(initialData);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setFormData(initialData); // Update formData when initialData changes
+    }, [initialData]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -72,21 +73,13 @@ const AddVitalDialog = () => {
             setError('All fields are required');
             return;
         }
-        const result = await handleServerAction(() =>
-                addVital(formData)
-            , {
-                loadingMessage: 'Adding new vital...',
-            });
+
+        const result = await handleServerAction(() => updateVital(formData), {
+            loadingMessage: 'Updating vital...',
+        });
+
         if (result.success) {
             setOpen(false);
-            setFormData({
-                icon: 'activity',
-                color: 'red',
-                name: '',
-                placeholder: '',
-                forGender: null,
-                type: VitalType.TEXT
-            });
         } else {
             setError(result.message);
         }
@@ -95,21 +88,16 @@ const AddVitalDialog = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Card className="border-dashed cursor-pointer hover:bg-gray-50 transition-colors">
-                    <CardContent className="flex items-center justify-center h-full p-12">
-                        <div className="flex flex-col items-center gap-2 text-gray-500">
-                            <Plus className="w-12 h-12"/>
-                            <p className="font-medium">Add New Vital</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                <Button variant="ghost" className="p-2">
+                    <DynamicIcon name="pencil" size={24} className="text-gray-500"/>
+                </Button>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Add New Vital</DialogTitle>
+                    <DialogTitle>Edit Vital</DialogTitle>
                     <DialogDescription>
-                        Create a new vital sign to track in patient records.
+                        Edit the details of an existing vital sign.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -118,6 +106,7 @@ const AddVitalDialog = () => {
                         {error}
                     </div>
                 )}
+
                 <div className="flex flex-col gap-4">
                     <div className={'grid grid-cols-4 items-center gap-4'}>
                         <Label htmlFor="name" className="text-right">
@@ -189,7 +178,7 @@ const AddVitalDialog = () => {
                         <RadioGroup
                             value={formData.type}
                             onValueChange={handleVitalTypeChange}
-                            className="flex flex-col space-y-1 col-span-1"
+                            className="flex flex-col space-y-1 col-span-3"
                         >
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value={VitalType.TEXT} id="vital-text"/>
@@ -204,9 +193,6 @@ const AddVitalDialog = () => {
                                 <Label htmlFor="vital-date">Date</Label>
                             </div>
                         </RadioGroup>
-                        <p className={'col-span-2 text-sm text-gray-500'}>
-                            Vital type cannot be changed after creating a prescription with this vital.
-                        </p>
                     </div>
                 </div>
 
@@ -215,7 +201,7 @@ const AddVitalDialog = () => {
                         Cancel
                     </Button>
                     <Button type="button" onClick={handleSubmit}>
-                        Add Vital
+                        Save Changes
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -223,4 +209,4 @@ const AddVitalDialog = () => {
     );
 };
 
-export default AddVitalDialog;
+export default EditVitalDialog;

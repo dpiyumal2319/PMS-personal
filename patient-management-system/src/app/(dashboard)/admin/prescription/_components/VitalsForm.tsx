@@ -1,43 +1,35 @@
-import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Pencil, Trash2} from "lucide-react";
 import {getAllVitals} from "@/app/lib/actions/prescriptions";
-import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog";
 import AddVitalDialog from "@/app/(dashboard)/admin/prescription/_components/AddVitalDialog";
+import {DynamicIcon, IconName} from "lucide-react/dynamic";
+import EditVitalDialog from "@/app/(dashboard)/admin/prescription/_components/EditVitalDialog";
+import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
+import DeleteVitalDialog from "@/app/(dashboard)/admin/prescription/_components/DeleteVital";
 
 const VitalsForm = async () => {
     const vitals = await getAllVitals();
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {vitals.map(vital => (
                 <Card key={vital.id || vital.name} className="overflow-hidden">
                     <CardHeader className="bg-gray-50 flex flex-row items-center justify-between p-4">
                         <div className="flex items-center gap-2">
-                            <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center"
-                                style={{backgroundColor: vital.color}}
-                            >
-                                <span className="text-white">{vital.icon}</span>
-                            </div>
+                            <DynamicIcon name={vital.icon as IconName} size={20} color={vital.color}/>
                             <CardTitle className="text-lg">{vital.name}</CardTitle>
                         </div>
-                        <div className="flex gap-2">
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                }}
-                            >
-                                <Pencil className="w-4 h-4"/>
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => {
-                                }}
-                            >
-                                <Trash2 className="w-4 h-4"/>
-                            </Button>
+                        <div className={"flex gap-2"}>
+                            <EditVitalDialog initialData={
+                                {
+                                    id: vital.id,
+                                    color: vital.color as keyof BasicColorType,
+                                    name: vital.name,
+                                    icon: vital.icon as IconName,
+                                    type: vital.type,
+                                    forGender: vital.forGender,
+                                    placeholder: vital.placeholder
+                                }
+                            }/>
+                            <DeleteVitalDialog id={vital.id}/>
                         </div>
                     </CardHeader>
                     <CardContent className="p-4">
@@ -49,7 +41,8 @@ const VitalsForm = async () => {
                                 <span className="font-medium">For Gender:</span> {vital.forGender || 'All'}
                             </div>
                             <div>
-                                <span className="font-medium">Numeric Only:</span> {vital.onlyNumber ? 'Yes' : 'No'}
+                                <span
+                                    className="font-medium">Type:</span> {vital.type === 'TEXT' ? 'Text' : vital.type === 'NUMBER' ? 'Number' : vital.type === 'DATE' ? 'Date' : 'unknown'}
                             </div>
                         </div>
                     </CardContent>

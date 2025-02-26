@@ -1,5 +1,3 @@
-"use client";
-
 import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
@@ -10,16 +8,15 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
-import iconSsrMapping, {IconName} from "@/app/lib/iconMapping";
 import type {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import CustomColorPicker from "@/app/(dashboard)/admin/prescription/_components/CustomColorPicker";
 import {ScrollArea} from "@/components/ui/scroll-area";
+import {IconName, dynamicIconImports, DynamicIcon} from "lucide-react/dynamic";
 
 interface IconSelectorDialogProps {
     buttonClassName?: string;
     children?: React.ReactNode;
-    onSelect: (icon: IconName, color: keyof BasicColorType) => void; // Modified to return color
+    onSelect: (icon: IconName, color: keyof BasicColorType) => void;
 }
 
 const IconSelectorDialog: React.FC<IconSelectorDialogProps> = ({buttonClassName, children, onSelect}) => {
@@ -27,10 +24,18 @@ const IconSelectorDialog: React.FC<IconSelectorDialogProps> = ({buttonClassName,
     const [selectedIcon, setSelectedIcon] = useState<IconName | null>(null);
     const [selectedColor, setSelectedColor] = useState<keyof BasicColorType>("slate");
     const [open, setOpen] = useState(false);
+    const icons = Object.keys(dynamicIconImports) as IconName[];
 
-    const filteredIcons = Object.keys(iconSsrMapping)
+    const handleIconSelect = (icon: IconName) => {
+        setSelectedIcon(icon);
+        onSelect(icon, selectedColor);
+        setOpen(false); // Close the dialog after selection
+    };
+
+    // Filter icons by search term and then limit to 50
+    const filteredIcons = icons
         .filter((icon) => icon.toLowerCase().includes(searchTerm.toLowerCase()))
-        .slice(0, 100); // Limit the number of displayed icons
+        .slice(0, 50);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -55,25 +60,19 @@ const IconSelectorDialog: React.FC<IconSelectorDialogProps> = ({buttonClassName,
                     <CustomColorPicker selectedColor={selectedColor} onSelectColor={setSelectedColor}/>
                 </div>
 
-                <ScrollArea className=" max-h-52">
-                    <div className="grid grid-cols-8 gap-4">
+                <ScrollArea className="max-h-52">
+                    <div className="grid grid-cols-8 gap-4 p-2">
                         {filteredIcons.map((icon) => (
-                            <button
+                            <div
                                 key={icon}
-                                onClick={() => {
-                                    setSelectedIcon(icon);
-                                    onSelect(icon, selectedColor); // Pass icon & color
-                                    setOpen(false);
-                                }}
-                                className={`p-2 rounded border flex flex-col ${
-                                    selectedIcon === icon ? "border-primary" : "border-gray-300"
+                                onClick={() => handleIconSelect(icon)}
+                                className={`cursor-pointer p-1 rounded-md ${
+                                    selectedIcon === icon ? "bg-gray-200 ring-2 ring-primary" : ""
                                 }`}
                             >
-                                <DynamicIcon
-                                    icon={icon}
-                                    className={`h-6 w-6 text${selectedColor}-500`}
-                                />
-                            </button>
+                                <DynamicIcon name={icon}
+                                             className={`w-8 h-8 ${selectedIcon === icon ? `text-${selectedColor}-600` : ""}`}/>
+                            </div>
                         ))}
                     </div>
                 </ScrollArea>
