@@ -5,7 +5,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {formatDistanceToNow} from "date-fns";
 import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {IconName} from "@/app/lib/iconMapping";
-import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
+import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import {getTextColorClass} from "@/app/lib/utils";
 
 const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}: {

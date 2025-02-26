@@ -17,7 +17,7 @@ import {IoMdDownload} from "react-icons/io";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {IconName} from "@/app/lib/iconMapping";
-import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
+import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import {getTextColorClass} from "@/app/lib/utils";
 import React from "react";
 import {Separator} from "@/components/ui/separator";
