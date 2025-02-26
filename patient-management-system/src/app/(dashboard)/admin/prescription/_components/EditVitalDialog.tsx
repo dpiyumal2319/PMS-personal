@@ -15,22 +15,11 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Pencil} from "lucide-react"; // Edit icon
-import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog";
 import {Gender, VitalType} from "@prisma/client";
-import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
 import {handleServerAction} from "@/app/lib/utils";
 import {updateVital} from "@/app/lib/actions/prescriptions";
+import {VitalFormData} from "@/app/(dashboard)/admin/prescription/_components/AddVitalDialog";
 
-export interface VitalFormData {
-    id: number;
-    icon: IconName;
-    color: keyof BasicColorType;
-    name: string;
-    placeholder: string;
-    forGender: Gender | null;
-    type: VitalType;
-}
 
 interface EditVitalDialogProps {
     initialData: VitalFormData;
@@ -73,7 +62,7 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
     };
 
     const handleSubmit = async () => {
-        if (!formData.name || !formData.placeholder || !formData.icon || !formData.color) {
+        if (!formData.name || !formData.placeholder) {
             setError('All fields are required');
             return;
         }
@@ -126,21 +115,6 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="icon" className="text-right">
-                            Icon
-                        </Label>
-                        <IconSelectorDialog onSelect={(icon, color) => {
-                            setFormData({
-                                ...formData,
-                                icon,
-                                color
-                            });
-                        }} buttonClassName={'p-2 rounded-lg bg-white hover:bg-gray-200 h-full'}
-                                            selectedIconP={formData.icon} selectedColorP={formData.color}>
-                            <DynamicIcon name={formData.icon} className={`w-8 h-8 text-${formData.color}-500`}/>
-                        </IconSelectorDialog>
-                    </div>
 
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="placeholder" className="text-right">

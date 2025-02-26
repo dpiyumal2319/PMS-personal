@@ -196,8 +196,6 @@ enum VitalType {
 model Vitals {
   id                 Int                  @id @default(autoincrement())
   name               String
-  icon               String
-  color              String
   placeholder        String
   forGender          Gender?
   type               VitalType

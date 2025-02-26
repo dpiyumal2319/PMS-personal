@@ -10,7 +10,7 @@ import IssueFromInventory from "./IssueFromInventory";
 import {IssuingStrategy, MEAL, Vitals} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
 import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/AddOffRecordDrugs";
-import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
+import {handleServerAction} from "@/app/lib/utils";
 import {addPrescription} from "@/app/lib/actions/prescriptions";
 import {
     PrescriptionIssuesList,
@@ -19,8 +19,6 @@ import {
 import {FaHeadSideCough, FaMoneyBill} from "react-icons/fa";
 import {useRouter} from "next/navigation";
 import {Textarea} from "@/components/ui/textarea";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
-import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 
 export interface IssueInForm {
     drugId: number;
@@ -195,11 +193,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {formData.vitals.map((vital, index) => (
                                 <div key={index} className="space-y-2">
-                                    <div className="flex items-center space-x-2">
-                                        <DynamicIcon name={vital.icon as IconName} size={20}
-                                                     className={`${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
-                                        <Label>{vital.name}</Label>
-                                    </div>
+                                    <Label>{vital.name}</Label>
                                     <Input
                                         name={`vital-${index}`}
                                         value={vital.value}
@@ -214,34 +208,37 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         <h2 className="text-lg font-semibold">Additional Details</h2>
 
                         {/* Description Section - Moved Outside */}
-                        <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                                <FileText className="h-4 w-4 text-gray-500"/>
-                                <Label>Description</Label>
-                            </div>
-                            <Textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                rows={3}
-                                className="w-full p-2 rounded-md"
-                                placeholder="Additional details..."
-                            />
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                        {/* Extra Doctor Charges Section - Moved Outside */}
-                        <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                                <FaMoneyBill className="h-4 w-4 text-orange-500"/>
-                                <Label>Extra Doctor Charges</Label>
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <FileText className="h-4 w-4 text-gray-500"/>
+                                    <Label>Description</Label>
+                                </div>
+                                <Textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    className="w-full p-2 rounded-md"
+                                    placeholder="Additional details..."
+                                />
                             </div>
-                            <Input
-                                type="number"
-                                name="extraDoctorCharges"
-                                value={formData.extraDoctorCharges}
-                                onChange={handleChange}
-                                placeholder="Enter extra charges..."
-                            />
+
+                            {/* Extra Doctor Charges Section - Moved Outside */}
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <FaMoneyBill className="h-4 w-4 text-orange-500"/>
+                                    <Label>Extra Doctor Charges</Label>
+                                </div>
+                                <Input
+                                    type="number"
+                                    name="extraDoctorCharges"
+                                    value={formData.extraDoctorCharges}
+                                    onChange={handleChange}
+                                    placeholder="Enter extra charges..."
+                                />
+                            </div>
                         </div>
                     </div>
                 </Card>

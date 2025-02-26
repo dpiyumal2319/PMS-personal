@@ -16,17 +16,12 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Plus} from "lucide-react";
-import IconSelectorDialog from "@/app/(dashboard)/admin/prescription/_components/IconSelectorDialog";
 import {Gender, VitalType} from "@prisma/client";
-import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
 import {addVital} from "@/app/lib/actions/prescriptions";
-import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
+import {handleServerAction} from "@/app/lib/utils";
 
 export interface VitalFormData {
     id?: number;
-    icon: IconName
-    color: keyof BasicColorType;
     name: string;
     placeholder: string;
     forGender: Gender | null;
@@ -36,8 +31,6 @@ export interface VitalFormData {
 const AddVitalDialog = () => {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState<VitalFormData>({
-        icon: 'activity',
-        color: 'red',
         name: '',
         placeholder: '',
         forGender: null,
@@ -47,8 +40,6 @@ const AddVitalDialog = () => {
 
     const reset = () => {
         setFormData({
-            icon: 'activity',
-            color: 'red',
             name: '',
             placeholder: '',
             forGender: null,
@@ -80,7 +71,7 @@ const AddVitalDialog = () => {
     };
 
     const handleSubmit = async () => {
-        if (!formData.name || !formData.placeholder || !formData.icon || !formData.color) {
+        if (!formData.name || !formData.placeholder) {
             setError('All fields are required');
             return;
         }
@@ -91,14 +82,7 @@ const AddVitalDialog = () => {
             });
         if (result.success) {
             setOpen(false);
-            setFormData({
-                icon: 'activity',
-                color: 'red',
-                name: '',
-                placeholder: '',
-                forGender: null,
-                type: VitalType.TEXT
-            });
+            reset();
         } else {
             setError(result.message);
         }
@@ -145,21 +129,6 @@ const AddVitalDialog = () => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="icon" className="text-right">
-                            Icon
-                        </Label>
-                        <IconSelectorDialog onSelect={(icon, color) => {
-                            setFormData({
-                                ...formData,
-                                icon,
-                                color
-                            });
-                        }} buttonClassName={'p-2 rounded-lg bg-white hover:bg-gray-200 h-full'}>
-                            <DynamicIcon name={formData.icon}
-                                         className={`w-8 h-8 ${getTextColorClass(formData.color)}`}/>
-                        </IconSelectorDialog>
-                    </div>
 
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="placeholder" className="text-right">

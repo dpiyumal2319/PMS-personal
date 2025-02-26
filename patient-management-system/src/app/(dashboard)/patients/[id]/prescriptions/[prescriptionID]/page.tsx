@@ -1,7 +1,7 @@
 import {getBill} from "@/app/lib/actions/bills";
 import {getPrescription} from "@/app/lib/actions/prescriptions";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {ChevronLeft} from "lucide-react";
 import {formatDistanceToNow} from "date-fns";
 import {
@@ -16,9 +16,8 @@ import {BillExport} from "@/app/(dashboard)/_components/BillExport";
 import {IoMdDownload} from "react-icons/io";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
-import {DynamicIcon, IconName} from "lucide-react/dynamic";
-import {getTextColorClass} from "@/app/lib/utils";
 import React from "react";
+import {Separator} from "@/components/ui/separator";
 
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
@@ -64,23 +63,25 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                         <span className="font-semibold">{prescription.details}</span>
                     </div>
                 )}
+                <Separator/>
+
+                {/*Prescription Vitals*/}
                 <div className="grid grid-cols-2 gap-4">
                     {prescription.PrescriptionVitals.map((vital) => (
-                        <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
-                            <DynamicIcon size={20} name={vital.vital.icon as IconName}
-                                         className={`${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}/>
-                            <span className="font-medium">{vital.vital.name}</span>
+                        <div className="flex items-center gap-1 text-gray-700" key={vital.id}>
+                            <span className="font-medium">{vital.vital.name}</span> :
                             <span className="font-semibold">{vital.value}</span>
                         </div>
                     ))}
                 </div>
 
                 {/*Prescription Issues*/}
+                <Separator/>
                 <h2 className="text-xl font-semibold italic">Rx</h2>
                 {prescription.status === "COMPLETED" ? (
                     <>
                         {prescription.issues.length > 0 && (
-                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                            <div className="space-y-4 pt-4">
                                 <span className="text font-semibold">Prescription Issues from Inventory</span>
                                 {prescription.issues.map((issue) => (
                                     <PrescriptionIssueCard issue={issue} key={issue.id}/>
@@ -88,8 +89,10 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                             </div>
                         )}
 
+                        <Separator/>
+
                         {prescription.OffRecordMeds.length > 0 && (
-                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                            <div className="space-y-4 pt-4">
                                 <span className="text font-semibold">Off Record Medications</span>
                                 {prescription.OffRecordMeds.map((med) => (
                                     <OffRecordMedCard med={med} key={med.id}/>
@@ -111,13 +114,16 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                 ) : (
                     <>
                         {prescription.OffRecordMeds.length > 0 && (
-                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                            <div className="space-y-4 pt-4">
                                 <span className="text font-semibold">Off Record Medications</span>
                                 {prescription.OffRecordMeds.map((med) => (
                                     <OffRecordMedCard med={med} key={med.id}/>
                                 ))}
                             </div>
                         )}
+
+                        <Separator/>
+
                         <BatchAssign issues={prescription.issues} prescriptionID={prescription.id} patientID={id}
                                      role={session.role}/>
                     </>

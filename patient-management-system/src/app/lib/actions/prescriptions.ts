@@ -700,7 +700,7 @@ export async function getPatientSpecificVitals(patientID: number) {
 export async function addVital(vital: VitalFormData): Promise<myError> {
 
 
-    if (!vital.name || !vital.icon || !vital.color || !vital.placeholder) {
+    if (!vital.name || !vital.placeholder) {
         return {
             success: false,
             message: "All fields are required",
@@ -730,8 +730,6 @@ export async function addVital(vital: VitalFormData): Promise<myError> {
 
     await prisma.vitals.create({
         data: {
-            icon: vital.icon,
-            color: vital.color,
             name: vital.name,
             placeholder: vital.placeholder,
             forGender: vital.forGender,
@@ -747,7 +745,7 @@ export async function addVital(vital: VitalFormData): Promise<myError> {
 }
 
 export async function updateVital(vital: VitalFormData): Promise<myError> {
-    if (!vital.id || !vital.name || !vital.icon || !vital.color || !vital.placeholder) {
+    if (!vital.id || !vital.name || !vital.placeholder) {
         return {
             success: false,
             message: "All fields are required",
@@ -795,8 +793,6 @@ export async function updateVital(vital: VitalFormData): Promise<myError> {
             id: vital.id
         },
         data: {
-            icon: vital.icon,
-            color: vital.color,
             name: vital.name,
             placeholder: vital.placeholder,
             forGender: vital.forGender,
