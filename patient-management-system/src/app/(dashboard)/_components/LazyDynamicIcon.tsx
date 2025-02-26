@@ -1,5 +1,3 @@
-'use client';
-
 import dynamic from "next/dynamic";
 import React, {CSSProperties} from "react";
 import iconMapping, {IconName} from "@/app/lib/iconMapping";
@@ -12,7 +10,7 @@ interface DynamicIconProps {
 
 // Lazy load icons dynamically
 const LazyIcon = ({icon, ...props}: { icon: IconName } & Omit<DynamicIconProps, "icon">) => {
-    const IconComponent = dynamic(() => Promise.resolve(iconMapping[icon]), {ssr: false});
+    const IconComponent = dynamic(() => Promise.resolve(iconMapping[icon]), {ssr: true});
 
     return <IconComponent {...props} />;
 };
