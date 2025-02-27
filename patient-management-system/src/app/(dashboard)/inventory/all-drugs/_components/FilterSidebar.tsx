@@ -1,7 +1,6 @@
 // components/drugs/filter-sidebar.tsx
 import { cn } from "@/lib/utils";
-import { FilterSection } from "@/components/drugs/filter-section";
-import { useFilterStore } from "@/lib/store";
+import { FilterSection } from "./FilterSections";
 import { 
   Accordion,
   AccordionContent,

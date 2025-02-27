@@ -1,4 +1,6 @@
 // components/ui/data-table.tsx
+"use client"
+
 import {
     Table,
     TableBody,

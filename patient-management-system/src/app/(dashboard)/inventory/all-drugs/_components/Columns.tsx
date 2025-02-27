@@ -1,8 +1,8 @@
 // components/drugs/columns.tsx
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { Drug } from "@/lib/types";
-import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
+import { Drug } from "../lib/types";
+import { DataTableColumnHeader } from "./ui/data-table-column-header";
 
 export const columns: ColumnDef<Drug>[] = [
   {

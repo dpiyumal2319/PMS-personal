@@ -1,9 +1,9 @@
 // components/drugs/drugs.tsx
-import { fetchDrugs } from '@/lib/data';
-import { DrugCard } from '@/components/drugs/drug-card';
-import { DataTable } from '@/components/ui/data-table';
-import { columns } from '@/components/drugs/columns';
-import { Pagination } from '@/components/ui/pagination';
+import { fetchDrugs } from '../lib/data';
+import { DrugCard } from './DrugCard';
+import { DataTable } from './ui/data-table';
+import { columns } from './Columns';
+import { Pagination } from './ui/pagination';
 
 interface DrugsProps {
   page: number;

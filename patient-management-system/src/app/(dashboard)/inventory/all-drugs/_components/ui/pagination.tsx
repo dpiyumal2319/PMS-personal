@@ -1,4 +1,6 @@
 // components/ui/pagination.tsx
+"use client"
+
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";

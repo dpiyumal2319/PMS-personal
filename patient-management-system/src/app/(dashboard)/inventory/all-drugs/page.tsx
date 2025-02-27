@@ -1,10 +1,10 @@
 // app/drugs/page.tsx
 import { Suspense } from 'react';
-import { Drugs } from '@/components/drugs/drugs';
-import { DashboardShell } from '@/components/dashboard/dashboard-shell';
-import { DashboardHeader } from '@/components/dashboard/dashboard-header';
-import { FilterSidebar } from '@/components/drugs/filter-sidebar';
-import { SearchAndSort } from '@/components/drugs/search-and-sort';
+import { Drugs } from './_components/Drugs';
+import { DashboardShell } from './_components/ui/dashboard-shell';
+import { DashboardHeader } from './_components/ui/dashboard-header';
+import { FilterSidebar } from './_components/FilterSidebar';
+import { SearchAndSort } from './_components/SearchAndSort';
 
 interface SearchParams {
   page?: string;
