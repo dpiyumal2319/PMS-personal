@@ -4,12 +4,39 @@ import AddVitalDialog from "@/app/(dashboard)/admin/prescription/_components/Add
 import {IconName} from "@/app/lib/iconMapping";
 import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import EditVitalDialog from "@/app/(dashboard)/admin/prescription/_components/EditVitalDialog";
-import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
+import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import DeleteVitalDialog from "@/app/(dashboard)/admin/prescription/_components/DeleteVital";
 import {getTextColorClass} from "@/app/lib/utils";
+import {Gender, VitalType} from "@prisma/client";
 
 const VitalsForm = async () => {
     const vitals = await getAllVitals();
+
+    const getCustomTypeBadge = (type: VitalType) => {
+        switch (type) {
+            case 'TEXT':
+                return <CustomBadge text={'Text'} color={'blue'}/>;
+            case 'NUMBER':
+                return <CustomBadge text={'Number'} color={'green'}/>;
+            case 'DATE':
+                return <CustomBadge text={'Date'} color={'red'}/>;
+            default:
+                return <CustomBadge text={'Unknown'} color={'gray'}/>;
+        }
+    };
+
+
+    const getCustomGenderBadge = (gender: Gender | null) => {
+        switch (gender) {
+            case 'MALE':
+                return <CustomBadge text={'Male'} color={'blue'}/>;
+            case 'FEMALE':
+                return <CustomBadge text={'Female'} color={'pink'}/>;
+            default:
+                return <CustomBadge text={'All'} color={'gray'}/>;
+        }
+    }
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {vitals.map(vital => (
@@ -46,14 +73,16 @@ const VitalsForm = async () => {
                     <CardContent className="p-4 relative z-10">
                         <div className="grid grid-cols-2 gap-2 text-sm">
                             <div>
-                                <span className="font-medium">Placeholder:</span> {vital.placeholder}
-                            </div>
-                            <div>
-                                <span className="font-medium">For Gender:</span> {vital.forGender || 'All'}
+                                <span className="font-semibold">Placeholder:</span> <span
+                                className={'text-gray-500'}>{vital.placeholder}</span>
                             </div>
                             <div>
                                 <span
-                                    className="font-medium">Type:</span> {vital.type === 'TEXT' ? 'Text' : vital.type === 'NUMBER' ? 'Number' : vital.type === 'DATE' ? 'Date' : 'unknown'}
+                                    className="font-semibold">For Gender:</span> {getCustomGenderBadge(vital.forGender)}
+                            </div>
+                            <div>
+                                <span
+                                    className="font-semibold">Type:</span> {getCustomTypeBadge(vital.type)}
                             </div>
                         </div>
                     </CardContent>
