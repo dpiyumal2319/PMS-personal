@@ -12,7 +12,6 @@ import {Skeleton} from "@/components/ui/skeleton";
 
 const VitalsForm = async () => {
     const vitals = await getAllVitals();
-
     const getCustomTypeBadge = (type: VitalType) => {
         switch (type) {
             case 'TEXT':
@@ -98,13 +97,8 @@ const VitalsFormSkeleton = () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(5)].map((_, index) => (
-                <Card key={index} className="relative overflow-hidden">
-                    {/* Background Skeleton */}
-                    <div className="absolute right-0 bottom-0 opacity-5 transform translate-x-1/4 translate-y-1/4">
-                        <Skeleton className="w-32 h-32"/>
-                    </div>
-
-                    <CardHeader className="flex flex-row items-center justify-between p-4 relative z-10">
+                <Card key={index} className="overflow-hidden">
+                    <CardHeader className="flex flex-row items-center justify-between p-4">
                         <div className="flex items-center gap-2">
                             <Skeleton className="w-8 h-8 rounded-full"/>
                             <CardTitle className="text-lg">
@@ -116,19 +110,19 @@ const VitalsFormSkeleton = () => {
                             <Skeleton className="w-6 h-6"/>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-4 relative z-10">
+                    <CardContent className="p-4 ">
                         <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                                <span className="font-semibold">Placeholder:</span>{" "}
-                                <Skeleton className="w-full h-4"/>
+                            <div className={'flex items-center gap-2'}>
+                                <Skeleton className={'w-12 h-6'}/>
+                                <Skeleton className="w-full h-6"/>
                             </div>
-                            <div>
-                                <span className="font-semibold">For Gender:</span>{" "}
-                                <Skeleton className="w-full h-4"/>
+                            <div className={'flex items-center gap-2'}>
+                                <Skeleton className={'w-12 h-6'}/>
+                                <Skeleton className="w-full h-6"/>
                             </div>
-                            <div>
-                                <span className="font-semibold">Type:</span>{" "}
-                                <Skeleton className="w-full h-4"/>
+                            <div className={'flex items-center gap-2'}>
+                                <Skeleton className={'w-12 h-6'}/>
+                                <Skeleton className="w-full h-6"/>
                             </div>
                         </div>
                     </CardContent>
