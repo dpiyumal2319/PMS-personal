@@ -67,7 +67,7 @@ const VitalsForm = async () => {
                                     placeholder: vital.placeholder
                                 }
                             }/>
-                            <DeleteVitalDialog id={vital.id}/>
+                            <DeleteVitalDialog vitalId={vital.id}/>
                         </div>
                     </CardHeader>
                     <CardContent className="p-4 relative z-10">

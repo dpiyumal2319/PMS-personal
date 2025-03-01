@@ -841,7 +841,7 @@ export async function safeDeleteVital(vitalID: number): Promise<myError | myConf
     if (extVital._count.PrescriptionVitals > 0) {
         return {
             confirmationRequired: true,
-            message: `Vital is in use in ${extVital._count.PrescriptionVitals} prescriptions. Are you sure you want to delete it?`,
+            message: `Vital is in use in ${extVital._count.PrescriptionVitals} prescriptions. Are you sure you want to delete it with all its data?`,
         }
     }
 

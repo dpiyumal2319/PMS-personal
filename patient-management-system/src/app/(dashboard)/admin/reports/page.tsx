@@ -1,5 +1,5 @@
 import SearchBox from "@/app/(dashboard)/_components/Search";
-import {getTotalReportTemplateCount} from "@/app/lib/actions";
+import {getTotalReportTemplateCount} from "@/app/lib/actions/reports";
 import AllReportsTable from "@/app/(dashboard)/admin/reports/_components/AllReportsTable";
 import AddReports from "@/app/(dashboard)/admin/reports/_components/AddReports";
 import {Suspense} from "react";

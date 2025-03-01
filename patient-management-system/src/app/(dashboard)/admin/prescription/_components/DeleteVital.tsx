@@ -14,39 +14,26 @@ import {
 } from "@/components/ui/alert-dialog";
 import {Button} from "@/components/ui/button";
 import {Trash2} from "lucide-react";
-import {handleServerActionWithConfirmation} from "@/app/lib/utils";
 import {deleteVital, safeDeleteVital} from "@/app/lib/actions/prescriptions";
+import {handleServerActionWithConfirmation} from "@/app/lib/toast";
 
 interface DeleteVitalDialogProps {
-    id: number;
+    vitalId: number;
 }
 
-const DeleteVitalDialog: React.FC<DeleteVitalDialogProps> = ({id}) => {
+const DeleteVitalDialog: React.FC<DeleteVitalDialogProps> = ({vitalId}) => {
     const [open, setOpen] = useState(false);
 
     const handleDelete = async () => {
-
-        const userConfirmation = confirm('This will remove any unsaved prescription data. Are you sure you want to delete this vital?');
-
-        if (!userConfirmation) {
-            return;
-        }
-
         Object.keys(localStorage).forEach((key) => {
             if (key.startsWith("prescription-form-")) {
                 localStorage.removeItem(key);
             }
         });
 
-
-        const result = await handleServerActionWithConfirmation(() => safeDeleteVital(id),
-            () => deleteVital(id)
-            , {
-                loadingMessage: 'Deleting vital...',
-            })
-        if (result.success) {
-            setOpen(false);
-        }
+        await handleServerActionWithConfirmation(() => safeDeleteVital(vitalId), () => deleteVital(vitalId), {
+            loadingMessage: 'Deleting vital...',
+        });
     };
 
     return (
@@ -60,11 +47,16 @@ const DeleteVitalDialog: React.FC<DeleteVitalDialogProps> = ({id}) => {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Vital</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to delete this vital? This action cannot be undone.
+                        Are you sure you want to <span className="text-red-500">delete</span> this vital? This
+                        action <span className="text-red-500">cannot be undone</span>.
+                        This will remove all <span className="text-amber-600 font-semibold">unsaved</span> prescription
+                        data.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel className="bg-green-600 text-white hover:bg-green-700 hover:text-white">
+                        Keep
+                    </AlertDialogCancel>
                     <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                         Delete
                     </AlertDialogAction>
