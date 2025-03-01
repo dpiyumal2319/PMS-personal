@@ -1,6 +1,6 @@
 'use server'
 
-import {myError} from "@/app/lib/definitions";
+import {myConfirmation, myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
 import type {DrugType} from "@prisma/client";
 import {revalidatePath} from "next/cache";
@@ -812,7 +812,7 @@ export async function updateVital(vital: VitalFormData): Promise<myError> {
 }
 
 
-export async function deleteVital(vitalID: number): Promise<myError> {
+export async function safeDeleteVital(vitalID: number): Promise<myError | myConfirmation> {
     const session = await verifySession();
     if (session.role !== 'DOCTOR') {
         redirect('/unauthorized');
@@ -840,9 +840,9 @@ export async function deleteVital(vitalID: number): Promise<myError> {
 
     if (extVital._count.PrescriptionVitals > 0) {
         return {
-            success: false,
-            message: "Vital cannot be deleted as it is in use",
-        };
+            confirmationRequired: true,
+            message: `Vital is in use in ${extVital._count.PrescriptionVitals} prescriptions. Are you sure you want to delete it with all its data?`,
+        }
     }
 
     await prisma.vitals.delete({
@@ -856,4 +856,31 @@ export async function deleteVital(vitalID: number): Promise<myError> {
         success: true,
         message: "Vital deleted successfully",
     };
+}
+
+export async function deleteVital(vitalID: number): Promise<myError> {
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        redirect('/unauthorized');
+    }
+
+    try {
+        await prisma.vitals.delete({
+            where: {
+                id: vitalID,
+            },
+        });
+
+        revalidatePath('/admin/prescription');
+        return {
+            success: true,
+            message: "Vital deleted successfully",
+        };
+    } catch (e) {
+        console.error("Error deleting vital:", e);
+        return {
+            success: false,
+            message: "An error occurred while deleting vital",
+        };
+    }
 }

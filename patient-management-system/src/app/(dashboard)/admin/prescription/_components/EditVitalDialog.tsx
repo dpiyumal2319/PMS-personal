@@ -79,6 +79,12 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
             return;
         }
 
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith("prescription-form-")) {
+                localStorage.removeItem(key);
+            }
+        });
+
         const result = await handleServerAction(() => updateVital(formData), {
             loadingMessage: 'Updating vital...',
         });
@@ -205,6 +211,10 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
                         </RadioGroup>
                     </div>
                 </div>
+
+                <span className={'text-sm text-gray-500'}>
+                    This will remove all unsaved prescription data.
+                </span>
 
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => {

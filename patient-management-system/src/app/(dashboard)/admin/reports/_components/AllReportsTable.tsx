@@ -1,6 +1,6 @@
 import React from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {getFilteredReports} from "@/app/lib/actions";
+import {getFilteredReports} from "@/app/lib/actions/reports";
 import {CustomBadge, RandomColorBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import EditReport from "@/app/(dashboard)/admin/reports/_components/EditReport";
 import {DeleteReport} from "@/app/(dashboard)/admin/reports/_components/DeleteReport";
@@ -32,7 +32,7 @@ const AllReportsTable = async ({query}: {
                             </CardTitle>
                             <div className={'flex gap-2'}>
                                 <EditReport ID={report.id}/>
-                                <DeleteReport id={report.id}/>
+                                <DeleteReport reportID={report.id}/>
                             </div>
                         </div>
                     </CardHeader>

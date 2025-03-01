@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {formatDistanceToNow} from 'date-fns';
-import {getPatientReports} from "@/app/lib/actions";
+import {getPatientReports} from "@/app/lib/actions/reports";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {DeleteReport} from "@/app/(dashboard)/patients/[id]/reports/_components/DeleteReporAlert";
 

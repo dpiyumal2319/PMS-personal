@@ -41,6 +41,11 @@ export type myError = {
     message: string
 }
 
+export type myConfirmation = {
+    confirmationRequired: boolean,
+    message: string,
+}
+
 export type myBillError = {
     success: boolean,
     message: string,
