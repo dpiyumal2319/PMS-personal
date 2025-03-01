@@ -179,7 +179,12 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         setSelectedBrand(null);
         resetStrategy();
 
-        const id = toast.loading("Fetching drug data...", {position: "bottom-right", pauseOnFocusLoss: false});
+        // Create a reference for the toast ID
+        const toastId = toast.loading("Fetching drug data...", {
+            position: "bottom-right",
+            pauseOnFocusLoss: false,
+            closeButton: true,
+        });
 
         try {
             // Set initial states
@@ -189,7 +194,13 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             setIsTypeSearching(true);
             setCacheFetching(true);
 
-            toast.update(id, {render: "Fetching cached strategy and types...", isLoading: true});
+            // Update toast with progress 15%
+            toast.update(toastId, {
+                render: "Fetching cached strategy and types...",
+                type: "info",
+                isLoading: true,
+                progress: 0.15
+            });
 
             // Fetch cached strategy & types
             const [cachedStrategy, types] = await Promise.all([
@@ -199,34 +210,46 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
             if (!types.length) {
                 setError("No types found for this drug");
-                toast.update(id, {
+                toast.update(toastId, {
                     render: "No types found for this drug",
                     type: "error",
                     isLoading: false,
-                    autoClose: 3000
+                    progress: 1,
                 });
                 return;
             }
 
             setTypes(types);
 
-            toast.update(id, {render: "Validating cached strategy & type...", isLoading: true});
+            // Update toast with progress 30%
+            toast.update(toastId, {
+                render: "Validating cached strategy & type...",
+                isLoading: true,
+                type: "info",
+                progress: 0.3
+            });
 
             // Validate cached strategy & type
             const selectedDrugType = types.find(type => cachedStrategy?.issue.type === type.name) || null;
             setSelectedType(selectedDrugType);
 
             if (!selectedDrugType) {
-                toast.update(id, {
+                toast.update(toastId, {
                     render: "Cached type invalid. Please select manually.",
                     type: "warning",
+                    progress: 1,
                     isLoading: false,
-                    autoClose: 1000
                 });
                 return;
             }
 
-            toast.update(id, {render: "Fetching concentrations...", isLoading: true});
+            // Update toast with progress 45%
+            toast.update(toastId, {
+                render: "Fetching concentrations...",
+                type: "info",
+                isLoading: true,
+                progress: 0.45
+            });
 
             // Fetch concentrations
             const concentrations = await getConcentrationByDrug({
@@ -240,11 +263,11 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
 
             if (!cachedConcentration) {
                 console.warn("Cached concentration is invalid");
-                toast.update(id, {
+                toast.update(toastId, {
                     render: "Cached concentration invalid. Please select manually.",
                     type: "warning",
                     isLoading: false,
-                    autoClose: 1000
+                    progress: 1,
                 });
                 return;
             }
@@ -252,7 +275,13 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             setSelectedConcentration(cachedConcentration);
             showWarnings(cachedConcentration);
 
-            toast.update(id, {render: "Fetching brands...", isLoading: true});
+            // Update toast with progress 60%
+            toast.update(toastId, {
+                render: "Fetching brands...",
+                isLoading: true,
+                type: "info",
+                progress: 0.6
+            });
 
             // Fetch brands
             const drugBrands = await getBrandByDrugConcentrationType({
@@ -262,16 +291,24 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
             });
 
             setBrands(drugBrands);
+            await handleCachedBrandStrategy(drugBrands, cachedStrategy, toastId);
 
-            toast.update(id, {render: "Applying cached brand and strategy...", isLoading: true});
-
-            await handleCachedBrandStrategy(drugBrands, cachedStrategy, id);
-
-            toast.update(id, {render: "Drug selection complete!", type: "success", isLoading: false, autoClose: 1000});
+            // Complete the progress bar and show success
+            toast.update(toastId, {
+                render: "Drug selection complete!",
+                type: "success",
+                isLoading: false,
+                progress: 1,
+            });
         } catch (error) {
             console.error("Error in handleDrugSelect:", error);
             setError("Error fetching drug data");
-            toast.update(id, {render: "Error fetching drug data", type: "error", isLoading: false, autoClose: 3000});
+            toast.update(toastId, {
+                render: "Error fetching drug data",
+                type: "error",
+                isLoading: false,
+                progress: 1,
+            });
         } finally {
             setIsBrandSearching(false);
             setIsConcentrationSearching(false);
@@ -285,18 +322,18 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
     const handleCachedBrandStrategy = async (
         drugBrands: BrandOption[],
         cachedStrategy: CachedStrategy,
-        id: Id
+        toastID: Id
     ) => {
         if (!cachedStrategy) return;
 
         const availableBrandIDs = drugBrands.map(brand => brand.id);
         if (!availableBrandIDs.includes(cachedStrategy.issue.brandId)) {
             // Reset strategy-related states if cached brand is not available
-            toast.update(id, {
+            toast.update(toastID, {
                 render: "Cached brand not available. Please select manually.",
                 type: "warning",
                 isLoading: false,
-                autoClose: 1000
+                progress: 0.85,
             });
 
             setStrategy(null);
@@ -312,9 +349,25 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         const {issue} = cachedStrategy;
         const selectedBrand_local = drugBrands.find(b => b.id === issue.brandId) || null;
 
+        toast.update(toastID, {
+            render: "Applying cached brand",
+            isLoading: true,
+            type: "info",
+            progress: 0.75
+        });
         // Set brand information
         setSelectedBrand(selectedBrand_local);
+
+
         // Set issue details
+
+        toast.update(toastID, {
+            render: "Applying cached strategy",
+            isLoading: true,
+            type: "info",
+            progress: 0.75
+        });
+
         setStrategy(issue.strategy);
         setDose(issue.dose);
         setMealTiming(issue.meal);
@@ -332,6 +385,13 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
         if (selectedBrand_local) {
             showWarnings(selectedBrand_local);
         }
+
+        toast.update(toastID, {
+            render: "Cached strategy applied",
+            isLoading: false,
+            type: "info",
+            progress: 0.95,
+        });
     };
 
     const handleTypeSelect = async (type: CustomDrugType) => {
