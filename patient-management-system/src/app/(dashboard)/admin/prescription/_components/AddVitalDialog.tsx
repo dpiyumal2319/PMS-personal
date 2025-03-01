@@ -37,7 +37,7 @@ export interface VitalFormData {
 const AddVitalDialog = () => {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState<VitalFormData>({
-        icon: 'BsActivity',
+        icon: 'Activity',
         color: 'red',
         name: '',
         placeholder: '',
@@ -167,7 +167,6 @@ const AddVitalDialog = () => {
                                 });
                             }}
                                                 buttonClassName={'flex items-center justify-center text-2xl p-2 rounded-lg bg-white hover:bg-gray-200 w-fit'}
-                                                selectedIconP={formData.icon}
                                                 selectedColorP={formData.color}
                             >
                                 <DynamicIcon icon={formData.icon}
