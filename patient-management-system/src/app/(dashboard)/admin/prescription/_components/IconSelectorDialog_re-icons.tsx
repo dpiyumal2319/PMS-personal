@@ -48,8 +48,7 @@ const IconSelectorDialog: React.FC<IconSelectorDialogProps> = ({
         }
     };
 
-    // Filter icons by search term and then limit to 50
-    const filteredIcons = Object.keys(iconMapping).filter((icon) => icon.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 100);
+    const filteredIcons = Object.keys(iconMapping).filter((icon) => icon.toLowerCase().includes(searchTerm.toLowerCase()))
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
