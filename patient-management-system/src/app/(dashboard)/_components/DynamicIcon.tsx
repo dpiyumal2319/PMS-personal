@@ -1,5 +1,6 @@
 import React, {CSSProperties} from "react";
 import iconMapping, {IconName} from "@/app/lib/iconMapping";
+import {MdInsertEmoticon} from "react-icons/md";
 
 interface DynamicIconProps {
     className?: string;
@@ -14,7 +15,7 @@ const DynamicIcon: React.FC<DynamicIconProps> = ({className, icon, style}) => {
             receivedIcon: icon,
             availableIcons: Object.keys(iconMapping),
         });
-        return null;
+        return <MdInsertEmoticon className={className} style={style}/>;
     }
 
     const IconComponent = iconMapping[icon];
