@@ -381,6 +381,11 @@ export async function addPrescription({
             redirect('/unauthorized');
         }
 
+        // Remove '' vitals
+        prescriptionForm.vitals = prescriptionForm.vitals.filter(
+            (vital) => vital.value !== ""
+        );
+
         // Create prescription with all related records in a transaction
         await prisma.$transaction(async (tx) => {
             // Create the main prescription and store its result to get issue IDs

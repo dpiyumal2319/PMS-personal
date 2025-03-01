@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
 import {handleServerAction} from "@/app/lib/utils";
-import {useRouter} from "next/navigation";
 import {BillExport} from '@/app/(dashboard)/_components/BillExport';
 import {IoMdDownload} from "react-icons/io";
 
@@ -51,7 +50,6 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
         );
         const [error, setError] = useState<string | null>(null);
         const [bill, setBill] = useState<Bill | null>(null);
-        const router = useRouter();
 
         const handleBatchAssign = (issueID: number, batchID: number | null) => {
             setBatchAssignments(prev => prev.map(assignment =>
@@ -106,7 +104,6 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
 
             if (result.success) {
                 await new Promise((resolve) => setTimeout(resolve, 2000));
-                router.push('/queue/active');
             }
             setError(result.message);
         }

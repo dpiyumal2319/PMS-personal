@@ -70,11 +70,13 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
 
                 <Separator/>
 
+                {/*Prescription Vitals*/}
+                <h2 className="text-lg font-semibold">Vitals</h2>
                 <div className="grid grid-cols-2 gap-4">
                     {prescription.PrescriptionVitals.map((vital) => (
                         <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
                             <DynamicIcon icon={vital.vital.icon as IconName}
-                                         className={`text-2xl ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}/>
+                                         className={`text-lg ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}/>
                             <span className="font-medium">{vital.vital.name}</span>
                             <span className="font-semibold">{vital.value}</span>
                         </div>
@@ -84,11 +86,11 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
 
                 <Separator/>
                 {/*Prescription Issues*/}
-                <h2 className="text-xl font-semibold italic">Rx</h2>
+                <h2 className="text-xl font-semibold italic text-primary-700">Rx</h2>
                 {prescription.status === "COMPLETED" ? (
                     <>
                         {prescription.issues.length > 0 && (
-                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                            <div className="space-y-4">
                                 <span className="text font-semibold">Prescription Issues from Inventory</span>
                                 {prescription.issues.map((issue) => (
                                     <PrescriptionIssueCard issue={issue} key={issue.id}/>
@@ -99,7 +101,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                         <Separator/>
 
                         {prescription.OffRecordMeds.length > 0 && (
-                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                            <div className="space-y-4">
                                 <span className="text font-semibold">Off Record Medications</span>
                                 {prescription.OffRecordMeds.map((med) => (
                                     <OffRecordMedCard med={med} key={med.id}/>
@@ -121,7 +123,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                 ) : (
                     <>
                         {prescription.OffRecordMeds.length > 0 && (
-                            <div className="space-y-4 border-t border-gray-200 pt-4">
+                            <div className="space-y-4">
                                 <span className="text font-semibold">Off Record Medications</span>
                                 {prescription.OffRecordMeds.map((med) => (
                                     <OffRecordMedCard med={med} key={med.id}/>

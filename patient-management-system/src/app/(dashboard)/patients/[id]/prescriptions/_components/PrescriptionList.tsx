@@ -50,7 +50,7 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                     {prescription.PrescriptionVitals.map((vital) => (
                                         <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
                                             <DynamicIcon
-                                                className={`text-xl ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}
+                                                className={`text-lg ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}
                                                 icon={vital.vital.icon as IconName}/>
                                             <span className="font-medium">{vital.vital.name}</span>
                                             <span className="font-semibold">{vital.value}</span>

@@ -213,7 +213,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                 <div key={index} className="space-y-2">
                                     <div className="flex items-center space-x-2">
                                         <DynamicIcon icon={vital.icon as IconName}
-                                                     className={`text-xl ${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
+                                                     className={`text-lg ${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
                                         <Label>{vital.name}</Label>
                                     </div>
                                     <Input

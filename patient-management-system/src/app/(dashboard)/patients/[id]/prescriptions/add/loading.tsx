@@ -29,7 +29,7 @@ const PrescriptionFormSkeleton = () => {
                     <Skeleton className="h-10 w-full"/>
                 </Card>
                 <Card className='bg-slate-100 p-4 space-y-6'>
-                    <h2 className="text-lg font-semibold">Medications</h2>
+                    <Skeleton className={'h-5 w-24'}/>
                     <Skeleton className="h-5 w-48"/>
                     <Skeleton className="h-16 w-full"/>
                     <Skeleton className="h-5 w-48"/>
