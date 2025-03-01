@@ -51,7 +51,7 @@ import {
     IoMdMedkit, IoMdThermometer, IoMdTrendingUp, IoMdTrendingDown
 } from "react-icons/io";
 
-import {IoSpeedometerOutline} from "react-icons/io5";
+import {IoFemale, IoMale, IoSpeedometerOutline} from "react-icons/io5";
 
 import {IconType} from "react-icons";
 
@@ -217,7 +217,11 @@ const iconMapping: Record<string, IconType> = {
     SkeletonInside: GiSkeletonInside,
     Sick: MdSick,
     Medical: IoMdMedical,
-    Medkit: IoMdMedkit
+    Medkit: IoMdMedkit,
+
+    //Gender
+    Female: IoFemale,
+    Male: IoMale,
 };
 
 type IconName = keyof typeof iconMapping;
