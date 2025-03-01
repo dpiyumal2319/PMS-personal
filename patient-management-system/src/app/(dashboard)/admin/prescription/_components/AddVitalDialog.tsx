@@ -10,16 +10,6 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
@@ -46,7 +36,6 @@ export interface VitalFormData {
 
 const AddVitalDialog = () => {
     const [open, setOpen] = useState(false);
-    const [alertOpen, setAlertOpen] = useState(false);
     const [formData, setFormData] = useState<VitalFormData>({
         icon: 'BsActivity',
         color: 'red',
@@ -99,29 +88,30 @@ const AddVitalDialog = () => {
         return true;
     };
 
-    const handleInitialSubmit = () => {
+    const handleInitialSubmit = async () => {
         if (validateForm()) {
-            setAlertOpen(true);
-        }
-    };
+            const userConfirmation = confirm('This will remove any unsaved prescription data. Are you sure you want to delete this vital?');
 
-    const handleConfirmedSubmit = async () => {
-        // Clear all unsaved prescriptions from localStorage
-        Object.keys(localStorage).forEach((key) => {
-            if (key.startsWith("prescription-form-")) {
-                localStorage.removeItem(key);
+            if (!userConfirmation) {
+                return;
             }
-        });
 
-        const result = await handleServerAction(() => addVital(formData), {
-            loadingMessage: 'Adding new vital...',
-        });
+            Object.keys(localStorage).forEach((key) => {
+                if (key.startsWith("prescription-form-")) {
+                    localStorage.removeItem(key);
+                }
+            });
 
-        if (result.success) {
-            setOpen(false);
-            reset();
-        } else {
-            setError(result.message);
+            const result = await handleServerAction(() => addVital(formData), {
+                loadingMessage: 'Adding new vital...',
+            });
+
+            if (result.success) {
+                setOpen(false);
+                reset();
+            } else {
+                setError(result.message);
+            }
         }
     };
 
@@ -265,21 +255,6 @@ const AddVitalDialog = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
-            <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Unsaved Prescriptions Will Be Removed</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Adding a new vital will remove all unsaved prescriptions. Do you want to continue?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleConfirmedSubmit}>Continue</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </>
     );
 };

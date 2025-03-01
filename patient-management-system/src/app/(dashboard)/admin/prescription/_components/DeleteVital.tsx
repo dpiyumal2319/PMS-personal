@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import {Button} from "@/components/ui/button";
 import {Trash2} from "lucide-react";
-import {handleServerAction} from "@/app/lib/utils";
-import {deleteVital} from "@/app/lib/actions/prescriptions";
+import {handleServerActionWithConfirmation} from "@/app/lib/utils";
+import {deleteVital, safeDeleteVital} from "@/app/lib/actions/prescriptions";
 
 interface DeleteVitalDialogProps {
     id: number;
@@ -25,10 +25,26 @@ const DeleteVitalDialog: React.FC<DeleteVitalDialogProps> = ({id}) => {
     const [open, setOpen] = useState(false);
 
     const handleDelete = async () => {
-        const result = await handleServerAction(() => deleteVital(id), {
-            loadingMessage: 'Deleting vital...',
-        })
-        if (result) {
+
+        const userConfirmation = confirm('This will remove any unsaved prescription data. Are you sure you want to delete this vital?');
+
+        if (!userConfirmation) {
+            return;
+        }
+
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith("prescription-form-")) {
+                localStorage.removeItem(key);
+            }
+        });
+
+
+        const result = await handleServerActionWithConfirmation(() => safeDeleteVital(id),
+            () => deleteVital(id)
+            , {
+                loadingMessage: 'Deleting vital...',
+            })
+        if (result.success) {
             setOpen(false);
         }
     };

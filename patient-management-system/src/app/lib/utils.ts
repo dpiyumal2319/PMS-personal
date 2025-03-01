@@ -2,6 +2,7 @@ import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
 import {IssuingStrategy} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
+import {myConfirmation, myError} from "@/app/lib/definitions";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();
@@ -51,10 +52,9 @@ export const getInitials = (name: string) => {
         .slice(0, 2);
 };
 
-type ServerActionResult = { success: boolean; message: string };
 
 // Now the server action is just a function that returns a Promise<ServerActionResult>
-type ServerAction = () => Promise<ServerActionResult>;
+type ServerAction = () => Promise<myError>;
 
 interface ActionOptions {
     loadingMessage?: string;
@@ -72,7 +72,7 @@ interface ActionOptions {
 export const handleServerAction = async (
     action: ServerAction,
     options: ActionOptions = {}
-): Promise<ServerActionResult> => {
+): Promise<myError> => {
     const {
         loadingMessage = "Processing...",
         position = "bottom-right",
@@ -110,6 +110,83 @@ export const handleServerAction = async (
         return {success: false, message: "An error occurred"};
     }
 };
+
+
+type ServerActionWithConfirmation = () => Promise<myConfirmation | myError>;
+export const handleServerActionWithConfirmation = async (
+        action: ServerActionWithConfirmation,
+        confirmAction: ServerAction,
+        options: ActionOptions = {}
+    ): Promise<myError> => {
+        const {loadingMessage = "Processing...", position = "bottom-right"} = options;
+        const id = toast.loading(loadingMessage, {position, pauseOnFocusLoss: false});
+
+        try {
+            const result = await action();
+
+            if ('confirmationRequired' in result) {
+                const userConfirmed = await new Promise<boolean>((resolve) => {
+                    if (window.confirm(result.message)) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                });
+
+                if (userConfirmed) {
+                    toast.update(id, {
+                        type: 'info',
+                        render: loadingMessage,
+                        isLoading: true,
+                    });
+                    const result = await confirmAction();
+                    if (result.success) {
+                        toast.update(id, {
+                            render: result.message || "Success!",
+                            type: "success",
+                            isLoading: false,
+                            autoClose: 2000,
+                        });
+                        return result;
+                    } else {
+                        toast.update(id, {
+                            render: result.message || "An error occurred!",
+                            type: "error",
+                            isLoading: false,
+                            autoClose: 2000,
+                        });
+                        return result;
+                    }
+                } else {
+                    toast.update(id, {
+                        render: "Action canceled by user.",
+                        type: "info",
+                        isLoading: false,
+                        autoClose: 2000,
+                    })
+                    return {success: false, message: "Action canceled by user."};
+                }
+            } else {
+                toast.update(id, {
+                    render: result.message || (result.success ? "Success!" : "An error occurred!"),
+                    type: result.success ? "success" : "error",
+                    isLoading: false,
+                    autoClose: 2000,
+                });
+                return result;
+            }
+        } catch
+            (error) {
+            toast.update(id, {
+                render: error instanceof Error ? error.message : "An error occurred!",
+                type: "error",
+                isLoading: false,
+                autoClose: 2000,
+            });
+            return {success: false, message: "An error occurred"};
+        }
+    }
+;
 
 
 export function calculateQuantity({

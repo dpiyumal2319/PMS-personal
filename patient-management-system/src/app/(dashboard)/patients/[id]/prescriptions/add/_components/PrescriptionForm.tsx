@@ -170,7 +170,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         <h1 className="text-2xl font-semibold">Prescribe Medication</h1>
                     </div>
                     <span onClick={formReset} className="text-red-500 cursor-pointer text-sm hover:underline">
-                    X Clear (Refetch vitals)
+                    X Clear (Refetch recent vitals)
                 </span>
                 </div>
                 <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
@@ -196,6 +196,18 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         <h2 className="text-md font-semibold">Patient Vitals</h2>
 
                         {/* Grid for Vitals */}
+                        {(vitals.length === 0) && (
+                            <div>No vitals found. Please click {' '}
+                                <span onClick={formReset} className="text-blue-500 hover:underline cursor-pointer">
+                                    here
+                                </span>
+                                {' '} to refetch vitals if you have added any.
+                                If you are an admin, you can create vitals {' '}
+                                <a href={'/admin/prescription'}
+                                   className="text-blue-500 hover:underline">here</a> before
+                                prescribing medication.</div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {formData.vitals.map((vital, index) => (
                                 <div key={index} className="space-y-2">
@@ -216,7 +228,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         </div>
 
                         <Separator/>
-                        <h2 className="text-lg font-semibold">Additional Details</h2>
+                        <h2 className="text-md font-semibold">Additional Details</h2>
 
                         {/* Description Section - Moved Outside */}
                         <div className={'grid grid-cols-1 md:grid-cols-2 gap-4'}>

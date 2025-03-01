@@ -79,6 +79,18 @@ const EditVitalDialog: React.FC<EditVitalDialogProps> = ({initialData}) => {
             return;
         }
 
+        const userConfirmation = confirm('This will remove any unsaved prescription data. Are you sure you want to delete this vital?');
+
+        if (!userConfirmation) {
+            return;
+        }
+
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith("prescription-form-")) {
+                localStorage.removeItem(key);
+            }
+        });
+
         const result = await handleServerAction(() => updateVital(formData), {
             loadingMessage: 'Updating vital...',
         });
