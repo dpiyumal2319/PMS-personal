@@ -1,3 +1,5 @@
+'use server'
+
 import {AddUserFormData} from "@/app/(dashboard)/admin/staff/_components/AddUserDialog";
 import {myError} from "@/app/lib/definitions";
 import {validateEmail, validateMobile} from "@/app/lib/utils";
