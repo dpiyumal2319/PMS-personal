@@ -7,7 +7,8 @@ import {verifySession} from "@/app/lib/sessions";
 import {Skeleton} from "@/components/ui/skeleton";
 import EditProfileDialog from "@/app/(dashboard)/admin/_components/EditProfileDialog";
 import ChangePasswordDialog from "@/app/(dashboard)/admin/_components/ChangePasswordDialog";
-import {getUser} from "@/app/lib/actions";
+
+import {getUser} from "@/app/lib/actions/account";
 
 const ProfileCard = async () => {
     const session = await verifySession();

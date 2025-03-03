@@ -21,8 +21,8 @@ import {Input} from "@/components/ui/input";
 import {useForm} from "react-hook-form";
 import {Gender} from "@prisma/client";
 import {validateEmail, validateMobile, handleServerAction} from "@/app/lib/utils";
-import {editProfile} from "@/app/lib/actions";
 import CustomGenderSelect from "@/app/(dashboard)/patients/_components/CustomGenderSelect";
+import {editProfile} from "@/app/lib/actions/account";
 
 export interface EditUserProfileFormData {
     name: string;
