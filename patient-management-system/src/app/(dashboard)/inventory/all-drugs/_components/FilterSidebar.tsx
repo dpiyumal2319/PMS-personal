@@ -2,10 +2,7 @@
 import { cn } from "@/lib/utils";
 import { FilterSection } from "./FilterSections";
 import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
+  Accordion
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
