@@ -107,7 +107,7 @@ model PatientHistory {
   patient     Patient            @relation(fields: [patientId], references: [id])
   patientId   Int
   name        String
-  description String
+  description String?
   type        PatientHistoryType
   time        DateTime           @default(now())
 }

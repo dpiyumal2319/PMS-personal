@@ -9,24 +9,27 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {Textarea} from "@/components/ui/textarea";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter} from "@/components/ui/dialog";
-import {PlusCircle, Loader2, Stethoscope, Cross, Users, HeartPulse, AlertCircle} from "lucide-react";
+import {PlusCircle, Stethoscope, Cross, Users, HeartPulse, AlertCircle} from "lucide-react";
 import {PatientHistoryType} from "@prisma/client";
-import {toast} from "react-toastify";
+import {addHistory} from "@/app/lib/actions/history";
+import {handleServerAction} from "@/app/lib/utils";
+import {Input} from "@/components/ui/input";
 
-// Form schema
+// Form schema - Modified to make description optional
 const formSchema = z.object({
     patientId: z.number(),
-    description: z.string().min(3, {
-        message: "Description must be at least 3 characters.",
+    name: z.string().min(3, {
+        message: "Name must be at least 3 characters.",
     }),
+    description: z.string().optional(), // Changed from requiring min length to optional
     type: z.nativeEnum(PatientHistoryType, {
         required_error: "Please select a history type.",
     }),
 });
 
+
 const AddHistoryForm = ({patientID}: { patientID: number }) => {
     const [open, setOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<PatientHistoryType>(PatientHistoryType.MEDICAL);
 
     // Initialize form
@@ -34,6 +37,7 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             patientId: patientID,
+            name: "",
             description: "",
             type: PatientHistoryType.MEDICAL,
         },
@@ -47,19 +51,20 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
 
     // Submit handler
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsSubmitting(true);
-
-        // Add console log to track submission
-        console.log("Submitting history entry:", values);
-
         try {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            console.log("History entry submitted successfully");
+            const result = await handleServerAction(() => addHistory({
+                patientID: values.patientId,
+                name: values.name,
+                description: values.description || "",
+                type: values.type,
+            }), {loadingMessage: 'Adding history...'});
+
+            if (result.success) {
+                form.reset();
+                setOpen(false);
+            }
         } catch (error) {
             console.error("Error submitting history:", error);
-            toast.error("An error occurred");
-        } finally {
-            setIsSubmitting(false);
         }
     }
 
@@ -119,30 +124,51 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
                             onValueChange={handleTabChange}
                             className="w-full"
                         >
-                            <TabsList className="grid grid-cols-5 mb-4">
+                            <TabsList className="grid grid-cols-5 mb-4 h-10">
                                 {tabConfig.map((tab) => (
                                     <TabsTrigger
                                         key={tab.value}
                                         value={tab.value}
                                         className={`flex items-center justify-center ${activeTab === tab.value ? tab.color : ''}`}
                                     >
-                                        {tab.icon}
+                                        <span className="hidden md:inline">{tab.icon}</span>
                                         <span className="hidden sm:inline">{tab.label}</span>
                                     </TabsTrigger>
                                 ))}
                             </TabsList>
 
                             {tabConfig.map((tab) => (
-                                <TabsContent key={tab.value} value={tab.value} className="mt-0">
+                                <TabsContent key={tab.value} value={tab.value} className="space-y-4">
+
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({field}) => (
+                                            <FormItem>
+                                                <FormLabel>Label<span className={`text-sm text-red-500`}>*</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Enter history label..."
+                                                        className="input"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+
                                     <FormField
                                         control={form.control}
                                         name="description"
                                         render={({field}) => (
                                             <FormItem>
-                                                <FormLabel>Description</FormLabel>
+                                                <FormLabel>Description (Optional)</FormLabel>
                                                 <FormControl>
                                                     <Textarea
-                                                        placeholder={`Enter ${tab.label.toLowerCase()} history details...`}
+                                                        placeholder={`Enter ${tab.label.toLowerCase()} history details (optional)...`}
                                                         className="resize-none"
                                                         rows={5}
                                                         {...field}
@@ -163,20 +189,15 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
                             <Button
                                 variant="outline"
                                 type="button"
-                                onClick={() => setOpen(false)}
-                                disabled={isSubmitting}
+                                onClick={() => {
+                                    form.reset();
+                                    setOpen(false);
+                                }}
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                                        Saving...
-                                    </>
-                                ) : (
-                                    "Save History"
-                                )}
+                            <Button type="submit">
+                                Save History
                             </Button>
                         </DialogFooter>
                     </form>

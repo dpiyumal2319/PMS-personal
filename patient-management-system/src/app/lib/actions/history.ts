@@ -1,9 +1,12 @@
 'use server';
 
 import {Prisma} from "@prisma/client";
+import type {PatientHistoryType} from "@prisma/client";
 import {prisma} from "@/app/lib/prisma";
 import {verifySession} from "@/app/lib/sessions";
 import {redirect} from "next/navigation";
+import {myError} from "@/app/lib/definitions";
+import {revalidatePath} from "next/cache";
 
 export async function getHistory({filter = "all", query = "", patientID}: {
     filter?: string;
@@ -82,4 +85,34 @@ export async function getHistory({filter = "all", query = "", patientID}: {
             time: 'desc'
         }
     });
+}
+
+
+export async function addHistory({patientID, name, description, type}: {
+    patientID: number;
+    name: string;
+    description: string;
+    type: PatientHistoryType
+}): Promise<myError> {
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        return {success: false, message: 'Unauthorized'};
+    }
+
+    try {
+        await prisma.patientHistory.create({
+            data: {
+                patientId: patientID,
+                name,
+                description,
+                type
+            }
+        });
+
+        revalidatePath(`/patients/[id]/history`);
+        return {success: true, message: 'History added successfully'};
+    } catch (error) {
+        console.log(error);
+        return {success: false, message: 'Error adding history'};
+    }
 }
