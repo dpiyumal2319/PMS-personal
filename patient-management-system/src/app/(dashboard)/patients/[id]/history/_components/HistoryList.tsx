@@ -4,6 +4,7 @@ import {format} from 'date-fns';
 import {Card, CardContent} from '@/components/ui/card';
 import {Slice, Stethoscope, HeartPulse, Users, AlertCircle} from 'lucide-react';
 import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import DeleteHistory from "@/app/(dashboard)/patients/[id]/history/_components/DeleteHistory";
 
 // Helper function to get icon and color based on history type
 const getHistoryTypeDetails = (type: string): {
@@ -101,6 +102,7 @@ const HistoryList = async ({filter, query, patientID}: { filter: string; query: 
                                         <p className="text-sm text-gray-600">{item.description ? item.description : 'No description'}</p>
                                     </div>
                                 </div>
+                                <DeleteHistory id={item.id}/>
                             </div>
                         </CardContent>
                     </Card>
