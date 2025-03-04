@@ -8,78 +8,53 @@ import {redirect} from "next/navigation";
 import {myError} from "@/app/lib/definitions";
 import {revalidatePath} from "next/cache";
 
-export async function getHistory({filter = "all", query = "", patientID}: {
+export async function getHistory({
+                                     filter = "all",
+                                     query = "",
+                                     patientID
+                                 }: {
     filter?: string;
-    query?: string,
-    patientID: number
+    query?: string;
+    patientID: number;
 }) {
-    let where: Prisma.PatientHistoryWhereInput = {}
-
     const session = await verifySession();
+
     if (session.role !== 'DOCTOR') redirect('/unauthorized');
     if (!patientID) throw new Error('No patient ID');
 
+    const baseSearchCriteria: Prisma.PatientHistoryWhereInput = {
+        OR: [
+            {name: {contains: query, mode: "insensitive"}},
+            {description: {contains: query, mode: "insensitive"}}
+        ]
+    };
 
-    if (filter) {
-        switch (filter) {
-            case 'all': {
-                where = {
-                    name: {
-                        contains: query,
-                        mode: "insensitive"
-                    }
-                };
-                break;
-            }
-            case 'medical': {
-                where = {
-                    type: 'MEDICAL',
-                    name: {
-                        contains: query,
-                        mode: "insensitive"
-                    }
-                };
-                break;
-            }
-            case 'social': {
-                where = {
-                    type: 'SOCIAL',
-                    name: {
-                        contains: query,
-                        mode: "insensitive"
-                    }
-                };
-                break;
-            }
-            case 'family': {
-                where = {
-                    type: 'FAMILY',
-                    name: {
-                        contains: query,
-                        mode: "insensitive"
-                    }
-                };
-                break;
-            }
-            case 'allergy': {
-                where = {
-                    type: 'ALLERGY',
-                    name: {
-                        contains: query,
-                        mode: "insensitive"
-                    }
-                };
-                break;
-            }
-            default:
-                break;
-        }
+    let typeFilter: object;
+
+    switch (filter) {
+        case 'medical':
+            typeFilter = {type: 'MEDICAL'};
+            break;
+        case 'social':
+            typeFilter = {type: 'SOCIAL'};
+            break;
+        case 'family':
+            typeFilter = {type: 'FAMILY'};
+            break;
+        case 'allergy':
+            typeFilter = {type: 'ALLERGY'};
+            break;
+        case 'all':
+        default:
+            typeFilter = {};
+            break;
     }
 
     return await prisma.patientHistory.findMany({
         where: {
             patientId: patientID,
-            ...where
+            ...typeFilter,
+            ...baseSearchCriteria
         },
         orderBy: {
             time: 'desc'

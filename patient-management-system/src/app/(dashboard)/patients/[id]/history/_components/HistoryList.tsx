@@ -37,9 +37,9 @@ const getHistoryTypeDetails = (type: string): {
         case 'SOCIAL':
             return {
                 icon: <HeartPulse className="h-5 w-5"/>,
-                color: 'bg-amber-500',
-                borderColor: 'border-l-amber-500',
-                badgeColor: 'amber',
+                color: 'bg-pink-500',
+                borderColor: 'border-l-pink-500',
+                badgeColor: 'pink',
             };
         case 'ALLERGY':
             return {
@@ -74,7 +74,7 @@ const HistoryList = async ({filter, query, patientID}: { filter: string; query: 
     }
 
     return (
-        <div className="space-y-1 py-2">
+        <div className="space-y-3 py-2">
             {history.map((item) => {
                 const {icon, color, borderColor, badgeColor} = getHistoryTypeDetails(item.type);
 
