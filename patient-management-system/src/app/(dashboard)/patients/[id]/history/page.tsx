@@ -36,8 +36,9 @@ const Page = async ({params, searchParams}: {
                 ]} urlParameterName="filter"/>
             </div>
 
-            <AddHistoryForm patientID={id}/>
-
+            <div className={'flex justify-end gap-4 items-center'}>
+                <AddHistoryForm patientID={id}/>
+            </div>
             <div className="flex-grow w-full">
                 <Suspense fallback={<PrescriptionListSkeleton/>}>
                     <HistoryList query={query} patientID={id} filter={filter}/>

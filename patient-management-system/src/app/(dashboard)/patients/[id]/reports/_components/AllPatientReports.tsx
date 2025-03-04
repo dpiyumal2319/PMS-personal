@@ -24,7 +24,7 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
     return (
         <div className="flex flex-col gap-4">
             {reports.map((report) => (
-                <Card key={report.id} className="w-full">
+                <Card key={report.id} className="w-full overflow-hidden border-l-4 border-l-primary-500">
                     <CardHeader className={'pb-2'}>
                         <CardTitle className="flex justify-between items-center">
                             <CardTitle className="text-lg font-semibold text-gray-900">

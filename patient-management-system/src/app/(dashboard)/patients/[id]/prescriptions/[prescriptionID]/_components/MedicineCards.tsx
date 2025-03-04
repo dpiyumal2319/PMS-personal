@@ -7,7 +7,7 @@ import {
 import {Batch, Drug, DrugBrand, Issue, OffRecordMeds, UnitConcentration} from "@prisma/client";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {
-    getStrategyBadgeColor, DrugIcon, StrategyDetails,
+    getStrategyStyles, DrugIcon, StrategyDetails,
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionIssuesList";
 import {calculateForDays, calculateTimes} from "@/app/lib/utils";
 
@@ -23,8 +23,11 @@ const PrescriptionIssueCard = ({issue}: { issue: IssueWithDetails }) => {
         return <div className="text-center text-red-500 font-semibold">Issue not found</div>;
     }
 
+    const cardStyles = getStrategyStyles(issue.strategy);
+
     return (
-        <Card className="p-4 flex-grow">
+        <Card
+            className={`p-4 flex-grow overflow-hidden border-l-4 ${cardStyles.borderColor}`}>
             <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
                     <div className="mt-1">
@@ -35,7 +38,7 @@ const PrescriptionIssueCard = ({issue}: { issue: IssueWithDetails }) => {
                             <h3 className="font-semibold">{issue.drug.name} - {issue.unitConcentration.concentration} mg/unit</h3>
                             <CustomBadge
                                 text={issue.strategy}
-                                color={getStrategyBadgeColor(issue.strategy)}
+                                color={cardStyles.badgeColor}
                             />
                         </div>
                         <div className="text-sm text-slate-600 flex flex-wrap items-center gap-1">
@@ -94,11 +97,11 @@ const OffRecordMedCard = ({med}: { med: OffRecordMeds }) => {
     }
 
     return (
-        <Card className="p-4">
+        <Card className="p-4 flex-grow overflow-hidden border-l-4 border-l-slate-500">
             <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
                     <div className="mt-1">
-                        <AlertCircle className="h-5 w-5 text-orange-500"/>
+                        <AlertCircle className="h-5 w-5 text-slate-500"/>
                     </div>
                     <div className="space-y-1">
                         <div className="flex items-center space-x-2">

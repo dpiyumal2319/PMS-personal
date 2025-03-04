@@ -105,7 +105,7 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="flex items-center w-full justify-center gap-2" variant="outline">
+                <Button className="flex items-center justify-center gap-2">
                     <PlusCircle className="h-5 w-5"/>
                     Add New History Entry
                 </Button>
