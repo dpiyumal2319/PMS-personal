@@ -28,6 +28,7 @@ const Page = async ({params, searchParams}: {
             <div className={'flex gap-4 items-center'}>
                 <Search placeholder={`Search Patient History by ${filter}...`}/>
                 <SearchDropdown items={[
+                    {value: "all", label: "All"},
                     {value: "medical", label: "Medical"},
                     {value: "social", label: "Social"},
                     {value: "family", label: "Family"},
