@@ -15,7 +15,7 @@ import {
     getCoreRowModel,
     useReactTable,
 } from "@tanstack/react-table";
-import {columns} from "@/app/(dashboard)/inventory/all-drugs/_components/Columns";
+import { columns } from "@/app/(dashboard)/inventory/all-drugs/_components/Columns";
 
 
 interface DataTableProps<TData> {
@@ -23,8 +23,8 @@ interface DataTableProps<TData> {
 }
 
 export function DataTable<TData>({
-                                     data,
-                                 }: DataTableProps<TData>) {
+    data,
+}: DataTableProps<TData>) {
     const table = useReactTable({
         data,
         columns: columns as ColumnDef<TData>[],

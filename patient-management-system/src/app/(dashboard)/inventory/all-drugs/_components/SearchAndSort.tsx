@@ -29,7 +29,7 @@ export function SearchAndSort() {
   };
 
   const handleSearch = () => {
-    router.push(`${pathname}?${createQueryString("drug_name", searchTerm)}`);
+    router.push(`${pathname}?${createQueryString("query", searchTerm)}`);
   };
 
   const handleSort = (value: string) => {

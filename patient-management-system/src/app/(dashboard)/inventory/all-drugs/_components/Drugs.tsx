@@ -8,6 +8,7 @@ interface DrugsProps {
     per_page: number;
     sort: string;
     filters: {
+        query?: string;
         drug_name?: string;
         drug_brand?: string;
         supplier?: string;

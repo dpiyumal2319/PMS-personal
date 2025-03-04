@@ -81,13 +81,19 @@
    // Apply filters
    let filteredDrugs = [...allDrugs];
    
-   if (filters.drug_name) {
-     const searchTerm = filters.drug_name.toLowerCase();
+   if (filters.query) {
+     const searchTerm = filters.query.toLowerCase();
      filteredDrugs = filteredDrugs.filter(drug => 
        drug.name.toLowerCase().includes(searchTerm) || 
        drug.brand.toLowerCase().includes(searchTerm) ||
        drug.batchNumber.toLowerCase().includes(searchTerm)
      );
+   }
+
+   if (filters.drug_name){
+      filteredDrugs = filteredDrugs.filter(drug => 
+        drug.name.toLowerCase() === filters.drug_name?.toLowerCase()
+      );
    }
    
    if (filters.drug_brand) {

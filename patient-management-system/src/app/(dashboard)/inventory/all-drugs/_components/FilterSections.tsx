@@ -9,7 +9,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useRef, useState } from "react";
+import { useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface FilterSectionProps {
   id: string;
@@ -18,28 +19,51 @@ interface FilterSectionProps {
 }
 
 export function FilterSection({ id, title, items }: FilterSectionProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get current selected items from URL parameters
+  const getCurrentSelectedItems = useCallback(() => {
+    const paramValue = searchParams.get(id);
+    return paramValue ? paramValue.split(',') : [];
+  }, [searchParams, id]);
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>(getCurrentSelectedItems());
   const allChecked = selectedItems.length === items.length;
   
   const filteredItems = items.filter(item => 
     item.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelectAll = () => {
-    if (allChecked) {
-      setSelectedItems([]);
+  const updateUrlParams = useCallback((newSelectedItems: string[]) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    
+    if (newSelectedItems.length > 0) {
+      current.set(id, newSelectedItems.join(','));
     } else {
-      setSelectedItems([...items]);
+      current.delete(id);
     }
+    
+    const search = current.toString();
+    const query = search ? `?${search}` : "";
+    
+    router.push(`${window.location.pathname}${query}`, { scroll: false });
+  }, [router, searchParams, id]);
+
+  const handleSelectAll = () => {
+    const newSelectedItems = allChecked ? [] : [...items];
+    setSelectedItems(newSelectedItems);
+    updateUrlParams(newSelectedItems);
   };
 
   const handleItemChange = (item: string) => {
-    if (selectedItems.includes(item)) {
-      setSelectedItems(selectedItems.filter(i => i !== item));
-    } else {
-      setSelectedItems([...selectedItems, item]);
-    }
+    const newSelectedItems = selectedItems.includes(item)
+      ? selectedItems.filter(i => i !== item)
+      : [...selectedItems, item];
+    
+    setSelectedItems(newSelectedItems);
+    updateUrlParams(newSelectedItems);
   };
 
   return (

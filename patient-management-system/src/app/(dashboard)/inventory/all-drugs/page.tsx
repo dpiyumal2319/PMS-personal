@@ -10,11 +10,12 @@ interface SearchParams {
     page?: string;
     per_page?: string;
     sort?: string;
-    drug_name?: string;
-    drug_brand?: string;
+    query?: string;
+    drugName?: string;
+    drugBrand?: string;
     supplier?: string;
-    drug_model?: string;
-    batch_status?: string;
+    drugModel?: string;
+    batchStatus?: string;
 
     [key: string]: string | undefined;
 }
@@ -32,11 +33,12 @@ export default async function DrugsPage({
 
     // Extract all filter parameters
     const filters = {
-        drug_name: awaited.drug_name,
-        drug_brand: awaited.drug_brand,
+        query: awaited.query,
+        drug_name: awaited.drugName,
+        drug_brand: awaited.drugBrand,
         supplier: awaited.supplier,
-        drug_model: awaited.drug_model,
-        batch_status: awaited.batch_status,
+        drug_model: awaited.drugModel,
+        batch_status: awaited.batchStatus,
     };
 
     return (
