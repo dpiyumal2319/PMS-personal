@@ -9,7 +9,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {Textarea} from "@/components/ui/textarea";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter} from "@/components/ui/dialog";
-import {PlusCircle, Stethoscope, Cross, Users, HeartPulse, AlertCircle} from "lucide-react";
+import {PlusCircle, Stethoscope, Slice, Users, HeartPulse, AlertCircle} from "lucide-react";
 import {PatientHistoryType} from "@prisma/client";
 import {addHistory} from "@/app/lib/actions/history";
 import {handleServerAction} from "@/app/lib/utils";
@@ -55,7 +55,7 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
             const result = await handleServerAction(() => addHistory({
                 patientID: values.patientId,
                 name: values.name,
-                description: values.description || "",
+                description: values.description,
                 type: values.type,
             }), {loadingMessage: 'Adding history...'});
 
@@ -79,7 +79,7 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
         {
             value: PatientHistoryType.SURGICAL,
             label: "Surgical",
-            icon: <Cross className="h-4 w-4 mr-2"/>,
+            icon: <Slice className="h-4 w-4 mr-2"/>,
             color: "text-purple-500"
         },
         {
@@ -131,8 +131,8 @@ const AddHistoryForm = ({patientID}: { patientID: number }) => {
                                         value={tab.value}
                                         className={`flex items-center justify-center ${activeTab === tab.value ? tab.color : ''}`}
                                     >
-                                        <span className="hidden md:inline">{tab.icon}</span>
-                                        <span className="hidden sm:inline">{tab.label}</span>
+                                        <span>{tab.icon}</span>
+                                        <span className="hidden md:inline">{tab.label}</span>
                                     </TabsTrigger>
                                 ))}
                             </TabsList>

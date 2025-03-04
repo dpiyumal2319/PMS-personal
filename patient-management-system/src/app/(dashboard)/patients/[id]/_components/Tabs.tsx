@@ -32,7 +32,7 @@ const PatientTabs = ({
     return (
         <div className="mt-6 border-t pt-4 h-14">
             <Tabs value={currentTab} className="w-full h-full">
-                <TabsList className="w-full">
+                <TabsList className="w-full overflow-x-auto">
                     {links.map((link, index) => (
                         <Link
                             key={index}

@@ -2,7 +2,7 @@ import React, {JSX} from 'react';
 import {getHistory} from '@/app/lib/actions/history';
 import {format} from 'date-fns';
 import {Card, CardContent} from '@/components/ui/card';
-import {Cross, Stethoscope, HeartPulse, Users, AlertCircle} from 'lucide-react';
+import {Slice, Stethoscope, HeartPulse, Users, AlertCircle} from 'lucide-react';
 import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 // Helper function to get icon and color based on history type
@@ -22,7 +22,7 @@ const getHistoryTypeDetails = (type: string): {
             };
         case 'SURGICAL':
             return {
-                icon: <Cross className="h-5 w-5"/>,
+                icon: <Slice className="h-5 w-5"/>,
                 color: 'bg-purple-500',
                 borderColor: 'border-l-purple-500',
                 badgeColor: 'purple',
@@ -50,7 +50,7 @@ const getHistoryTypeDetails = (type: string): {
             };
         default:
             return {
-                icon: <Cross className="h-5 w-5"/>,
+                icon: <Slice className="h-5 w-5"/>,
                 color: 'bg-gray-500',
                 borderColor: 'border-l-gray-500',
                 badgeColor: 'gray',
@@ -64,7 +64,7 @@ const HistoryList = async ({filter, query, patientID}: { filter: string; query: 
     if (history.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center">
-                <Cross className="h-12 w-12 text-gray-400 mb-3"/>
+                <Slice className="h-12 w-12 text-gray-400 mb-3"/>
                 <h3 className="text-lg font-medium">No history records found</h3>
                 <p className="text-sm text-gray-500 mt-2">
                     {query ? `No results matching "${query}"` : 'This patient has no history records yet'}

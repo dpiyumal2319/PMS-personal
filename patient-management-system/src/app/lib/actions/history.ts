@@ -66,7 +66,7 @@ export async function getHistory({
 export async function addHistory({patientID, name, description, type}: {
     patientID: number;
     name: string;
-    description: string;
+    description?: string;
     type: PatientHistoryType
 }): Promise<myError> {
     const session = await verifySession();
