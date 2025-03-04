@@ -78,19 +78,36 @@ enum MedicalCertificateStatus {
 }
 
 model Patient {
-  id           Int                  @id @default(autoincrement())
-  telephone    String
-  name         String
-  birthDate    DateTime?
-  address      String?
-  height       Float?
-  weight       Float?
-  gender       Gender
-  NIC          String?
-  queueEntry   QueueEntry[]
-  prescription Prescription[]
-  reports      PatientReport[]
-  medicalCert  MedicalCertificate[]
+  id             Int                  @id @default(autoincrement())
+  telephone      String
+  name           String
+  birthDate      DateTime?
+  address        String?
+  height         Float?
+  weight         Float?
+  gender         Gender
+  NIC            String?
+  queueEntry     QueueEntry[]
+  prescription   Prescription[]
+  reports        PatientReport[]
+  medicalCert    MedicalCertificate[]
+  PatientHistory PatientHistory[]
+}
+
+model PatientHistoryType {
+  id             Int              @id @default(autoincrement())
+  name           String
+  PatientHistory PatientHistory[]
+}
+
+model PatientHistory {
+  id          Int                @id @default(autoincrement())
+  patient     Patient            @relation(fields: [patientId], references: [id])
+  patientId   Int
+  type        PatientHistoryType @relation(fields: [typeId], references: [id])
+  typeId      Int
+  description String
+  time        DateTime           @default(now())
 }
 
 model User {
