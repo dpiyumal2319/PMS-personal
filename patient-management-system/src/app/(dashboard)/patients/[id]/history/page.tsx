@@ -2,8 +2,7 @@ import {Metadata} from "next";
 import Search from "@/app/(dashboard)/_components/Search";
 import SearchDropdown from "@/app/(dashboard)/_components/Dropdown";
 import React, {Suspense} from "react";
-import PrescriptionListSkeleton from "@/app/(dashboard)/patients/[id]/prescriptions/_components/CardsSkeleton";
-import HistoryList from "@/app/(dashboard)/patients/[id]/history/_components/HistoryList";
+import HistoryList, {HistoryListSkeleton} from "@/app/(dashboard)/patients/[id]/history/_components/HistoryList";
 import AddHistoryForm from "@/app/(dashboard)/patients/[id]/history/_components/AddHistoryForm";
 import {getHistoryCount} from "@/app/lib/actions/history";
 
@@ -42,7 +41,7 @@ const Page = async ({params, searchParams}: {
                 ]} urlParameterName="filter"/>
             </div>
             <div className="flex-grow w-full">
-                <Suspense fallback={<PrescriptionListSkeleton/>}>
+                <Suspense fallback={<HistoryListSkeleton/>}>
                     <HistoryList query={query} patientID={id} filter={filter}/>
                 </Suspense>
             </div>
