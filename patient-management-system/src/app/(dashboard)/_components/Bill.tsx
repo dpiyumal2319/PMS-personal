@@ -1,8 +1,8 @@
 import React from "react";
-import { Bill } from "@/app/lib/definitions";
-import { Card } from "@/components/ui/card";
+import {Bill} from "@/app/lib/definitions";
+import {Card} from "@/components/ui/card";
 
-export function BillComponent({ bill }: { bill: Bill | null }) {
+export function BillComponent({bill}: { bill: Bill | null }) {
     if (!bill) return null;
 
     const total = bill.cost + bill.dispensary_charge + bill.doctor_charge;
@@ -21,7 +21,7 @@ export function BillComponent({ bill }: { bill: Bill | null }) {
                                 {entry.drugName} ({entry.brandName})
                             </span>
                             <span className="text-gray-500">
-                                LKR {entry.unitPrice} × {entry.quantity}
+                                LKR {entry.unitPrice.toFixed(2)} × {entry.quantity}
                             </span>
                         </div>
                         <div className="text-right font-semibold text-gray-900">
