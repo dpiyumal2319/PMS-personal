@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,70 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum Gender {
-  MALE
-  FEMALE
-}
-
-enum Role {
-  DOCTOR
-  NURSE
-}
-
-enum QueueStatus {
-  IN_PROGRESS
-  COMPLETED
-}
-
-enum VisitStatus {
-  PENDING
-  PRESCRIBED
-  COMPLETED
-}
-
-// If change this remember to update the prescription type in IssueFromInventory
-enum DrugType {
-  Tablet
-  Syrup
-}
-
-enum BatchStatus {
-  AVAILABLE
-  EXPIRED
-  COMPLETED
-  TRASHED
-}
-
-enum IssuingStrategy {
-  TDS // Ter die sumendum - Three times a day
-  BD // Bis die - Twice a day
-  OD // Omne die - Once a day
-  QDS // Quater die sumendum - Four times a day
-  SOS // Si opus sit - If needed
-  NOCTE // At night
-  MANE // In the morning
-  VESPE // In the evening
-  NOON // At noon
-  WEEKLY // Once a week
-  OTHER //
-}
-
-enum MEAL {
-  BEFORE
-  AFTER
-  WITH
-}
-
-enum PrescriptionStatus {
-  PENDING
-  COMPLETED
-}
-
-enum MedicalCertificateStatus {
-  FIT
-  UNFIT
 }
 
 model Patient {
@@ -87,27 +17,21 @@ model Patient {
   weight         Float?
   gender         Gender
   NIC            String?
-  queueEntry     QueueEntry[]
-  prescription   Prescription[]
-  reports        PatientReport[]
   medicalCert    MedicalCertificate[]
   PatientHistory PatientHistory[]
-}
-
-model PatientHistoryType {
-  id             Int              @id @default(autoincrement())
-  name           String
-  PatientHistory PatientHistory[]
+  reports        PatientReport[]
+  prescription   Prescription[]
+  queueEntry     QueueEntry[]
 }
 
 model PatientHistory {
   id          Int                @id @default(autoincrement())
-  patient     Patient            @relation(fields: [patientId], references: [id])
   patientId   Int
-  type        PatientHistoryType @relation(fields: [typeId], references: [id])
-  typeId      Int
   description String
+  type        PatientHistoryType
   time        DateTime           @default(now())
+  name        String
+  patient     Patient            @relation(fields: [patientId], references: [id])
 }
 
 model User {
@@ -131,15 +55,15 @@ model Queue {
 
 model QueueEntry {
   id        Int         @id @default(autoincrement())
-  token     Int // Token number within the queue
+  token     Int
   status    VisitStatus @default(PENDING)
-  queue     Queue       @relation(fields: [queueId], references: [id])
   queueId   Int
-  patient   Patient     @relation(fields: [patientId], references: [id])
   patientId Int
   time      DateTime    @default(now())
+  patient   Patient     @relation(fields: [patientId], references: [id])
+  queue     Queue       @relation(fields: [queueId], references: [id])
 
-  @@unique([queueId, token]) // Ensure token uniqueness within a queue
+  @@unique([queueId, token])
 }
 
 model DrugBrand {
@@ -147,26 +71,24 @@ model DrugBrand {
   name         String
   description  String?
   Batch        Batch[]
-  Issue        Issue[]
   BatchHistory BatchHistory[]
+  Issue        Issue[]
 }
 
 model Drug {
-  id               Int                @id @default(autoincrement())
+  id               Int               @id @default(autoincrement())
   name             String
   batch            Batch[]
-  stratergyHistory StratergyHistory[]
-  Issue            Issue[]
   BatchHistory     BatchHistory[]
+  Issue            Issue[]
+  stratergyHistory StratergyHistory?
 }
 
 model Batch {
   id                  Int               @id @default(autoincrement())
   number              String
   drugId              Int
-  drug                Drug              @relation(fields: [drugId], references: [id])
   drugBrandId         Int
-  drugBrand           DrugBrand         @relation(fields: [drugBrandId], references: [id])
   type                DrugType
   fullAmount          Float
   expiry              DateTime
@@ -175,18 +97,20 @@ model Batch {
   wholesalePrice      Float
   retailPrice         Float
   status              BatchStatus
-  Issue               Issue[]
-  BatchHistory        BatchHistory[]
-  unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
   unitConcentrationId Int
+  drugBrand           DrugBrand         @relation(fields: [drugBrandId], references: [id])
+  drug                Drug              @relation(fields: [drugId], references: [id])
+  unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
+  BatchHistory        BatchHistory[]
+  Issue               Issue[]
 }
 
 model UnitConcentration {
   id            Int            @id @default(autoincrement())
   concentration Float          @unique
   Batch         Batch[]
-  Issue         Issue[]
   BatchHistory  BatchHistory[]
+  Issue         Issue[]
 }
 
 model Prescription {
@@ -196,18 +120,12 @@ model Prescription {
   status             PrescriptionStatus   @default(PENDING)
   extraDoctorCharge  Float?
   details            String?
-  patient            Patient              @relation(fields: [patientId], references: [id])
   patientId          Int
+  Bill               Bill?
   issues             Issue[]
   OffRecordMeds      OffRecordMeds[]
-  Bill               Bill?
+  patient            Patient              @relation(fields: [patientId], references: [id])
   PrescriptionVitals PrescriptionVitals[]
-}
-
-enum VitalType {
-  NUMBER
-  TEXT
-  DATE
 }
 
 model Vitals {
@@ -223,16 +141,15 @@ model Vitals {
 
 model PrescriptionVitals {
   id             Int          @id @default(autoincrement())
-  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
   prescriptionId Int
-  vital          Vitals       @relation(fields: [vitalId], references: [id], onDelete: Cascade) // ✅ Corrected
   vitalId        Int
   value          String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  vital          Vitals       @relation(fields: [vitalId], references: [id], onDelete: Cascade)
 }
 
 model MedicalCertificate {
   id                   Int                      @id @default(autoincrement())
-  patient              Patient                  @relation(fields: [patientId], references: [id])
   patientId            Int
   nameOfThePatient     String
   addressOfThePatient  String
@@ -243,6 +160,7 @@ model MedicalCertificate {
   ageOfThePatient      Int
   reccomendations      String
   time                 DateTime
+  patient              Patient                  @relation(fields: [patientId], references: [id])
 }
 
 model Bill {
@@ -250,27 +168,23 @@ model Bill {
   doctorCharge     Float
   dispensaryCharge Float
   medicinesCharge  Float
+  prescriptionId   Int          @unique
   Prescription     Prescription @relation(fields: [prescriptionId], references: [id])
-  prescriptionId   Int          @unique // Ensures one-to-one relationship
 }
 
 model OffRecordMeds {
   id             Int          @id @default(autoincrement())
   name           String
   description    String?
-  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
   prescriptionId Int
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
 }
 
 model Issue {
   id                  Int                @id @default(autoincrement())
-  prescription        Prescription       @relation(fields: [prescriptionId], references: [id])
   prescriptionId      Int
-  batch               Batch?             @relation(fields: [batchId], references: [id])
   batchId             Int?
-  drug                Drug               @relation(fields: [drugId], references: [id])
   drugId              Int
-  brand               DrugBrand          @relation(fields: [brandId], references: [id])
   brandId             Int
   strategy            IssuingStrategy
   quantity            Float
@@ -278,8 +192,12 @@ model Issue {
   details             String?
   meal                MEAL?
   type                DrugType
-  unitConcentration   UnitConcentration  @relation(fields: [unitConcentrationId], references: [id])
   unitConcentrationId Int
+  batch               Batch?             @relation(fields: [batchId], references: [id])
+  brand               DrugBrand          @relation(fields: [brandId], references: [id])
+  drug                Drug               @relation(fields: [drugId], references: [id])
+  prescription        Prescription       @relation(fields: [prescriptionId], references: [id])
+  unitConcentration   UnitConcentration  @relation(fields: [unitConcentrationId], references: [id])
   stratergyHistory    StratergyHistory[]
 }
 
@@ -287,8 +205,8 @@ model ReportParameter {
   id           Int           @id @default(autoincrement())
   name         String
   units        String?
-  ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   reportTypeId Int?
+  ReportType   ReportType?   @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   ReportValue  ReportValue[]
 }
 
@@ -296,51 +214,126 @@ model ReportType {
   id            Int               @id @default(autoincrement())
   name          String            @unique
   description   String?
-  parameters    ReportParameter[]
   PatientReport PatientReport[]
+  parameters    ReportParameter[]
 }
 
 model PatientReport {
   id           Int           @id @default(autoincrement())
-  patient      Patient       @relation(fields: [patientId], references: [id])
   patientId    Int
-  reportType   ReportType    @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   reportTypeId Int
   time         DateTime      @default(now())
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  reportType   ReportType    @relation(fields: [reportTypeId], references: [id], onDelete: Cascade)
   parameters   ReportValue[]
 }
 
 model ReportValue {
   id                Int             @id @default(autoincrement())
-  reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id], onDelete: Cascade)
   reportParameterId Int
   attention         Boolean         @default(false)
   value             String
-  PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id], onDelete: Cascade)
   patientReportId   Int?
+  PatientReport     PatientReport?  @relation(fields: [patientReportId], references: [id], onDelete: Cascade)
+  reportParameter   ReportParameter @relation(fields: [reportParameterId], references: [id], onDelete: Cascade)
 }
 
 model StratergyHistory {
   id      Int   @id @default(autoincrement())
-  drug    Drug  @relation(fields: [drugId], references: [id])
   drugId  Int   @unique
-  issue   Issue @relation(fields: [issueId], references: [id])
   issueId Int
+  drug    Drug  @relation(fields: [drugId], references: [id])
+  issue   Issue @relation(fields: [issueId], references: [id])
 }
 
 model BatchHistory {
   id                  Int               @id @default(autoincrement())
-  drug                Drug              @relation(fields: [drugId], references: [id])
   drugId              Int
   type                DrugType
-  unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
   unitConcentrationId Int
-  brand               DrugBrand         @relation(fields: [drugBrandId], references: [id])
   drugBrandId         Int
   batchId             Int
   batch               Batch             @relation(fields: [batchId], references: [id])
+  brand               DrugBrand         @relation(fields: [drugBrandId], references: [id])
+  drug                Drug              @relation(fields: [drugId], references: [id])
+  unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
 
   @@unique([drugId, drugBrandId, type, unitConcentrationId])
+}
+
+model Charge {
+  name      ChargeType @id
+  value     Float
+  updatedAt DateTime   @updatedAt
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  DOCTOR
+  NURSE
+}
+
+enum QueueStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum VisitStatus {
+  PENDING
+  PRESCRIBED
+  COMPLETED
+}
+
+enum DrugType {
+  Tablet
+  Syrup
+}
+
+enum BatchStatus {
+  AVAILABLE
+  EXPIRED
+  COMPLETED
+  TRASHED
+}
+
+enum IssuingStrategy {
+  TDS
+  BD
+  OD
+  QDS
+  SOS
+  NOCTE
+  MANE
+  VESPE
+  NOON
+  WEEKLY
+  OTHER
+}
+
+enum MEAL {
+  BEFORE
+  AFTER
+  WITH
+}
+
+enum PrescriptionStatus {
+  PENDING
+  COMPLETED
+}
+
+enum MedicalCertificateStatus {
+  FIT
+  UNFIT
+}
+
+enum VitalType {
+  NUMBER
+  TEXT
+  DATE
 }
 
 enum ChargeType {
@@ -348,8 +341,10 @@ enum ChargeType {
   DISPENSARY
 }
 
-model Charge {
-  name      ChargeType @id
-  value     Float
-  updatedAt DateTime   @updatedAt // Tracks last modification
+enum PatientHistoryType {
+  MEDICAL
+  SURGICAL
+  FAMILY
+  SOCIAL
+  ALLERGY
 }
