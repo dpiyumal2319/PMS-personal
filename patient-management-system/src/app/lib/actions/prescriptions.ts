@@ -1,6 +1,6 @@
 'use server'
 
-import {myError} from "@/app/lib/definitions";
+import {myConfirmation, myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
 import type {DrugType} from "@prisma/client";
 import {revalidatePath} from "next/cache";
@@ -10,6 +10,8 @@ import {
     BrandOption, CustomDrugType, DrugOption,
     ConcentrationOption
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
+import {VitalFormData} from "@/app/(dashboard)/admin/prescription/_components/AddVitalDialog";
+import {redirect} from "next/navigation";
 
 export async function completePrescription(
     prescriptionID: number
@@ -166,6 +168,11 @@ export async function getPrescription(
             ...(session.role !== "DOCTOR" && {status: "PENDING"}),
         },
         include: {
+            PrescriptionVitals: {
+                include: {
+                    vital: true,
+                },
+            },
             issues: {
                 include: {
                     drug: true,
@@ -262,6 +269,11 @@ export async function searchPrescriptions({
             time: "desc",
         },
         include: {
+            PrescriptionVitals: {
+                include: {
+                    vital: true,
+                },
+            },
             issues: {
                 include: {
                     drug: true,
@@ -364,6 +376,16 @@ export async function addPrescription({
             };
         }
 
+        const session = await verifySession();
+        if (session.role !== "DOCTOR") {
+            redirect('/unauthorized');
+        }
+
+        // Remove '' vitals
+        prescriptionForm.vitals = prescriptionForm.vitals.filter(
+            (vital) => vital.value !== ""
+        );
+
         // Create prescription with all related records in a transaction
         await prisma.$transaction(async (tx) => {
             // Create the main prescription and store its result to get issue IDs
@@ -371,9 +393,6 @@ export async function addPrescription({
                 data: {
                     patientId: patientID,
                     presentingSymptoms: prescriptionForm.presentingSymptoms,
-                    bloodPressure: prescriptionForm.bloodPressure,
-                    pulse: prescriptionForm.pulse,
-                    cardiovascular: prescriptionForm.cardiovascular,
                     details: prescriptionForm.description,
                     status: "PENDING",
                     extraDoctorCharge: Number(
@@ -398,6 +417,13 @@ export async function addPrescription({
                         create: prescriptionForm.offRecordMeds.map((med) => ({
                             name: med.name,
                             description: med.description,
+                        })),
+                    },
+                    //  Create vitals
+                    PrescriptionVitals: {
+                        create: prescriptionForm.vitals.map((vital) => ({
+                            vitalId: vital.id,
+                            value: vital.value,
                         })),
                     },
                 },
@@ -641,4 +667,225 @@ export async function getDrugTypesByDrug(drugID: number): Promise<CustomDrugType
             type: type.type
         }));
     });
+}
+
+export async function getAllVitals() {
+    return prisma.vitals.findMany({
+        orderBy: {
+            id: "asc",
+        }
+    });
+}
+
+export async function getPatientSpecificVitals(patientID: number) {
+    // Fetch the patient to get their gender
+    const patient = await prisma.patient.findUnique({
+        where: {
+            id: patientID,
+        }
+    });
+
+    if (!patient) {
+        throw new Error("Patient not found");
+    }
+
+    return prisma.vitals.findMany({
+        where: {
+            OR: [
+                {forGender: null}, // Include vitals with no gender restriction
+                {forGender: patient.gender}, // Include vitals specific to the patient's gender
+            ],
+        },
+        orderBy: {
+            id: "asc",
+        }
+    });
+}
+
+export async function addVital(vital: VitalFormData): Promise<myError> {
+
+
+    if (!vital.name || !vital.icon || !vital.color || !vital.placeholder) {
+        return {
+            success: false,
+            message: "All fields are required",
+        };
+    }
+
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        redirect('/unauthorized');
+    }
+
+    const extVital = await prisma.vitals.findMany({
+        where: {
+            name: {
+                equals: vital.name,
+                mode: 'insensitive',
+            }
+        },
+    })
+
+    if (extVital.length > 0) {
+        return {
+            success: false,
+            message: "Vital already exists",
+        };
+    }
+
+    await prisma.vitals.create({
+        data: {
+            icon: vital.icon,
+            color: vital.color,
+            name: vital.name,
+            placeholder: vital.placeholder,
+            forGender: vital.forGender,
+            type: vital.type
+        }
+    });
+
+    revalidatePath('/admin/prescription');
+    return {
+        success: true,
+        message: "Vital added successfully",
+    };
+}
+
+export async function updateVital(vital: VitalFormData): Promise<myError> {
+    if (!vital.id || !vital.name || !vital.icon || !vital.color || !vital.placeholder) {
+        return {
+            success: false,
+            message: "All fields are required",
+        };
+    }
+
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        redirect('/unauthorized');
+    }
+
+    // check if type changed
+    const extVital = await prisma.vitals.findUnique({
+        where: {
+            id: vital.id, // Ensure `vital.id` is a valid integer
+        },
+        include: {
+            _count: {
+                select: {
+                    PrescriptionVitals: true,
+                },
+            },
+        },
+    });
+
+    if (!extVital) {
+        return {
+            success: false,
+            message: "Vital not found",
+        };
+    } else {
+        if (extVital.type !== vital.type) {
+            if (extVital._count.PrescriptionVitals > 0) {
+                return {
+                    success: false,
+                    message: "Vital type cannot be changed as it is already in use",
+                };
+            }
+        }
+    }
+
+
+    await prisma.vitals.update({
+        where: {
+            id: vital.id
+        },
+        data: {
+            icon: vital.icon,
+            color: vital.color,
+            name: vital.name,
+            placeholder: vital.placeholder,
+            forGender: vital.forGender,
+            type: vital.type
+        }
+    });
+
+    revalidatePath('/admin/prescription');
+    return {
+        success: true,
+        message: "Vital updated successfully",
+    };
+}
+
+
+export async function safeDeleteVital(vitalID: number): Promise<myError | myConfirmation> {
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        redirect('/unauthorized');
+    }
+
+    const extVital = await prisma.vitals.findUnique({
+        where: {
+            id: vitalID,
+        },
+        include: {
+            _count: {
+                select: {
+                    PrescriptionVitals: true,
+                },
+            },
+        },
+    });
+
+    if (!extVital) {
+        return {
+            success: false,
+            message: "Vital not found",
+        };
+    }
+
+    if (extVital._count.PrescriptionVitals > 0) {
+        return {
+            confirmationRequired: true,
+            message: `Vital is in use in ${extVital._count.PrescriptionVitals} prescriptions. Are you sure you want to delete it with all its data?`,
+        }
+    }
+
+    await prisma.vitals.delete({
+        where: {
+            id: vitalID,
+        },
+    });
+
+    revalidatePath('/admin/prescription');
+    return {
+        success: true,
+        message: "Vital deleted successfully",
+    };
+}
+
+export async function deleteVital(vitalID: number): Promise<myError> {
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        redirect('/unauthorized');
+    }
+
+    try {
+        await prisma.vitals.delete({
+            where: {
+                id: vitalID,
+            },
+        });
+
+        revalidatePath('/admin/prescription');
+        return {
+            success: true,
+            message: "Vital deleted successfully",
+        };
+    } catch (e) {
+        console.error("Error deleting vital:", e);
+        return {
+            success: false,
+            message: "An error occurred while deleting vital",
+        };
+    }
 }

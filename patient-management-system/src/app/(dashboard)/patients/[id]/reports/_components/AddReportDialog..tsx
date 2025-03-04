@@ -7,7 +7,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {Switch} from "@/components/ui/switch";
-import {addPatientReport, getReportParams, searchReportTypes} from "@/app/lib/actions";
+import {addPatientReport, getReportParams, searchReportTypes} from "@/app/lib/actions/reports";
 import {useDebouncedCallback} from "use-debounce";
 import {handleServerAction} from "@/app/lib/utils";
 import PopoverSelect from "@/app/(dashboard)/_components/PopOverSelect";

@@ -298,15 +298,29 @@ async function createReportTypes() {
     }
 }
 
+async function createHistoryType() {
+    console.log('Creating HistoryType');
+    await prisma.patientHistoryType.createMany({
+        data: [
+            {name: 'Medical'},
+            {name: 'Surgical'},
+            {name: 'Family'},
+            {name: 'Social'},
+            {name: 'Allergy'}
+        ]
+    })
+}
+
 
 async function main() {
-    console.log('Starting database seeding...')
+    console.log('\nStarting database seeding...')
 
     // Create all data in sequence
     await createUnitConcentrations()
     await createUsersAndPatients()
     await createDrugsAndBatches()
     await createReportTypes()
+    await createHistoryType()
 
     console.log('\nDatabase seeding completed successfully!')
 }

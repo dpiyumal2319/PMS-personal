@@ -17,11 +17,15 @@ const Page = async () => {
     const dispensaryFee = fees.find(fee => fee.name === ChargeType.DISPENSARY);
 
     return (
-        <div className={'flex flex-col items-center justify-center h-full'}>
-            <FeeForm initialDispensaryCharge={dispensaryFee?.value || 0}
-                     initialDispensaryUpdatedAt={dispensaryFee?.updatedAt || new Date()}
-                     initialDoctorCharge={doctorFee?.value || 0}
-                     initialDoctorUpdatedAt={doctorFee?.updatedAt || new Date()}/>
+        <div className={'flex flex-col h-full w-full p-4'}>
+            {/*Heading*/}
+            <h1 className="text-2xl font-bold text-primary-700">Fees Management</h1>
+            <div className={'flex flex-col items-center justify-center h-full'}>
+                <FeeForm initialDispensaryCharge={dispensaryFee?.value || 0}
+                         initialDispensaryUpdatedAt={dispensaryFee?.updatedAt || new Date()}
+                         initialDoctorCharge={doctorFee?.value || 0}
+                         initialDoctorUpdatedAt={doctorFee?.updatedAt || new Date()}/>
+            </div>
         </div>
     );
 };

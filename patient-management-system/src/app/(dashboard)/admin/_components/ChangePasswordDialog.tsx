@@ -20,7 +20,8 @@ import {
 import {Input} from "@/components/ui/input";
 import {useForm} from "react-hook-form";
 import {handleServerAction} from "@/app/lib/utils";
-import {changePassword} from "@/app/lib/actions";
+
+import {changePassword} from "@/app/lib/actions/account";
 
 export interface ChangePasswordFormData {
     currentPassword: string;

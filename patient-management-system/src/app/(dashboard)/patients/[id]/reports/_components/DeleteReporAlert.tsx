@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {Trash2} from "lucide-react";
 import {handleServerAction} from "@/app/lib/utils";
-import {deletePatientReport} from "@/app/lib/actions";
+import {deletePatientReport} from "@/app/lib/actions/reports";
 import {Button} from "@/components/ui/button";
 import React from "react";
 

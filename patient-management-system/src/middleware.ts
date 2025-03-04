@@ -11,6 +11,7 @@ const doctorOnlyRoutes = [
     "/admin/staff",
     "/admin/reports",
     "/admin/fees",
+    "/admin/prescription",
     "/inventory/cost-management"
 ];
 

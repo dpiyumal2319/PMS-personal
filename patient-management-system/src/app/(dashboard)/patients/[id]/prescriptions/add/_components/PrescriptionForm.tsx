@@ -5,12 +5,12 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
-import {Stethoscope, Heart, Activity, FileText, ChevronLeft} from "lucide-react";
+import {FileText, ChevronLeft} from "lucide-react";
 import IssueFromInventory from "./IssueFromInventory";
-import {IssuingStrategy, MEAL} from "@prisma/client";
+import {IssuingStrategy, MEAL, Vitals} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
 import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/AddOffRecordDrugs";
-import {handleServerAction} from "@/app/lib/utils";
+import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
 import {addPrescription} from "@/app/lib/actions/prescriptions";
 import {
     PrescriptionIssuesList,
@@ -19,6 +19,10 @@ import {
 import {FaHeadSideCough, FaMoneyBill} from "react-icons/fa";
 import {useRouter} from "next/navigation";
 import {Textarea} from "@/components/ui/textarea";
+import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
+import {IconName} from "@/app/lib/iconMapping";
+import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
+import {Separator} from "@/components/ui/separator";
 
 export interface IssueInForm {
     drugId: number;
@@ -42,18 +46,20 @@ export interface OffRecordMeds {
     description?: string;
 }
 
-export interface PrescriptionFormData {
-    presentingSymptoms: string;
-    bloodPressure: string;
-    description: string;
-    extraDoctorCharges: number;
-    pulse: string;
-    cardiovascular: string;
-    issues: IssueInForm[];
-    offRecordMeds: OffRecordMeds[];
+export interface VitalInForm extends Vitals {
+    value: string;
 }
 
-const PrescriptionForm = ({patientID}: { patientID: number }) => {
+export interface PrescriptionFormData {
+    presentingSymptoms: string;
+    description: string;
+    extraDoctorCharges: number;
+    issues: IssueInForm[];
+    offRecordMeds: OffRecordMeds[];
+    vitals: VitalInForm[];
+}
+
+const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: VitalInForm[] }) => {
     const [formData, setFormData] = useState<PrescriptionFormData>(() => {
         if (typeof window !== 'undefined') {
             const savedForm = localStorage.getItem(`prescription-form-${patientID}`);
@@ -63,13 +69,11 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
         }
         return {
             presentingSymptoms: '',
-            bloodPressure: '',
             description: '',
             extraDoctorCharges: 0,
-            pulse: '',
-            cardiovascular: '',
             issues: [],
-            offRecordMeds: []
+            offRecordMeds: [],
+            vitals: vitals
         };
     });
     const router = useRouter();
@@ -82,13 +86,11 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
     function formReset() {
         setFormData({
             presentingSymptoms: '',
-            bloodPressure: '',
             description: '',
-            pulse: '',
             extraDoctorCharges: 0,
-            cardiovascular: '',
             issues: [],
-            offRecordMeds: []
+            offRecordMeds: [],
+            vitals: vitals
         });
         localStorage.removeItem(`prescription-form-${patientID}`);
     }
@@ -100,6 +102,23 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
             [name]: value,
         }));
     };
+
+    const handleVitalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target;
+        const index = Number(name.split('-')[1]);
+        setFormData((prevData) => ({
+            ...prevData,
+            vitals: prevData.vitals.map((vital, i) => {
+                if (i === index) {
+                    return {
+                        ...vital,
+                        value: value
+                    };
+                }
+                return vital;
+            })
+        }));
+    }
 
     const handleAddIssue = (issue: IssueInForm) => {
         setFormData((prevData) => ({
@@ -151,67 +170,68 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                         <h1 className="text-2xl font-semibold">Prescribe Medication</h1>
                     </div>
                     <span onClick={formReset} className="text-red-500 cursor-pointer text-sm hover:underline">
-                    X Clear
+                    X Clear (Refetch recent vitals)
                 </span>
                 </div>
                 <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
-                    <div className="space-y-6">
-                        <h2 className="text-lg font-semibold">Patient Vitals</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                    <FaHeadSideCough className="h-4 w-4 text-cyan-500"/>
-                                    <Label>Presenting Symptoms<span className="text-red-500">*</span></Label>
-                                </div>
-                                <Input
-                                    type="text"
-                                    name="presentingSymptoms"
-                                    value={formData.presentingSymptoms}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full"
-                                    placeholder="Enter symptoms e.g., headache, fever"
-                                />
+                    <div className="space-y-2.5">
+                        <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <FaHeadSideCough className="h-4 w-4 text-cyan-500"/>
+                                <Label>Presenting Complaint<span className="text-red-500">*</span></Label>
                             </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                    <Activity className="h-4 w-4 text-amber-500"/>
-                                    <Label>Blood Pressure</Label>
+                            <Input
+                                type="text"
+                                name="presentingSymptoms"
+                                value={formData.presentingSymptoms}
+                                onChange={handleChange}
+                                required
+                                className="w-full"
+                                placeholder="Enter symptoms e.g., headache, fever"
+                            />
+                        </div>
+
+                        <Separator/>
+
+                        <h2 className="text-md font-semibold">Patient Vitals</h2>
+
+                        {/* Grid for Vitals */}
+                        {(vitals.length === 0) && (
+                            <div>No vitals found. Please click {' '}
+                                <span onClick={formReset} className="text-blue-500 hover:underline cursor-pointer">
+                                    here
+                                </span>
+                                {' '} to refetch vitals if you have added any.
+                                If you are an admin, you can create vitals {' '}
+                                <a href={'/admin/prescription'}
+                                   className="text-blue-500 hover:underline">here</a> before
+                                prescribing medication.</div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {formData.vitals.map((vital, index) => (
+                                <div key={index} className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                        <DynamicIcon icon={vital.icon as IconName}
+                                                     className={`text-lg ${getTextColorClass(vital.color as keyof BasicColorType)}`}/>
+                                        <Label>{vital.name}</Label>
+                                    </div>
+                                    <Input
+                                        name={`vital-${index}`}
+                                        value={vital.value}
+                                        type={vital.type === 'NUMBER' ? 'number' : vital.type === 'DATE' ? 'date' : 'text'}
+                                        onChange={handleVitalChange}
+                                        placeholder={vital.placeholder}
+                                    />
                                 </div>
-                                <Input
-                                    type="text"
-                                    name="bloodPressure"
-                                    value={formData.bloodPressure}
-                                    onChange={handleChange}
-                                    placeholder="e.g., 120/80"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                    <Heart className="h-4 w-4 text-rose-500"/>
-                                    <Label>Pulse</Label>
-                                </div>
-                                <Input
-                                    type="text"
-                                    name="pulse"
-                                    value={formData.pulse}
-                                    onChange={handleChange}
-                                    placeholder="e.g., 72 bpm"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                    <Stethoscope className="h-4 w-4 text-emerald-500"/>
-                                    <Label>Cardiovascular</Label>
-                                </div>
-                                <Input
-                                    type="text"
-                                    name="cardiovascular"
-                                    value={formData.cardiovascular}
-                                    onChange={handleChange}
-                                    placeholder="Enter cardiovascular status..."
-                                />
-                            </div>
+                            ))}
+                        </div>
+
+                        <Separator/>
+                        <h2 className="text-md font-semibold">Additional Details</h2>
+
+                        {/* Description Section - Moved Outside */}
+                        <div className={'grid grid-cols-1 md:grid-cols-2 gap-4'}>
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
                                     <FileText className="h-4 w-4 text-gray-500"/>
@@ -226,7 +246,8 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                                     placeholder="Additional details..."
                                 />
                             </div>
-                            {/*Extra doctor charges*/}
+
+                            {/* Extra Doctor Charges Section - Moved Outside */}
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-2">
                                     <FaMoneyBill className="h-4 w-4 text-orange-500"/>
@@ -240,7 +261,6 @@ const PrescriptionForm = ({patientID}: { patientID: number }) => {
                                     placeholder="Enter extra charges..."
                                 />
                             </div>
-
                         </div>
                     </div>
                 </Card>
