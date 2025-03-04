@@ -63,11 +63,18 @@ export async function getHistory({
 }
 
 
-export async function addHistory({patientID, name, description, type}: {
+export async function addHistory({
+                                     patientID,
+                                     name,
+                                     description,
+                                     type,
+                                     time
+                                 }: {
     patientID: number;
     name: string;
     description?: string;
-    type: PatientHistoryType
+    type: PatientHistoryType;
+    time?: Date;
 }): Promise<myError> {
     const session = await verifySession();
     if (session.role !== 'DOCTOR') {
@@ -80,11 +87,13 @@ export async function addHistory({patientID, name, description, type}: {
                 patientId: patientID,
                 name,
                 description,
-                type
+                type,
+                time: time || new Date() // Use provided time or default to current time
             }
         });
 
-        revalidatePath(`/patients/[id]/history`);
+        revalidatePath(`/patients/${patientID}/history`);
+        revalidatePath(`/patients/${patientID}/prescriptions/add`);
         return {success: true, message: 'History added successfully'};
     } catch (error) {
         console.log(error);
@@ -106,6 +115,7 @@ export async function deleteHistory({id}: { id: number }) {
         });
 
         revalidatePath(`/patients/[id]/history`);
+        revalidatePath(`/patients/[id]/prescriptions/add`);
         return {success: true, message: 'History deleted successfully'};
     } catch (error) {
         console.log(error);

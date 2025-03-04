@@ -47,7 +47,7 @@ const PatientTabs = ({
                                 }`}
                             >
                                 <link.icon className="h-4 w-4"/>
-                                <span className={'hidden md:inline'}>{link.name}</span>
+                                <span className={'hidden sm:inline'}>{link.name}</span>
                             </TabsTrigger>
                         </Link>
                     ))}
