@@ -1,0 +1,111 @@
+import React from 'react';
+import {getHistory} from '@/app/lib/actions/history';
+import {format} from 'date-fns';
+import {Card, CardContent} from '@/components/ui/card';
+import {Badge} from '@/components/ui/badge';
+import {Cross, Stethoscope, HeartPulse, Users, AlertCircle} from 'lucide-react';
+
+// Helper function to get icon and color based on history type
+const getHistoryTypeDetails = (type: string) => {
+    switch (type) {
+        case 'MEDICAL':
+            return {
+                icon: <Stethoscope className="h-5 w-5"/>,
+                color: 'bg-blue-500',
+                borderColor: 'border-l-blue-500',
+                badgeColor: 'bg-blue-100 text-blue-800',
+            };
+        case 'SURGICAL':
+            return {
+                icon: <Cross className="h-5 w-5"/>,
+                color: 'bg-purple-500',
+                borderColor: 'border-l-purple-500',
+                badgeColor: 'bg-purple-100 text-purple-800',
+            };
+        case 'FAMILY':
+            return {
+                icon: <Users className="h-5 w-5"/>,
+                color: 'bg-green-500',
+                borderColor: 'border-l-green-500',
+                badgeColor: 'bg-green-100 text-green-800',
+            };
+        case 'SOCIAL':
+            return {
+                icon: <HeartPulse className="h-5 w-5"/>,
+                color: 'bg-amber-500',
+                borderColor: 'border-l-amber-500',
+                badgeColor: 'bg-amber-100 text-amber-800',
+            };
+        case 'ALLERGY':
+            return {
+                icon: <AlertCircle className="h-5 w-5"/>,
+                color: 'bg-red-500',
+                borderColor: 'border-l-red-500',
+                badgeColor: 'bg-red-100 text-red-800',
+            };
+        default:
+            return {
+                icon: <Cross className="h-5 w-5"/>,
+                color: 'bg-gray-500',
+                borderColor: 'border-l-gray-500',
+                badgeColor: 'bg-gray-100 text-gray-800',
+            };
+    }
+};
+
+const HistoryList = async ({filter, query, patientID}: { filter: string; query: string; patientID: number }) => {
+    const history = await getHistory({filter, query, patientID});
+
+    if (history.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+                <Cross className="h-12 w-12 text-gray-400 mb-3"/>
+                <h3 className="text-lg font-medium">No history records found</h3>
+                <p className="text-sm text-gray-500 mt-2">
+                    {query ? `No results matching "${query}"` : 'This patient has no history records yet'}
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-1 py-2 relative">
+            {/* Timeline line */}
+            <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gray-200"></div>
+
+            {history.map((item) => {
+                const {icon, color, borderColor, badgeColor} = getHistoryTypeDetails(item.type);
+
+                return (
+                    <Card key={item.id}
+                          className={`mb-4 overflow-hidden border-l-4 shadow-sm hover:shadow ${borderColor}`}>
+                        <CardContent className="p-0">
+                            <div className="flex items-start p-4">
+                                {/* Timeline dot */}
+                                <div className={`flex-shrink-0 rounded-full p-2 ${color} text-white mr-4`}>
+                                    {icon}
+                                </div>
+
+                                <div className="flex-grow min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className={`${badgeColor} border-0`}>
+                                                {item.type}
+                                            </Badge>
+                                            <span
+                                                className="text-xs text-gray-500">{format(new Date(item.time), 'PPp')}</span>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+            })}
+        </div>
+    );
+};
+
+export default HistoryList;

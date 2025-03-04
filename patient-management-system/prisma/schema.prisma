@@ -77,6 +77,14 @@ enum MedicalCertificateStatus {
   UNFIT
 }
 
+enum PatientHistoryType {
+  MEDICAL
+  SURGICAL
+  FAMILY
+  SOCIAL
+  ALLERGY
+}
+
 model Patient {
   id             Int                  @id @default(autoincrement())
   telephone      String
@@ -94,19 +102,13 @@ model Patient {
   PatientHistory PatientHistory[]
 }
 
-model PatientHistoryType {
-  id             Int              @id @default(autoincrement())
-  name           String
-  PatientHistory PatientHistory[]
-}
-
 model PatientHistory {
   id          Int                @id @default(autoincrement())
   patient     Patient            @relation(fields: [patientId], references: [id])
   patientId   Int
-  type        PatientHistoryType @relation(fields: [typeId], references: [id])
-  typeId      Int
+  name        String
   description String
+  type        PatientHistoryType
   time        DateTime           @default(now())
 }
 

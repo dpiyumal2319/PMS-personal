@@ -8,6 +8,7 @@ const doctorOnlyRoutes = [
     "/patients/[id]/medicalCertificates",
     "/patients/[id]/reports",
     "/patients/[id]/notes",
+    "/patients/[id]/history",
     "/admin/staff",
     "/admin/reports",
     "/admin/fees",
