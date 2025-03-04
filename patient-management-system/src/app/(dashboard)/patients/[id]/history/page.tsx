@@ -5,6 +5,7 @@ import React, {Suspense} from "react";
 import PrescriptionListSkeleton from "@/app/(dashboard)/patients/[id]/prescriptions/_components/CardsSkeleton";
 import HistoryList from "@/app/(dashboard)/patients/[id]/history/_components/HistoryList";
 import AddHistoryForm from "@/app/(dashboard)/patients/[id]/history/_components/AddHistoryForm";
+import {getHistoryCount} from "@/app/lib/actions/history";
 
 export const metadata: Metadata = {
     title: "PMS - Patient History",
@@ -22,9 +23,14 @@ const Page = async ({params, searchParams}: {
     const resolvedParams = await searchParams;
     const query = resolvedParams?.query || "";
     const filter = resolvedParams?.filter || "all";
+    const count = await getHistoryCount({patientID: id});
 
     return (
         <div className={'flex flex-col gap-4 h-full'}>
+            <div className={'flex justify-between gap-4 items-center'}>
+                <h3 className={'text-md'}>There are total {count} history records</h3>
+                <AddHistoryForm patientID={id}/>
+            </div>
             <div className={'flex gap-4 items-center'}>
                 <Search placeholder={`Search Patient History by ${filter}...`}/>
                 <SearchDropdown items={[
@@ -34,10 +40,6 @@ const Page = async ({params, searchParams}: {
                     {value: "family", label: "Family"},
                     {value: "allergy", label: "Allergy"}
                 ]} urlParameterName="filter"/>
-            </div>
-
-            <div className={'flex justify-end gap-4 items-center'}>
-                <AddHistoryForm patientID={id}/>
             </div>
             <div className="flex-grow w-full">
                 <Suspense fallback={<PrescriptionListSkeleton/>}>

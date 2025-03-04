@@ -91,3 +91,32 @@ export async function addHistory({patientID, name, description, type}: {
         return {success: false, message: 'Error adding history'};
     }
 }
+
+export async function deleteHistory({id}: { id: number }) {
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        return {success: false, message: 'Unauthorized'};
+    }
+
+    try {
+        await prisma.patientHistory.delete({
+            where: {
+                id
+            }
+        });
+
+        revalidatePath(`/patients/[id]/history`);
+        return {success: true, message: 'History deleted successfully'};
+    } catch (error) {
+        console.log(error);
+        return {success: false, message: 'Error deleting history'};
+    }
+}
+
+export async function getHistoryCount({patientID}: { patientID: number }) {
+    return await prisma.patientHistory.count({
+        where: {
+            patientId: patientID
+        }
+    });
+}
