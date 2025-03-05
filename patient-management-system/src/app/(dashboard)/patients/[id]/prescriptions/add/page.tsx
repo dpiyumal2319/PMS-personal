@@ -35,10 +35,8 @@ const Page = async ({
 
     return (
         <div className="flex flex-row gap-4"> {/* Add a fixed viewport height */}
-            <div> {/* Make form scrollable if needed */}
-                <PrescriptionForm patientID={patientID} vitals={vitals}/>
-            </div>
-            <Card className="flex flex-col"> {/* Use flex layout */}
+            <PrescriptionForm patientID={patientID} vitals={vitals}/>
+            <Card className={'flex flex-col h-fit'}> {/* Use flex layout */}
                 <CardHeader className={'pb-2'}>
                     <div className={'flex flex-row justify-center gap-2 items-center text-center'}>
                         <SearchDropdown items={[

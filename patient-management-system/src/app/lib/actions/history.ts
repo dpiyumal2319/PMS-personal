@@ -11,11 +11,13 @@ import {revalidatePath} from "next/cache";
 export async function getHistory({
                                      filter = "all",
                                      query = "",
-                                     patientID
+                                     patientID,
+                                     limit
                                  }: {
     filter?: string;
     query?: string;
     patientID: number;
+    limit?: number;
 }) {
     const session = await verifySession();
 
@@ -50,7 +52,7 @@ export async function getHistory({
             break;
     }
 
-    return await prisma.patientHistory.findMany({
+    const findManyOptions: Prisma.PatientHistoryFindManyArgs = {
         where: {
             patientId: patientID,
             ...typeFilter,
@@ -59,7 +61,14 @@ export async function getHistory({
         orderBy: {
             time: 'desc'
         }
-    });
+    };
+
+    // Only add limit if it's explicitly passed
+    if (limit !== undefined) {
+        findManyOptions.take = limit;
+    }
+
+    return await prisma.patientHistory.findMany(findManyOptions);
 }
 
 

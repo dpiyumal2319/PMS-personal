@@ -5,6 +5,7 @@ import {Slice, Stethoscope, HeartPulse, Users, AlertCircle} from 'lucide-react';
 import {CardContent} from '@/components/ui/card';
 import {Skeleton} from "@/components/ui/skeleton";
 import Link from "next/link";
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 // Reuse the getHistoryTypeDetails helper function from the original component
 const getHistoryTypeDetails = (type: string) => {
@@ -43,7 +44,9 @@ const getHistoryTypeDetails = (type: string) => {
 };
 
 const SidebarHistoryList = async ({patientID, filter}: { patientID: number, filter: string }) => {
-    const history = await getHistory({filter: filter, query: '', patientID});
+    const limit = 20
+
+    const history = await getHistory({filter: filter, query: '', patientID, limit: limit});
 
     if (history.length === 0) {
         return (
@@ -57,7 +60,7 @@ const SidebarHistoryList = async ({patientID, filter}: { patientID: number, filt
     return (
         <>
             <h3 className="text-md font-semibold px-2">Recent History</h3>
-            <div className="space-y-2 overflow-y-auto">
+            <ScrollArea className="space-y-2 h-[800px]">
                 {history.map((item) => {
                     const {icon, color} = getHistoryTypeDetails(item.type);
                     return (
@@ -78,7 +81,15 @@ const SidebarHistoryList = async ({patientID, filter}: { patientID: number, filt
                         </Link>
                     );
                 })}
-            </div>
+                {(history.length >= limit) ? (
+                    <div className={'flex justify-end h-full'}>
+                        <Link
+                            className={'text-sm font-bold text-blue-600 hover:underline'}
+                            href={`/patients/${patientID}/history`}>
+                            more..
+                        </Link>
+                    </div>) : null}
+            </ScrollArea>
         </>
     );
 };
