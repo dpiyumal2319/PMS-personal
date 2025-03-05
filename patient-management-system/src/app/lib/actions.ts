@@ -798,6 +798,7 @@ export async function addNewItem(
                 update: {},
                 create: {
                     name: formData.drugName,
+                    Buffer: formData.Buffer,
                 },
             });
 
@@ -851,7 +852,7 @@ export async function addNewItem(
                     unitConcentration: {
                         connect: {id: newConcentrationId},
                     },
-                    supplier: {
+                    Supplier: {
                         connect: { id: supplier.id } // Connect the batch to the supplier
                     },
                     status: "AVAILABLE",
