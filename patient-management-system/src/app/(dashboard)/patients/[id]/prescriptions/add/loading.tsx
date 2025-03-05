@@ -38,8 +38,8 @@ const PrescriptionFormSkeleton = () => {
                     <Skeleton className="h-5 w-48"/>
                     <Skeleton className="h-16 w-full"/>
                 </Card>
-                <div className="flex justify-end">
-                    <Button disabled className="px-8">
+                <div className="flex">
+                    <Button disabled className="px-8 w-full">
                         <Skeleton className="h-6 w-24"/>
                     </Button>
                 </div>
