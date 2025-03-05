@@ -1,4 +1,3 @@
-// components/drugs/filter-sidebar.tsx
 "use client"
 
 import { cn } from "@/lib/utils";
@@ -10,6 +9,15 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RefreshCw } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+
+// Import the fetching functions
+import { 
+  fetchDrugTypes, 
+  fetchDrugBrands, 
+  fetchSuppliers, 
+  fetchBatchStatuses 
+} from "../lib/dataFetch";
 
 interface FilterSidebarProps {
   className?: string;
@@ -19,15 +27,69 @@ export function FilterSidebar({ className }: FilterSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // This would be populated from your API
-  const drugModels = ["Tablet", "Syrup", "Injection", "Capsule", "Cream"];
-  const drugBrands = ["Pfizer", "Novartis", "Roche", "Sanofi", "GSK", "Johnson & Johnson"];
-  const suppliers = ["Supplier A", "Supplier B", "Supplier C", "Distributor X", "Wholesaler Y"];
-  const batchStatuses = ["Available", "Completed", "Expired", "Disposed", "Quality Failed"];
+  // State to store filter options
+  const [drugModels, setDrugModels] = useState<string[]>([]);
+  const [drugBrands, setDrugBrands] = useState<string[]>([]);
+  const [suppliers, setSuppliers] = useState<string[]>([]);
+  const [batchStatuses, setBatchStatuses] = useState<string[]>([]);
+
+  // State to manage loading and error
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch filter options on component mount
+  useEffect(() => {
+    async function loadFilterOptions() {
+      try {
+        setIsLoading(true);
+        const [
+          fetchedDrugModels, 
+          fetchedDrugBrands, 
+          fetchedSuppliers, 
+          fetchedBatchStatuses
+        ] = await Promise.all([
+          fetchDrugTypes(),
+          fetchDrugBrands(),
+          fetchSuppliers(),
+          fetchBatchStatuses()
+        ]);
+
+        setDrugModels(fetchedDrugModels);
+        setDrugBrands(fetchedDrugBrands);
+        setSuppliers(fetchedSuppliers);
+        setBatchStatuses(fetchedBatchStatuses);
+      } catch (err) {
+        console.error("Failed to fetch filter options:", err);
+        setError("Failed to load filter options");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadFilterOptions();
+  }, []);
   
   const handleResetFilters = () => {
     router.push(window.location.pathname, { scroll: false });
   };
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className={cn("border rounded-lg flex items-center justify-center", className)}>
+        <p>Loading filters...</p>
+      </div>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className={cn("border rounded-lg flex items-center justify-center", className)}>
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("border rounded-lg", className)}>

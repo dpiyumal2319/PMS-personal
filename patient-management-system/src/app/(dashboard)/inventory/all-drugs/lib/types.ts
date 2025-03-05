@@ -1,30 +1,4 @@
-// lib/types.ts
-import { 
-  BatchStatus, 
-  DrugType, 
-  IssuingStrategy, 
-  UnitConcentration, 
-  DrugBrand, 
-  Supplier, 
-  Drug as PrismaDrug 
-} from '@prisma/client'
-
-export interface Drug {
-  id: number
-  name: string
-  brandName: string
-  supplierName: string
-  batchNumber: string
-  stockDate: Date
-  expiryDate: Date
-  drugType: DrugType
-  batchStatus: BatchStatus
-  fullAmount: number
-  remainingQuantity: number
-  wholesalePrice: number
-  retailPrice: number
-  unitConcentration: number
-}
+import { BatchStatus, DrugType } from '@prisma/client'
 
 export interface FetchDrugsParams {
   page?: number
@@ -46,15 +20,32 @@ export interface FetchDrugsResult {
   totalPages: number
 }
 
+export interface Drug {
+  id: number
+  name: string
+  brandName: string
+  supplierName: string
+  batchNumber: string
+  stockDate: Date
+  expiryDate: Date
+  drugType: DrugType
+  batchStatus: BatchStatus
+  fullAmount: number
+  remainingQuantity: number
+  wholesalePrice: number
+  retailPrice: number
+  unitConcentration: number
+}
+
 export interface DrugDetails extends Drug {
-  brand: DrugBrand
-  supplier: Supplier
-  drug: PrismaDrug
-  unitConcentration: UnitConcentration
-  issues?: {
+  brand: any // Replace with actual type from Prisma
+  supplier: any // Replace with actual type from Prisma
+  drug: any // Replace with actual type from Prisma
+  unitConcentration: any // Replace with actual type from Prisma
+  issues: Array<{
     id: number
-    strategy: IssuingStrategy
+    strategy: string
     quantity: number
     dose: number
-  }[]
+  }>
 }
