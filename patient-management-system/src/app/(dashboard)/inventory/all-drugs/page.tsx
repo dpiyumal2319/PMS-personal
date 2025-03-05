@@ -1,10 +1,11 @@
-// app/drugs/page.tsx
-import {Suspense} from 'react';
-import {Drugs} from './_components/Drugs';
-import {DashboardShell} from './_components/ui/dashboard-shell';
-import {DashboardHeader} from './_components/ui/dashboard-header';
-import {FilterSidebar} from './_components/FilterSidebar';
-import {SearchAndSort} from './_components/SearchAndSort';
+// app/inventory/all-drugs/page.tsx
+import { Suspense } from 'react';
+import { Drugs } from './_components/Drugs';
+import { DashboardShell } from './_components/ui/dashboard-shell';
+import { DashboardHeader } from './_components/ui/dashboard-header';
+import { FilterSidebar } from './_components/FilterSidebar';
+import { SearchAndSort } from './_components/SearchAndSort';
+import { BatchStatus, DrugType } from '@prisma/client';
 
 interface SearchParams {
     page?: string;
@@ -14,31 +15,32 @@ interface SearchParams {
     drugName?: string;
     drugBrand?: string;
     supplier?: string;
-    drugModel?: string;
+    drugType?: string;
     batchStatus?: string;
 
     [key: string]: string | undefined;
 }
 
 export default async function DrugsPage({
-                                            searchParams,
-                                        }: {
-    searchParams: Promise<SearchParams>;
+    searchParams,
+}: {
+    searchParams: SearchParams;
 }) {
-    const awaited = await searchParams;
+    // Await searchParams if it's a promise (though it shouldn't be in Next.js 13+)
+    const params = await Promise.resolve(searchParams);
 
-    const page = awaited.page ? parseInt(awaited.page) : 1;
-    const per_page = awaited.per_page ? parseInt(awaited.per_page) : 10;
-    const sort = awaited.sort || 'expiry_date:asc';
+    const page = params.page ? parseInt(params.page) : 1;
+    const per_page = params.per_page ? parseInt(params.per_page) : 10;
+    const sort = params.sort || 'expiry:asc';
 
-    // Extract all filter parameters
+    // Extract and convert filter parameters
     const filters = {
-        query: awaited.query,
-        drug_name: awaited.drugName,
-        drug_brand: awaited.drugBrand,
-        supplier: awaited.supplier,
-        drug_model: awaited.drugModel,
-        batch_status: awaited.batchStatus,
+        query: params.query,
+        drug_name: params.drugName,
+        drug_brand: params.drugBrand,
+        supplier: params.supplier,
+        drug_type: params.drugType ? params.drugType as DrugType : undefined,
+        batch_status: params.batchStatus ? params.batchStatus as BatchStatus : undefined,
     };
 
     return (

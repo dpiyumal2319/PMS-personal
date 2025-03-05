@@ -1,39 +1,60 @@
 // lib/types.ts
+import { 
+  BatchStatus, 
+  DrugType, 
+  IssuingStrategy, 
+  UnitConcentration, 
+  DrugBrand, 
+  Supplier, 
+  Drug as PrismaDrug 
+} from '@prisma/client'
+
 export interface Drug {
-    id: string;
-    name: string;
-    brand: string;
-    supplier: string;
-    batchNumber: string;
-    stockDate: string;
-    expiryDate: string;
-    drugModel: "Tablet" | "Syrup" | "Injection" | "Capsule" | "Cream";
-    batchStatus: "Available" | "Completed" | "Expired" | "Disposed" | "Quality Failed";
-    fullAmount: number;
-    remainingAmount: number;
-    unitConcentration: string;
+  id: number
+  name: string
+  brandName: string
+  supplierName: string
+  batchNumber: string
+  stockDate: Date
+  expiryDate: Date
+  drugType: DrugType
+  batchStatus: BatchStatus
+  fullAmount: number
+  remainingQuantity: number
+  wholesalePrice: number
+  retailPrice: number
+  unitConcentration: number
+}
+
+export interface FetchDrugsParams {
+  page?: number
+  per_page?: number
+  sort?: string
+  filters?: {
+    query?: string
+    drug_name?: string
+    drug_brand?: string
+    supplier?: string
+    drug_type?: DrugType
+    batch_status?: BatchStatus
   }
-  
-  export interface FetchDrugsParams {
-    page: number;
-    per_page: number;
-    sort: string;
-    filters: {
-      drug_name?: string;
-      drug_brand?: string;
-      supplier?: string;
-      drug_model?: string;
-      batch_status?: string;
-      [key: string]: string | undefined;
-    };
-  }
-  
-  export type FetchDrugsResult = {
-    data: Drug[];
-    totalItems: number;
-    totalPages: number;
-  };
-  
- 
-  
-  
+}
+
+export interface FetchDrugsResult {
+  data: Drug[]
+  totalItems: number
+  totalPages: number
+}
+
+export interface DrugDetails extends Drug {
+  brand: DrugBrand
+  supplier: Supplier
+  drug: PrismaDrug
+  unitConcentration: UnitConcentration
+  issues?: {
+    id: number
+    strategy: IssuingStrategy
+    quantity: number
+    dose: number
+  }[]
+}
