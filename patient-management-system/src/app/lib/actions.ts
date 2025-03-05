@@ -774,10 +774,10 @@ export async function addNewItem(
     {formData}: {
         formData: InventoryFormData
     }): Promise<myError> {
-    try {
+    try { 
 
         // Check all the required fields
-        if (!formData.concentrationId || !formData.concentration || !formData.batchNumber || !formData.drugType || !formData.quantity || !formData.expiry || !formData.retailPrice || !formData.wholesalePrice) {
+        if (!formData.concentrationId || !formData.concentration || !formData.batchNumber || !formData.drugType || !formData.quantity || !formData.expiry || !formData.retailPrice || !formData.wholesalePrice || !formData.supplierName) {
             return {success: false, message: "Please fill all fields"};
         }
 
@@ -801,7 +801,17 @@ export async function addNewItem(
                 },
             });
 
-            // 3. Create batch with both drug and brand relationships
+            // 3. Create or connect supplier
+            const supplier = await tx.supplier.upsert({
+                where: { name: formData.supplierName },
+                update: {},
+                create: {
+                    name: formData.supplierName,
+                    contact: formData.supplierContact || "N/A", // Add contact if available
+                },
+            });
+
+            // 4. Create batch with both drug and brand relationships
             if (formData.concentrationId === undefined || formData.concentration === undefined) {
                 return {success: false, message: "Please select a concentration"};
             }
@@ -840,6 +850,9 @@ export async function addNewItem(
                     ),
                     unitConcentration: {
                         connect: {id: newConcentrationId},
+                    },
+                    supplier: {
+                        connect: { id: supplier.id } // Connect the batch to the supplier
                     },
                     status: "AVAILABLE",
                 },

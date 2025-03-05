@@ -81,13 +81,14 @@ model Drug {
   batch            Batch[]
   BatchHistory     BatchHistory[]
   Issue            Issue[]
+  Buffer           Int
   stratergyHistory StratergyHistory?
 }
 
 model Supplier {
   id      Int     @id @default(autoincrement())
   name    String  @unique
-  contact String
+  contact String?
   batches Batch[]
 }
 

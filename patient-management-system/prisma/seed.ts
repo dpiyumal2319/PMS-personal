@@ -169,9 +169,11 @@ async function createDrugsAndBatches() {
 
         // Create drug
         const drug = await prisma.drug.create({
-            data: {name: drugName}
+            data: {name: drugName,
+                Buffer: faker.number.int({ min: 10, max: 100 }) // Random buffer value
+            }
         })
-        console.log(`Created drug: ${drug.name} (ID: ${drug.id})`)
+         console.log(`Created drug: ${drug.name} (ID: ${drug.id}, Buffer: ${drug.Buffer})`)
 
         // Randomly select 2-4 brands that will manufacture this drug
         const brandCount = faker.number.int({min: 2, max: 4})
