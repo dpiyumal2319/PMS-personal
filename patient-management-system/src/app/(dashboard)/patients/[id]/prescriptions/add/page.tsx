@@ -28,19 +28,18 @@ const Page = async ({
     const patientID = Number(id);
     const filter = (await searchParams)?.filter || '';
 
-
     const vitals = (await getPatientSpecificVitals(patientID)).map(vital => ({
         ...vital,
         value: ''
     }));
 
     return (
-        <div className="grid grid-cols-4 gap-4">
-            <div className="col-span-3">
+        <div className="flex flex-row gap-4"> {/* Add a fixed viewport height */}
+            <div> {/* Make form scrollable if needed */}
                 <PrescriptionForm patientID={patientID} vitals={vitals}/>
             </div>
-            <Card className="col-span-1 h-full">
-                <CardHeader className={'pb-2 '}>
+            <Card className="flex flex-col"> {/* Use flex layout */}
+                <CardHeader className={'pb-2'}>
                     <div className={'flex flex-row justify-center gap-2 items-center text-center'}>
                         <SearchDropdown items={[
                             {value: "all", label: "All"},
@@ -52,15 +51,14 @@ const Page = async ({
                         <AddHistoryForm patientID={patientID}/>
                     </div>
                 </CardHeader>
-                <CardContent className={'flex flex-col overflow-y-auto p-3 flex-grow-0'} >
+                <CardContent className={'p-3'}>
                     <Suspense fallback={<SidebarHistoryListSkeleton/>}>
                         <SidebarHistoryList patientID={patientID} filter={filter}/>
                     </Suspense>
                 </CardContent>
             </Card>
         </div>
-    )
-        ;
+    );
 };
 
 export default Page;

@@ -2,7 +2,7 @@ import React from 'react';
 import {getHistory} from '@/app/lib/actions/history';
 import {format} from 'date-fns';
 import {Slice, Stethoscope, HeartPulse, Users, AlertCircle} from 'lucide-react';
-import { CardContent} from '@/components/ui/card';
+import {CardContent} from '@/components/ui/card';
 import {Skeleton} from "@/components/ui/skeleton";
 import Link from "next/link";
 
@@ -57,7 +57,7 @@ const SidebarHistoryList = async ({patientID, filter}: { patientID: number, filt
     return (
         <>
             <h3 className="text-md font-semibold px-2">Recent History</h3>
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-y-auto">
                 {history.map((item) => {
                     const {icon, color} = getHistoryTypeDetails(item.type);
                     return (
