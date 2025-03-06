@@ -4,6 +4,8 @@ import { FaCoins } from "react-icons/fa";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { StockData } from "@/app/lib/definitions";
 
+import { MdLocalGroceryStore } from "react-icons/md";
+
 export default function PriceListByBatch({ items }: { items: StockData[] }) {
   return (
     <div className="flex flex-col gap-4">
@@ -17,6 +19,14 @@ export default function PriceListByBatch({ items }: { items: StockData[] }) {
             <div className="flex items-center gap-4 font-semibold text-md flex-1 text-primary-600">
               <LucidePackagePlus className="w-5 h-5 text-gray-500" />
               <span>{item.name}</span>
+            </div>
+
+            {/* Supplier */}
+            <div className="flex items-center gap-3 text-gray-700 text-md justify-center flex-1">
+              <MdLocalGroceryStore className="w-5 h-5 text-gray-500" />
+              <span className="font-medium">
+                {item.supplier || "Unknown Supplier"}
+              </span>
             </div>
 
             {/* Unit Price */}

@@ -1171,6 +1171,7 @@ export async function getStockByBatch({
     include: {
       drug: true,
       drugBrand: true,
+      Supplier: true,
     },
   });
 
@@ -1181,6 +1182,7 @@ export async function getStockByBatch({
     retailPrice: batch.retailPrice,
     wholesalePrice: batch.wholesalePrice,
     remainingQuantity: batch.remainingQuantity,
+    supplier: batch.Supplier.name,
   }));
 
   const sortedData = applySorting(stockData, sort as SortOption);
