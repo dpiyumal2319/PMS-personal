@@ -16,9 +16,16 @@ export default function PriceListByBatch({ items }: { items: StockData[] }) {
             className="flex items-center justify-between p-5 hover:bg-gray-50 hover:shadow-md transition-all duration-300"
           >
             {/* Batch Info */}
-            <div className="flex items-center gap-4 font-semibold text-md flex-1 text-primary-600">
-              <LucidePackagePlus className="w-5 h-5 text-gray-500" />
-              <span>{item.name}</span>
+            <div className="flex items-start gap-4 font-semibold text-md flex-1 text-primary-600">
+              <div>
+                <LucidePackagePlus className="w-5 h-5 text-gray-500" />
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-md">{item.name}</span>
+                <span className="text-sm text-green-600">{item.drugName}</span>
+                <span className="text-sm text-pink-700">{item.brandName}</span>
+              </div>
             </div>
 
             {/* Supplier */}

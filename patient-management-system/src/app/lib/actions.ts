@@ -1177,7 +1177,9 @@ export async function getStockByBatch({
 
   const stockData: StockData[] = batches.map((batch) => ({
     id: batch.id,
-    name: `${batch.drugBrand.name} - ${batch.drug.name} (Batch ${batch.number})`,
+    name: `(Batch ${batch.number})`,
+    brandName: batch.drugBrand.name,
+    drugName: batch.drug.name,
     totalPrice: batch.retailPrice * batch.remainingQuantity,
     retailPrice: batch.retailPrice,
     wholesalePrice: batch.wholesalePrice,

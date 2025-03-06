@@ -158,6 +158,8 @@ export const searchModelsCM = [
 export interface StockData {
   id: number;
   name: string;
+  drugName?: string;
+  brandName?: string;
   totalPrice: number;
   retailPrice?: number;
   wholesalePrice?: number;
