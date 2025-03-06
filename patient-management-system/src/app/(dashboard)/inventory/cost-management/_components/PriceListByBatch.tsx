@@ -1,15 +1,8 @@
 import { LucidePackagePlus } from "lucide-react";
-import { AiOutlineNumber } from "react-icons/ai";
 import { Card } from "@/components/ui/card";
 import { FaCoins } from "react-icons/fa";
-
-interface StockData {
-  id: number;
-  name: string;
-  totalPrice: number;
-  unitPrice?: number;
-  remainingQuantity?: number;
-}
+import { IoPricetagsOutline } from "react-icons/io5";
+import { StockData } from "@/app/lib/definitions";
 
 export default function PriceListByBatch({ items }: { items: StockData[] }) {
   return (
@@ -28,9 +21,9 @@ export default function PriceListByBatch({ items }: { items: StockData[] }) {
 
             {/* Unit Price */}
             <div className="flex items-center gap-3 text-gray-700 text-md justify-center flex-1">
-              <AiOutlineNumber className="w-5 h-5 text-gray-500" />
+              <IoPricetagsOutline className="w-5 h-5 text-gray-500" />
               <span className="font-medium">
-                Rs. {item.unitPrice?.toFixed(2)} per unit
+                Rs. {item.retailPrice?.toFixed(2)} per unit
               </span>
             </div>
 

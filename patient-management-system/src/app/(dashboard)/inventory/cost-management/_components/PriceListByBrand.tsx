@@ -1,14 +1,7 @@
 import { MdOutlineBrandingWatermark } from "react-icons/md";
 import { Card } from "@/components/ui/card";
 import { FaCoins } from "react-icons/fa";
-
-interface StockData {
-  id: number;
-  name: string;
-  totalPrice: number;
-  unitPrice?: number;
-  remainingQuantity?: number;
-}
+import { StockData } from "@/app/lib/definitions";
 
 export default function PriceListByBrand({ items }: { items: StockData[] }) {
   return (

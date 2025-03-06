@@ -4,14 +4,7 @@ import { AiOutlineMedicineBox } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FaCoins } from "react-icons/fa";
-
-interface StockData {
-  id: number;
-  name: string;
-  totalPrice: number;
-  unitPrice?: number;
-  remainingQuantity?: number;
-}
+import { StockData } from "@/app/lib/definitions";
 
 export default function PriceListByModel({ items }: { items: StockData[] }) {
   return (
