@@ -1257,6 +1257,53 @@ export async function getStockByBrand({
   return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
 
+export async function getSupplierWisePricing(drugId: number) {
+  try {
+    const batches = await prisma.batch.findMany({
+      where: {
+        drugId: drugId,
+        // status: "AVAILABLE",
+      },
+      include: {
+        drugBrand: true,
+        Supplier: true,
+        unitConcentration: true,
+      },
+      orderBy: {
+        retailPrice: "asc", // Sort by retail price (low to high)
+      },
+    });
+
+    // Group batches by supplier
+    const supplierData = batches.reduce((acc, batch) => {
+      const supplierName = batch.Supplier.name;
+      if (!acc[supplierName]) {
+        acc[supplierName] = {
+          supplierId: batch.Supplier.id,
+          supplierName: supplierName,
+          batches: [],
+        };
+      }
+      acc[supplierName].batches.push({
+        batchId: batch.id,
+        batchNumber: batch.number,
+        brandName: batch.drugBrand.name,
+        concentration: batch.unitConcentration.concentration,
+        retailPrice: batch.retailPrice,
+        totalPrice: batch.fullAmount * batch.wholesalePrice,
+        remainingQuantity: batch.remainingQuantity,
+        expiryDate: batch.expiry.toISOString().split("T")[0],
+      });
+      return acc;
+    }, {} as Record<string, any>);
+
+    return Object.values(supplierData);
+  } catch (error) {
+    console.error("Error fetching supplier-wise pricing:", error);
+    throw new Error("Failed to fetch supplier-wise pricing");
+  }
+}
+
 export async function getStockAnalysis(
   dateRange: DateRange
 ): Promise<StockAnalysis> {
