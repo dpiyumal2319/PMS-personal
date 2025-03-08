@@ -105,12 +105,8 @@ export function FilterSidebar({ className }: FilterSidebarProps) {
       
       <ScrollArea className="h-[calc(100vh-13rem)]">
         <div className="p-4">
-          <Accordion type="multiple" defaultValue={["drugModel", "batchStatus"]}>
-            <FilterSection 
-              id="drugType"
-              title="Drug Type"
-              items={drugType}
-            />
+          <Accordion type="multiple" defaultValue={["drugModel"]}>
+
 
             <FilterSection 
               id="drugModel"
@@ -128,6 +124,12 @@ export function FilterSidebar({ className }: FilterSidebarProps) {
               id="supplier"
               title="Supplier"
               items={suppliers}
+            />
+            
+            <FilterSection 
+              id="drugType"
+              title="Drug Type"
+              items={drugType}
             />
             
             <FilterSection 
