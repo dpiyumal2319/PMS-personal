@@ -17,31 +17,31 @@ export async function fetchDrugs({
     // Create a type-safe where condition
     const whereConditions: Prisma.BatchWhereInput = {
       ...(filters.drug_model && {
-        drug: {
+        drug: { 
           name: { 
-            equals: filters.drug_model, 
+            in: filters.drug_model.split(',').map(name => name.trim()), 
             mode: 'insensitive' 
-          }
+          } 
         }
       }),
       ...(filters.drug_brand && {
-        drugBrand: {
+        drugBrand: { 
           name: { 
-            equals: filters.drug_brand, 
+            in: filters.drug_brand.split(',').map(name => name.trim()), 
             mode: 'insensitive' 
-          }
+          } 
         }
       }),
       ...(filters.supplier && {
-        Supplier: {
+        Supplier: { 
           name: { 
-            equals: filters.supplier, 
+            in: filters.supplier.split(',').map(name => name.trim()), 
             mode: 'insensitive' 
-          }
+          } 
         }
       }),
-      ...(filters.drug_type && { type: filters.drug_type }),
-      ...(filters.batch_status && { status: filters.batch_status }),
+      ...(filters.drug_type && { type: { in: filters.drug_type.split(',').map(name => name.trim()) } }),
+      ...(filters.batch_status && { status: { in: filters.batch_status.split(',').map(name => name.trim()) } }),
       ...(filters.query && {
         OR: [
           { drug: { name: { contains: filters.query, mode: 'insensitive' } } },
@@ -49,7 +49,8 @@ export async function fetchDrugs({
           { number: { contains: filters.query, mode: 'insensitive' } }
         ]
       })
-    }
+    };
+    
 
     // Prepare sorting
     const [sortField, sortDirection] = sort.split(':')
