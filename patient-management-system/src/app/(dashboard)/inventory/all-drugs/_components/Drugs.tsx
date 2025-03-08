@@ -40,6 +40,7 @@ export async function Drugs({
     });
 
 
+
     return (
         <div className="space-y-4">
             <DataTable data={data}/>

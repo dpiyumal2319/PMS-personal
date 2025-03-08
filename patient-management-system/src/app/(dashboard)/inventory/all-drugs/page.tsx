@@ -36,7 +36,6 @@ export default async function DrugsPage({
     // Extract and convert filter parameters
     const filters = {
         query: params.query,
-        drug_name: params.drugName,
         drug_brand: params.drugBrand,
         supplier: params.supplier,
         drug_model: params.drugModel,
