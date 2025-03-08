@@ -13,13 +13,14 @@ export const columns: ColumnDef<Drug>[] = [
     cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "brand",
+    accessorKey: "brandName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Brand" />
     ),
+    // cell: ({ row }) => <div className="font-medium">{row.getValue("brand_name")}</div>,
   },
   {
-    accessorKey: "supplier",
+    accessorKey: "supplierName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Supplier" />
     ),
@@ -58,12 +59,12 @@ export const columns: ColumnDef<Drug>[] = [
     },
   },
   {
-    accessorKey: "drugModel",
+    accessorKey: "drugType",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Model" />
+      <DataTableColumnHeader column={column} title="Type" />
     ),
     cell: ({ row }) => (
-      <div>{row.getValue("drugModel")}</div>
+      <div>{row.getValue("drugType")}</div>
     ),
   },
   {

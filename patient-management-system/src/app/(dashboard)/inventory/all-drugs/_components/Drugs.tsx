@@ -20,6 +20,7 @@ export async function Drugs({
         drug_brand?: string;
         supplier?: string;
         drug_type?: DrugType;
+        drug_Model?: string;
         batch_status?: BatchStatus;
         [key: string]: string | DrugType | BatchStatus | undefined;
     };
@@ -37,6 +38,7 @@ export async function Drugs({
         sort, 
         filters: processedFilters
     });
+
 
     return (
         <div className="space-y-4">

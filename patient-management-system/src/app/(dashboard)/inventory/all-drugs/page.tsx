@@ -39,6 +39,7 @@ export default async function DrugsPage({
         drug_name: params.drugName,
         drug_brand: params.drugBrand,
         supplier: params.supplier,
+        drug_model: params.drugModel,
         drug_type: params.drugType ? params.drugType as DrugType : undefined,
         batch_status: params.batchStatus ? params.batchStatus as BatchStatus : undefined,
     };

@@ -14,6 +14,20 @@ export async function fetchDrugTypes() {
   }
 }
 
+// Fetch unique drug models
+export async function fetchDrugModels() {
+  try {
+    const models = await prisma.drug.findMany({
+      select: { name: true },
+      distinct: ['name']
+    })
+    return models.map(model => model.name)
+  } catch (error) {
+    console.error('Error fetching drug models:', error)
+    throw new Error('Failed to fetch drug models')
+  }
+}
+
 // Fetch unique drug brands
 export async function fetchDrugBrands() {
   try {

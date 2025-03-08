@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 // Import the fetching functions
 import { 
   fetchDrugTypes, 
+  fetchDrugModels,
   fetchDrugBrands, 
   fetchSuppliers, 
   fetchBatchStatuses 
@@ -28,7 +29,8 @@ export function FilterSidebar({ className }: FilterSidebarProps) {
   const searchParams = useSearchParams();
 
   // State to store filter options
-  const [drugModels, setDrugModels] = useState<string[]>([]);
+  const [drugType, setdrugType] = useState<string[]>([]);
+  const [drugModel, setDrugModel] = useState<string[]>([]);
   const [drugBrands, setDrugBrands] = useState<string[]>([]);
   const [suppliers, setSuppliers] = useState<string[]>([]);
   const [batchStatuses, setBatchStatuses] = useState<string[]>([]);
@@ -43,18 +45,21 @@ export function FilterSidebar({ className }: FilterSidebarProps) {
       try {
         setIsLoading(true);
         const [
+          fetcheddrugType,
           fetchedDrugModels, 
           fetchedDrugBrands, 
           fetchedSuppliers, 
           fetchedBatchStatuses
         ] = await Promise.all([
           fetchDrugTypes(),
+          fetchDrugModels(),
           fetchDrugBrands(),
           fetchSuppliers(),
           fetchBatchStatuses()
         ]);
 
-        setDrugModels(fetchedDrugModels);
+        setdrugType(fetcheddrugType);
+        setDrugModel(fetchedDrugModels);
         setDrugBrands(fetchedDrugBrands);
         setSuppliers(fetchedSuppliers);
         setBatchStatuses(fetchedBatchStatuses);
@@ -102,9 +107,15 @@ export function FilterSidebar({ className }: FilterSidebarProps) {
         <div className="p-4">
           <Accordion type="multiple" defaultValue={["drugModel", "batchStatus"]}>
             <FilterSection 
+              id="drugType"
+              title="Drug Type"
+              items={drugType}
+            />
+
+            <FilterSection 
               id="drugModel"
               title="Drug Model"
-              items={drugModels}
+              items={drugModel}
             />
             
             <FilterSection 
