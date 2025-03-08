@@ -1,7 +1,6 @@
 import { Column } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 
-import { cn } from "../../lib/utils";
 import { Button } from "@/components/ui/button";
 // import {
 //   DropdownMenu,
@@ -16,7 +15,6 @@ interface DataTableColumnHeaderProps<TData, TValue> {
 }
 
 export function DataTableColumnHeader<TData, TValue>({
-  column,
   title,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   return (

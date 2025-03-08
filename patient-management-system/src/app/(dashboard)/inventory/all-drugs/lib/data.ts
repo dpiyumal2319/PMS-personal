@@ -13,7 +13,6 @@ export async function fetchDrugs({
 }: FetchDrugsParams): Promise<FetchDrugsResult> {
   try {
 
-    console.log(filters)
     // Create a type-safe where condition
     const whereConditions: Prisma.BatchWhereInput = {
       ...(filters.drug_model && {

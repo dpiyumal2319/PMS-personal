@@ -38,10 +38,10 @@ export interface Drug {
 }
 
 export interface DrugDetails extends Drug {
-  brand: any // Replace with actual type from Prisma
-  supplier: any // Replace with actual type from Prisma
-  drug: any // Replace with actual type from Prisma
-  unitConcentration: any // Replace with actual type from Prisma
+  brand: string // Replace with actual type from Prisma
+  supplier: string // Replace with actual type from Prisma
+  drug: DrugType // Replace with actual type from Prisma
+  unitConcentration: number // Replace with actual type from Prisma
   issues: Array<{
     id: number
     strategy: string

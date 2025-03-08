@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RefreshCw } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 // Import the fetching functions
@@ -26,7 +26,6 @@ interface FilterSidebarProps {
 
 export function FilterSidebar({ className }: FilterSidebarProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // State to store filter options
   const [drugType, setdrugType] = useState<string[]>([]);
@@ -131,7 +130,7 @@ export function FilterSidebar({ className }: FilterSidebarProps) {
               title="Drug Type"
               items={drugType}
             />
-            
+
             <FilterSection 
               id="batchStatus"
               title="Batch Status"
