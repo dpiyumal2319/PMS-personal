@@ -158,7 +158,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className={'w-full'}>
             <Card className={'flex flex-col p-4 space-y-4'}>
                 <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
