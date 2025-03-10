@@ -78,6 +78,7 @@ model DrugBrand {
 model Drug {
   id               Int               @id @default(autoincrement())
   name             String
+  Buffer           Int
   batch            Batch[]
   BatchHistory     BatchHistory[]
   Issue            Issue[]
@@ -98,8 +99,10 @@ model Batch {
   retailPrice         Float
   status              BatchStatus
   unitConcentrationId Int
+  supplierId          Int
   drugBrand           DrugBrand         @relation(fields: [drugBrandId], references: [id])
   drug                Drug              @relation(fields: [drugId], references: [id])
+  Supplier            Supplier          @relation(fields: [supplierId], references: [id])
   unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
   BatchHistory        BatchHistory[]
   Issue               Issue[]
@@ -267,6 +270,13 @@ model Charge {
   updatedAt DateTime   @updatedAt
 }
 
+model Supplier {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  contact String
+  Batch   Batch[]
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -330,6 +340,14 @@ enum MedicalCertificateStatus {
   UNFIT
 }
 
+enum PatientHistoryType {
+  MEDICAL
+  SURGICAL
+  FAMILY
+  SOCIAL
+  ALLERGY
+}
+
 enum VitalType {
   NUMBER
   TEXT
@@ -339,12 +357,4 @@ enum VitalType {
 enum ChargeType {
   DOCTOR
   DISPENSARY
-}
-
-enum PatientHistoryType {
-  MEDICAL
-  SURGICAL
-  FAMILY
-  SOCIAL
-  ALLERGY
 }

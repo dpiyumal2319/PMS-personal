@@ -31,7 +31,17 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                         key={prescription.id}
                         href={`/patients/${patientID}/prescriptions/${prescription.id}`}
                     >
-                        <Card className="cursor-pointer hover:shadow-lg transition h-full">
+                        <Card className={`
+                            cursor-pointer 
+                            hover:shadow-md 
+                            transition 
+                            h-full
+                            overflow-hidden
+                            ${prescription.status === 'PENDING'
+                            ? 'border-l-4 border-l-amber-500'
+                            : 'border-l-4 border-l-green-500'
+                        }
+                        `}>
                             <CardHeader className={'pb-2'}>
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-2">

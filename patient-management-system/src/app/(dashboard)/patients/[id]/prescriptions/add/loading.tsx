@@ -1,12 +1,15 @@
 import React from "react";
 import {Skeleton} from "@/components/ui/skeleton";
-import {Card} from "@/components/ui/card";
+import {Card, CardHeader} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
+import {
+    SidebarHistoryListSkeleton
+} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/CompactSidebarHistoryList";
 
 const PrescriptionFormSkeleton = () => {
     return (
-        <div className="space-y-8">
-            <Card className="p-4 space-y-4">
+        <div className="grid grid-cols-4 gap-4">
+            <Card className="p-4 space-y-4 col-span-3">
                 <div className="flex justify-between items-center">
                     <Skeleton className="h-6 w-40"/>
                     <Skeleton className="h-4 w-16"/>
@@ -35,11 +38,20 @@ const PrescriptionFormSkeleton = () => {
                     <Skeleton className="h-5 w-48"/>
                     <Skeleton className="h-16 w-full"/>
                 </Card>
-                <div className="flex justify-end">
-                    <Button disabled className="px-8">
+                <div className="flex">
+                    <Button disabled className="px-8 w-full">
                         <Skeleton className="h-6 w-24"/>
                     </Button>
                 </div>
+            </Card>
+            <Card className={'col-span-1'}>
+                <CardHeader className={'pb-2'}>
+                    <div className={'flex flex-row justify-center gap-2 items-center text-center'}>
+                        <Skeleton className="h-5 w-24"/>
+                        <Skeleton className="h-10 w-full"/>
+                    </div>
+                </CardHeader>
+                <SidebarHistoryListSkeleton/>
             </Card>
         </div>
     );

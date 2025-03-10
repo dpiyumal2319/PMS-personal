@@ -158,8 +158,8 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
-            <Card className={'p-4 space-y-4'}>
+        <form onSubmit={handleSubmit} className={'w-full'}>
+            <Card className={'flex flex-col p-4 space-y-4'}>
                 <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                         {/* Back Button */}
@@ -173,7 +173,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                     X Clear (Refetch recent vitals)
                 </span>
                 </div>
-                <Card className="bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300">
+                <Card className="bg-slate-100 p-4 transition-shadow duration-300">
                     <div className="space-y-2.5">
                         <div className="space-y-2">
                             <div className="flex items-center space-x-2">
@@ -265,7 +265,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                     </div>
                 </Card>
 
-                <Card className='bg-slate-100 p-4 hover:shadow-lg transition-shadow duration-300'>
+                <Card className='bg-slate-100 p-4 transition-shadow duration-300'>
                     <div className="space-y-6">
                         <h2 className="text-lg font-semibold">Medications</h2>
                         <div className="space-y-4">
@@ -302,11 +302,11 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                     </div>
                 </Card>
 
-                <div className="flex justify-end">
+                <div className="flex items-end h-full">
                     <Button
                         type="submit"
                         size="lg"
-                        className="px-8"
+                        className="px-8 w-full"
                     >
                         Submit Prescription
                     </Button>

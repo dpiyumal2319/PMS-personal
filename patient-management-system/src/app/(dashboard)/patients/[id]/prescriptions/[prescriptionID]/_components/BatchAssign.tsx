@@ -151,7 +151,7 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button
-                                className="bg-green-500 hover:bg-green-600 w-full shadow-md"
+                                className="bg-green-600 hover:bg-green-700 w-full shadow-md"
                                 disabled={!bill}
                             >
                                 Confirm Prescription
@@ -183,7 +183,7 @@ const BatchAssign = ({issues, prescriptionID, patientID, role}: {
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
-                                    className="bg-green-500 hover:bg-green-600"
+                                    className="bg-green-600 hover:bg-green-700"
                                     onClick={handleCompletePrescription}
                                 >
                                     Yes, Confirm Prescription

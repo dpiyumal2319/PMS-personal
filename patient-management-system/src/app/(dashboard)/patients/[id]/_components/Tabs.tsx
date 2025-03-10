@@ -2,7 +2,7 @@
 
 import {usePathname} from "next/navigation";
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import { FileText, Pill, BriefcaseMedical, FileUser} from "lucide-react";
+import {FileText, Pill, BriefcaseMedical, FileUser, Clock} from "lucide-react";
 import Link from "next/link";
 
 const PatientTabs = ({
@@ -32,7 +32,7 @@ const PatientTabs = ({
     return (
         <div className="mt-6 border-t pt-4 h-14">
             <Tabs value={currentTab} className="w-full h-full">
-                <TabsList className="w-full" >
+                <TabsList className="w-full overflow-x-auto">
                     {links.map((link, index) => (
                         <Link
                             key={index}
@@ -47,7 +47,7 @@ const PatientTabs = ({
                                 }`}
                             >
                                 <link.icon className="h-4 w-4"/>
-                                {link.name}
+                                <span className={'hidden sm:inline'}>{link.name}</span>
                             </TabsTrigger>
                         </Link>
                     ))}
@@ -63,6 +63,7 @@ export default PatientTabs;
 const DoctorLinks = [
     {name: "Prescribe", value: "prescriptions/add", icon: BriefcaseMedical},
     {name: "Prescriptions", value: "prescriptions", icon: Pill},
+    {name: "History", value: "history", icon: Clock},
     {name: "Reports", value: "reports", icon: FileText},
     // {name: "Notes", value: "notes", icon: ClipboardEdit},
     {name: "Medical Certificates", value: "medicalCertificates", icon: FileUser}
