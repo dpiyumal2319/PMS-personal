@@ -27,7 +27,7 @@ model Patient {
 model PatientHistory {
   id          Int                @id @default(autoincrement())
   patientId   Int
-  description String
+  description String?
   type        PatientHistoryType
   time        DateTime           @default(now())
   name        String
@@ -76,13 +76,13 @@ model DrugBrand {
 }
 
 model Drug {
-  id               Int               @id @default(autoincrement())
-  name             String
-  Buffer           Int
-  batch            Batch[]
-  BatchHistory     BatchHistory[]
-  Issue            Issue[]
-  Buffer           Int
+  id           Int            @id @default(autoincrement())
+  name         String
+  Buffer       Int
+  batch        Batch[]
+  BatchHistory BatchHistory[]
+  Issue        Issue[]
+
   stratergyHistory StratergyHistory?
 }
 
@@ -114,8 +114,6 @@ model Batch {
   unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
   BatchHistory        BatchHistory[]
   Issue               Issue[]
-  Supplier            Supplier          @relation(fields: [supplierId], references: [id])
-  supplierId          Int
 }
 
 model UnitConcentration {
@@ -278,13 +276,6 @@ model Charge {
   name      ChargeType @id
   value     Float
   updatedAt DateTime   @updatedAt
-}
-
-model Supplier {
-  id      Int     @id @default(autoincrement())
-  name    String  @unique
-  contact String
-  Batch   Batch[]
 }
 
 enum Gender {
