@@ -1,11 +1,13 @@
-import React, {JSX} from 'react';
-import {getHistory} from '@/app/lib/actions/history';
-import {format} from 'date-fns';
-import {Card, CardContent} from '@/components/ui/card';
-import {Slice, Stethoscope, HeartPulse, Users, AlertCircle} from 'lucide-react';
-import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+'use client';
+
+import React, {useState, useCallback, JSX} from 'react';
+import { format } from 'date-fns';
+import { Card, CardContent } from '@/components/ui/card';
+import { Slice, Stethoscope, HeartPulse, Users, AlertCircle } from 'lucide-react';
+import { BasicColorType, CustomBadge } from "@/app/(dashboard)/_components/CustomBadge";
 import DeleteHistory from "@/app/(dashboard)/patients/[id]/history/_components/DeleteHistory";
-import {Skeleton} from "@/components/ui/skeleton";
+import HistoryFilters from "./HistoryFilters";
+import { getAllHistory } from "@/app/lib/actions/history";
 
 // Helper function to get icon and color based on history type
 const getHistoryTypeDetails = (type: string): {
@@ -60,90 +62,79 @@ const getHistoryTypeDetails = (type: string): {
     }
 };
 
-const HistoryList = async ({filter, query, patientID}: { filter: string; query: string; patientID: number }) => {
-    const history = await getHistory({filter, query, patientID});
+interface HistoryListProps {
+    initialHistory: Awaited<ReturnType<typeof getAllHistory>>;
+}
 
-    if (history.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center p-8 text-center">
-                <Slice className="h-12 w-12 text-gray-400 mb-3"/>
-                <h3 className="text-lg font-medium">No history records found</h3>
-                <p className="text-sm text-gray-500 mt-2">
-                    {query ? `No results matching "${query}"` : 'This patient has no history records yet'}
-                </p>
-            </div>
-        );
-    }
+const HistoryList = ({ initialHistory }: HistoryListProps) => {
+    const [filteredHistory, setFilteredHistory] = useState(initialHistory);
+
+    // Use useCallback to memoize the filter change handler
+    const handleFilterChange = useCallback((newFilteredHistory: typeof initialHistory) => {
+        setFilteredHistory(newFilteredHistory);
+    }, []);
+
+    const renderEmptyState = () => (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+            <Slice className="h-12 w-12 text-gray-400 mb-3"/>
+            <h3 className="text-lg font-medium">No history records found</h3>
+            <p className="text-sm text-gray-500 mt-2">
+                Adjust your search or filter criteria to see more results.
+            </p>
+        </div>
+    );
 
     return (
-        <div className="space-y-3 py-2">
-            {history.map((item) => {
-                const {icon, color, borderColor, badgeColor} = getHistoryTypeDetails(item.type);
+        <>
+            <HistoryFilters
+                history={initialHistory}
+                onFilterChange={handleFilterChange}
+            />
 
-                return (
-                    <Card key={item.id}
-                          className={`overflow-hidden border-l-4 shadow-sm hover:shadow ${borderColor}`}>
-                        <CardContent className="p-0">
-                            <div className="flex items-center p-4">
-                                {/* Timeline dot */}
-                                <div className={`rounded-full p-2 ${color} text-white mr-4`}>
-                                    {icon}
-                                </div>
+            {filteredHistory.length === 0 ? (
+                renderEmptyState()
+            ) : (
+                <div className="space-y-3 py-2">
+                    {filteredHistory.map((item) => {
+                        const {icon, color, borderColor, badgeColor} = getHistoryTypeDetails(item.type);
 
-                                <div className="flex-grow min-w-0">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <CustomBadge color={badgeColor} text={item.type}/>
-                                            <span
-                                                className="text-xs text-gray-500">{format(new Date(item.time), 'PPp')}</span>
+                        return (
+                            <Card key={item.id}
+                                  className={`overflow-hidden border-l-4 shadow-sm hover:shadow ${borderColor}`}>
+                                <CardContent className="p-0">
+                                    <div className="flex items-center p-4">
+                                        {/* Timeline dot */}
+                                        <div className={`rounded-full p-2 ${color} text-white mr-4`}>
+                                            {icon}
                                         </div>
+
+                                        <div className="flex-grow min-w-0">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
+                                                <div className="flex items-center gap-2">
+                                                    <CustomBadge color={badgeColor} text={item.type}/>
+                                                    <span
+                                                        className="text-xs text-gray-500">
+                                                        {format(new Date(item.time), 'PPp')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-semibold">{item.name}</p>
+                                                <p className="text-sm text-gray-600">
+                                                    {item.description ? item.description : 'No description'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <DeleteHistory id={item.id}/>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-sm font-semibold">{item.name}</p>
-                                        <p className="text-sm text-gray-600">{item.description ? item.description : 'No description'}</p>
-                                    </div>
-                                </div>
-                                <DeleteHistory id={item.id}/>
-                            </div>
-                        </CardContent>
-                    </Card>
-                );
-            })}
-        </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            )}
+        </>
     );
 };
 
-const HistoryListSkeleton = () => {
-    return (
-        <div className="space-y-3 py-2">
-            {[1, 2, 3].map((item) => (
-                <Card key={item} className="overflow-hidden border-l-4 border-l-gray-300 shadow-sm">
-                    <CardContent className="p-0">
-                        <div className="flex items-center p-4">
-                            {/* Skeleton for Timeline dot */}
-                            <Skeleton className="rounded-full h-10 w-10 mr-4"/>
-
-                            <div className="flex-grow min-w-0 space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-2">
-                                        <Skeleton className="h-4 w-20"/> {/* Badge */}
-                                        <Skeleton className="h-3 w-24"/> {/* Date */}
-                                    </div>
-                                    <Skeleton className="h-5 w-5"/> {/* Delete Icon */}
-                                </div>
-                                <div className="space-y-1">
-                                    <Skeleton className="h-4 w-3/4"/> {/* Name */}
-                                    <Skeleton className="h-3 w-full"/> {/* Description */}
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
-        </div>
-    );
-};
-
-
-export {HistoryListSkeleton}
 export default HistoryList;

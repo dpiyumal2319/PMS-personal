@@ -144,6 +144,9 @@ export async function getAllHistory({patientID}: { patientID: number }) {
     return await prisma.patientHistory.findMany({
         where: {
             patientId: patientID
+        },
+        orderBy: {
+            time: 'desc'
         }
     })
 }
