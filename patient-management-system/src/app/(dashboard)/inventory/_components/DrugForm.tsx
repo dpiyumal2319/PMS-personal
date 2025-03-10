@@ -7,6 +7,7 @@ import {
   searchDrugBrands,
   searchDrugModels,
   getDrugConcentrations,
+  searchSuppliers,
 } from "@/app/lib/actions";
 import { Plus } from "lucide-react";
 import { handleServerAction } from "@/app/lib/utils";
@@ -15,6 +16,7 @@ import {
   DrugModelSuggestion,
   InventoryFormData,
   DrugConcentrationDataSuggestion,
+  SupplierSuggestion,
 } from "@/app/lib/definitions";
 import { DrugSuggestionBox } from "@/app/(dashboard)/inventory/_components/DrugSuggestionBox";
 import { DrugConcentrationField } from "@/app/(dashboard)/inventory/_components/AddWeightField";
@@ -26,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import CustomDrugTypeSelect from "@/app/(dashboard)/inventory/available-stocks/_components/CustomDrugTypeSelect";
+import { SupplierSuggestionBox } from "@/app/(dashboard)/inventory/_components/SupplierSuggestionBox";
 
 export function DrugForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,11 +53,15 @@ export function DrugForm() {
   const [drugSuggestions, setDrugSuggestions] = useState<DrugModelSuggestion[]>(
     []
   );
+  const [supplierSuggestions, setSupplierSuggestions] = useState<
+    SupplierSuggestion[]
+  >([]);
   const [drugConcentrations, setDrugConcentrations] = useState<
     DrugConcentrationDataSuggestion[]
   >([]);
   const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
   const [showDrugSuggestions, setShowDrugSuggestions] = useState(false);
+  const [showSupplierSuggestions, setShowSupplierSuggestions] = useState(false);
 
   const handleConcentrationAdded = (
     newWeight: DrugConcentrationDataSuggestion
@@ -149,7 +156,34 @@ export function DrugForm() {
         setDrugSuggestions([]);
         setShowDrugSuggestions(false);
       }
+    } else if (name === "supplierName") {
+      if (value.length >= 2) {
+        handleSupplierSearch(value).then();
+        setShowSupplierSuggestions(true);
+      } else {
+        setSupplierSuggestions([]);
+        setShowSupplierSuggestions(false);
+      }
     }
+  };
+
+  const handleSupplierSearch = async (query: string) => {
+    try {
+      const results = await searchSuppliers(query);
+      setSupplierSuggestions(results);
+    } catch (error) {
+      console.error("Error searching suppliers:", error);
+      setSupplierSuggestions([]);
+    }
+  };
+  const handleSupplierSelect = (suggestion: SupplierSuggestion) => {
+    setFormData((prev) => ({
+      ...prev,
+      supplierId: suggestion.id,
+      supplierName: suggestion.name,
+      supplierContact: suggestion.contact || "",
+    }));
+    setShowSupplierSuggestions(false);
   };
 
   const fetchDrugWeights = useCallback(async () => {
@@ -314,10 +348,10 @@ export function DrugForm() {
               name="supplierName"
               className={"h-8"}
             />
-            <DrugSuggestionBox
-              suggestions={drugSuggestions}
-              visible={showDrugSuggestions}
-              onSelect={handleDrugSelect}
+            <SupplierSuggestionBox
+              suggestions={supplierSuggestions}
+              visible={showSupplierSuggestions}
+              onSelect={handleSupplierSelect}
             />
           </div>
           <div>
@@ -334,11 +368,6 @@ export function DrugForm() {
               required
               name="supplierContact"
               className={"h-8"}
-            />
-            <DrugSuggestionBox
-              suggestions={drugSuggestions}
-              visible={showDrugSuggestions}
-              onSelect={handleDrugSelect}
             />
           </div>
           <div>

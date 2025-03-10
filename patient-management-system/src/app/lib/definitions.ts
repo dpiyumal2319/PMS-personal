@@ -78,6 +78,7 @@ export type InventoryFormData = {
   concentrationId?: number;
   concentration?: number;
   Buffer: number; // Add Buffer property
+  supplierId?: number;
   supplierName: string; // Add supplierName property
   supplierContact: string; // Add supplierContact property
 };
@@ -272,4 +273,10 @@ export interface IncomeStats {
   totalIncome: number;
   patientCount: number;
   averagePerPatient: number;
+}
+
+export interface SupplierSuggestion {
+  id: number;
+  name: string;
+  contact: string | null;
 }

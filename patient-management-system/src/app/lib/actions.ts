@@ -777,6 +777,33 @@ export async function updatePatient(
   }
 }
 
+//suggest supplier information
+export async function searchSuppliers(query: string) {
+  "use server";
+
+  try {
+    const suppliers = await prisma.supplier.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        contact: true,
+      },
+      take: 5, // Limit results
+    });
+
+    return suppliers;
+  } catch (error) {
+    console.error("Error searching suppliers:", error);
+    return [];
+  }
+}
+
 //For adding drugs to the inventory
 export async function addNewItem({
   formData,
@@ -824,11 +851,15 @@ export async function addNewItem({
 
       // 3. Create or connect supplier
       const supplier = await tx.supplier.upsert({
-        where: { name: formData.supplierName },
-        update: {},
+        where: formData.supplierId
+          ? { id: formData.supplierId }
+          : { name: formData.supplierName },
+        update: {
+          contact: formData.supplierContact, // Update contact info in case it changed
+        },
         create: {
           name: formData.supplierName,
-          contact: formData.supplierContact || "N/A", // Add contact if available
+          contact: formData.supplierContact || "N/A",
         },
       });
 
