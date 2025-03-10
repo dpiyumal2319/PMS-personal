@@ -1,15 +1,15 @@
 "use client";
 
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import jsPDF from "jspdf";
-import {Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {Textarea} from "@/components/ui/textarea";
-import {FileText} from "lucide-react";
-import getNextMedicalCertificateId, {fetchPatientData, storeMedicalCertificate} from "@/app/lib/actions";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FileText } from "lucide-react";
+import getNextMedicalCertificateId, { fetchPatientData, storeMedicalCertificate } from "@/app/lib/actions";
 
-export function MedicalCertificateExport({patientId}: { patientId?: number }) {
+export function MedicalCertificateExport({ patientId }: { patientId?: number }) {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
         patientName: "",
@@ -62,11 +62,11 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value,
-            ...(name === 'fitForDuty' && value === 'Yes' ? {sickDaysCount: '0'} : {})
+            ...(name === 'fitForDuty' && value === 'Yes' ? { sickDaysCount: '0' } : {})
         }));
     };
 
@@ -133,7 +133,7 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
 
             pdf.setFontSize(14);  // Increased from 9
             pdf.setFont("helvetica", "bold");
-            pdf.text("Private Medical Certificate", centerX, yPos, {align: "center"});
+            pdf.text("Private Medical Certificate", centerX, yPos, { align: "center" });
             yPos += 13;
 
 
@@ -141,20 +141,20 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
             pdf.setFontSize(10);  // Increased from 8
 
             // Patient details
-            pdf.text(`Name of the Patient: ${formData.patientName || "[Not Provided]"}`, marginLeft, yPos);
+            pdf.text(`Name of the Patient : ${formData.patientName || "[Not Provided]"}`, marginLeft, yPos);
             yPos += 6;
 
-            pdf.text(`Age: ${formData.age ? formData.age + " years" : "[Not Provided]"}`, marginLeft, yPos);
+            pdf.text(`Age : ${formData.age ? formData.age + " years" : "[Not Provided]"}`, marginLeft, yPos);
             yPos += 6;
 
             // Address with proper wrapping for A5
-            const addressText = `Address: ${formData.address || "[Not Provided]"}`;
+            const addressText = `Address : ${formData.address || "[Not Provided]"}`;
             const addressLines = pdf.splitTextToSize(addressText, contentWidth);
             pdf.text(addressLines, marginLeft, yPos);
             yPos += (addressLines.length * 5) + 1;  // Increased line spacing
 
             // Workplace
-            const workplaceText = `Name and Adress of the Work Place: ${formData.workPlace || "[Not Provided]"}`;
+            const workplaceText = `Name and Adress of the Work Place : ${formData.workPlace || "[Not Provided]"}`;
             const workplaceLines = pdf.splitTextToSize(workplaceText, contentWidth);
             pdf.text(workplaceLines, marginLeft, yPos);
             yPos += (workplaceLines.length * 5) + 1;  // Increased line spacing
@@ -164,14 +164,14 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
             pdf.setFontSize(10);  // Increased from 8
 
             // Medical condition with wrapping
-            const conditionText = `Nature of the Disease: ${formData.disease || "[Not Provided]"}`;
+            const conditionText = `Nature of the Disease : ${formData.disease || "[Not Provided]"}`;
             const conditionLines = pdf.splitTextToSize(conditionText, contentWidth);
             pdf.text(conditionLines, marginLeft, yPos);
             yPos += (conditionLines.length * 5) + 1;  // Increased line spacing
 
 
             // Recommendation section
-            pdf.text("Recommendation of the medical officer:", marginLeft, yPos);
+            pdf.text("Recommendation of the medical officer :", marginLeft, yPos);
             yPos += 5;
 
             // Recommendation text - still slightly larger but manageable
@@ -188,8 +188,7 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
             pdf.text(dieseaseLines, marginLeft, yPos);
             yPos += (dieseaseLines.length * 5) + 1;  // Increased line spacing
 
-            pdf.text(`Date of Sickness: ${formatDate(formData.sickDate) || "[Not Provided]"}`, marginLeft, yPos);
-            yPos += 6;
+
 
             // Sick leave details if not fit
             if (formData.fitForDuty === "No") {
@@ -197,12 +196,15 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
 
                 if (formData.sickDaysCount === "1") {
 
-                    pdf.text(`Recommended Leave: ${formData.sickDaysCount || "[Not Provided]"} day`, marginLeft, yPos);
+                    pdf.text(`Recommended Leave : ${formData.sickDaysCount || "[Not Provided]"} day from ${formatDate(formData.sickDate) || "[Not Provided]"}`, marginLeft, yPos);
                     yPos += 6;
                 } else {
-                    pdf.text(`Recommended Leave: ${formData.sickDaysCount || "[Not Provided]"} days`, marginLeft, yPos);
+                    pdf.text(`Recommended Leave : ${formData.sickDaysCount || "[Not Provided]"} days from ${formatDate(formData.sickDate) || "[Not Provided]"}`, marginLeft, yPos);
                     yPos += 6;
                 }
+            } else {
+                pdf.text(`Date of Sickness : ${formatDate(formData.sickDate) || "[Not Provided]"}`, marginLeft, yPos);
+                yPos += 6;
             }
 
             // Certificate issue date and signature - positioned near bottom
@@ -213,11 +215,11 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
             // Signature line
             pdf.line(pageWidth - 65, signatureY, pageWidth - marginRight, signatureY);
             pdf.setFontSize(9);  // Increased from 7
-            pdf.text("Signature", pageWidth - 38, signatureY + 5, {align: "center"});
+            pdf.text("Signature", pageWidth - 38, signatureY + 5, { align: "center" });
 
             // Footer with certificate ID
             pdf.setFontSize(8);  // Increased from 6
-            pdf.text(`Certificate ID: MC-${nextMCId}`, centerX, 190, {align: "center"});
+            pdf.text(`Certificate ID: MC-${nextMCId}`, centerX, 190, { align: "center" });
 
             // Save the PDF with a dynamic filename
             const filename = formData.patientName
@@ -237,7 +239,7 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button>
-                    <FileText className="w-5 h-5 text-white"/> Generate Medical Certificate
+                    <FileText className="w-5 h-5 text-white" /> Generate Medical Certificate
                 </Button>
             </DialogTrigger>
 
@@ -365,16 +367,6 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
                                     </select>
                                 </div>
 
-                                <div className="mb-4">
-                                    <label className="text-sm font-medium text-gray-700">Date of Sickness</label>
-                                    <Input
-                                        name="sickDate"
-                                        value={formData.sickDate}
-                                        onChange={handleChange}
-                                        type="date"
-                                        className="border-gray-300 focus:ring-blue-500"
-                                    />
-                                </div>
                                 {formData.fitForDuty === "No" ? (
                                     <div className="mb-4">
                                         <label className="text-sm font-medium text-gray-700">Days of Leave
@@ -396,7 +388,29 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
                                         onChange={handleChange}
                                     />
                                 )}
-
+                                {formData.fitForDuty === "No" ? (
+                                    <div className="mb-4">
+                                        <label className="text-sm font-medium text-gray-700">From date</label>
+                                        <Input
+                                            name="sickDate"
+                                            value={formData.sickDate}
+                                            onChange={handleChange}
+                                            type="date"
+                                            className="border-gray-300 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="mb-4">
+                                        <label className="text-sm font-medium text-gray-700">Date of Sickness</label>
+                                        <Input
+                                            name="sickDate"
+                                            value={formData.sickDate}
+                                            onChange={handleChange}
+                                            type="date"
+                                            className="border-gray-300 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                )}
 
                                 <div className="mb-4">
                                     <label className="text-sm font-medium text-gray-700">Report Issue Date</label>
@@ -420,7 +434,7 @@ export function MedicalCertificateExport({patientId}: { patientId?: number }) {
                         className="w-full"
                         disabled={isLoading}
                     >
-                        <FileText className="w-5 h-5 mr-2"/> Generate Medical Certificate
+                        <FileText className="w-5 h-5 mr-2" /> Generate Medical Certificate
                     </Button>
                 </div>
             </DialogContent>
