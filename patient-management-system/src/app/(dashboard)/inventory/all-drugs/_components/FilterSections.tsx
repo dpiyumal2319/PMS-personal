@@ -221,7 +221,7 @@ export const FilterSectionOnlyName = forwardRef<FilterSectionRef, FilterSectionO
       console.log("Resetting", id);
       setSelectedItems([]);
       updateUrlParams([]);
-    }, [updateUrlParams]);
+    }, [id, updateUrlParams]);
 
     // Expose the reset function through the ref
     useImperativeHandle(ref, () => ({

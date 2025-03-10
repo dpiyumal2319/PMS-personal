@@ -8,6 +8,7 @@ export interface FetchDrugsParams {
     query?: string
     drug_name?: string
     drug_brand?: string
+    drug_model?: string
     supplier?: string
     drug_type?: DrugType
     batch_status?: BatchStatus

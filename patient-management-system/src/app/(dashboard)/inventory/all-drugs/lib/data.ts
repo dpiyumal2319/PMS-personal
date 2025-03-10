@@ -1,7 +1,7 @@
 'use server'
 
 import { Drug, FetchDrugsParams, FetchDrugsResult } from './types'
-import { Prisma } from '@prisma/client'
+import {BatchStatus, DrugType, Prisma} from '@prisma/client'
 import {prisma} from '@/app/lib/prisma'
 
 
@@ -17,9 +17,9 @@ export async function fetchDrugs({
     // Create a type-safe where condition
     const whereConditions: Prisma.BatchWhereInput = {
       ...(filters.drug_model && {
-        drug: { 
-          id: { 
-            in: filters.drug_model.split(',').map(id => parseInt(id.trim())), 
+        drug: {
+          id: {
+            in: filters.drug_model.split(',').map(id => parseInt(id.trim())),
           }
         }
       }),
@@ -37,8 +37,8 @@ export async function fetchDrugs({
           }
         }
       }),
-      ...(filters.drug_type && { type: { in: filters.drug_type.split(',').map(name => name.trim()) } }),
-      ...(filters.batch_status && { status: { in: filters.batch_status.split(',').map(name => name.trim()) } }),
+      ...(filters.drug_type && { type: { in: filters.drug_type.split(',').map(name => name.trim() as DrugType) } }),
+      ...(filters.batch_status && { status: { in: filters.batch_status.split(',').map(name => name.trim() as BatchStatus) } }),
       ...(filters.query && {
         OR: [
           { drug: { name: { contains: filters.query, mode: 'insensitive' } } },
