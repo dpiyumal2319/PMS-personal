@@ -24,7 +24,7 @@ interface SearchParams {
 export default async function DrugsPage({
     searchParams,
 }: {
-    searchParams: SearchParams;
+    searchParams: Promise<SearchParams>;
 }) {
     // Await searchParams if it's a promise (though it shouldn't be in Next.js 13+)
     const params = await Promise.resolve(searchParams);

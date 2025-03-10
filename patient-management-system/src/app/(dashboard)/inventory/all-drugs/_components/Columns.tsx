@@ -97,13 +97,13 @@ export const columns: ColumnDef<Drug>[] = [
     ),
   },
   {
-    accessorKey: "remainingAmount",
+    accessorKey: "remainingQuantity",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Remaining" />
     ),
     cell: ({ row }) => {
       const fullAmount = row.getValue("fullAmount") as number;
-      const remainingAmount = row.getValue("remainingAmount") as number;
+      const remainingAmount = row.getValue("remainingQuantity") as number;
       const percentage = (remainingAmount / fullAmount) * 100;
       
       return (
