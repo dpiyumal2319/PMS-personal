@@ -32,7 +32,7 @@ export default async function StockPage({
     new Date().setMonth(new Date().getMonth() - 1)
   );
   const defaultEndDate = new Date();
-  defaultEndDate.setHours(0, 1, 0, 0);
+  defaultEndDate.setHours(23, 59, 59, 999);
 
   const startDate = resolvedSearchParams?.startDate
     ? new Date(resolvedSearchParams.startDate)

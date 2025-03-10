@@ -777,7 +777,7 @@ export async function addNewItem(
     try {
 
         // Check all the required fields
-        if (!formData.drugId || !formData.concentrationId || !formData.concentration || !formData.batchNumber || !formData.drugType || !formData.quantity || !formData.expiry || !formData.retailPrice || !formData.wholesalePrice) {
+        if (!formData.concentrationId || !formData.concentration || !formData.batchNumber || !formData.drugType || !formData.quantity || !formData.expiry || !formData.retailPrice || !formData.wholesalePrice) {
             return {success: false, message: "Please fill all fields"};
         }
 
