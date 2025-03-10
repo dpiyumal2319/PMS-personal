@@ -1,6 +1,6 @@
 "use server";
 
-import {revalidatePath} from "next/cache";
+import { revalidatePath } from "next/cache";
 import {
   DateRange,
   DrugConcentrationDataSuggestion,
@@ -12,10 +12,10 @@ import {
   StockData,
   StockQueryParams,
 } from "@/app/lib/definitions";
-import {prisma} from "./prisma";
-import {verifySession} from "./sessions";
-import {$Enums, BatchStatus, DrugType} from "@prisma/client";
-import {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
+import { prisma } from "./prisma";
+import { verifySession } from "./sessions";
+import { $Enums, BatchStatus, DrugType } from "@prisma/client";
+import { SearchType } from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 import MedicalCertificateStatus = $Enums.MedicalCertificateStatus;
 
 export async function addQueue(): Promise<myError> {
@@ -1288,7 +1288,27 @@ export async function getStockByBrand({
   return sortedData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 }
 
-export async function getSupplierWisePricing(drugId: number) {
+// Define interfaces for the return types
+interface BatchInfo {
+  batchId: number;
+  batchNumber: string;
+  brandName: string;
+  concentration: number;
+  retailPrice: number;
+  totalPrice: number;
+  remainingQuantity: number;
+  expiryDate: string;
+}
+
+interface SupplierData {
+  supplierId: number;
+  supplierName: string;
+  batches: BatchInfo[];
+}
+
+export async function getSupplierWisePricing(
+  drugId: number
+): Promise<SupplierData[]> {
   try {
     const batches = await prisma.batch.findMany({
       where: {
@@ -1306,27 +1326,33 @@ export async function getSupplierWisePricing(drugId: number) {
     });
 
     // Group batches by supplier
-    const supplierData = batches.reduce((acc, batch) => {
-      const supplierName = batch.Supplier.name;
-      if (!acc[supplierName]) {
-        acc[supplierName] = {
-          supplierId: batch.Supplier.id,
-          supplierName: supplierName,
-          batches: [],
-        };
-      }
-      acc[supplierName].batches.push({
-        batchId: batch.id,
-        batchNumber: batch.number,
-        brandName: batch.drugBrand.name,
-        concentration: batch.unitConcentration.concentration,
-        retailPrice: batch.retailPrice,
-        totalPrice: batch.fullAmount * batch.wholesalePrice,
-        remainingQuantity: batch.remainingQuantity,
-        expiryDate: batch.expiry.toISOString().split("T")[0],
-      });
-      return acc;
-    }, {} as Record<string, any>);
+    const supplierData: Record<string, SupplierData> = batches.reduce(
+      (acc, batch) => {
+        const supplierName = batch.Supplier.name;
+
+        if (!acc[supplierName]) {
+          acc[supplierName] = {
+            supplierId: batch.Supplier.id,
+            supplierName: supplierName,
+            batches: [],
+          };
+        }
+
+        acc[supplierName].batches.push({
+          batchId: batch.id,
+          batchNumber: batch.number,
+          brandName: batch.drugBrand.name,
+          concentration: batch.unitConcentration.concentration,
+          retailPrice: batch.retailPrice,
+          totalPrice: batch.fullAmount * batch.wholesalePrice,
+          remainingQuantity: batch.remainingQuantity,
+          expiryDate: batch.expiry.toISOString().split("T")[0],
+        });
+
+        return acc;
+      },
+      {} as Record<string, SupplierData>
+    );
 
     return Object.values(supplierData);
   } catch (error) {
