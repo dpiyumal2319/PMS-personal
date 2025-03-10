@@ -27,7 +27,7 @@ model Patient {
 model PatientHistory {
   id          Int                @id @default(autoincrement())
   patientId   Int
-  description String
+  description String?
   type        PatientHistoryType
   time        DateTime           @default(now())
   name        String
