@@ -44,9 +44,8 @@ export default async function StockPage({
   const totalPages = await getAvailableDrugsTotalPages(query, selection);
 
   return (
-    <div className="flex flex-col gap-4 ">
+    <div className="flex flex-col h-full w-full">
       {/* Top Bar */}
-
       <StockTopbar
         defaultStartDate={startDate}
         defaultEndDate={endDate}
@@ -54,7 +53,7 @@ export default async function StockPage({
       />
 
       {/* Content */}
-      <div className="flex-grow overflow-y-auto mt-4 p-4">
+      <div className="flex flex-col h-full p-4 overflow-y-auto">
         <Suspense
           fallback={
             <div className="text-center">
@@ -71,14 +70,14 @@ export default async function StockPage({
             endDate={endDate}
           />
         </Suspense>
-      </div>
 
-      {/* Pagination */}
-      {totalPages > 0 && (
-        <div className="mt-4 flex justify-center">
-          <Pagination totalPages={totalPages} />
-        </div>
-      )}
+        {/* Pagination */}
+        {totalPages > 0 && (
+          <div className="mt-4 flex justify-center">
+            <Pagination totalPages={totalPages} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

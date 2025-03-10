@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 
 const InventoryLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-none bg-white border-b border-primary-900/25 shadow z-5  py-2 px-4">
+    <div className="flex flex-col h-full w-full">
+      <div className="w-full bg-white border-b border-primary-900/25 shadow py-2 px-4 h-14">
         <TabsBar />
       </div>
-      <div className="flex-1 overflow-y-auto min-h-0">{children}</div>
+      <div className="flex flex-col min-h-0 h-full">{children}</div>
     </div>
   );
 };

@@ -284,7 +284,7 @@ export function DrugForm() {
           <Plus className="w-4 h-4 mr-2" /> Add New Item
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-primary-600 text-center">
             Add New Drug
