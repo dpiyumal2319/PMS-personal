@@ -3,8 +3,7 @@ import { Card } from "@/components/ui/card";
 import { FaCoins } from "react-icons/fa";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { StockData } from "@/app/lib/definitions";
-
-import { MdLocalGroceryStore } from "react-icons/md";
+import { PiHospitalFill } from "react-icons/pi";
 
 export default function PriceListByBatch({ items }: { items: StockData[] }) {
   return (
@@ -30,7 +29,10 @@ export default function PriceListByBatch({ items }: { items: StockData[] }) {
 
             {/* Supplier */}
             <div className="flex items-center gap-3 text-gray-700 text-md justify-center flex-1">
-              <MdLocalGroceryStore className="w-5 h-5 text-gray-500" />
+              <div>
+                <PiHospitalFill className="w-5 h-5 text-gray-500" />
+              </div>
+
               <span className="font-medium">
                 {item.supplier || "Unknown Supplier"}
               </span>
