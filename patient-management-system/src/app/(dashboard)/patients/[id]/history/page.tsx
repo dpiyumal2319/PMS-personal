@@ -4,7 +4,7 @@ import SearchDropdown from "@/app/(dashboard)/_components/Dropdown";
 import React, {Suspense} from "react";
 import HistoryList, {HistoryListSkeleton} from "@/app/(dashboard)/patients/[id]/history/_components/HistoryList";
 import AddHistoryForm from "@/app/(dashboard)/patients/[id]/history/_components/AddHistoryForm";
-import {getHistoryCount} from "@/app/lib/actions/history";
+import {getAllHistory, getHistoryCount} from "@/app/lib/actions/history";
 
 export const metadata: Metadata = {
     title: "PMS - Patient History",
@@ -22,7 +22,8 @@ const Page = async ({params, searchParams}: {
     const resolvedParams = await searchParams;
     const query = resolvedParams?.query || "";
     const filter = resolvedParams?.filter || "all";
-    const count = await getHistoryCount({patientID: id});
+    const histories = await getAllHistory({patientID: id});
+    const count = histories.length
 
     return (
         <div className={'flex flex-col gap-4 h-full'}>

@@ -139,3 +139,11 @@ export async function getHistoryCount({patientID}: { patientID: number }) {
         }
     });
 }
+
+export async function getAllHistory({patientID}: { patientID: number }) {
+    return await prisma.patientHistory.findMany({
+        where: {
+            patientId: patientID
+        }
+    })
+}
