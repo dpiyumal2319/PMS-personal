@@ -4,7 +4,7 @@ import React, {useState} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {addReportType} from "@/app/lib/actions";
+import {addReportType} from "@/app/lib/actions/reports";
 import {handleServerAction} from "@/app/lib/utils";
 import {Parameter, ReportForm} from "@/app/lib/definitions";
 import {Textarea} from "@/components/ui/textarea";

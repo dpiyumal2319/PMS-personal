@@ -1,6 +1,8 @@
 import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
 import {IssuingStrategy} from "@prisma/client";
+import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
+import { myError} from "@/app/lib/definitions";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();
@@ -8,6 +10,38 @@ export function calcAge(birthDate: Date): number {
 
     return Math.abs(age_dt.getUTCFullYear() - 1970);
 }
+
+// Get the text color class based on the selected color
+export const getTextColorClass = (color: keyof BasicColorType) => {
+    const iconColorMap: Record<keyof BasicColorType, string> = {
+        slate: "text-slate-600",
+        gray: "text-gray-600",
+        zinc: "text-zinc-600",
+        neutral: "text-neutral-600",
+        stone: "text-stone-600",
+        red: "text-red-600",
+        orange: "text-orange-600",
+        amber: "text-amber-600",
+        yellow: "text-yellow-600",
+        lime: "text-lime-600",
+        green: "text-green-600",
+        emerald: "text-emerald-600",
+        teal: "text-teal-600",
+        cyan: "text-cyan-600",
+        sky: "text-sky-600",
+        blue: "text-blue-600",
+        indigo: "text-indigo-600",
+        violet: "text-violet-600",
+        purple: "text-purple-600",
+        fuchsia: "text-fuchsia-600",
+        pink: "text-pink-600",
+        rose: "text-rose-600",
+        destructive: "",
+        okay: ""
+    };
+
+    return iconColorMap[color] || "text-gray-600";
+};
 
 export const getInitials = (name: string) => {
     return name
@@ -18,12 +52,11 @@ export const getInitials = (name: string) => {
         .slice(0, 2);
 };
 
-type ServerActionResult = { success: boolean; message: string };
 
 // Now the server action is just a function that returns a Promise<ServerActionResult>
-type ServerAction = () => Promise<ServerActionResult>;
+type ServerAction = () => Promise<myError>;
 
-interface ActionOptions {
+export interface ActionOptions {
     loadingMessage?: string;
     successMessage?: string;
     errorMessage?: string;
@@ -39,7 +72,7 @@ interface ActionOptions {
 export const handleServerAction = async (
     action: ServerAction,
     options: ActionOptions = {}
-): Promise<ServerActionResult> => {
+): Promise<myError> => {
     const {
         loadingMessage = "Processing...",
         position = "bottom-right",
@@ -55,7 +88,7 @@ export const handleServerAction = async (
                 render: result.message || "An error occurred!",
                 type: "error",
                 isLoading: false,
-                autoClose: 2000,
+                autoClose: 3000,
             });
             return {success: false, message: result.message};
         }
@@ -72,7 +105,7 @@ export const handleServerAction = async (
             render: error instanceof Error ? error.message : "An error occurred!",
             type: "error",
             isLoading: false,
-            autoClose: 2000,
+            autoClose: 3000,
         });
         return {success: false, message: "An error occurred"};
     }

@@ -300,7 +300,7 @@ async function createReportTypes() {
 
 
 async function main() {
-    console.log('Starting database seeding...')
+    console.log('\nStarting database seeding...')
 
     // Create all data in sequence
     await createUnitConcentrations()

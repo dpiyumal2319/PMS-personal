@@ -4,19 +4,19 @@ import React, {useState, useEffect} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {editReportType, getReportType} from "@/app/lib/actions";
+import {editReportType, getReportType} from "@/app/lib/actions/reports";
 import {handleServerAction} from "@/app/lib/utils";
 import {Edit} from "lucide-react";
 import {Textarea} from "@/components/ui/textarea";
 
-interface Parameter {
+export interface Parameter {
     name: string;
     units: string;
     id?: number;
     isNew?: boolean;
 }
 
-interface ReportForm {
+export interface ReportForm {
     name: string;
     description: string;
     parameters: Parameter[];

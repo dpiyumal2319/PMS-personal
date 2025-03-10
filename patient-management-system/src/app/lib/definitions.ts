@@ -7,6 +7,17 @@ export type SessionPayload = {
     role: Role;
 }
 
+export interface Parameter {
+    name: string;
+    units: string;
+}
+
+export interface ReportForm {
+    name: string;
+    description: string;
+    parameters: Parameter[];
+}
+
 export type SidebarLinkItem = {
     type: "link";
     icon?: LucideIcon;
@@ -30,21 +41,15 @@ export type myError = {
     message: string
 }
 
+export type myConfirmation = {
+    confirmationRequired: boolean,
+    message: string,
+}
+
 export type myBillError = {
     success: boolean,
     message: string,
     bill?: Bill | null
-}
-
-export interface Parameter {
-    name: string;
-    units: string;
-}
-
-export interface ReportForm {
-    name: string;
-    description: string;
-    parameters: Parameter[];
 }
 
 export type PatientFormData = {

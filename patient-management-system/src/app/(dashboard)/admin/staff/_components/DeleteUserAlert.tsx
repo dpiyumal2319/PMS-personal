@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import {Button} from "@/components/ui/button";
 import {handleServerAction} from "@/app/lib/utils";
-import {deleteUser} from "@/app/lib/actions";
+
+import {deleteUser} from "@/app/lib/actions/account";
 
 
 export default function DeleteUserDialog({id}: { id: number }) {

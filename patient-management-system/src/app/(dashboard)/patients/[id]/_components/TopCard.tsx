@@ -4,10 +4,9 @@ import PatientDetails from "@/app/(dashboard)/patients/[id]/_components/PatientD
 import PatientDetailsSkeleton from "@/app/(dashboard)/patients/[id]/reports/_components/PatientDetailsSkeleton";
 import TabsWrapper, {TabsSkeleton} from "@/app/(dashboard)/patients/[id]/_components/TabsWrapper";
 
-
 const TopCard = async ({id}: { id: number }) => {
     return (
-        <Card className={'hover:shadow-lg transition duration-300'}>
+        <Card className={'hover:shadow-md transition duration-300'}>
             <CardContent className={'p-4'}>
                 <Suspense fallback={<PatientDetailsSkeleton/>}>
                     <PatientDetails id={id}/>

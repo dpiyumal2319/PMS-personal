@@ -61,8 +61,8 @@ const LandingPage = () => {
                         <div className="rounded-md shadow">
                             <Link href={'/dashboard'}>
                                 <button
-                                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600/90 backdrop-blur-sm hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
-                                    Dashboard <ArrowRight className="ml-2 h-5 w-5"/>
+                                    className="group w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600/90 backdrop-blur-sm hover:bg-blue-700 transition-all duration-300 md:py-4 md:text-lg md:px-10">
+                                    Dashboard <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-2"/>
                                 </button>
                             </Link>
                         </div>

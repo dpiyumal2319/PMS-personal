@@ -68,33 +68,41 @@ const FeeForm = ({
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Doctor Charge Section */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Doctor Charge</label>
-                    <Input
-                        type="number"
-                        value={doctorCharge}
-                        onChange={(e) => setDoctorCharge(parseFloat(e.target.value) || 0)}
-                        className="mt-1"
-                    />
+                <div className="border rounded-lg p-4 bg-slate-50">
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Doctor Charge</label>
+                        <div className="flex space-x-2">
+                            <Input
+                                type="number"
+                                value={doctorCharge}
+                                onChange={(e) => setDoctorCharge(parseFloat(e.target.value) || 0)}
+                                className="flex-grow"
+                            />
+                            <Button onClick={handleDoctorUpdate} className="whitespace-nowrap">
+                                Update
+                            </Button>
+                        </div>
+                    </div>
                     <div className="text-sm text-gray-500">Last Updated: {formatDate(doctorUpdatedAt)}</div>
-                    <Button onClick={handleDoctorUpdate} className="w-full">
-                        Update Doctor Charge
-                    </Button>
                 </div>
 
                 {/* Dispensary Charge Section */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Dispensary Charge</label>
-                    <Input
-                        type="number"
-                        value={dispensaryCharge}
-                        onChange={(e) => setDispensaryCharge(parseFloat(e.target.value) || 0)}
-                        className="mt-1"
-                    />
+                <div className="border rounded-lg p-4 bg-slate-50">
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Dispensary Charge</label>
+                        <div className="flex space-x-2">
+                            <Input
+                                type="number"
+                                value={dispensaryCharge}
+                                onChange={(e) => setDispensaryCharge(parseFloat(e.target.value) || 0)}
+                                className="flex-grow"
+                            />
+                            <Button onClick={handleDispensaryUpdate} className="whitespace-nowrap">
+                                Update
+                            </Button>
+                        </div>
+                    </div>
                     <div className="text-sm text-gray-500">Last Updated: {formatDate(dispensaryUpdatedAt)}</div>
-                    <Button onClick={handleDispensaryUpdate} className="w-full">
-                        Update Dispensary Charge
-                    </Button>
                 </div>
             </CardContent>
         </Card>

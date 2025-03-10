@@ -2,8 +2,8 @@ import React from 'react';
 import UserAvatar from "@/app/(dashboard)/_components/UserAvatar";
 import {verifySession} from "@/app/lib/sessions";
 import {Skeleton} from "@/components/ui/skeleton";
-import {getUser} from "@/app/lib/actions";
 import Link from "next/link";
+import {getUser} from "@/app/lib/actions/account";
 
 const UserDetails = async () => {
     const session = await verifySession();

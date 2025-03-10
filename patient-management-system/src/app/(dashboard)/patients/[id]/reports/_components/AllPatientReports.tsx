@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {formatDistanceToNow} from 'date-fns';
-import {getPatientReports} from "@/app/lib/actions";
+import {getPatientReports} from "@/app/lib/actions/reports";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {DeleteReport} from "@/app/(dashboard)/patients/[id]/reports/_components/DeleteReporAlert";
 
@@ -24,7 +24,7 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
     return (
         <div className="flex flex-col gap-4">
             {reports.map((report) => (
-                <Card key={report.id} className="w-full">
+                <Card key={report.id} className="w-full overflow-hidden border-l-4 border-l-primary-500">
                     <CardHeader className={'pb-2'}>
                         <CardTitle className="flex justify-between items-center">
                             <CardTitle className="text-lg font-semibold text-gray-900">

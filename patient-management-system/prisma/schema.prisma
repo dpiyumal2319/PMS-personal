@@ -24,6 +24,16 @@ model Patient {
   queueEntry     QueueEntry[]
 }
 
+model PatientHistory {
+  id          Int                @id @default(autoincrement())
+  patientId   Int
+  description String
+  type        PatientHistoryType
+  time        DateTime           @default(now())
+  name        String
+  patient     Patient            @relation(fields: [patientId], references: [id])
+}
+
 model User {
   id       Int     @id @default(autoincrement())
   email    String  @unique
@@ -119,6 +129,26 @@ model Prescription {
   OffRecordMeds      OffRecordMeds[]
   patient            Patient              @relation(fields: [patientId], references: [id])
   PrescriptionVitals PrescriptionVitals[]
+}
+
+model Vitals {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  icon               String
+  color              String
+  placeholder        String
+  forGender          Gender?
+  type               VitalType
+  PrescriptionVitals PrescriptionVitals[]
+}
+
+model PrescriptionVitals {
+  id             Int          @id @default(autoincrement())
+  prescriptionId Int
+  vitalId        Int
+  value          String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  vital          Vitals       @relation(fields: [vitalId], references: [id], onDelete: Cascade)
 }
 
 model MedicalCertificate {
@@ -240,41 +270,11 @@ model Charge {
   updatedAt DateTime   @updatedAt
 }
 
-model PatientHistory {
-  id          Int                @id @default(autoincrement())
-  patientId   Int
-  description String
-  type        PatientHistoryType
-  time        DateTime           @default(now())
-  name        String
-  Patient     Patient            @relation(fields: [patientId], references: [id])
-}
-
-model PrescriptionVitals {
-  id             Int          @id @default(autoincrement())
-  prescriptionId Int
-  vitalId        Int
-  value          String
-  Prescription   Prescription @relation(fields: [prescriptionId], references: [id])
-  Vitals         Vitals       @relation(fields: [vitalId], references: [id], onDelete: Cascade)
-}
-
 model Supplier {
   id      Int     @id @default(autoincrement())
   name    String  @unique
   contact String
   Batch   Batch[]
-}
-
-model Vitals {
-  id                 Int                  @id @default(autoincrement())
-  name               String
-  icon               String
-  color              String
-  placeholder        String
-  forGender          Gender?
-  type               VitalType
-  PrescriptionVitals PrescriptionVitals[]
 }
 
 enum Gender {
@@ -340,11 +340,6 @@ enum MedicalCertificateStatus {
   UNFIT
 }
 
-enum ChargeType {
-  DOCTOR
-  DISPENSARY
-}
-
 enum PatientHistoryType {
   MEDICAL
   SURGICAL
@@ -357,4 +352,9 @@ enum VitalType {
   NUMBER
   TEXT
   DATE
+}
+
+enum ChargeType {
+  DOCTOR
+  DISPENSARY
 }
