@@ -1091,7 +1091,7 @@ export async function getStockByModel({
 }: StockQueryParams): Promise<StockData[]> {
   const drugs = await prisma.drug.findMany({
     where: {
-      name: { contains: query },
+      name: { contains: query, mode: "insensitive" },
       batch: {
         some: {
           // status: "AVAILABLE",
@@ -1155,8 +1155,10 @@ export async function getStockByBatch({
   const batches = await prisma.batch.findMany({
     where: {
       OR: [
-        { drug: { name: { contains: query } } },
-        { drugBrand: { name: { contains: query } } },
+        { drug: { name: { contains: query, mode: "insensitive" } } },
+        { drugBrand: { name: { contains: query, mode: "insensitive" } } },
+        { number: { contains: query, mode: "insensitive" } },
+        { Supplier: { name: { contains: query, mode: "insensitive" } } },
       ],
       // status: "AVAILABLE",
       ...(startDate && endDate
