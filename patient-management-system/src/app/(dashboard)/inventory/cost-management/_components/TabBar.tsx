@@ -8,18 +8,28 @@ import Link from "next/link";
 
 export default function TabsBar() {
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState("analysis");
-
-  useEffect(() => {
-    if (pathname.includes("analysis")) {
-      setActiveTab("analysis");
-    } else {
-      setActiveTab("stock");
+  // Determine the active tab based on the current pathname
+  const getActiveTab = (path: string) => {
+    if (path.includes("analysis")) {
+      return "analysis";
+    } else if (path.includes("stocks")) {
+      return "stock";
     }
+    // Default to analysis if path doesn't match either
+    return "analysis";
+  };
+
+  // Set the initial state based on the current pathname
+  const [activeTab, setActiveTab] = useState(() => getActiveTab(pathname));
+
+  // Keep activeTab in sync with pathname changes
+  useEffect(() => {
+    const currentTab = getActiveTab(pathname);
+    setActiveTab(currentTab);
   }, [pathname]);
 
   return (
-    <Tabs defaultValue={activeTab} className="w-full h-10">
+    <Tabs value={activeTab} className="w-full h-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="stock" asChild>
           <Link href="/inventory/cost-management/stocks">

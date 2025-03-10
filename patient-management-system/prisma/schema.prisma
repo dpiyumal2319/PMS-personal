@@ -82,7 +82,15 @@ model Drug {
   batch            Batch[]
   BatchHistory     BatchHistory[]
   Issue            Issue[]
+  Buffer           Int
   stratergyHistory StratergyHistory?
+}
+
+model Supplier {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  contact String?
+  batches Batch[]
 }
 
 model Batch {
@@ -106,6 +114,8 @@ model Batch {
   unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
   BatchHistory        BatchHistory[]
   Issue               Issue[]
+  Supplier            Supplier          @relation(fields: [supplierId], references: [id])
+  supplierId          Int
 }
 
 model UnitConcentration {

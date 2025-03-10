@@ -5,6 +5,7 @@ import {
 } from "@/app/lib/actions/dailyIncomes";
 import IncomeCard from "@/app/(dashboard)/income-by-patients/_components/IncomeCard";
 import IncomeHeader from "@/app/(dashboard)/income-by-patients/_components/IncomeHeader";
+import DailyIncomeChart from "@/app/(dashboard)/income-by-patients/_components/IncomeChart";
 import { Suspense } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { IoIosPeople } from "react-icons/io";
@@ -69,6 +70,9 @@ async function IncomeContent({ start, end }: { start: Date; end: Date }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Add the DailyIncomeChart component here */}
+      <DailyIncomeChart incomeData={incomes} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {incomes.map((income) => (

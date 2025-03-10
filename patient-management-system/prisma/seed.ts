@@ -33,6 +33,24 @@ async function createUnitConcentrations() {
     }
 }
 
+async function createSuppliers() {
+    console.log('\n--- Creating Suppliers ---');
+    const suppliers = [];
+
+    for (let i = 0; i < 10; i++) {
+        const supplier = await prisma.supplier.create({
+            data: {
+                name: faker.company.name(),
+                contact: faker.phone.number(),
+          
+            }
+        });
+        console.log(`Created supplier: ${supplier.name}`);
+        suppliers.push(supplier);
+    }
+    return suppliers;
+}
+
 async function createUsersAndPatients() {
     console.log('\n--- Creating Users and Patients ---')
 
@@ -86,7 +104,7 @@ async function createUsersAndPatients() {
     }
 }
 
-async function generateBatchData(drugType: DrugType, createdAt: Date) {
+async function generateBatchData(drugType: DrugType, createdAt: Date, supplierId: number) {
     const expiryDate = new Date(createdAt)
     expiryDate.setDate(expiryDate.getDate() + faker.number.int({min: 1, max: 730})) // 1 day to 2 years
 
@@ -114,7 +132,8 @@ async function generateBatchData(drugType: DrugType, createdAt: Date) {
         wholesalePrice,
         retailPrice: wholesalePrice * 1.3, // 30% markup
         status: BatchStatus.AVAILABLE,
-        unitConcentrationId: unitConcentration.id // Pass the ID instead of concentration value
+        unitConcentrationId: unitConcentration.id ,// Pass the ID instead of concentration value
+        supplierId
     }
 }
 
@@ -141,6 +160,7 @@ async function createDrugsAndBatches() {
     console.log('\n--- Creating Drugs and Batches ---')
 
     // Create a pool of brands first (20 pharmaceutical companies)
+    const allSuppliers = await createSuppliers(); // Get suppliers
     const allBrands = await createDrugBrands(20)
 
     // Create drugs and their batches
@@ -149,9 +169,11 @@ async function createDrugsAndBatches() {
 
         // Create drug
         const drug = await prisma.drug.create({
-            data: {name: drugName}
+            data: {name: drugName,
+                Buffer: faker.number.int({ min: 10, max: 100 }) // Random buffer value
+            }
         })
-        console.log(`Created drug: ${drug.name} (ID: ${drug.id})`)
+         console.log(`Created drug: ${drug.name} (ID: ${drug.id}, Buffer: ${drug.Buffer})`)
 
         // Randomly select 2-4 brands that will manufacture this drug
         const brandCount = faker.number.int({min: 2, max: 4})
@@ -166,7 +188,8 @@ async function createDrugsAndBatches() {
 
             for (let i = 0; i < batchCount; i++) {
                 const drugType = i < syrupCount ? DrugType.Syrup : DrugType.Tablet
-                const batchData = await generateBatchData(drugType, new Date())
+                const supplier = faker.helpers.arrayElement(allSuppliers); // Random supplier
+                const batchData = await generateBatchData(drugType, new Date(),supplier.id)
 
                 const batch = await prisma.batch.create({
                     data: {

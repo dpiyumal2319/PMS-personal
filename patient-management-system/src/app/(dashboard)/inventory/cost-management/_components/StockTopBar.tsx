@@ -43,7 +43,7 @@ export default function StockTopbar({
   };
 
   return (
-    <div className="sticky top-0 p-4 bg-white z-5 border-b shadow-md flex gap-4 overflow-x-auto">
+    <div className="px-4 py-2 bg-white border-b shadow-md flex gap-4 overflow-x-auto h-14">
       <SearchPanel
         placeholder="Search by Name"
         //   defaultValue={query}
