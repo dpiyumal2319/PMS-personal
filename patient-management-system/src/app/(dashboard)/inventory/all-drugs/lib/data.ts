@@ -12,31 +12,29 @@ export async function fetchDrugs({
   filters = {}
 }: FetchDrugsParams): Promise<FetchDrugsResult> {
   try {
+    console.log(sort)
 
     // Create a type-safe where condition
     const whereConditions: Prisma.BatchWhereInput = {
       ...(filters.drug_model && {
         drug: { 
-          name: { 
-            in: filters.drug_model.split(',').map(name => name.trim()), 
-            mode: 'insensitive' 
-          } 
+          id: { 
+            in: filters.drug_model.split(',').map(id => parseInt(id.trim())), 
+          }
         }
       }),
       ...(filters.drug_brand && {
         drugBrand: { 
-          name: { 
-            in: filters.drug_brand.split(',').map(name => name.trim()), 
-            mode: 'insensitive' 
-          } 
+          id: { 
+            in: filters.drug_brand.split(',').map(id => parseInt(id.trim())), 
+          }
         }
       }),
       ...(filters.supplier && {
         Supplier: { 
-          name: { 
-            in: filters.supplier.split(',').map(name => name.trim()), 
-            mode: 'insensitive' 
-          } 
+          id: { 
+            in: filters.supplier.split(',').map(id => parseInt(id.trim())), 
+          }
         }
       }),
       ...(filters.drug_type && { type: { in: filters.drug_type.split(',').map(name => name.trim()) } }),
@@ -51,12 +49,17 @@ export async function fetchDrugs({
     };
     
 
-    // Prepare sorting
-    const [sortField, sortDirection] = sort.split(':')
-    const orderBy: Prisma.BatchOrderByWithRelationInput =
-      sortField === 'expiry' ? { expiry: sortDirection as Prisma.SortOrder } :
-        sortField === 'stock_date' ? { stockDate: sortDirection as Prisma.SortOrder } :
-          { id: 'desc' }
+// Prepare sorting
+const [sortField, sortDirection] = sort ? sort.split(':') : ['id', 'desc'];
+const orderBy: Prisma.BatchOrderByWithRelationInput =
+  sortField === 'name' ? 
+    { drug: { name: sortDirection as Prisma.SortOrder } } :
+  sortField === 'expiry' ? 
+    { expiry: sortDirection as Prisma.SortOrder } :
+  sortField === 'remaining_amount' ? 
+    { remainingQuantity: sortDirection as Prisma.SortOrder } :
+  { id: 'desc' };
+
 
     // Fetch total count for pagination
     const totalItems = await prisma.batch.count({ where: whereConditions })

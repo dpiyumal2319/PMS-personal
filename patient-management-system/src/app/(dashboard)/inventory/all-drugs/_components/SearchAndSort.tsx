@@ -40,8 +40,8 @@ export function SearchAndSort() {
   const sortOptions = [
     { value: "name:asc", label: "Name (A-Z)" },
     { value: "name:desc", label: "Name (Z-A)" },
-    { value: "expiry_date:asc", label: "Expiry Date (Earliest)" },
-    { value: "expiry_date:desc", label: "Expiry Date (Latest)" },
+    { value: "expiry:asc", label: "Expiry Date (Earliest)" },
+    { value: "expiry:desc", label: "Expiry Date (Latest)" },
     { value: "remaining_amount:asc", label: "Stock (Lowest)" },
     { value: "remaining_amount:desc", label: "Stock (Highest)" },
   ];
