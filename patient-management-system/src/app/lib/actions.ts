@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import {revalidatePath} from "next/cache";
 import {
   DateRange,
   DrugConcentrationDataSuggestion,
@@ -12,10 +12,10 @@ import {
   StockData,
   StockQueryParams,
 } from "@/app/lib/definitions";
-import { prisma } from "./prisma";
-import { verifySession } from "./sessions";
-import { $Enums, BatchStatus, DrugType } from "@prisma/client";
-import { SearchType } from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
+import {prisma} from "./prisma";
+import {verifySession} from "./sessions";
+import {$Enums, BatchStatus, DrugType} from "@prisma/client";
+import {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 import MedicalCertificateStatus = $Enums.MedicalCertificateStatus;
 
 export async function addQueue(): Promise<myError> {
@@ -782,7 +782,7 @@ export async function searchSuppliers(query: string) {
   "use server";
 
   try {
-    const suppliers = await prisma.supplier.findMany({
+    return await prisma.supplier.findMany({
       where: {
         name: {
           contains: query,
@@ -796,8 +796,6 @@ export async function searchSuppliers(query: string) {
       },
       take: 5, // Limit results
     });
-
-    return suppliers;
   } catch (error) {
     console.error("Error searching suppliers:", error);
     return [];
