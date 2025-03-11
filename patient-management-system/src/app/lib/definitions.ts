@@ -217,11 +217,13 @@ export interface PieChartData {
 export interface DrugBrandSuggestion {
   id: number;
   name: string;
+  Buffer?: number;
 }
 
 export interface DrugModelSuggestion {
   id: number;
   name: string;
+  Buffer?: number;
 }
 
 export interface DrugConcentrationDataSuggestion {
