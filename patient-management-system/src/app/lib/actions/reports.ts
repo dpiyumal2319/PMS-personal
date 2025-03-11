@@ -284,6 +284,7 @@ export async function getPatientReports(
                             select: {
                                 name: true,
                                 units: true,
+                                id: true,
                             },
                         },
                     },
@@ -390,5 +391,68 @@ export async function deletePatientReport(
     } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while deleting report'};
+    }
+}
+
+
+export async function getPatientParameterData(patientId: number, parameterId: number) {
+    try {
+        // First, get the parameter details to check if it exists
+        const parameter = await prisma.reportParameter.findUnique({
+            where: {
+                id: parameterId
+            },
+            select: {
+                name: true,
+                units: true
+            }
+        })
+
+        if (!parameter) {
+            throw new Error("Parameter not found")
+        }
+
+        // Then find all reports for this patient
+        const patientReports = await prisma.patientReport.findMany({
+            where: {
+                patientId,
+            },
+            include: {
+                parameters: {
+                    where: {
+                        reportParameterId: parameterId
+                    },
+                },
+                patient: {
+                    select: {
+                        name: true,
+                    },
+                }
+            },
+            orderBy: {
+                time: "asc",
+            },
+        })
+
+        // Extract parameter values with timestamps
+        const parameterData = patientReports.flatMap(report =>
+            report.parameters.map(param => ({
+                time: report.time,
+                value: param.value,
+                attention: param.attention
+            }))
+        )
+
+        const patientName = patientReports[0]?.patient.name || "Unknown Patient"
+
+        return {
+            data: parameterData,
+            parameterName: parameter.name,
+            patientName,
+            units: parameter.units || undefined
+        }
+    } catch (error) {
+        console.error("Error fetching patient parameter data:", error)
+        throw new Error("Failed to fetch patient parameter data")
     }
 }
