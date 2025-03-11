@@ -82,7 +82,6 @@ model Drug {
   batch        Batch[]
   BatchHistory BatchHistory[]
   Issue        Issue[]
-
   stratergyHistory StratergyHistory?
 }
 

@@ -14,17 +14,32 @@ export async function calculateBill({prescriptionData}: {
     const batchAssignments = prescriptionData.batchAssigns;
 
     try {
+        // Increase the transaction timeout to 10000ms
         return await prisma.$transaction(async (prisma): Promise<myBillError> => {
-            const prescription = await prisma.prescription.findUnique({
-                where: {id: prescriptionID},
-                include: {
-                    patient: {
-                        select: {
-                            name: true
+            // 1. Fetch prescription and fees in parallel to save time
+            const [prescription, dispensaryFee, doctorFee, issues] = await Promise.all([
+                prisma.prescription.findUnique({
+                    where: {id: prescriptionID},
+                    include: {
+                        patient: {
+                            select: {
+                                name: true
+                            }
                         }
                     }
-                }
-            });
+                }),
+                prisma.charge.findUnique({
+                    where: {name: ChargeType.DISPENSARY}
+                }),
+                prisma.charge.findUnique({
+                    where: {name: ChargeType.DOCTOR}
+                }),
+                prisma.issue.findMany({
+                    where: {
+                        id: {in: batchAssignments.map(assign => assign.issueID)}
+                    }
+                })
+            ]);
 
             if (!prescription) {
                 return {success: false, message: 'Prescription not found'};
@@ -34,108 +49,128 @@ export async function calculateBill({prescriptionData}: {
                 return {success: false, message: 'Prescription already completed'};
             }
 
-            let dspFees: number = 0;
-            const dispensaryFee = await prisma.charge.findUnique({
-                where: {
-                    name: ChargeType.DISPENSARY
-                }
-            });
+            // 2. Calculate fees
+            const dspFees = dispensaryFee?.value || 0;
+            const dctFee = doctorFee?.value || 0;
+            const totalDoctorFee = dctFee + (prescription.extraDoctorCharge ?? 0);
 
-            if (dispensaryFee) {
-                dspFees = dispensaryFee.value;
-            }
-
-            let dctFee: number = 0;
-            const doctorFee = await prisma.charge.findUnique({
-                where: {
-                    name: ChargeType.DOCTOR
-                }
-            });
-
-            if (doctorFee) {
-                dctFee = doctorFee.value;
-            }
-
-            // Create or update the bill in the database first to get the billID
+            // 3. Create bill first (with zero medicine charge initially)
             const createdBill = await prisma.bill.upsert({
-                where: {
-                    prescriptionId: prescriptionID
-                },
+                where: {prescriptionId: prescriptionID},
                 create: {
                     prescriptionId: prescriptionID,
-                    doctorCharge: dctFee + (prescription.extraDoctorCharge ?? 0),
+                    doctorCharge: totalDoctorFee,
                     dispensaryCharge: dspFees,
-                    medicinesCharge: 0 // Will update this later
+                    medicinesCharge: 0
                 },
                 update: {
-                    doctorCharge: dctFee + (prescription.extraDoctorCharge ?? 0),
+                    doctorCharge: totalDoctorFee,
                     dispensaryCharge: dspFees,
-                    medicinesCharge: 0 // Will update this later
+                    medicinesCharge: 0
                 }
             });
 
-            // Initialize the bill object with the new structure
+            // 4. Initialize bill object
             const bill: Bill = {
                 billID: createdBill.id,
                 prescriptionID,
                 patientName: prescription.patient.name,
                 patientID: prescriptionData.patientID,
                 dispensary_charge: dspFees,
-                doctor_charge: dctFee + (prescription.extraDoctorCharge ?? 0),
+                doctor_charge: totalDoctorFee,
                 cost: 0,
                 entries: [],
             };
 
-            for (let i = 0; i < batchAssignments.length; i++) {
-                const assign = batchAssignments[i];
-                if (!assign.batchID) {
-                    return {success: false, message: `Batch not found for a drug`};
+            // 5. Fetch all batches at once instead of in loop
+            // Filter out any null or undefined batch IDs and ensure we have the right number
+            const validBatchAssignments = batchAssignments.filter(assign => assign.batchID !== null && assign.batchID !== undefined);
+
+            if (validBatchAssignments.length !== batchAssignments.length) {
+                return {success: false, message: `Batch not found for a drug`};
+            }
+
+            // Extract the batch IDs as a non-null array
+            const batchIds: number[] = validBatchAssignments.map(assign => assign.batchID!);
+
+            const batches = await prisma.batch.findMany({
+                where: {id: {in: batchIds}},
+                include: {drug: true, drugBrand: true}
+            });
+
+            // Verify all batches were found
+            if (batches.length !== batchIds.length) {
+                return {success: false, message: `Some batches were not found`};
+            }
+
+            // Create a map for easier access
+            const batchMap = new Map(batches.map(batch => [batch.id, batch]));
+            const issueMap = new Map(issues.map(issue => [issue.id, issue]));
+
+            // 6. Prepare batch history updates and issue updates for bulk operations
+            const batchHistories = [];
+            const issueUpdates = [];
+            const batchHistoryKeys = new Set();
+
+            for (const assign of batchAssignments) {
+                // Safely check and get the batch ID and issue ID
+                const batchID = assign.batchID;
+                const issueID = assign.issueID;
+
+                if (batchID === null || batchID === undefined) {
+                    return {success: false, message: `Batch ID is missing`};
                 }
 
-                const batch = await prisma.batch.findUnique({
-                    where: {id: assign.batchID},
-                    include: {drug: true, drugBrand: true},
-                });
+                if (issueID === null || issueID === undefined) {
+                    return {success: false, message: `Issue ID is missing`};
+                }
+
+                const batch = batchMap.get(batchID);
+                const issue = issueMap.get(issueID);
 
                 if (!batch) {
-                    return {success: false, message: `Batch not found for drug ${assign.batchID}`};
+                    return {success: false, message: `Batch not found for drug ${batchID}`};
                 }
-
-                const issue = await prisma.issue.findUnique({
-                    where: {id: assign.issueID},
-                });
 
                 if (!issue) {
-                    return {success: false, message: `Issue not found for drug ${assign.issueID}`};
+                    return {success: false, message: `Issue not found for drug ${issueID}`};
                 }
 
-                // Updating or creating the cache
-                await prisma.batchHistory.upsert({
-                    where: {
-                        drugId_drugBrandId_type_unitConcentrationId: {
-                            drugId: batch.drugId,
-                            drugBrandId: batch.drugBrandId,
-                            type: batch.type,
-                            unitConcentrationId: batch.unitConcentrationId
-                        }
-                    },
-                    update: {
-                        batchId: assign.batchID
-                    },
-                    create: {
-                        drugId: batch.drugId,
-                        drugBrandId: batch.drugBrandId,
-                        type: batch.type,
-                        unitConcentrationId: batch.unitConcentrationId,
-                        batchId: assign.batchID,
-                    }
-                });
+                // Prepare issue update - ensure batchId is not null
+                issueUpdates.push(
+                    prisma.issue.update({
+                        where: {id: issueID},
+                        data: {batchId: batchID}
+                    })
+                );
 
-                await prisma.issue.update({
-                    where: {id: assign.issueID},
-                    data: {batchId: assign.batchID},
-                });
+                // Prepare batch history upsert (avoiding duplicates)
+                const historyKey = `${batch.drugId}-${batch.drugBrandId}-${batch.type}-${batch.unitConcentrationId}`;
+                if (!batchHistoryKeys.has(historyKey)) {
+                    batchHistoryKeys.add(historyKey);
+                    batchHistories.push(
+                        prisma.batchHistory.upsert({
+                            where: {
+                                drugId_drugBrandId_type_unitConcentrationId: {
+                                    drugId: batch.drugId,
+                                    drugBrandId: batch.drugBrandId,
+                                    type: batch.type,
+                                    unitConcentrationId: batch.unitConcentrationId
+                                }
+                            },
+                            update: {batchId: batchID},
+                            create: {
+                                drugId: batch.drugId,
+                                drugBrandId: batch.drugBrandId,
+                                type: batch.type,
+                                unitConcentrationId: batch.unitConcentrationId,
+                                batchId: batchID,
+                            }
+                        })
+                    );
+                }
 
+                // Calculate cost and add entry to bill
                 const batchCost = issue.quantity * batch.retailPrice;
                 bill.cost += batchCost;
 
@@ -147,18 +182,23 @@ export async function calculateBill({prescriptionData}: {
                 });
             }
 
-            // Update the final medicine charges
+            // 7. Execute batch operations in parallel
+            await Promise.all([
+                ...batchHistories,
+                ...issueUpdates
+            ]);
+
+            // 8. Update final medicine charges
             await prisma.bill.update({
-                where: {
-                    id: createdBill.id
-                },
-                data: {
-                    medicinesCharge: bill.cost
-                }
+                where: {id: createdBill.id},
+                data: {medicinesCharge: bill.cost}
             });
 
             bill.cost += bill.doctor_charge + bill.dispensary_charge;
+
             return {success: true, message: 'Bill calculated successfully', bill};
+        }, {
+            timeout: 10000 // Increase timeout to 10 seconds
         });
     } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
