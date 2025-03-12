@@ -16,6 +16,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { columns } from "@/app/(dashboard)/inventory/all-drugs/_components/Columns";
+import { useRouter } from "next/navigation";
 
 
 interface DataTableProps<TData> {
@@ -30,6 +31,13 @@ export function DataTable<TData>({
         columns: columns as ColumnDef<TData>[],
         getCoreRowModel: getCoreRowModel(),
     });
+
+    const router = useRouter();
+
+    const handleRowClick = (id: string) => {
+        router.push(`/inventory/all-drugs/batch/${id}`);
+    };
+
 
     return (
         <div className="rounded-md border">
@@ -56,7 +64,8 @@ export function DataTable<TData>({
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
-                            >
+                                onClick={() => handleRowClick((row.original as { id: string }).id)}
+                                  >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
