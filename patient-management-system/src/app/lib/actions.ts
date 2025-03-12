@@ -973,12 +973,11 @@ export async function getBatchData(batchId: number) {
 
 export async function handleConfirmationOfBatchStatusChange(
   batchId: number,
-  action: "completed" | "trashed"
+  action: "completed" | "disposed" | "quality_failed" | "available"
 ): Promise<myError> {
   if (!batchId) return { success: false, message: "Batch ID not provided" };
 
-  const newStatus = action === "completed" ? "COMPLETED" : "TRASHED";
-
+  const newStatus = action === "completed" ? "COMPLETED" : action === "disposed" ? "DISPOSED" : action === "quality_failed" ? "QUALITY_FAILED" : "AVAILABLE";
   try {
     await prisma.batch.update({
       where: { id: batchId },

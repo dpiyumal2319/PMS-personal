@@ -58,14 +58,8 @@ export const DoctorLinks: SidebarItem[] = [
         items: [
             {
                 type: "link",
-                title: "Available Stocks",
-                url: "/inventory/available-stocks",
-                isActive: false,
-            },
-            {
-                type: "link",
-                title: "Completed Stocks",
-                url: "/inventory/completed-stocks",
+                title: "Drug Stock",
+                url: "/inventory/all-drugs",
                 isActive: false,
             },
             {

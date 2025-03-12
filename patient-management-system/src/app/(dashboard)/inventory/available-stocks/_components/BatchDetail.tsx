@@ -33,13 +33,15 @@ export default async function BatchDetail({ batchId }: { batchId: string }) {
                         color={
                             batchData.status === "AVAILABLE"
                                 ? "green"
-                                : batchData.status === "TRASHED"
+                                : batchData.status === "DISPOSED"
                                     ? "red"
                                     : batchData.status === "EXPIRED"
                                         ? "yellow"
-                                        : batchData.status === "COMPLETED"
-                                            ? "blue"
-                                            : "gray"
+                                        : batchData.status === "QUALITY_FAILED"
+                                            ? "violet"
+                                            : batchData.status === "COMPLETED"
+                                                ? "blue"
+                                                : "gray"
                         }
                         className="text-sm px-4 py-1"
                     />
