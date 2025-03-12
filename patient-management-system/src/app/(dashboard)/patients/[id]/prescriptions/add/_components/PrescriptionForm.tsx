@@ -197,7 +197,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
 
                         {/* Grid for Vitals */}
                         {(vitals.length === 0) && (
-                            <div>No vitals found. Please click {' '}
+                            <div className={'text-sm'}>No vitals found. Please click {' '}
                                 <span onClick={formReset} className="text-blue-500 hover:underline cursor-pointer">
                                     here
                                 </span>
