@@ -50,7 +50,7 @@ export default async function DrugsPage({
                 {/*<FilterSidebar className="w-full md:w-64 flex-shrink-0"/>*/}
                 <div className="flex flex-col space-y-4">
                     <SearchAndSort/>
-                    <div className={'container w-[calc(100%-160px)]'}>
+                    <div className={'container w-full'}>
                         <Suspense fallback={<DrugsTableSkeleton/>}>
                             <Drugs
                                 page={page}

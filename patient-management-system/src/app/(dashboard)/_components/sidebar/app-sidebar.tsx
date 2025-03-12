@@ -12,7 +12,7 @@ import Link from "next/link";
 
 export async function AppSidebar() {
     return (
-        <Sidebar className="h-screen">
+        <Sidebar className="h-full">
             <SidebarHeader className="p-4">
                 <Link className="flex items-center space-x-3" href={"/"}>
                     <div className="bg-primary p-2 rounded-md">

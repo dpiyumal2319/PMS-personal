@@ -17,27 +17,12 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        // <div className="flex h-screen">
-        //     <aside className={"fixed top-0 left-0 h-full w-[250px] z-50"}>
-        //         <Sidebar/>
-        //     </aside>
-        //     <div className="flex flex-col w-full h-full ml-[250px]">
-        //         <div className={'sticky top-0 z-10 w-full'}>
-        //             <TopBar/>
-        //         </div>
-        //         <main className={'flex-grow overflow-y-auto'}>
-        //             <Suspense fallback={<Loading />}>
-        //                 {children}
-        //             </Suspense>
-        //         </main>
-        //     </div>
-        // </div>
-        <SidebarProvider>
+        <SidebarProvider className="h-screen w-screen flex overflow-hidden">
             <AppSidebar/>
-            <main className="flex flex-col w-full h-full">
+            <main className="flex flex-col flex-1 overflow-hidden">
                 <TopBar/>
                 <Suspense fallback={<Loading/>}>
-                    <div className="flex flex-col min-h-0 h-full">{children}</div>
+                    <div className="flex-1 overflow-auto">{children}</div>
                 </Suspense>
             </main>
         </SidebarProvider>
