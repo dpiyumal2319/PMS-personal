@@ -282,3 +282,11 @@ export interface SupplierSuggestion {
   name: string;
   contact: string | null;
 }
+
+export interface DrugModelsWithBufferLevel {
+  id: number;
+  name: string;
+  bufferLevel: number;
+  availableAmount: number;
+  fullAmount?: number;
+}

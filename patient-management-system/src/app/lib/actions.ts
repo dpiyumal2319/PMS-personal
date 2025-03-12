@@ -2030,3 +2030,34 @@ export async function deleteMedicalCertificate(id: number) {
     throw new Error("Failed to delete certificate");
   }
 }
+
+export async function getDrugModelsWithBufferLevel() {
+  try {
+    const drugs = await prisma.drug.findMany({
+      include: {
+        batch: {
+          where: {
+            status: "AVAILABLE",
+          },
+          select: {
+            remainingQuantity: true,
+            fullAmount: true,
+          },
+        },
+      },
+    });
+    return drugs.map((drug) => ({
+      id: drug.id,
+      name: drug.name,
+      bufferLevel: drug.Buffer,
+      availableAmount: drug.batch.reduce(
+        (sum, batch) => sum + batch.remainingQuantity,
+        0
+      ),
+      fullAmount: drug.batch.reduce((sum, batch) => sum + batch.fullAmount, 0),
+    }));
+  } catch (error) {
+    console.error("Failed to fetch drug models with buffer level:", error);
+    throw new Error("Failed to fetch drug models with buffer level");
+  }
+}
