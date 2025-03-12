@@ -307,7 +307,8 @@ enum BatchStatus {
   AVAILABLE
   EXPIRED
   COMPLETED
-  TRASHED
+  QUALITY_FAILED
+  DISPOSED
 }
 
 enum IssuingStrategy {

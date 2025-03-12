@@ -31,7 +31,7 @@ export default async function DrugsPage({
 
     const page = params.page ? parseInt(params.page) : 1;
     const per_page = params.per_page ? parseInt(params.per_page) : 10;
-    const sort = params.sort || 'expiry:asc';
+    const sort = params.sort || 'stockDate:desc';
 
     // Extract and convert filter parameters
     const filters = {

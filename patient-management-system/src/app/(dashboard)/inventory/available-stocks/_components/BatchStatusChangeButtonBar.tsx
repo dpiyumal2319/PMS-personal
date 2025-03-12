@@ -12,7 +12,7 @@ import { handleConfirmationOfBatchStatusChange } from '@/app/lib/actions';
 import { useRouter } from 'next/navigation'; // Import useRouter
 
 const BatchStatusChangeButtonBar = ({ batchId }: { batchId: string }) => {
-    const [action, setAction] = useState<"completed" | "trashed" | null>(null);
+    const [action, setAction] = useState<"completed" | "disposed" | "quality_failed"| "available"| null>(null);
     const [completedOpen, setCompletedOpen] = useState(false);
     const [trashedOpen, setTrashedOpen] = useState(false);
     const router = useRouter(); // Initialize useRouter
@@ -53,9 +53,9 @@ const BatchStatusChangeButtonBar = ({ batchId }: { batchId: string }) => {
 
             <AlertDialog open={trashedOpen} onOpenChange={setTrashedOpen}>
                 <AlertDialogTrigger asChild>
-                    <Button variant="destructive" onClick={() => { setTrashedOpen(true); setAction("trashed"); }}>
+                    <Button variant="destructive" onClick={() => { setTrashedOpen(true); setAction("disposed"); }}>
                         <FaTrashAlt className="mr-2" />
-                        Trash
+                        Dispose
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
