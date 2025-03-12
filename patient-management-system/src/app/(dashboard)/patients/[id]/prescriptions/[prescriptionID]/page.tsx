@@ -32,7 +32,6 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
     const prescriptionID = Number(resolvedParams.prescriptionID);
     const prescription = await getPrescription(prescriptionID, id);
     const session = await verifySession();
-    console.log(prescription)
 
     if (!prescription) {
         return <div className="text-center text-red-500 font-semibold">Prescription not found</div>;
