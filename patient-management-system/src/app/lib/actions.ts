@@ -1382,6 +1382,7 @@ export async function getStockAnalysis(
       sold: 0, // Will store sold quantity value
       expired: 0, // Will store expired quantity value
       disposed: 0, // Will store disposed quantity value
+      quality_failed: 0, // Will store quality failed quantity value
       errors: 0, // Will store error quantity value
     };
 
@@ -1427,6 +1428,16 @@ export async function getStockAnalysis(
           // - disposed = remainingQuantity * price
           // - sold = (fullAmount - remainingQuantity) * price
           analysis.disposed += batch.remainingQuantity * pricePerUnit;
+          if (batch.fullAmount > batch.remainingQuantity) {
+            analysis.sold +=
+              (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+          }
+          break;
+        case "QUALITY_FAILED":
+          // For quality failed status:
+          // - quality_failed = remainingQuantity * price
+          // - sold = (fullAmount - remainingQuantity) * price
+          analysis.quality_failed += batch.remainingQuantity * pricePerUnit;
           if (batch.fullAmount > batch.remainingQuantity) {
             analysis.sold +=
               (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
@@ -1867,6 +1878,7 @@ export async function getDrugModelStats(drugId: number) {
       sold: { quantity: 0, value: 0 },
       expired: { quantity: 0, value: 0 },
       disposed: { quantity: 0, value: 0 },
+      quality_failed: { quantity: 0, value: 0 },
       errors: { quantity: 0, value: 0 },
     };
 
@@ -1910,6 +1922,17 @@ export async function getDrugModelStats(drugId: number) {
             stats.sold.quantity += batch.fullAmount - batch.remainingQuantity;
           }
           break;
+        case "QUALITY_FAILED":
+          stats.quality_failed.quantity += batch.remainingQuantity;
+          stats.quality_failed.value +=
+            batch.remainingQuantity * batch.retailPrice;
+          if (batch.fullAmount > batch.remainingQuantity) {
+            stats.sold.value +=
+              (batch.fullAmount - batch.remainingQuantity) * batch.retailPrice;
+            stats.sold.quantity += batch.fullAmount - batch.remainingQuantity;
+          }
+          break;
+
         default:
           // Any unknown status, count as error
           stats.errors.value += batch.fullAmount * batch.retailPrice;

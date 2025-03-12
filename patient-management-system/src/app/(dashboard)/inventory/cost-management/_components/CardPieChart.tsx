@@ -65,6 +65,11 @@ export default function CardOfPieChart() {
       { name: "Sold Value", value: data.sold, color: "#2196F3" },
       { name: "Expired Stock Value", value: data.expired, color: "#FF9800" },
       { name: "Disposed Stock Value", value: data.disposed, color: "#F44336" },
+      {
+        name: "Quality Failed Stock Value",
+        value: data.quality_failed,
+        color: "violet",
+      },
       { name: "Error Stock Value", value: data.errors, color: "#9E9E9E" },
     ];
   };
@@ -103,7 +108,7 @@ export default function CardOfPieChart() {
         ) : analysisData ? (
           <>
             <StockPieChart data={getPieChartData(analysisData)} />
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
               {Object.entries(analysisData).map(([key, value]) => (
                 <Card key={key}>
                   <CardContent className="p-4">

@@ -190,6 +190,7 @@ export interface StockAnalysis {
   sold: number; // Total value of sold drugs
   expired: number; // Total value of expired drugs
   disposed: number; // Total value of disposed drugs
+  quality_failed: number; // Total value of quality failed drugs
   errors: number; // Total value of drugs with errors
 }
 
