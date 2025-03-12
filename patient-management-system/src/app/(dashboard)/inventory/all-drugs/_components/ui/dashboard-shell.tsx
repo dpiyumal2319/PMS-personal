@@ -1,5 +1,6 @@
 // components/dashboard/dashboard-shell.tsx
 import { cn } from "../../lib/utils";
+import React from "react";
 
 interface DashboardShellProps {
   children: React.ReactNode;
