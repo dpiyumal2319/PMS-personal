@@ -21,6 +21,9 @@ import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import {getTextColorClass} from "@/app/lib/utils";
 import React from "react";
 import {Separator} from "@/components/ui/separator";
+import type {
+    PrescriptionVitalWithRelation
+} from "@/app/(dashboard)/patients/[id]/prescriptions/_components/PrescriptionList";
 
 
 const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: string }> }) => {
@@ -29,6 +32,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
     const prescriptionID = Number(resolvedParams.prescriptionID);
     const prescription = await getPrescription(prescriptionID, id);
     const session = await verifySession();
+    console.log(prescription)
 
     if (!prescription) {
         return <div className="text-center text-red-500 font-semibold">Prescription not found</div>;
@@ -70,18 +74,24 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
 
                 <Separator/>
 
-                {/*Prescription Vitals*/}
-                <h2 className="text-lg font-semibold">Vitals</h2>
-                <div className="grid grid-cols-2 gap-4">
-                    {prescription.PrescriptionVitals.map((vital) => (
-                        <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
-                            <DynamicIcon icon={vital.vital.icon as IconName}
-                                         className={`text-lg ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}/>
-                            <span className="font-medium">{vital.vital.name}</span>
-                            <span className="font-semibold">{vital.value}</span>
+                {/* Prescription Vitals */}
+                {prescription.PrescriptionVitals && prescription.PrescriptionVitals.length > 0 && (
+                    <>
+                        <h2 className="text-lg font-semibold">Vitals</h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            {(prescription.PrescriptionVitals as PrescriptionVitalWithRelation[]).map((vital) => (
+                                <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
+                                    <DynamicIcon
+                                        icon={vital.vital.icon as IconName}
+                                        className={`text-lg ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}
+                                    />
+                                    <span className="font-medium">{vital.vital.name}</span>
+                                    <span className="font-semibold">{vital.value}</span>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </>
+                )}
 
 
                 <Separator/>

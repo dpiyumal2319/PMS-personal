@@ -161,6 +161,7 @@ export async function getPrescription(
     patientID: number
 ) {
     const session = await verifySession();
+
     return prisma.prescription.findUnique({
         where: {
             id: prescriptionID,
@@ -168,11 +169,6 @@ export async function getPrescription(
             ...(session.role !== "DOCTOR" && {status: "PENDING"}),
         },
         include: {
-            PrescriptionVitals: {
-                include: {
-                    vital: true,
-                },
-            },
             issues: {
                 include: {
                     drug: true,
@@ -182,9 +178,19 @@ export async function getPrescription(
                 },
             },
             OffRecordMeds: true,
+            ...(session.role === "DOCTOR"
+                ? {
+                    PrescriptionVitals: {
+                        include: {
+                            vital: true,
+                        },
+                    },
+                }
+                : {}),
         },
     });
 }
+
 
 //For prescriptions page
 export async function getPrescriptionsCount(patientID: number) {

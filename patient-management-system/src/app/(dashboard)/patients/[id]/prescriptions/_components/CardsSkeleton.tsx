@@ -4,7 +4,7 @@ import {Card, CardContent, CardHeader} from "@/components/ui/card";  // Assuming
 
 const PrescriptionListSkeleton = () => {
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
             {/* First Card Skeleton */}
             <Card className="p-4 hover:shadow-md transition h-full">
                 <CardHeader className={'pb-2'}>

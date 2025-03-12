@@ -9,7 +9,7 @@ import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import {getTextColorClass} from "@/app/lib/utils";
 import {Issue, PrescriptionVitals} from "@prisma/client";
 
-interface PrescriptionVitalWithRelation extends PrescriptionVitals {
+export interface PrescriptionVitalWithRelation extends PrescriptionVitals {
     vital: {
         color: string;
         icon: string;
@@ -17,7 +17,7 @@ interface PrescriptionVitalWithRelation extends PrescriptionVitals {
     };
 }
 
-interface PrescriptionIssueWithRelation extends Issue {
+export interface PrescriptionIssueWithRelation extends Issue {
     drug: {
         name: string;
     };
@@ -39,10 +39,8 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
         skip,
     });
 
-    console.log(prescriptions);
-
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
             {prescriptions.length > 0 ? (
                 prescriptions.map((prescription) => (
                     <Link
