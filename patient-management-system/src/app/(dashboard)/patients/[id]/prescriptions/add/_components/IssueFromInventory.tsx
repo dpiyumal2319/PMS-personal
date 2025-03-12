@@ -36,7 +36,8 @@ interface IssuesListProps {
 export type DrugOption = {
     id: number;
     name: string;
-    concentrationCount: number;
+    buffer: number;
+    remaining: number;
 }
 
 export type CustomDrugType = {

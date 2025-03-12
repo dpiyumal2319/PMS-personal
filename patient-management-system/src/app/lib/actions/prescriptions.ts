@@ -545,16 +545,16 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
                     },
                 },
             },
-            take: 10,
             select: {
                 id: true,
                 name: true,
+                Buffer: true,
                 batch: {
                     where: {
                         status: "AVAILABLE",
                     },
                     select: {
-                        unitConcentrationId: true,
+                        remainingQuantity: true,
                     },
                 },
             },
@@ -563,7 +563,8 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
             drugs.map((drug) => ({
                 id: drug.id,
                 name: drug.name,
-                concentrationCount: new Set(drug.batch.map((b) => b.unitConcentrationId)).size, // Count unique concentrations
+                buffer: drug.Buffer,
+                remaining: drug.batch.reduce((acc, batch) => acc + batch.remainingQuantity, 0),
             }))
         );
 }
