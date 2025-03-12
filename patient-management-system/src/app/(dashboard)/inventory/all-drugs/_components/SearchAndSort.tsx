@@ -54,7 +54,7 @@ export function SearchAndSort() {
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
         <Input
           placeholder="Search drugs by name, brand, or batch..."
-          className="pl-9"
+          className="pl-9 h-full"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}

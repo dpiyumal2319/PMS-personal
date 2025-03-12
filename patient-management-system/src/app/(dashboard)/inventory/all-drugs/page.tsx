@@ -1,11 +1,9 @@
 // app/inventory/all-drugs/page.tsx
-import { Suspense } from 'react';
-import { Drugs } from './_components/Drugs';
-import { DashboardShell } from './_components/ui/dashboard-shell';
-import { DashboardHeader } from './_components/ui/dashboard-header';
-import { FilterSidebar } from './_components/FilterSidebar';
-import { SearchAndSort } from './_components/SearchAndSort';
-import { BatchStatus, DrugType } from '@prisma/client';
+import {Suspense} from 'react';
+import {Drugs} from './_components/Drugs';
+import {DashboardHeader} from './_components/ui/dashboard-header';
+import {SearchAndSort} from './_components/SearchAndSort';
+import {BatchStatus, DrugType} from '@prisma/client';
 
 interface SearchParams {
     page?: string;
@@ -22,8 +20,8 @@ interface SearchParams {
 }
 
 export default async function DrugsPage({
-    searchParams,
-}: {
+                                            searchParams,
+                                        }: {
     searchParams: Promise<SearchParams>;
 }) {
     // Await searchParams if it's a promise (though it shouldn't be in Next.js 13+)
@@ -44,26 +42,27 @@ export default async function DrugsPage({
     };
 
     return (
-        <DashboardShell>
+        <div className={'flex h-full w-full flex-col p-4 overflow-y-auto'}>
             <DashboardHeader
                 heading="Drugs Inventory"
-                description="Manage your pharmacy inventory with advanced filtering and sorting options."
             />
-            <div className="flex flex-col md:flex-row gap-6">
-                <FilterSidebar className="w-full md:w-64 flex-shrink-0"/>
-                <div className="flex-1 space-y-4">
+            <div className="container gap-6">
+                {/*<FilterSidebar className="w-full md:w-64 flex-shrink-0"/>*/}
+                <div className="flex flex-col space-y-4">
                     <SearchAndSort/>
-                    <Suspense fallback={<DrugsTableSkeleton/>}>
-                        <Drugs
-                            page={page}
-                            per_page={per_page}
-                            sort={sort}
-                            filters={filters}
-                        />
-                    </Suspense>
+                    <div className={'container w-[calc(100%-160px)]'}>
+                        <Suspense fallback={<DrugsTableSkeleton/>}>
+                            <Drugs
+                                page={page}
+                                per_page={per_page}
+                                sort={sort}
+                                filters={filters}
+                            />
+                        </Suspense>
+                    </div>
                 </div>
             </div>
-        </DashboardShell>
+        </div>
     );
 }
 
