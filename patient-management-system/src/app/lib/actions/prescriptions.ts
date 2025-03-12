@@ -2,7 +2,7 @@
 
 import {myConfirmation, myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
-import type {DrugType} from "@prisma/client";
+import {DrugType, Prisma} from "@prisma/client";
 import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
@@ -209,6 +209,7 @@ export async function searchPrescriptions({
     skip: number;
 }) {
     let where = {};
+    let select: Prisma.PrescriptionSelect = {};
     const session = await verifySession();
 
     if (query) {
@@ -258,6 +259,23 @@ export async function searchPrescriptions({
         };
     }
 
+    if (session.role === 'DOCTOR') {
+        select = {
+            PrescriptionVitals: {
+                select: {
+                    value: true,
+                    vital: {
+                        select: {
+                            color: true,
+                            icon: true,
+                            name: true,
+                        }
+                    },
+                },
+            },
+        }
+    }
+
     return prisma.prescription.findMany({
         where: {
             patientId: patientID,
@@ -268,22 +286,27 @@ export async function searchPrescriptions({
         orderBy: {
             time: "desc",
         },
-        include: {
-            PrescriptionVitals: {
-                include: {
-                    vital: true,
-                },
-            },
+        select: {
+            id: true,
+            time: true,
+            presentingSymptoms: true,
+            details: true,
+            status: true,
             issues: {
-                include: {
-                    drug: true,
-                },
+                select: {
+                    drug: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
             },
             OffRecordMeds: {
                 select: {
                     name: true,
                 },
             },
+            ...select,
         },
     });
 }
