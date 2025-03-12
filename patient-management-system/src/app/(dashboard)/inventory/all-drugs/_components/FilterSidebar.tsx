@@ -5,9 +5,16 @@ import {useRouter} from "next/navigation"
 import {Button} from "@/components/ui/button"
 import {ScrollArea} from "@/components/ui/scroll-area"
 import {Accordion} from "@/components/ui/accordion"
-import {Drawer, DrawerContent, DrawerTrigger, DrawerClose} from "@/components/ui/drawer"
+import {
+    Sheet,
+    SheetContent,
+    SheetTrigger,
+    SheetTitle,
+    SheetHeader,
+    SheetDescription,
+} from "@/components/ui/sheet"
 import {FilterSection, FilterSectionOnlyName, FilterSectionRef} from "./FilterSections"
-import {FilterIcon, RefreshCw, X} from "lucide-react"
+import {FilterIcon, RefreshCw} from "lucide-react"
 import {cn} from "@/lib/utils"
 
 // Import the fetching functions
@@ -19,11 +26,11 @@ import {
     fetchBatchStatuses
 } from "../lib/dataFetch"
 
-interface FilterDrawerProps {
+interface FilterSidebarProps {
     className?: string
 }
 
-export function FilterDrawer({className}: FilterDrawerProps) {
+export function FilterSidebar({className}: FilterSidebarProps) {
     const router = useRouter()
     const [open, setOpen] = useState(false)
 
@@ -76,7 +83,7 @@ export function FilterDrawer({className}: FilterDrawerProps) {
             }
         }
 
-        loadFilterOptions()
+        loadFilterOptions().then();
     }, [])
 
     // Parse URL on mount to count active filters
@@ -119,7 +126,7 @@ export function FilterDrawer({className}: FilterDrawerProps) {
 
             await router.push(`${window.location.pathname}${query}`, {scroll: false})
 
-            // Close drawer after applying filters
+            // Close sidebar after applying filters
             setTimeout(() => {
                 setApplying(false)
                 setOpen(false)
@@ -152,51 +159,46 @@ export function FilterDrawer({className}: FilterDrawerProps) {
     }
 
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
+        <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
                 <Button
                     variant="outline"
-                    className={cn("flex items-center gap-2", className)}
+                    className={cn("flex items-center gap-2 bg-white", className)}
+                    aria-label={`Open filters${activeFiltersCount > 0 ? `, ${activeFiltersCount} active` : ''}`}
                 >
                     <FilterIcon size={16}/>
                     <span>Filters</span>
                     {activeFiltersCount > 0 && (
                         <span
                             className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium bg-primary text-primary-foreground rounded-full">
-              {activeFiltersCount}
-            </span>
+                            {activeFiltersCount}
+                        </span>
                     )}
                 </Button>
-            </DrawerTrigger>
-            <DrawerContent className="max-h-[80vh]">
-                <div className="max-w-md mx-auto w-full">
-                    <div className="p-4 border-b flex items-center justify-between">
-                        <div>
-                            <h3 className="font-medium text-lg">Filters</h3>
-                            <p className="text-sm text-gray-500">Refine your inventory view</p>
-                        </div>
-                        <DrawerClose asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <X className="h-4 w-4"/>
-                                <span className="sr-only">Close</span>
-                            </Button>
-                        </DrawerClose>
-                    </div>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:max-w-md p-0 border-l">
+                <div className="flex flex-col h-full">
+                    <SheetHeader className="p-4 border-b">
+                        <SheetTitle className="text-lg">Filters</SheetTitle>
+                        <SheetDescription className="text-sm text-gray-500">
+                            Refine your inventory view
+                        </SheetDescription>
+                    </SheetHeader>
 
                     {isLoading ? (
                         <div className="p-8 flex items-center justify-center">
-                            <p className="flex items-center">
+                            <p className="flex items-center" aria-live="polite">
                                 <RefreshCw className="h-4 w-4 mr-2 animate-spin"/>
                                 Loading filters...
                             </p>
                         </div>
                     ) : error ? (
                         <div className="p-8 flex items-center justify-center">
-                            <p className="text-red-500">{error}</p>
+                            <p className="text-red-500" role="alert">{error}</p>
                         </div>
                     ) : (
                         <>
-                            <ScrollArea className="max-h-[calc(80vh-12rem)]">
+                            <ScrollArea className="flex-1">
                                 <div className="p-4">
                                     <Accordion type="multiple" defaultValue={["drugModel"]}>
                                         <FilterSection
@@ -252,16 +254,21 @@ export function FilterDrawer({className}: FilterDrawerProps) {
                                 </div>
                             </ScrollArea>
 
-                            <div className="p-4 border-t space-y-3">
-                                <Button className="w-full relative" onClick={handleApplyFilters} disabled={applying}>
-                  <span className={`transition-opacity ${applying ? "opacity-0" : "opacity-100"}`}>
-                    Apply Filters
-                  </span>
+                            <div className="p-4 border-t space-y-3 mt-auto">
+                                <Button
+                                    className="w-full relative"
+                                    onClick={handleApplyFilters}
+                                    disabled={applying}
+                                    aria-busy={applying}
+                                >
+                                    <span className={`transition-opacity ${applying ? "opacity-0" : "opacity-100"}`}>
+                                        Apply Filters
+                                    </span>
                                     {applying && (
                                         <span className="absolute inset-0 flex items-center justify-center">
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin"/>
-                      Applying...
-                    </span>
+                                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" aria-hidden="true"/>
+                                            Applying...
+                                        </span>
                                     )}
                                 </Button>
                                 <Button
@@ -270,23 +277,25 @@ export function FilterDrawer({className}: FilterDrawerProps) {
                                     size="sm"
                                     onClick={handleResetFilters}
                                     disabled={resetting}
+                                    aria-busy={resetting}
                                 >
-                  <span className={`flex items-center transition-opacity ${resetting ? "opacity-0" : "opacity-100"}`}>
-                    <RefreshCw className="h-3.5 w-3.5 mr-2"/>
-                    Reset Filters
-                  </span>
+                                    <span
+                                        className={`flex items-center transition-opacity ${resetting ? "opacity-0" : "opacity-100"}`}>
+                                        <RefreshCw className="h-3.5 w-3.5 mr-2" aria-hidden="true"/>
+                                        Reset Filters
+                                    </span>
                                     {resetting && (
                                         <span className="absolute inset-0 flex items-center justify-center">
-                      <RefreshCw className="h-3.5 w-3.5 mr-2 animate-spin"/>
-                      Resetting...
-                    </span>
+                                            <RefreshCw className="h-3.5 w-3.5 mr-2 animate-spin" aria-hidden="true"/>
+                                            Resetting...
+                                        </span>
                                     )}
                                 </Button>
                             </div>
                         </>
                     )}
                 </div>
-            </DrawerContent>
-        </Drawer>
+            </SheetContent>
+        </Sheet>
     )
 }
