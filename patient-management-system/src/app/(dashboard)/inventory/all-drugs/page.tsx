@@ -4,7 +4,7 @@ import {Drugs} from './_components/Drugs';
 import {DashboardHeader} from './_components/ui/dashboard-header';
 import {SearchAndSort} from './_components/SearchAndSort';
 import {BatchStatus, DrugType} from '@prisma/client';
-import {FilterSidebar} from "@/app/(dashboard)/inventory/all-drugs/_components/FilterSidebar";
+import {FilterDrawer} from "@/app/(dashboard)/inventory/all-drugs/_components/FilterSidebar";
 
 interface SearchParams {
     page?: string;
@@ -48,7 +48,7 @@ export default async function DrugsPage({
                 heading="Drugs Inventory"
             />
             <div className="container gap-6">
-                <FilterSidebar className="w-full md:w-64 flex-shrink-0"/>
+                <FilterDrawer/>
                 <div className="flex flex-col space-y-4">
                     <SearchAndSort/>
                     <div className={'container w-full'}>
