@@ -16,7 +16,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function SearchAndSort() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOption, setSortOption] = useState("expiry_date:asc");
+  const [sortOption, setSortOption] = useState("stockDate:desc");
 
   const router = useRouter();
   const pathname = usePathname();
@@ -40,6 +40,8 @@ export function SearchAndSort() {
   const sortOptions = [
     { value: "name:asc", label: "Name (A-Z)" },
     { value: "name:desc", label: "Name (Z-A)" },
+    { value: "stockDate:asc", label: "Stock Date (Earliest)" },
+    { value: "stockDate:desc", label: "Stock Date (Latest)" },
     { value: "expiry:asc", label: "Expiry Date (Earliest)" },
     { value: "expiry:desc", label: "Expiry Date (Latest)" },
     { value: "remaining_amount:asc", label: "Stock (Lowest)" },
