@@ -2084,3 +2084,31 @@ export async function getDrugModelsWithBufferLevel() {
     throw new Error("Failed to fetch drug models with buffer level");
   }
 }
+
+export async function updateDrugBufferLevel(
+  drugId: number,
+  newBufferLevel: number
+) {
+  try {
+    if (!drugId || drugId <= 0) {
+      return { success: false, message: "Invalid drug ID" };
+    }
+    if (newBufferLevel < 0) {
+      return { success: false, message: "Buffer level cannot be negative" };
+    }
+    const updatedDrug = await prisma.drug.update({
+      where: { id: drugId },
+      data: { Buffer: newBufferLevel },
+    });
+
+    revalidatePath("/inventory/buffer-level");
+    return {
+      success: true,
+      message: `Buffer level for ${updatedDrug.name} updated to ${newBufferLevel}`,
+      drug: updatedDrug,
+    };
+  } catch (error) {
+    console.error("Failed to update drug buffer level:", error);
+    throw new Error("Failed to update drug buffer level");
+  }
+}

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { DrugModelsWithBufferLevel } from "@/app/lib/definitions";
+import { updateDrugBufferLevel } from "@/app/lib/actions";
 
 interface DrugModelCardProps {
   drug: DrugModelsWithBufferLevel;
@@ -33,12 +34,17 @@ export function DrugModelCard({
   const [newBufferLevel, setNewBufferLevel] = useState(
     drug.bufferLevel.toString()
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = () => {
     const parsedLevel = parseInt(newBufferLevel);
     if (!isNaN(parsedLevel) && parsedLevel >= 0 && onBufferLevelChange) {
       onBufferLevelChange(drug.id, parsedLevel);
     }
+    setIsLoading(true);
+
+    const result = updateDrugBufferLevel(drug.id, parsedLevel);
   };
 
   // Determine status and styles
@@ -150,8 +156,8 @@ export function DrugModelCard({
 
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleSubmit}>
-                Save Changes
+              <AlertDialogAction onClick={handleSubmit} disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Changes"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
