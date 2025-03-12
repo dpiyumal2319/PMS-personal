@@ -77,8 +77,8 @@ export async function getTotalQueueCount() {
 export async function getTotalPages(query = "", filter = "name") {
   const whereClause = query
     ? {
-        [filter]: { contains: query, mode: "insensitive" },
-      }
+      [filter]: { contains: query, mode: "insensitive" },
+    }
     : {};
 
   const totalPatients = await prisma.patient.count({ where: whereClause });
@@ -92,8 +92,8 @@ export async function getFilteredPatients(
 ) {
   const whereCondition = query
     ? {
-        [filter]: { contains: query, mode: "insensitive" },
-      }
+      [filter]: { contains: query, mode: "insensitive" },
+    }
     : {};
 
   return prisma.patient.findMany({
@@ -935,6 +935,11 @@ export async function getBatchData(batchId: number) {
             name: true,
           },
         },
+        Supplier: {
+          select: {
+            name: true,
+          },
+        },
         unitConcentration: true,
       },
     });
@@ -954,6 +959,7 @@ export async function getBatchData(batchId: number) {
       stockDate: batchData.stockDate.toISOString().split("T")[0], // Format to 'YYYY-MM-DD'
       retailPrice: batchData.retailPrice,
       wholesalePrice: batchData.wholesalePrice,
+      supplier: batchData.Supplier.name,
       status: batchData.status,
       unitConcetration: batchData.unitConcentration.concentration,
     };
@@ -1126,11 +1132,11 @@ export async function getStockByModel({
           // status: "AVAILABLE",
           ...(startDate && endDate
             ? {
-                stockDate: {
-                  gte: startDate,
-                  lte: endDate,
-                },
-              }
+              stockDate: {
+                gte: startDate,
+                lte: endDate,
+              },
+            }
             : {}),
         },
       },
@@ -1141,11 +1147,11 @@ export async function getStockByModel({
           // status: "AVAILABLE",
           ...(startDate && endDate
             ? {
-                stockDate: {
-                  gte: startDate,
-                  lte: endDate,
-                },
-              }
+              stockDate: {
+                gte: startDate,
+                lte: endDate,
+              },
+            }
             : {}),
         },
         select: {
@@ -1192,11 +1198,11 @@ export async function getStockByBatch({
       // status: "AVAILABLE",
       ...(startDate && endDate
         ? {
-            stockDate: {
-              gte: startDate,
-              lte: endDate,
-            },
-          }
+          stockDate: {
+            gte: startDate,
+            lte: endDate,
+          },
+        }
         : {}),
     },
     include: {
