@@ -2,7 +2,7 @@
 
 import {myConfirmation, myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
-import type {DrugType} from "@prisma/client";
+import {DrugType, Prisma} from "@prisma/client";
 import {revalidatePath} from "next/cache";
 import {verifySession} from "@/app/lib/sessions";
 import {PrescriptionFormData} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionForm";
@@ -17,59 +17,56 @@ export async function completePrescription(
     prescriptionID: number
 ): Promise<myError> {
     try {
+        // Fetch prescription with related data in one query
         const prescription = await prisma.prescription.findUnique({
             where: {id: prescriptionID},
             include: {
                 issues: {
-                    include: {
-                        batch: true,
-                    },
+                    include: {batch: true},
                 },
             },
         });
 
+        // Validation checks before transaction
         if (!prescription) {
             return {success: false, message: "Prescription not found"};
         }
 
         if (prescription.status === "COMPLETED") {
-            return {
-                success: false,
-                message: "Prescription already completed",
-            };
+            return {success: false, message: "Prescription already completed"};
         }
 
-        if (!prescription.issues.every((issue) => issue.batch)) {
-            return {success: false, message: "Prescription not completed"};
+        // Check if all issues have batches
+        const missingBatchIssue = prescription.issues.find(issue => !issue.batch || !issue.batchId);
+        if (missingBatchIssue) {
+            return {success: false, message: "Batch not found for a drug"};
         }
 
-        // Updating remaining quantity of batches
-        await prisma.$transaction(async (prisma) => {
-            for (let i = 0; i < prescription.issues.length; i++) {
-                const issue = prescription.issues[i];
-                if (!issue.batch || !issue.batchId) {
-                    return {
-                        success: false,
-                        message: "Batch not found for a drug",
-                    };
-                }
-                await prisma.batch.update({
-                    where: {id: issue.batchId},
+        // Perform all database operations in a transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // Prepare batch updates (more efficient than sequential updates)
+            const batchUpdates = prescription.issues.map(issue =>
+                tx.batch.update({
+                    where: {id: issue.batchId!},
                     data: {
                         remainingQuantity: {
                             decrement: issue.quantity,
                         },
                     },
-                });
-            }
+                })
+            );
 
-            await prisma.prescription.update({
+            // Execute batch updates in parallel
+            await Promise.all(batchUpdates);
+
+            // Update prescription status
+            await tx.prescription.update({
                 where: {id: prescriptionID},
                 data: {status: "COMPLETED"},
             });
 
-            //Check for queue entry
-            const queueEntry = await prisma.queueEntry.findFirst({
+            // Check and update queue entry if exists
+            const queueEntry = await tx.queueEntry.findFirst({
                 where: {
                     patientId: prescription.patientId,
                     status: "PRESCRIBED",
@@ -77,18 +74,22 @@ export async function completePrescription(
             });
 
             if (queueEntry) {
-                await prisma.queueEntry.update({
-                    where: {
-                        id: queueEntry.id,
-                    },
-                    data: {
-                        status: "COMPLETED",
-                    },
+                await tx.queueEntry.update({
+                    where: {id: queueEntry.id},
+                    data: {status: "COMPLETED"},
                 });
-                revalidatePath(`/queue/${queueEntry.id}`);
+                return queueEntry.id;
             }
+
+            return null;
         });
+
+        // Handle revalidation after transaction
         revalidatePath(`/patients/${prescription.patientId}/prescriptions`);
+        if (result) {
+            revalidatePath(`/queue/${result}`);
+        }
+
         return {
             success: true,
             message: "Prescription completed successfully",
@@ -161,6 +162,7 @@ export async function getPrescription(
     patientID: number
 ) {
     const session = await verifySession();
+
     return prisma.prescription.findUnique({
         where: {
             id: prescriptionID,
@@ -168,11 +170,6 @@ export async function getPrescription(
             ...(session.role !== "DOCTOR" && {status: "PENDING"}),
         },
         include: {
-            PrescriptionVitals: {
-                include: {
-                    vital: true,
-                },
-            },
             issues: {
                 include: {
                     drug: true,
@@ -182,9 +179,19 @@ export async function getPrescription(
                 },
             },
             OffRecordMeds: true,
+            ...(session.role === "DOCTOR"
+                ? {
+                    PrescriptionVitals: {
+                        include: {
+                            vital: true,
+                        },
+                    },
+                }
+                : {}),
         },
     });
 }
+
 
 //For prescriptions page
 export async function getPrescriptionsCount(patientID: number) {
@@ -209,6 +216,7 @@ export async function searchPrescriptions({
     skip: number;
 }) {
     let where = {};
+    let select: Prisma.PrescriptionSelect = {};
     const session = await verifySession();
 
     if (query) {
@@ -258,6 +266,23 @@ export async function searchPrescriptions({
         };
     }
 
+    if (session.role === 'DOCTOR') {
+        select = {
+            PrescriptionVitals: {
+                select: {
+                    value: true,
+                    vital: {
+                        select: {
+                            color: true,
+                            icon: true,
+                            name: true,
+                        }
+                    },
+                },
+            },
+        }
+    }
+
     return prisma.prescription.findMany({
         where: {
             patientId: patientID,
@@ -268,22 +293,27 @@ export async function searchPrescriptions({
         orderBy: {
             time: "desc",
         },
-        include: {
-            PrescriptionVitals: {
-                include: {
-                    vital: true,
-                },
-            },
+        select: {
+            id: true,
+            time: true,
+            presentingSymptoms: true,
+            details: true,
+            status: true,
             issues: {
-                include: {
-                    drug: true,
-                },
+                select: {
+                    drug: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
             },
             OffRecordMeds: {
                 select: {
                     name: true,
                 },
             },
+            ...select,
         },
     });
 }
@@ -354,7 +384,7 @@ export async function addPrescription({
     patientID: number;
 }): Promise<myError> {
     try {
-        // Basic validation checks
+        // Early validation checks
         if (
             prescriptionForm.issues.length === 0 &&
             prescriptionForm.offRecordMeds.length === 0
@@ -365,75 +395,68 @@ export async function addPrescription({
             };
         }
 
-        // check for repeated drugs
+        // Check for repeated drugs more efficiently
         const drugIds = prescriptionForm.issues.map((issue) => issue.drugId);
         const uniqueDrugIds = new Set(drugIds);
         if (drugIds.length !== uniqueDrugIds.size) {
             return {
                 success: false,
-                message:
-                    "Repeated drugs are not allowed in a single prescription",
+                message: "Repeated drugs are not allowed in a single prescription",
             };
         }
 
+        // Session verification (consider moving this check earlier in the request flow)
         const session = await verifySession();
         if (session.role !== "DOCTOR") {
             redirect('/unauthorized');
         }
 
-        // Remove '' vitals
-        prescriptionForm.vitals = prescriptionForm.vitals.filter(
+        // Clean data before database operations
+        const filteredVitals = prescriptionForm.vitals.filter(
             (vital) => vital.value !== ""
         );
 
-        // Create prescription with all related records in a transaction
+        // Prepare data structures for transaction
+        const issuesData = prescriptionForm.issues.map((issue) => ({
+            drugId: issue.drugId,
+            details: issue.details,
+            brandId: issue.brandId,
+            strategy: issue.strategy,
+            quantity: issue.quantity,
+            meal: issue.meal,
+            dose: issue.dose,
+            type: issue.drugType,
+            unitConcentrationId: issue.concentrationID,
+        }));
+
+        const offRecordMedsData = prescriptionForm.offRecordMeds.map((med) => ({
+            name: med.name,
+            description: med.description,
+        }));
+
+        const vitalsData = filteredVitals.map((vital) => ({
+            vitalId: vital.id,
+            value: vital.value,
+        }));
+
+        // Execute all database operations in a transaction
         await prisma.$transaction(async (tx) => {
-            // Create the main prescription and store its result to get issue IDs
+            // Create prescription with all related data in one operation
             const prescription = await tx.prescription.create({
                 data: {
                     patientId: patientID,
                     presentingSymptoms: prescriptionForm.presentingSymptoms,
                     details: prescriptionForm.description,
                     status: "PENDING",
-                    extraDoctorCharge: Number(
-                        prescriptionForm.extraDoctorCharges
-                    ),
-                    // Create issues
-                    issues: {
-                        create: prescriptionForm.issues.map((issue) => ({
-                            drugId: issue.drugId,
-                            details: issue.details,
-                            brandId: issue.brandId,
-                            strategy: issue.strategy,
-                            quantity: issue.quantity,
-                            meal: issue.meal,
-                            dose: issue.dose,
-                            type: issue.drugType,
-                            unitConcentrationId: issue.concentrationID,
-                        })),
-                    },
-                    // Create off-record medications
-                    OffRecordMeds: {
-                        create: prescriptionForm.offRecordMeds.map((med) => ({
-                            name: med.name,
-                            description: med.description,
-                        })),
-                    },
-                    //  Create vitals
-                    PrescriptionVitals: {
-                        create: prescriptionForm.vitals.map((vital) => ({
-                            vitalId: vital.id,
-                            value: vital.value,
-                        })),
-                    },
+                    extraDoctorCharge: Number(prescriptionForm.extraDoctorCharges),
+                    issues: {create: issuesData},
+                    OffRecordMeds: {create: offRecordMedsData},
+                    PrescriptionVitals: {create: vitalsData},
                 },
-                // Include the created issues in the return value
-                include: {
-                    issues: true,
-                },
+                include: {issues: true},
             });
 
-            //Check for queue entry
+            // Update queue status if needed
             const queueEntry = await tx.queueEntry.findFirst({
                 where: {
                     patientId: patientID,
@@ -441,41 +464,35 @@ export async function addPrescription({
                 },
             });
 
-
             if (queueEntry) {
-                revalidatePath(`/queue/${queueEntry.id}`);
                 await tx.queueEntry.update({
-                    where: {
-                        id: queueEntry.id,
-                    },
-                    data: {
-                        status: "PRESCRIBED",
-                    },
+                    where: {id: queueEntry.id},
+                    data: {status: "PRESCRIBED"},
                 });
             }
 
-            // Update strategy history for each issue
-            await Promise.all(
-                prescriptionForm.issues.map((issue, index) => {
-                    const createdIssue = prescription.issues[index]; // Get the corresponding created issue
+            // Batch strategy history updates
+            const strategyUpdates = prescription.issues.map((createdIssue, index) => {
+                const originalIssue = prescriptionForm.issues[index];
+                return tx.stratergyHistory.upsert({
+                    where: {drugId: originalIssue.drugId},
+                    update: {issueId: createdIssue.id},
+                    create: {
+                        drugId: originalIssue.drugId,
+                        issueId: createdIssue.id,
+                    },
+                });
+            });
 
-                    return tx.stratergyHistory.upsert({
-                        where: {
-                            drugId: issue.drugId,
-                        },
-                        update: {
-                            issueId: createdIssue.id,
-                        },
-                        create: {
-                            drugId: issue.drugId,
-                            issueId: createdIssue.id,
-                        },
-                    });
-                })
-            );
+            await Promise.all(strategyUpdates);
+
+            // Store queue ID for revalidation after transaction
+            return queueEntry?.id;
         });
 
+        // Handle path revalidation after successful transaction
         revalidatePath(`/patients/${patientID}/prescriptions`);
+
         return {
             success: true,
             message: "Prescription created successfully",
@@ -484,10 +501,9 @@ export async function addPrescription({
         console.error("Error adding prescription:", e);
         return {
             success: false,
-            message:
-                e instanceof Error
-                    ? e.message
-                    : "An error occurred while adding prescription",
+            message: e instanceof Error
+                ? e.message
+                : "An error occurred while adding prescription",
         };
     }
 }
@@ -529,16 +545,16 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
                     },
                 },
             },
-            take: 10,
             select: {
                 id: true,
                 name: true,
+                Buffer: true,
                 batch: {
                     where: {
                         status: "AVAILABLE",
                     },
                     select: {
-                        unitConcentrationId: true,
+                        remainingQuantity: true,
                     },
                 },
             },
@@ -547,7 +563,8 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
             drugs.map((drug) => ({
                 id: drug.id,
                 name: drug.name,
-                concentrationCount: new Set(drug.batch.map((b) => b.unitConcentrationId)).size, // Count unique concentrations
+                buffer: drug.Buffer,
+                remaining: drug.batch.reduce((acc, batch) => acc + batch.remainingQuantity, 0),
             }))
         );
 }

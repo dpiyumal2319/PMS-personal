@@ -7,6 +7,21 @@ import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomB
 import {IconName} from "@/app/lib/iconMapping";
 import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import {getTextColorClass} from "@/app/lib/utils";
+import {Issue, PrescriptionVitals} from "@prisma/client";
+
+export interface PrescriptionVitalWithRelation extends PrescriptionVitals {
+    vital: {
+        color: string;
+        icon: string;
+        name: string;
+    };
+}
+
+export interface PrescriptionIssueWithRelation extends Issue {
+    drug: {
+        name: string;
+    };
+}
 
 const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}: {
     currentPage: number;
@@ -23,8 +38,9 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
         take: perPage,
         skip,
     });
+
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
             {prescriptions.length > 0 ? (
                 prescriptions.map((prescription) => (
                     <Link
@@ -57,25 +73,30 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                             <CardContent className="flex flex-col gap-2">
                                 <p className="text-gray-500 text-sm">{prescription.details}</p>
                                 <div className="grid grid-cols-2 gap-2">
-                                    {prescription.PrescriptionVitals.map((vital) => (
-                                        <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
-                                            <DynamicIcon
-                                                className={`text-lg ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}
-                                                icon={vital.vital.icon as IconName}/>
-                                            <span className="font-medium">{vital.vital.name}</span>
-                                            <span className="font-semibold">{vital.value}</span>
-                                        </div>
-                                    ))}
+                                    {prescription.PrescriptionVitals && prescription.PrescriptionVitals.length > 0 &&
+                                        (prescription.PrescriptionVitals as PrescriptionVitalWithRelation[]).map((vital) => (
+                                            <div className="flex items-center gap-2 text-gray-700" key={vital.id}>
+                                                <DynamicIcon
+                                                    className={`text-lg ${getTextColorClass(vital.vital.color as keyof BasicColorType)}`}
+                                                    icon={vital.vital.icon as IconName}/>
+                                                <span className="font-medium">{vital.vital.name}</span>
+                                                <span className="font-semibold">{vital.value}</span>
+                                            </div>
+                                        ))
+                                    }
                                 </div>
-                                {prescription.issues.length > 0 && (
-                                    <div className="flex items-center flex-wrap gap-2">
-                                        <span className="text-sm">Inventory Meds:</span>
-                                        {prescription.issues.map((issue) => (
-                                            issue.drug &&
-                                            <CustomBadge key={issue.drug.name} text={issue.drug.name} color="rose"/>
-                                        ))}
-                                    </div>
-                                )}
+
+                                <div className="flex items-center flex-wrap gap-2">
+                                    {prescription.issues && prescription.issues.length > 0 && (
+                                        <>
+                                            <span className="text-sm">Inventory Meds:</span>
+                                            {(prescription.issues as PrescriptionIssueWithRelation[]).map((issue) => (
+                                                issue.drug &&
+                                                <CustomBadge key={issue.drug.name} text={issue.drug.name} color="rose"/>
+                                            ))}
+                                        </>
+                                    )}
+                                </div>
                                 {prescription.OffRecordMeds.length > 0 && (
                                     <div className="flex items-center flex-wrap gap-2">
                                         <span className="text-sm">Off Record Meds:</span>
