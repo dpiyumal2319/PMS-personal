@@ -101,7 +101,7 @@ export function FilterSidebar({className}: FilterSidebarProps) {
 
     const filterRefs = useRef<(FilterSectionRef | null)[]>([])
 
-    const handleApplyFilters = async () => {
+    const handleApplyFilters = () => {
         setApplying(true)
 
         try {
@@ -124,7 +124,7 @@ export function FilterSidebar({className}: FilterSidebarProps) {
             const search = filterParams.toString()
             const query = search ? `?${search}` : ""
 
-            await router.push(`${window.location.pathname}${query}`, {scroll: false})
+            router.push(`${window.location.pathname}${query}`, {scroll: false})
 
             // Close sidebar after applying filters
             setTimeout(() => {
