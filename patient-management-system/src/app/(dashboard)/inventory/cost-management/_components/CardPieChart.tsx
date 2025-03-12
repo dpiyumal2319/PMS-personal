@@ -64,7 +64,7 @@ export default function CardOfPieChart() {
       },
       { name: "Sold Value", value: data.sold, color: "#2196F3" },
       { name: "Expired Stock Value", value: data.expired, color: "#FF9800" },
-      { name: "Trashed Stock Value", value: data.trashed, color: "#F44336" },
+      { name: "Disposed Stock Value", value: data.disposed, color: "#F44336" },
       { name: "Error Stock Value", value: data.errors, color: "#9E9E9E" },
     ];
   };

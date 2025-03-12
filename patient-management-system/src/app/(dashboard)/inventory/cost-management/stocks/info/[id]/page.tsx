@@ -7,7 +7,7 @@ interface DrugModelStats {
   available: { quantity: number; value: number };
   sold: { quantity: number; value: number };
   expired: { quantity: number; value: number };
-  trashed: { quantity: number; value: number };
+  disposed: { quantity: number; value: number };
   errors: { quantity: number; value: number };
 }
 
@@ -48,9 +48,9 @@ export default async function DrugDetailByModel({
           className="bg-orange-400"
         />
         <StatCard
-          title="Trashed"
-          quantity={stats.trashed.quantity}
-          value={stats.trashed.value}
+          title="Disposed"
+          quantity={stats.disposed.quantity}
+          value={stats.disposed.value}
           className="bg-red-500"
         />
         <StatCard

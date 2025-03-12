@@ -967,11 +967,11 @@ export async function getBatchData(batchId: number) {
 
 export async function handleConfirmationOfBatchStatusChange(
   batchId: number,
-  action: "completed" | "trashed"
+  action: "completed" | "disposed"
 ): Promise<myError> {
   if (!batchId) return { success: false, message: "Batch ID not provided" };
 
-  const newStatus = action === "completed" ? "COMPLETED" : "TRASHED";
+  const newStatus = action === "completed" ? "COMPLETED" : "DISPOSED";
 
   try {
     await prisma.batch.update({
@@ -1381,7 +1381,7 @@ export async function getStockAnalysis(
       available: 0, // Will store available quantity value
       sold: 0, // Will store sold quantity value
       expired: 0, // Will store expired quantity value
-      trashed: 0, // Will store trashed quantity value
+      disposed: 0, // Will store disposed quantity value
       errors: 0, // Will store error quantity value
     };
 
@@ -1422,11 +1422,11 @@ export async function getStockAnalysis(
             (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
           break;
 
-        case "TRASHED":
-          // For trashed status:
-          // - trashed = remainingQuantity * price
+        case "DISPOSED":
+          // For disposed status:
+          // - disposed = remainingQuantity * price
           // - sold = (fullAmount - remainingQuantity) * price
-          analysis.trashed += batch.remainingQuantity * pricePerUnit;
+          analysis.disposed += batch.remainingQuantity * pricePerUnit;
           if (batch.fullAmount > batch.remainingQuantity) {
             analysis.sold +=
               (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
@@ -1866,7 +1866,7 @@ export async function getDrugModelStats(drugId: number) {
       available: { quantity: 0, value: 0 },
       sold: { quantity: 0, value: 0 },
       expired: { quantity: 0, value: 0 },
-      trashed: { quantity: 0, value: 0 },
+      disposed: { quantity: 0, value: 0 },
       errors: { quantity: 0, value: 0 },
     };
 
@@ -1901,9 +1901,9 @@ export async function getDrugModelStats(drugId: number) {
           stats.sold.value +=
             (batch.fullAmount - batch.remainingQuantity) * batch.retailPrice;
           break;
-        case "TRASHED":
-          stats.trashed.quantity += batch.remainingQuantity;
-          stats.trashed.value += batch.remainingQuantity * batch.retailPrice;
+        case "DISPOSED":
+          stats.disposed.quantity += batch.remainingQuantity;
+          stats.disposed.value += batch.remainingQuantity * batch.retailPrice;
           if (batch.fullAmount > batch.remainingQuantity) {
             stats.sold.value +=
               (batch.fullAmount - batch.remainingQuantity) * batch.retailPrice;
