@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { DrugModelsWithBufferLevel } from "@/app/lib/definitions";
 import { updateDrugBufferLevel } from "@/app/lib/actions";
+import { handleServerAction } from "@/app/lib/utils";
 
 interface DrugModelCardProps {
   drug: DrugModelsWithBufferLevel;
@@ -37,14 +38,38 @@ export function DrugModelCard({
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const parsedLevel = parseInt(newBufferLevel);
     if (!isNaN(parsedLevel) && parsedLevel >= 0 && onBufferLevelChange) {
       onBufferLevelChange(drug.id, parsedLevel);
     }
     setIsLoading(true);
 
-    const result = updateDrugBufferLevel(drug.id, parsedLevel);
+    try {
+      // Use handleServerAction to call the server action with toast notifications
+      const result = await handleServerAction(
+        () => updateDrugBufferLevel(drug.id, parsedLevel),
+        {
+          loadingMessage: "Updating buffer level...",
+          position: "bottom-right",
+        }
+      );
+
+      if (result && result.success) {
+        // Call the parent callback if provided
+        if (onBufferLevelChange) {
+          onBufferLevelChange(drug.id, parsedLevel);
+        }
+
+        // Close the dialog
+        setIsOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to update buffer level:", error);
+      // No need for extra toast here as handleServerAction already handles errors
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Determine status and styles

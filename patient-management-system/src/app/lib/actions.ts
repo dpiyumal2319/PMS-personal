@@ -2054,9 +2054,20 @@ export async function deleteMedicalCertificate(id: number) {
   }
 }
 
-export async function getDrugModelsWithBufferLevel() {
+export async function getDrugModelsWithBufferLevel(
+  searchQuery?: string,
+  selection?: string
+) {
   try {
     const drugs = await prisma.drug.findMany({
+      where: searchQuery
+        ? {
+            name: {
+              contains: searchQuery,
+              mode: "insensitive",
+            },
+          }
+        : undefined,
       include: {
         batch: {
           where: {
@@ -2069,7 +2080,7 @@ export async function getDrugModelsWithBufferLevel() {
         },
       },
     });
-    return drugs.map((drug) => ({
+    let results = drugs.map((drug) => ({
       id: drug.id,
       name: drug.name,
       bufferLevel: drug.Buffer,
@@ -2079,6 +2090,37 @@ export async function getDrugModelsWithBufferLevel() {
       ),
       fullAmount: drug.batch.reduce((sum, batch) => sum + batch.fullAmount, 0),
     }));
+
+    // Apply sorting based on selection
+    if (selection) {
+      switch (selection) {
+        case "buffer-reached":
+          results.sort((a, b) => {
+            const aReached = a.availableAmount >= a.bufferLevel;
+            const bReached = b.availableAmount >= b.bufferLevel;
+            return (bReached ? 1 : 0) - (aReached ? 1 : 0);
+          });
+          break;
+        case "buffer-far":
+          results.sort((a, b) => {
+            const aPercentage =
+              a.bufferLevel > 0 ? a.availableAmount / a.bufferLevel : 0;
+            const bPercentage =
+              b.bufferLevel > 0 ? b.availableAmount / b.bufferLevel : 0;
+            return aPercentage - bPercentage;
+          });
+          break;
+        case "quantity-asc":
+          // Sort by available amount (low to high)
+          results.sort((a, b) => a.availableAmount - b.availableAmount);
+          break;
+        case "quantity-desc":
+          // Sort by available amount (high to low)
+          results.sort((a, b) => b.availableAmount - a.availableAmount);
+          break;
+      }
+    }
+    return results;
   } catch (error) {
     console.error("Failed to fetch drug models with buffer level:", error);
     throw new Error("Failed to fetch drug models with buffer level");
@@ -2109,6 +2151,9 @@ export async function updateDrugBufferLevel(
     };
   } catch (error) {
     console.error("Failed to update drug buffer level:", error);
-    throw new Error("Failed to update drug buffer level");
+    return {
+      success: false,
+      message: "Failed to update buffer level. Please try again.",
+    };
   }
 }
