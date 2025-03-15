@@ -64,7 +64,7 @@ export const DoctorLinks: SidebarItem[] = [
             },
             {
                 type: "link",
-                title: "Drug with Buffers",
+                title: "Drug Buffers",
                 url: "/inventory/buffer-level",
                 isActive: false,
             },
@@ -166,7 +166,7 @@ export const NurseLinks: SidebarItem[] = [
             },
             {
                 type: "link",
-                title: "Drug with Buffers",
+                title: "Drug Buffers",
                 url: "/inventory/buffer-level",
                 isActive: false,
             },
