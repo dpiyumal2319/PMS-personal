@@ -1,13 +1,19 @@
 import React from 'react';
 import {Card} from "@/components/ui/card";
 import {
-    Pill,
     Clock,
     Calendar,
     AlertCircle,
     Info,
-    X, FileText, Moon, Sun, Sunset, Milk, Tally3, Tally4, Tally2, Tally1
+    X, FileText, Moon, Sun, Sunset, Tally3, Tally4, Tally2, Tally1,
 } from "lucide-react";
+import {FaPills, FaCapsules, FaWineBottle, FaEyeDropper, FaAssistiveListeningSystems} from 'react-icons/fa';
+import {MdOutlineHealing} from 'react-icons/md';
+import {GiPowder, GiNoseFront, GiLiquidSoap, GiMedicinePills, GiSyringe} from 'react-icons/gi';
+import {BsPatchCheck, BsCupStraw} from 'react-icons/bs';
+import {TbBottle} from 'react-icons/tb';
+import {CgPill, CgSmileMouthOpen} from 'react-icons/cg';
+import {BiSolidFlask} from 'react-icons/bi';
 import {Button} from "@/components/ui/button";
 import {IssuingStrategy, MEAL} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
@@ -24,6 +30,7 @@ import {
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
+import {FaSprayCan} from "react-icons/fa6";
 
 
 export interface StrategyIconProps {
@@ -45,17 +52,53 @@ export interface StrategyDetailsProps {
 // Tablet or Syrup
 export const DrugIcon: React.FC<{ drugType: DrugType }> = ({drugType}) => {
     switch (drugType) {
-        case 'Tablet':
-            return <Pill
-                className="text-green-600"
-                size={20}
-            />;
-        case 'Syrup':
-            return <Milk className="text-blue-600" size={20}/>;
+        case 'TABLET':
+            return <FaPills className="text-green-600" size={20}/>;
+        case 'CAPSULE':
+            return <FaCapsules className="text-yellow-600" size={20}/>;
+        case 'SYRUP':
+            return <FaWineBottle className="text-blue-600" size={20}/>;
+        case 'EYE_DROP':
+            return <FaEyeDropper className="text-cyan-600" size={20}/>;
+        case 'EAR_DROP':
+            return <FaAssistiveListeningSystems className="text-purple-600" size={20}/>;
+        case 'NASAL_DROP':
+            return <GiNoseFront className="text-pink-600" size={20}/>;
+        case 'CREAM':
+            return <GiLiquidSoap className="text-orange-600" size={20}/>;
+        case 'OINTMENT':
+            return <GiLiquidSoap className="text-amber-600" size={20}/>;
+        case 'GEL':
+            return <GiLiquidSoap className="text-blue-400" size={20}/>;
+        case 'LOTION':
+            return <GiLiquidSoap className="text-teal-600" size={20}/>;
+        case 'INJECTION':
+            return <GiSyringe className="text-red-600" size={20}/>;
+        case 'INHALER':
+            return <GiNoseFront className="text-blue-500" size={20}/>;
+        case 'SPRAY':
+            return <FaSprayCan className="text-indigo-600" size={20}/>;
+        case 'LOZENGE':
+            return <GiMedicinePills className="text-pink-500" size={20}/>;
+        case 'SUPPOSITORY':
+            return <CgPill className="text-gray-600" size={20}/>;
+        case 'PATCH':
+            return <BsPatchCheck className="text-emerald-600" size={20}/>;
+        case 'POWDER':
+            return <GiPowder className="text-gray-500" size={20}/>;
+        case 'SOLUTION':
+            return <BiSolidFlask className="text-blue-300" size={20}/>;
+        case 'SUSPENSION':
+            return <TbBottle className="text-violet-500" size={20}/>;
+        case 'GARGLE':
+            return <BsCupStraw className="text-cyan-500" size={20}/>;
+        case 'MOUTHWASH':
+            return <CgSmileMouthOpen className="text-teal-500" size={20}/>;
         default:
-            return null;
+            return <MdOutlineHealing className="text-gray-600" size={20}/>;
     }
-}
+};
+
 
 const strategyIconMap: Record<IssuingStrategy, React.ComponentType<{ className?: string, size: number }>> = {
     [IssuingStrategy.TDS]: Tally3,
@@ -276,7 +319,8 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
                                         <span className="text-sm text-slate-500">{issue.details}</span>
                                     </div>
                                     <div className="text-sm text-slate-500">
-                                        Drug: {issue.drugName} • Concentration: {issue.concentration} mg/unit •
+                                        Drug: {issue.drugName} • Type: {issue.drugType.charAt(0).toUpperCase() + issue.drugType.slice(1).toLowerCase()}
+                                        • Concentration: {issue.concentration} mg/unit •
                                         Brand: {issue.brandName} • Quantity: {issue.quantity}
                                     </div>
                                     <StrategyDetails strategy={issue.strategy} details={issue}/>

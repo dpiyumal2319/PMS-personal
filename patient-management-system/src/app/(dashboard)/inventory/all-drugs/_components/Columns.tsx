@@ -1,5 +1,6 @@
 // components/drugs/columns.tsx
 import {ColumnDef} from "@tanstack/react-table";
+import {format} from "date-fns";
 import {Drug} from "../lib/types";
 import {DataTableColumnHeader} from "./ui/data-table-column-header";
 import {BatchStatus} from "@prisma/client";
@@ -11,14 +12,15 @@ export const columns: ColumnDef<Drug>[] = [
         header: ({column}) => (
             <DataTableColumnHeader column={column} title="Drug Name"/>
         ),
-        cell: ({row}) => <div className="font-medium">{row.getValue("name")}</div>,
+        cell: ({row}) => (
+            <div className="font-medium">{row.getValue("name")}</div>
+        ),
     },
     {
         accessorKey: "brandName",
         header: ({column}) => (
             <DataTableColumnHeader column={column} title="Brand"/>
         ),
-        // cell: ({ row }) => <div className="font-medium">{row.getValue("brand_name")}</div>,
     },
     {
         accessorKey: "supplierName",
@@ -39,7 +41,7 @@ export const columns: ColumnDef<Drug>[] = [
         ),
         cell: ({row}) => {
             const date = new Date(row.getValue("stockDate"));
-            return <div>{date.toLocaleDateString()}</div>;
+            return <div className="font-medium">{format(date, "MMM d, yyyy")}</div>;
         },
     },
     {
@@ -53,8 +55,8 @@ export const columns: ColumnDef<Drug>[] = [
             const isExpiringSoon = date < new Date(now.setMonth(now.getMonth() + 3)) && date > now;
 
             return (
-                <div className={isExpiringSoon ? "text-amber-500 font-medium" : ""}>
-                    {date.toLocaleDateString()}
+                <div className={`font-medium ${isExpiringSoon ? "text-amber-500" : ""}`}>
+                    {format(date, "MMM d, yyyy")}
                 </div>
             );
         },
@@ -64,9 +66,14 @@ export const columns: ColumnDef<Drug>[] = [
         header: ({column}) => (
             <DataTableColumnHeader column={column} title="Type"/>
         ),
-        cell: ({row}) => (
-            <div>{row.getValue("drugType")}</div>
-        ),
+        cell: ({row}) => {
+            const type = row.getValue("drugType") as string;
+            return (
+                <div className="font-medium capitalize">
+                    {type.toLowerCase()}
+                </div>
+            );
+        },
     },
     {
         accessorKey: "batchStatus",
@@ -74,24 +81,27 @@ export const columns: ColumnDef<Drug>[] = [
             <DataTableColumnHeader column={column} title="Status"/>
         ),
         cell: ({row}) => {
-            const status = row.getValue("batchStatus") as string;
+            const status = row.getValue("batchStatus") as BatchStatus;
             const badgeColors: Record<BatchStatus, keyof BasicColorType> = {
-                AVAILABLE: 'green',
-                COMPLETED: 'blue',
-                EXPIRED: 'yellow',
+                AVAILABLE: "green",
+                COMPLETED: "blue",
+                EXPIRED: "yellow",
                 QUALITY_FAILED: "violet",
-                DISPOSED: 'red'
-            }
+                DISPOSED: "red"
+            };
 
-            return (
-                <CustomBadge text={status} color={badgeColors[status as BatchStatus]}/>
-            );
+            return <CustomBadge text={status} color={badgeColors[status]} className={'text-xs'}/>;
         },
     },
     {
         accessorKey: "fullAmount",
         header: ({column}) => (
             <DataTableColumnHeader column={column} title="Full Amount"/>
+        ),
+        cell: ({row}) => (
+            <div className="font-medium text-right">
+                {row.getValue("fullAmount")}
+            </div>
         ),
     },
     {
@@ -104,15 +114,21 @@ export const columns: ColumnDef<Drug>[] = [
             const remainingAmount = row.getValue("remainingQuantity") as number;
             const percentage = (remainingAmount / fullAmount) * 100;
 
+            // Color based on remaining percentage
+            const barColor = percentage > 75 ? "bg-green-500" :
+                percentage > 25 ? "bg-blue-500" :
+                    "bg-amber-500";
+
             return (
-                <div className="flex items-center gap-2">
-                    <span>{remainingAmount}</span>
-                    <div className="w-16 h-2 bg-gray-200 rounded-full">
+                <div className="flex items-center gap-3">
+                    <span className="font-medium">{remainingAmount}</span>
+                    <div className="w-20 h-2 bg-gray-200 rounded-full">
                         <div
-                            className="h-full bg-blue-500 rounded-full"
+                            className={`h-full ${barColor} rounded-full transition-all duration-300`}
                             style={{width: `${percentage}%`}}
                         />
                     </div>
+                    <span className="text-xs text-gray-500">{Math.round(percentage)}%</span>
                 </div>
             );
         },
@@ -122,6 +138,10 @@ export const columns: ColumnDef<Drug>[] = [
         header: ({column}) => (
             <DataTableColumnHeader column={column} title="Concentration"/>
         ),
+        cell: ({row}) => (
+            <div className="font-medium">
+                {row.getValue("unitConcentration")}
+            </div>
+        ),
     },
 ];
-

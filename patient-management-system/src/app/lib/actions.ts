@@ -984,6 +984,7 @@ export async function handleConfirmationOfBatchStatusChange(
             data: {status: newStatus},
         });
 
+        revalidatePath(`/inventory/all-drugs/batch/${batchId}`);
         return {success: true, message: "Batch status updated successfully"};
     } catch (error) {
         console.error("Error updating batch status:", error);
