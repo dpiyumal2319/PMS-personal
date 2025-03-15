@@ -1,13 +1,9 @@
+import { DrugModelSuggestion } from "@/app/lib/definitions";
 import React from "react";
 
-interface Suggestion {
-  id: number;
-  name: string;
-}
-
 interface DrugSuggestionBoxProps {
-  suggestions: Suggestion[];
-  onSelect: (suggestion: Suggestion) => void;
+  suggestions: DrugModelSuggestion[];
+  onSelect: (suggestion: DrugModelSuggestion) => void;
   visible: boolean;
 }
 

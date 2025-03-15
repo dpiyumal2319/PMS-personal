@@ -240,6 +240,7 @@ export function DrugForm() {
       ...prev,
       drugId: suggestion.id,
       drugName: suggestion.name,
+      Buffer: suggestion.Buffer ?? 0,
     }));
     setShowDrugSuggestions(false);
   };
