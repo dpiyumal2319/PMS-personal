@@ -317,16 +317,16 @@ export type PrescriptionCard = {
     }>;
 }
 
-type QueueCountCacheType = {
+export type QueueCountCacheType = {
     dirty: boolean;
-    data: Awaited<ReturnType<typeof getPendingPatientsCount>>;
+    data: { doctorData: { total: number, pending: number }, nurseData: { total: number, pending: number } }
     timestamp: number;
     fetchPromise: Promise<Awaited<ReturnType<typeof getPendingPatientsCount>>> | null;
 }
 
 export const queueCountCache: QueueCountCacheType = {
     dirty: true,
-    data: {total: 0, pending: 0},
+    data: {doctorData: {total: 0, pending: 0}, nurseData: {total: 0, pending: 0}},
     timestamp: 0,
     fetchPromise: null
 };

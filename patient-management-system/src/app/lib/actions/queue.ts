@@ -340,8 +340,10 @@ export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
 
-export async function getPendingPatientsCount() {
-    const session = await verifySession();
+export async function getPendingPatientsCount(): Promise<{
+    doctorData: { total: number, pending: number },
+    nurseData: { total: number, pending: number }
+}> {
 
     const result = await prisma.queueEntry.findMany({
         where: {
@@ -351,24 +353,26 @@ export async function getPendingPatientsCount() {
         },
     });
 
-    return result.reduce(
-        (acc, {status}) => {
-            acc.total++;
-            if (
-                (session.role === 'DOCTOR' && status === 'PENDING') ||
-                (session.role === 'NURSE' && status === 'PRESCRIBED')
-            ) {
-                acc.pending++;
-            }
-            return acc;
-        },
-        {total: 0, pending: 0}
-    );
+    const counts: { doctorData: { total: number, pending: number }, nurseData: { total: number, pending: number } } = {
+        doctorData: {total: 0, pending: 0},
+        nurseData: {total: 0, pending: 0},
+    }
+
+    for (const entry of result) {
+        counts.doctorData.total++;
+        counts.nurseData.total++;
+        if (entry.status === 'PENDING') {
+            counts.doctorData.pending++;
+        } else if (entry.status === 'PRESCRIBED') {
+            counts.nurseData.pending++;
+        }
+    }
+    return counts;
 }
 
 export const getPendingPatientsCountCached = async () => {
     const now = Date.now();
-
+    const session = await verifySession();
     // Check if cache is expired by time
     if (now - queueCountCache.timestamp > CACHE_TTL) {
         invalidateQueueCountCache()
@@ -391,6 +395,6 @@ export const getPendingPatientsCountCached = async () => {
             queueCountCache.fetchPromise = null;
         }
     }
-
-    return queueCountCache.data;
+    console.log(queueCountCache);
+    return session.role === 'DOCTOR' ? queueCountCache.data.doctorData : queueCountCache.data.nurseData;
 };
