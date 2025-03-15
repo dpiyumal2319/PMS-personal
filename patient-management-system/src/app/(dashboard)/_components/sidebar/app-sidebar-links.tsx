@@ -64,6 +64,12 @@ export const DoctorLinks: SidebarItem[] = [
             },
             {
                 type: "link",
+                title: "Drug with Buffers",
+                url: "/inventory/buffer-level",
+                isActive: false,
+            },
+            {
+                type: "link",
                 title: "Cost Management",
                 url: "/inventory/cost-management",
                 isActive: false,
@@ -154,14 +160,14 @@ export const NurseLinks: SidebarItem[] = [
         items: [
             {
                 type: "link",
-                title: "Available Stocks",
-                url: "/inventory/available-stocks",
+                title: "Drug Stock",
+                url: "/inventory/all-drugs",
                 isActive: false,
             },
             {
                 type: "link",
-                title: "Completed Stocks",
-                url: "/inventory/completed-stocks",
+                title: "Drug with Buffers",
+                url: "/inventory/buffer-level",
                 isActive: false,
             },
         ],

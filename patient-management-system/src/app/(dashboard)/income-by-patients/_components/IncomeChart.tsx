@@ -74,6 +74,12 @@ const DailyIncomeChart = ({ incomeData }: DailyIncomeChartProps) => {
                 tick={{ fill: "#6B7280" }}
                 tickLine={{ stroke: "#9CA3AF" }}
                 axisLine={{ stroke: "#9CA3AF" }}
+                label={{
+                  value: "Date",
+                  position: "insideBottom",
+                  offset: -5,
+                  fill: "#6B7280",
+                }}
               />
               <YAxis
                 yAxisId="left"
@@ -81,6 +87,12 @@ const DailyIncomeChart = ({ incomeData }: DailyIncomeChartProps) => {
                 tickLine={{ stroke: "#9CA3AF" }}
                 axisLine={{ stroke: "#9CA3AF" }}
                 tickFormatter={(value) => `LKR ${value.toLocaleString()}`}
+                label={{
+                  angle: -90,
+                  position: "insideLeft",
+                  style: { textAnchor: "middle" },
+                  fill: "#6B7280",
+                }}
               />
               <YAxis
                 yAxisId="right"
@@ -88,6 +100,13 @@ const DailyIncomeChart = ({ incomeData }: DailyIncomeChartProps) => {
                 tick={{ fill: "#6B7280" }}
                 tickLine={{ stroke: "#9CA3AF" }}
                 axisLine={{ stroke: "#9CA3AF" }}
+                label={{
+                  value: "Number of Patients",
+                  angle: 90,
+                  position: "insideRight",
+                  style: { textAnchor: "middle" },
+                  fill: "#6B7280",
+                }}
               />
               <Tooltip
                 contentStyle={{

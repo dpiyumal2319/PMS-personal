@@ -1383,13 +1383,14 @@ export async function getStockAnalysis(
             },
         });
 
-        const analysis: StockAnalysis = {
-            available: 0, // Will store available quantity value
-            sold: 0, // Will store sold quantity value
-            expired: 0, // Will store expired quantity value
-            trashed: 0, // Will store trashed quantity value
-            errors: 0, // Will store error quantity value
-        };
+    const analysis: StockAnalysis = {
+      available: 0, // Will store available quantity value
+      sold: 0, // Will store sold quantity value
+      expired: 0, // Will store expired quantity value
+      disposed: 0, // Will store disposed quantity value
+      quality_failed: 0, // Will store quality failed quantity value
+      errors: 0, // Will store error quantity value
+    };
 
         batches.forEach((batch) => {
             const pricePerUnit = batch.retailPrice;
@@ -1417,27 +1418,37 @@ export async function getStockAnalysis(
                     }
                     break;
 
-                case "COMPLETED":
-                    // For completed status:
-                    // - If there's remaining quantity, it's an error
-                    // - sold = (fullAmount - remainingQuantity) * price
-                    if (batch.remainingQuantity > 0) {
-                        analysis.errors += batch.remainingQuantity * pricePerUnit;
-                    }
-                    analysis.sold +=
-                        (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
-                    break;
+        case "COMPLETED":
+          // For completed status:
+          // - If there's remaining quantity, it's an error
+          // - sold = (fullAmount - remainingQuantity) * price
+          if (batch.remainingQuantity > 0) {
+            analysis.errors += batch.remainingQuantity * pricePerUnit;
+          }
+          analysis.sold +=
+            (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+          break;
 
-                case 'DISPOSED':
-                    // For trashed status:
-                    // - trashed = remainingQuantity * price
-                    // - sold = (fullAmount - remainingQuantity) * price
-                    analysis.trashed += batch.remainingQuantity * pricePerUnit;
-                    if (batch.fullAmount > batch.remainingQuantity) {
-                        analysis.sold +=
-                            (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
-                    }
-                    break;
+        case "DISPOSED":
+          // For disposed status:
+          // - disposed = remainingQuantity * price
+          // - sold = (fullAmount - remainingQuantity) * price
+          analysis.disposed += batch.remainingQuantity * pricePerUnit;
+          if (batch.fullAmount > batch.remainingQuantity) {
+            analysis.sold +=
+              (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+          }
+          break;
+        case "QUALITY_FAILED":
+          // For quality failed status:
+          // - quality_failed = remainingQuantity * price
+          // - sold = (fullAmount - remainingQuantity) * price
+          analysis.quality_failed += batch.remainingQuantity * pricePerUnit;
+          if (batch.fullAmount > batch.remainingQuantity) {
+            analysis.sold +=
+              (batch.fullAmount - batch.remainingQuantity) * pricePerUnit;
+          }
+          break;
 
                 default:
                     // Any unknown status, count as error
@@ -2034,4 +2045,108 @@ export async function deleteMedicalCertificate(id: number) {
         console.error("Failed to delete certificate:", error);
         throw new Error("Failed to delete certificate");
     }
+}
+
+export async function getDrugModelsWithBufferLevel(
+  searchQuery?: string,
+  selection?: string
+) {
+  try {
+    const drugs = await prisma.drug.findMany({
+      where: searchQuery
+        ? {
+            name: {
+              contains: searchQuery,
+              mode: "insensitive",
+            },
+          }
+        : undefined,
+      include: {
+        batch: {
+          where: {
+            status: "AVAILABLE",
+          },
+          select: {
+            remainingQuantity: true,
+            fullAmount: true,
+          },
+        },
+      },
+    });
+    const results = drugs.map((drug) => ({
+      id: drug.id,
+      name: drug.name,
+      bufferLevel: drug.Buffer,
+      availableAmount: drug.batch.reduce(
+        (sum, batch) => sum + batch.remainingQuantity,
+        0
+      ),
+      fullAmount: drug.batch.reduce((sum, batch) => sum + batch.fullAmount, 0),
+    }));
+
+    // Apply sorting based on selection
+    if (selection) {
+      switch (selection) {
+        case "buffer-reached":
+          results.sort((a, b) => {
+            const aReached = a.availableAmount >= a.bufferLevel;
+            const bReached = b.availableAmount >= b.bufferLevel;
+            return (bReached ? 1 : 0) - (aReached ? 1 : 0);
+          });
+          break;
+        case "buffer-far":
+          results.sort((a, b) => {
+            const aPercentage =
+              a.bufferLevel > 0 ? a.availableAmount / a.bufferLevel : 0;
+            const bPercentage =
+              b.bufferLevel > 0 ? b.availableAmount / b.bufferLevel : 0;
+            return aPercentage - bPercentage;
+          });
+          break;
+        case "quantity-asc":
+          // Sort by available amount (low to high)
+          results.sort((a, b) => a.availableAmount - b.availableAmount);
+          break;
+        case "quantity-desc":
+          // Sort by available amount (high to low)
+          results.sort((a, b) => b.availableAmount - a.availableAmount);
+          break;
+      }
+    }
+    return results;
+  } catch (error) {
+    console.error("Failed to fetch drug models with buffer level:", error);
+    throw new Error("Failed to fetch drug models with buffer level");
+  }
+}
+
+export async function updateDrugBufferLevel(
+  drugId: number,
+  newBufferLevel: number
+) {
+  try {
+    if (!drugId || drugId <= 0) {
+      return { success: false, message: "Invalid drug ID" };
+    }
+    if (newBufferLevel < 0) {
+      return { success: false, message: "Buffer level cannot be negative" };
+    }
+    const updatedDrug = await prisma.drug.update({
+      where: { id: drugId },
+      data: { Buffer: newBufferLevel },
+    });
+
+    revalidatePath("/inventory/buffer-level");
+    return {
+      success: true,
+      message: `Buffer level for ${updatedDrug.name} updated to ${newBufferLevel}`,
+      drug: updatedDrug,
+    };
+  } catch (error) {
+    console.error("Failed to update drug buffer level:", error);
+    return {
+      success: false,
+      message: "Failed to update buffer level. Please try again.",
+    };
+  }
 }
