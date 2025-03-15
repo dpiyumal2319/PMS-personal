@@ -4,6 +4,8 @@ import {Drugs} from './_components/Drugs';
 import {DashboardHeader} from './_components/ui/dashboard-header';
 import {SearchAndSort} from './_components/SearchAndSort';
 import {BatchStatus, DrugType} from '@prisma/client';
+import {TableBody, TableHead, TableHeader, TableRow, Table, TableCell} from "@/components/ui/table";
+import {Skeleton} from "@/components/ui/skeleton";
 
 interface SearchParams {
     page?: string;
@@ -28,7 +30,7 @@ export default async function DrugsPage({
     const params = await Promise.resolve(searchParams);
 
     const page = params.page ? parseInt(params.page) : 1;
-    const per_page = params.per_page ? parseInt(params.per_page) : 10;
+    const per_page = params.per_page ? parseInt(params.per_page) : 15;
     const sort = params.sort || 'stockDate:desc';
 
     // Extract and convert filter parameters
@@ -66,13 +68,43 @@ export default async function DrugsPage({
 }
 
 function DrugsTableSkeleton() {
+    // Create array for columns (adjust number based on your actual table)
+    const columnCount = 6;
+
     return (
-        <div className="rounded-md border border-input">
-            <div className="p-4 space-y-4">
-                {Array.from({length: 5}).map((_, i) => (
-                    <div key={i} className="w-full h-12 bg-muted animate-pulse rounded-md"/>
-                ))}
-            </div>
+        <div className="rounded-md border shadow-sm overflow-hidden">
+            <Table className="w-full border-collapse">
+                <TableHeader>
+                    <TableRow className="divide-x divide-gray-200">
+                        {Array.from({length: columnCount}).map((_, i) => (
+                            <TableHead
+                                key={i}
+                                className="whitespace-nowrap py-3 text-xs font-medium border-r border-gray-200 last:border-r-0"
+                            >
+                                <Skeleton className="h-4 w-full mx-auto"/>
+                            </TableHead>
+                        ))}
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {Array.from({length: 5}).map((_, rowIndex) => (
+                        <TableRow
+                            key={rowIndex}
+                            className="divide-x divide-gray-200"
+                        >
+                            {Array.from({length: columnCount}).map((_, cellIndex) => (
+                                <TableCell
+                                    key={cellIndex}
+                                    className="py-3 px-4 border-b border-gray-100 border-r last:border-r-0"
+                                >
+                                    <Skeleton
+                                        className={`h-4 w-${cellIndex === 0 ? '12' : Math.floor(Math.random() * 24) + 12}`}/>
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     );
 }

@@ -1,16 +1,16 @@
 // components/drugs/drugs.tsx
-import { fetchDrugs } from '../lib/data';
-import { DataTable } from './ui/data-table';
-import { Pagination } from './ui/pagination';
-import { BatchStatus, DrugType } from '@prisma/client';
-import { FetchDrugsParams } from '../lib/types';
+import {fetchDrugs} from '../lib/data';
+import {DataTable} from './ui/data-table';
+import {Pagination} from './ui/pagination';
+import {BatchStatus, DrugType} from '@prisma/client';
+import {FetchDrugsParams} from '../lib/types';
 
 export async function Drugs({
-    page = 1, 
-    per_page = 10, 
-    sort = 'expiry:asc', 
-    filters = {}
-}: {
+                                page = 1,
+                                per_page = 10,
+                                sort = 'expiry:asc',
+                                filters = {}
+                            }: {
     page?: number;
     per_page?: number;
     sort?: string;
@@ -33,12 +33,11 @@ export async function Drugs({
     };
 
     const {data, totalPages} = await fetchDrugs({
-        page, 
-        per_page, 
-        sort, 
+        page,
+        per_page,
+        sort,
         filters: processedFilters
     });
-
 
 
     return (
