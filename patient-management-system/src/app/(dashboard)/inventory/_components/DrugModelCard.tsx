@@ -24,6 +24,7 @@ import {updateDrugBufferLevel} from "@/app/lib/actions";
 import {handleServerAction} from "@/app/lib/utils";
 import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {Button} from "@/components/ui/button";
+import {ChevronDown, ChevronUp} from "lucide-react";
 
 interface DrugModelCardProps {
     drug: DrugModelsWithBufferLevel;
@@ -164,22 +165,14 @@ export function DrugModelCard({
                     <div className="flex items-center mt-2">
                         {drug.availableAmount < drug.bufferLevel ? (
                             <div className="flex items-center text-red-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none"
-                                     viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-                                </svg>
+                                <ChevronDown/>
                                 <span className="text-xs">
                                     {drug.bufferLevel - drug.availableAmount} units below buffer
                                 </span>
                             </div>
                         ) : (
                             <div className="flex items-center text-green-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none"
-                                     viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                                </svg>
+                                <ChevronUp/>
                                 <span className="text-xs">
                                     {drug.availableAmount - drug.bufferLevel} units above buffer
                                 </span>
