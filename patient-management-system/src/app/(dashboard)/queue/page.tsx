@@ -20,7 +20,7 @@ export default async function Page(props: {
     const currentPage = Number(searchParams?.page) || 1;
 
     return (
-        <div className="p-4  flex flex-col items-center justify-between flex-grow">
+        <div className="flex flex-col flex-1 h-full p-4 overflow-y-auto items-center justify-between">
             <div className=" min-h-52 flex flex-col w-4/5">
                 <div className={'flex justify-end mb-2.5'}>
                 <AddQueue/>

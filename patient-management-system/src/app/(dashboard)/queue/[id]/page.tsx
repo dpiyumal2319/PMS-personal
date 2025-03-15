@@ -23,10 +23,10 @@ export default async function page({
     return (
         <div
             className={
-                "flex-grow p-2 flex flex-col items-center justify-between"
+                "flex flex-col flex-1 h-full p-4 overflow-y-auto items-center"
             }
         >
-            <div className={"w-4/5 pt-4"}>
+            <div className={"w-4/5"}>
                 <div>
                     <Suspense fallback={<CardSet number={3}/>}>
                         <CardWrapper id={id}/>
