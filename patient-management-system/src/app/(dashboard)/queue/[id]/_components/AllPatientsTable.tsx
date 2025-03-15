@@ -22,6 +22,7 @@ import {
 } from "@/app/(dashboard)/queue/[id]/_components/TableButtons";
 import { CustomBadge } from "@/app/(dashboard)/_components/CustomBadge";
 import AddPatientButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
+import {formatDistanceToNow} from "date-fns";
 
 type Patients = Awaited<ReturnType<typeof queuePatients>>;
 
@@ -140,7 +141,7 @@ export default function AllPatientsTable({ id }: { id: number }) {
                         <TableHead>Name</TableHead>
                         <TableHead>Sex</TableHead>
                         <TableHead>Age</TableHead>
-                        <TableHead>Arrive At</TableHead>
+                        <TableHead>Arrived</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -172,7 +173,7 @@ export default function AllPatientsTable({ id }: { id: number }) {
                                 <TableCell>Unknown</TableCell>
                             )}
                             <TableCell>
-                                {new Date(patient.time).toLocaleTimeString()}
+                                {formatDistanceToNow(new Date(patient.time), { addSuffix: true })}
                             </TableCell>
                             <TableCell className="flex justify-start items-center gap-2">
                                 {role === "DOCTOR" &&
