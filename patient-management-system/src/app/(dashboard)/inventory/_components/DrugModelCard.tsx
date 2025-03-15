@@ -100,7 +100,7 @@ export function DrugModelCard({
     const styles = getStyles();
 
     const maxRef = Math.max(drug.fullAmount, drug.bufferLevel)
-    const stockPercentage = (drug.availableAmount / maxRef) * 100;
+    const stockPercentage = ((drug.availableAmount / maxRef) * 100).toFixed(2);
 
     return (
         <Card className="border border-gray-200 shadow-sm rounded-lg overflow-hidden">
