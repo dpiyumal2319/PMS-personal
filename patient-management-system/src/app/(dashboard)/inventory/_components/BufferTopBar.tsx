@@ -9,27 +9,27 @@ import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
 // Commented out because it is not being used
 export default function BufferTopbar() {
-  // const searchParams = useSearchParams();
+    // const searchParams = useSearchParams();
 
-  //   const selection = searchParams.get("selection") || defaultSelection;
+    //   const selection = searchParams.get("selection") || defaultSelection;
 
-  return (
-    <div className="px-4 py-2 bg-white border-b shadow-md flex gap-4 overflow-x-auto h-14">
-      <SearchPanel
-        placeholder="Search by Name"
-        //   defaultValue={query}
-      />
+    return (
+        <div className="px-4 py-2 bg-white border-b shadow-md flex gap-4 overflow-x-auto h-14">
+            <SearchPanel
+                placeholder="Search by Name"
+                //   defaultValue={query}
+            />
 
-      <Dropdown
-        items={[
-          { label: "Buffer Level Reached", value: "buffer-reached" },
-          { label: "Buffer Level Far", value: "buffer-far" },
-          { label: "Low to High Quantity", value: "quantity-asc" },
-          { label: "High to Low Quantity", value: "quantity-desc" },
-        ]}
-        urlParameterName="selection"
-        //   defaultValue={selection}
-      />
-    </div>
-  );
+            <Dropdown
+                items={[
+                    {label: "Buffered", value: "buffered"},
+                    {label: "Stocked", value: "stocked"},
+                    {label: "Low to High Quantity", value: "quantity-asc"},
+                    {label: "High to Low Quantity", value: "quantity-desc"},
+                ]}
+                urlParameterName="selection"
+                //   defaultValue={selection}
+            />
+        </div>
+    );
 }

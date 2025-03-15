@@ -289,7 +289,7 @@ export interface DrugModelsWithBufferLevel {
   name: string;
   bufferLevel: number;
   availableAmount: number;
-  fullAmount?: number;
+  fullAmount: number;
 }
 
 

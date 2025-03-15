@@ -22,6 +22,8 @@ import {Input} from "@/components/ui/input";
 import {DrugModelsWithBufferLevel} from "@/app/lib/definitions";
 import {updateDrugBufferLevel} from "@/app/lib/actions";
 import {handleServerAction} from "@/app/lib/utils";
+import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import {Button} from "@/components/ui/button";
 
 interface DrugModelCardProps {
     drug: DrugModelsWithBufferLevel;
@@ -78,31 +80,27 @@ export function DrugModelCard({
             return {
                 headerBg: "bg-gray-300",
                 statusText: "Out of Stock",
-                textColor: "text-gray-600",
+                badgeColor: 'gray' as keyof BasicColorType,
             };
         } else if (drug.availableAmount <= drug.bufferLevel) {
             return {
                 headerBg: "bg-red-100",
                 statusText: "Low Stock",
-                textColor: "text-red-600",
+                badgeColor: 'red' as keyof BasicColorType
             };
         } else {
             return {
-                headerBg: "bg-green-100",
+                headerBg: "bg-emerald-100",
                 statusText: "In Stock",
-                textColor: "text-green-600",
+                badgeColor: 'emerald' as keyof BasicColorType
             };
         }
     };
 
     const styles = getStyles();
-    const stockPercentage =
-        drug.fullAmount && drug.fullAmount > 0
-            ? Math.min(
-                100,
-                Math.round((drug.availableAmount / drug.fullAmount) * 100)
-            )
-            : 0; // Default to 0% if fullAmount is undefined or zero
+
+    const maxRef = Math.max(drug.fullAmount, drug.bufferLevel)
+    const stockPercentage = (drug.availableAmount / maxRef) * 100;
 
     return (
         <Card className="border border-gray-200 shadow-sm rounded-lg overflow-hidden">
@@ -111,54 +109,94 @@ export function DrugModelCard({
                     <CardTitle className="text-base font-semibold text-gray-800">
                         {drug.name}
                     </CardTitle>
-                    <span className={`text-sm font-medium ${styles.textColor}`}>
-            {styles.statusText}
-          </span>
+                    <CustomBadge text={styles.statusText} className="ml-2" color={styles.badgeColor} inverse/>
                 </div>
             </CardHeader>
 
             <CardContent className="px-4 py-3 grid grid-cols-2 gap-4 text-gray-700">
                 <div>
-          <span className="text-xs font-medium uppercase text-gray-500">
-            Available
-          </span>
-                    <p className="text-lg font-semibold">{drug.availableAmount}</p>
+                    <span className="text-sm font-medium text-gray-500">
+                        Available / Stocked
+                    </span>
+                    <p className="text-lg font-semibold">{drug.availableAmount} / {drug.fullAmount}</p>
                 </div>
                 <div>
-          <span className="text-xs font-medium uppercase text-gray-500">
-            Buffer Level
-          </span>
+                    <span className="text-sm font-medium uppercase text-gray-500">
+                        Buffer Level
+                    </span>
                     <p className="text-lg font-semibold">{drug.bufferLevel}</p>
                 </div>
-                {/* Stock Level Bar */}
-                {/* Stock level visual indicator */}
-                <div>
+
+                {/* Enhanced Stock Level Bar */}
+                <div className="col-span-2">
                     <div className="flex justify-between items-center mb-1 text-xs text-gray-500">
                         <span>Stock Level</span>
                         <span>{stockPercentage}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+
+                    {/* Stock bar container with relative positioning */}
+                    <div className="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                        {/* Progress bar */}
                         <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
+                            className={`h-4 rounded-full transition-all duration-300 ${
                                 drug.availableAmount === 0
                                     ? "bg-gray-400"
-                                    : drug.availableAmount <= drug.bufferLevel
-                                        ? "bg-red-400"
-                                        : "bg-green-400"
+                                    : drug.availableAmount < drug.bufferLevel
+                                        ? "bg-red-500"
+                                        : "bg-emerald-500"
                             }`}
                             style={{width: `${stockPercentage}%`}}
-                        ></div>
+                        >
+                            {/* Buffer level indicator inside the progress bar */}
+                            {drug.bufferLevel > 0 && drug.fullAmount > 0 && (
+                                <div
+                                    className="absolute top-0 bottom-0 w-1 bg-black"
+                                    style={{
+                                        left: `${Math.min(100, (drug.bufferLevel / maxRef) * 100)}%`,
+                                        height: '100%',
+                                    }}
+                                ></div>
+                            )}
+                        </div>
                     </div>
+
+                    {/* Buffer status indicator */}
+                    <div className="flex items-center mt-2">
+                        {drug.availableAmount < drug.bufferLevel ? (
+                            <div className="flex items-center text-red-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none"
+                                     viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                </svg>
+                                <span className="text-xs">
+                                    {drug.bufferLevel - drug.availableAmount} units below buffer
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center text-green-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none"
+                                     viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                                </svg>
+                                <span className="text-xs">
+                                    {drug.availableAmount - drug.bufferLevel} units above buffer
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                    {/*<EnhancedStockLevelIndicator drug={drug}/>*/}
                 </div>
             </CardContent>
 
             <CardFooter className="px-4 py-3">
                 <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                     <AlertDialogTrigger asChild>
-                        <button
-                            className="w-full py-2 px-4 rounded bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium shadow-md transition-all duration-200">
+                        <Button
+                            className="w-full">
                             Adjust Buffer
-                        </button>
+                        </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
