@@ -76,12 +76,12 @@ model DrugBrand {
 }
 
 model Drug {
-  id           Int            @id @default(autoincrement())
-  name         String
-  Buffer       Int
-  batch        Batch[]
-  BatchHistory BatchHistory[]
-  Issue        Issue[]
+  id               Int               @id @default(autoincrement())
+  name             String
+  Buffer           Int
+  batch            Batch[]
+  BatchHistory     BatchHistory[]
+  Issue            Issue[]
   stratergyHistory StratergyHistory?
 }
 
@@ -299,8 +299,27 @@ enum VisitStatus {
 }
 
 enum DrugType {
-  Tablet
-  Syrup
+  TABLET
+  CAPSULE
+  SYRUP
+  EYE_DROP
+  EAR_DROP
+  NASAL_DROP
+  CREAM
+  OINTMENT
+  GEL
+  LOTION
+  INJECTION
+  INHALER
+  SPRAY
+  LOZENGE
+  SUPPOSITORY
+  PATCH
+  POWDER
+  SOLUTION
+  SUSPENSION
+  GARGLE
+  MOUTHWASH
 }
 
 enum BatchStatus {

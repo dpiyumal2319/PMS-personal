@@ -18,12 +18,21 @@ const drugNames = [
 ]
 
 // Common concentrations in mg
-const tabletConcentrations = [100, 200, 250, 325, 400, 500, 600, 650, 750, 1000]
-const syrupConcentrations = [100, 125, 150, 200, 250] // mg/5ml typically
+const tabletConcentrations = [100, 200, 250, 325, 400, 500, 600, 650, 750, 1000];
+const capsuleConcentrations = [50, 100, 150, 200, 250, 300, 400, 500];
+const syrupConcentrations = [100, 125, 150, 200, 250]; // mg/5ml typically
+const dropConcentrations = [0.5, 1, 2, 5, 10]; // percentage or mg/ml
+const topicalConcentrations = [0.5, 1, 2, 5, 10, 15, 20]; // percentage
+const inhalationConcentrations = [50, 100, 200, 250, 500]; // mcg
+const injectionConcentrations = [10, 25, 50, 100, 250, 500]; // mg/ml
+const lozengeConcentrations = [5, 10, 15, 25]; // mg
+const suppositoryConcentrations = [25, 50, 100, 200]; // mg
+const patchConcentrations = [5, 10, 20, 30, 50]; // mcg/hour or mg
+const oralSolutionConcentrations = [50, 100, 125, 200, 250]; // mg/5ml or mg/ml
 
 async function createUnitConcentrations() {
     console.log('\n--- Creating Unit Concentrations ---')
-    const allConcentrations = [...new Set([...tabletConcentrations, ...syrupConcentrations])]
+    const allConcentrations = [...new Set([...tabletConcentrations, ...syrupConcentrations, ...dropConcentrations, ...topicalConcentrations, ...inhalationConcentrations, ...injectionConcentrations, ...lozengeConcentrations, ...suppositoryConcentrations, ...patchConcentrations, ...oralSolutionConcentrations])]
 
     for (const concentration of allConcentrations) {
         await prisma.unitConcentration.create({
@@ -42,7 +51,7 @@ async function createSuppliers() {
             data: {
                 name: faker.company.name(),
                 contact: faker.phone.number(),
-          
+
             }
         });
         console.log(`Created supplier: ${supplier.name}`);
@@ -105,22 +114,112 @@ async function createUsersAndPatients() {
 }
 
 async function generateBatchData(drugType: DrugType, createdAt: Date, supplierId: number) {
-    const expiryDate = new Date(createdAt)
-    expiryDate.setDate(expiryDate.getDate() + faker.number.int({min: 1, max: 730})) // 1 day to 2 years
+    const expiryDate = new Date(createdAt);
+    expiryDate.setDate(expiryDate.getDate() + faker.number.int({min: 1, max: 730})); // 1 day to 2 years
 
-    const concentrations = drugType === DrugType.Tablet ? tabletConcentrations : syrupConcentrations
-    const concentration = concentrations[Math.floor(Math.random() * concentrations.length)]
+    // Select appropriate concentration based on drug type
+    let concentrations;
+    switch (drugType) {
+        case DrugType.TABLET:
+            concentrations = tabletConcentrations;
+            break;
+        case DrugType.CAPSULE:
+            concentrations = capsuleConcentrations;
+            break;
+        case DrugType.SYRUP:
+            concentrations = syrupConcentrations;
+            break;
+        case DrugType.EYE_DROP:
+        case DrugType.EAR_DROP:
+        case DrugType.NASAL_DROP:
+            concentrations = dropConcentrations;
+            break;
+        case DrugType.CREAM:
+        case DrugType.OINTMENT:
+        case DrugType.GEL:
+        case DrugType.LOTION:
+            concentrations = topicalConcentrations;
+            break;
+        case DrugType.INJECTION:
+            concentrations = injectionConcentrations;
+            break;
+        case DrugType.INHALER:
+        case DrugType.SPRAY:
+            concentrations = inhalationConcentrations;
+            break;
+        case DrugType.LOZENGE:
+            concentrations = lozengeConcentrations;
+            break;
+        case DrugType.SUPPOSITORY:
+            concentrations = suppositoryConcentrations;
+            break;
+        case DrugType.PATCH:
+            concentrations = patchConcentrations;
+            break;
+        case DrugType.POWDER:
+            concentrations = tabletConcentrations; // Using tablet concentrations as a default
+            break;
+        case DrugType.SOLUTION:
+        case DrugType.SUSPENSION:
+        case DrugType.GARGLE:
+        case DrugType.MOUTHWASH:
+            concentrations = oralSolutionConcentrations;
+            break;
+        default:
+            concentrations = tabletConcentrations; // Fallback
+    }
 
-    const fullAmount = faker.number.int({min: 50, max: 1000})
-    const wholesalePrice = faker.number.float({min: 10, max: 100, fractionDigits: 2})
+    const concentration = concentrations[Math.floor(Math.random() * concentrations.length)];
 
-    // Get the concentration ID instead of the value
+    // Adjust fullAmount based on drug type
+    let minAmount = 50;
+    let maxAmount = 1000;
+
+    // Smaller quantities for certain drug types
+    if (drugType === DrugType.EYE_DROP ||
+        drugType === DrugType.EAR_DROP ||
+        drugType === DrugType.NASAL_DROP ||
+        drugType === DrugType.SPRAY) {
+        minAmount = 5;
+        maxAmount = 100;
+    } else if (drugType === DrugType.CREAM ||
+        drugType === DrugType.OINTMENT ||
+        drugType === DrugType.GEL ||
+        drugType === DrugType.LOTION) {
+        minAmount = 10;
+        maxAmount = 200;
+    } else if (drugType === DrugType.SUPPOSITORY ||
+        drugType === DrugType.PATCH) {
+        minAmount = 5;
+        maxAmount = 50;
+    }
+
+    const fullAmount = faker.number.int({min: minAmount, max: maxAmount});
+
+// Adjust pricing based on drug type
+    let minPrice = 10;
+    let maxPrice = 100;
+
+// Higher pricing for certain drug types
+    if (drugType === DrugType.INJECTION ||
+        drugType === DrugType.INHALER) {
+        minPrice = 50;
+        maxPrice = 300;
+    } else if (drugType === DrugType.PATCH ||
+        drugType === DrugType.SPRAY) {
+        minPrice = 30;
+        maxPrice = 200;
+    }
+
+    const wholesalePrice = faker.number.float({min: minPrice, max: maxPrice, fractionDigits: 2});
+
+    // Get the concentration ID
     const unitConcentration = await prisma.unitConcentration.findFirst({
         where: {concentration}
-    })
+    });
 
     if (!unitConcentration) {
-        throw new Error(`Concentration ${concentration} not found in database`)
+        throw new Error(`Concentration ${concentration} not found in database`);
     }
 
     return {
@@ -132,9 +231,9 @@ async function generateBatchData(drugType: DrugType, createdAt: Date, supplierId
         wholesalePrice,
         retailPrice: wholesalePrice * 1.3, // 30% markup
         status: BatchStatus.AVAILABLE,
-        unitConcentrationId: unitConcentration.id ,// Pass the ID instead of concentration value
+        unitConcentrationId: unitConcentration.id, // Pass the ID instead of concentration value
         supplierId
-    }
+    };
 }
 
 // Add this function to create a pool of pharmaceutical brands
@@ -157,39 +256,47 @@ async function createDrugBrands(count: number) {
 }
 
 async function createDrugsAndBatches() {
-    console.log('\n--- Creating Drugs and Batches ---')
+    console.log('\n--- Creating Drugs and Batches ---');
 
     // Create a pool of brands first (20 pharmaceutical companies)
     const allSuppliers = await createSuppliers(); // Get suppliers
-    const allBrands = await createDrugBrands(20)
+    const allBrands = await createDrugBrands(20);
 
     // Create drugs and their batches
     for (const drugName of drugNames) {
-        console.log(`\nProcessing drug: ${drugName}`)
+        console.log(`\nProcessing drug: ${drugName}`);
 
         // Create drug
         const drug = await prisma.drug.create({
-            data: {name: drugName,
-                Buffer: faker.number.int({ min: 10, max: 100 }) // Random buffer value
+            data: {
+                name: drugName,
+                Buffer: faker.number.int({min: 10, max: 100}) // Random buffer value
             }
-        })
-         console.log(`Created drug: ${drug.name} (ID: ${drug.id}, Buffer: ${drug.Buffer})`)
+        });
+        console.log(`Created drug: ${drug.name} (ID: ${drug.id}, Buffer: ${drug.Buffer})`);
 
         // Randomly select 2-4 brands that will manufacture this drug
-        const brandCount = faker.number.int({min: 2, max: 4})
-        const selectedBrands = faker.helpers.shuffle([...allBrands]).slice(0, brandCount)
+        const brandCount = faker.number.int({min: 2, max: 4});
+        const selectedBrands = faker.helpers.shuffle([...allBrands]).slice(0, brandCount);
 
         for (const brand of selectedBrands) {
-            console.log(`Assigning ${brand.name} to produce ${drugName}`)
+            console.log(`Assigning ${brand.name} to produce ${drugName}`);
 
             // Create 3-10 batches for each brand-drug combination
-            const batchCount = faker.number.int({min: 2, max: 5})
-            const syrupCount = faker.number.int({min: 0, max: 1}) // 0-2 syrups
+            const batchCount = faker.number.int({min: 2, max: 5});
+
+            // Randomly assign different drug types based on the drug
+            // Some drugs might appear in multiple forms (e.g., both TABLET and CAPSULE)
+            const drugFormCount = faker.number.int({min: 1, max: 3}); // How many different forms this drug has
+
+            // Select random drug types for this drug
+            const drugTypes = faker.helpers.shuffle(Object.values(DrugType)).slice(0, drugFormCount);
 
             for (let i = 0; i < batchCount; i++) {
-                const drugType = i < syrupCount ? DrugType.Syrup : DrugType.Tablet
+                // Distribute batches among the selected drug types
+                const drugType = drugTypes[i % drugTypes.length];
                 const supplier = faker.helpers.arrayElement(allSuppliers); // Random supplier
-                const batchData = await generateBatchData(drugType, new Date(),supplier.id)
+                const batchData = await generateBatchData(drugType, new Date(), supplier.id);
 
                 const batch = await prisma.batch.create({
                     data: {
@@ -197,9 +304,9 @@ async function createDrugsAndBatches() {
                         drugId: drug.id,
                         drugBrandId: brand.id
                     }
-                })
+                });
 
-                console.log(`Created batch: ${batch.number} (${batch.type}, Brand: ${brand.name})`)
+                console.log(`Created batch: ${batch.number} (${batch.type}, Brand: ${brand.name})`);
             }
         }
     }

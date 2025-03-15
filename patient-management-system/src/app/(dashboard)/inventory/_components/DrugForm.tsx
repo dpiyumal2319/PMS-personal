@@ -31,21 +31,21 @@ import CustomDrugTypeSelect from "@/app/(dashboard)/inventory/available-stocks/_
 import { SupplierSuggestionBox } from "@/app/(dashboard)/inventory/_components/SupplierSuggestionBox";
 
 export function DrugForm() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState<InventoryFormData>({
-    brandName: "",
-    drugName: "",
-    batchNumber: "",
-    drugType: "Tablet",
-    quantity: "",
-    expiry: "",
-    retailPrice: "",
-    wholesalePrice: "",
-    concentration: 0,
-    Buffer: 0,
-    supplierName: "",
-    supplierContact: "",
-  });
+    const [isOpen, setIsOpen] = useState(false);
+    const [formData, setFormData] = useState<InventoryFormData>({
+        brandName: "",
+        drugName: "",
+        batchNumber: "",
+        drugType: "TABLET",
+        quantity: "",
+        expiry: "",
+        retailPrice: "",
+        wholesalePrice: "",
+        concentration: 0,
+        Buffer: 0,
+        supplierName: "",
+        supplierContact: "",
+    });
 
   const [brandSuggestions, setBrandSuggestions] = useState<
     DrugBrandSuggestion[]
@@ -253,27 +253,27 @@ export function DrugForm() {
         loadingMessage: "Adding new item...",
       });
 
-      if (result.success) {
-        setIsOpen(false);
-        setFormData({
-          brandName: "",
-          drugName: "",
-          batchNumber: "",
-          drugType: "Tablet",
-          quantity: "",
-          expiry: "",
-          wholesalePrice: "",
-          retailPrice: "",
-          concentration: 0,
-          Buffer: 0,
-          supplierName: "",
-          supplierContact: "",
-        });
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
-  };
+            if (result.success) {
+                setIsOpen(false);
+                setFormData({
+                    brandName: "",
+                    drugName: "",
+                    batchNumber: "",
+                    drugType: "TABLET",
+                    quantity: "",
+                    expiry: "",
+                    wholesalePrice: "",
+                    retailPrice: "",
+                    concentration: 0,
+                    Buffer: 0,
+                    supplierName: "",
+                    supplierContact: "",
+                });
+            }
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        }
+    };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

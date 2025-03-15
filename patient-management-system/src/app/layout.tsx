@@ -23,8 +23,10 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className={montserrat.className}>
-        <body className={'bg-background h-screen flex'}>
-        {children}
+        <body className={'bg-background h-screen w-screen flex'}>
+        <div className={'w-full h-full'}>
+            {children}
+        </div>
         <ToastContainer/>
         </body>
         </html>

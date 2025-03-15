@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useState, useCallback, forwardRef, useEffect, useImperativeHandle  } from "react";
+import { useState, useCallback, forwardRef, useEffect, useImperativeHandle } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface FilterSectionProps {
@@ -18,14 +18,16 @@ interface FilterSectionProps {
     id: number;
     name: string;
   }[];
+  applyOnClick?: boolean;
 }
 
 export interface FilterSectionRef {
   reset: () => void;
+  getSelectedItems: () => { id: string; selectedItems: string[] };
 }
 
 export const FilterSection = forwardRef<FilterSectionRef, FilterSectionProps>(
-  ({ id, title, items }, ref) => {
+  ({ id, title, items, applyOnClick = true }, ref) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     
@@ -50,6 +52,8 @@ export const FilterSection = forwardRef<FilterSectionRef, FilterSectionProps>(
     );
 
     const updateUrlParams = useCallback((newSelectedItems: string[]) => {
+      if (!applyOnClick) return;
+      
       const current = new URLSearchParams(Array.from(searchParams.entries()));
       
       if (newSelectedItems.length > 0) {
@@ -62,7 +66,7 @@ export const FilterSection = forwardRef<FilterSectionRef, FilterSectionProps>(
       const query = search ? `?${search}` : "";
       
       router.push(`${window.location.pathname}${query}`, { scroll: false });
-    }, [router, searchParams, id]);
+    }, [router, searchParams, id, applyOnClick]);
 
     const handleSelectAll = () => {
       const newSelectedItems = allChecked 
@@ -86,12 +90,20 @@ export const FilterSection = forwardRef<FilterSectionRef, FilterSectionProps>(
     // Reset function to clear all selections
     const reset = useCallback(() => {
       setSelectedItems([]);
-      updateUrlParams([]);
-    }, [updateUrlParams]);
+      if (applyOnClick) {
+        updateUrlParams([]);
+      }
+    }, [updateUrlParams, applyOnClick]);
+    
+    // Function to get current selected items
+    const getSelectedItems = useCallback(() => {
+      return { id, selectedItems };
+    }, [id, selectedItems]);
 
     // Expose the reset function through the ref
     useImperativeHandle(ref, () => ({
-      reset
+      reset,
+      getSelectedItems
     }));
 
     return (
@@ -156,14 +168,11 @@ interface FilterSectionOnlyNameProps {
   id: string;
   title: string;
   items: string[];
-}
-
-export interface FilterSectionRef {
-  reset: () => void;
+  applyOnClick?: boolean;
 }
 
 export const FilterSectionOnlyName = forwardRef<FilterSectionRef, FilterSectionOnlyNameProps>(
-  ({ id, title, items }, ref) => {
+  ({ id, title, items, applyOnClick = true }, ref) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     
@@ -187,6 +196,8 @@ export const FilterSectionOnlyName = forwardRef<FilterSectionRef, FilterSectionO
     );
 
     const updateUrlParams = useCallback((newSelectedItems: string[]) => {
+      if (!applyOnClick) return;
+      
       const current = new URLSearchParams(Array.from(searchParams.entries()));
       
       if (newSelectedItems.length > 0) {
@@ -199,7 +210,7 @@ export const FilterSectionOnlyName = forwardRef<FilterSectionRef, FilterSectionO
       const query = search ? `?${search}` : "";
       
       router.push(`${window.location.pathname}${query}`, { scroll: false });
-    }, [router, searchParams, id]);
+    }, [router, searchParams, id, applyOnClick]);
 
     const handleSelectAll = () => {
       const newSelectedItems = allChecked ? [] : [...items];
@@ -220,12 +231,20 @@ export const FilterSectionOnlyName = forwardRef<FilterSectionRef, FilterSectionO
     const reset = useCallback(() => {
       console.log("Resetting", id);
       setSelectedItems([]);
-      updateUrlParams([]);
-    }, [id, updateUrlParams]);
+      if (applyOnClick) {
+        updateUrlParams([]);
+      }
+    }, [id, updateUrlParams, applyOnClick]);
+    
+    // Function to get current selected items
+    const getSelectedItems = useCallback(() => {
+      return { id, selectedItems };
+    }, [id, selectedItems]);
 
-    // Expose the reset function through the ref
+    // Expose functions through the ref
     useImperativeHandle(ref, () => ({
-      reset
+      reset,
+      getSelectedItems
     }));
 
     return (

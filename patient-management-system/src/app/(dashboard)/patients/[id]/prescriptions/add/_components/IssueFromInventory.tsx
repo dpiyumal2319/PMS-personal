@@ -508,6 +508,14 @@ const IssueFromInventory: React.FC<IssuesListProps> = ({onAddIssue}) => {
                 times: times || 0
             });
 
+            if (calculatedQuantity <= 0) {
+                setError("Invalid quantity");
+                return;
+            } else if (calculatedQuantity > selectedBrand.totalRemainingQuantity) {
+                setError(`Required quantity(${calculatedQuantity}) exceeds available stock(${selectedBrand.totalRemainingQuantity})`);
+                return;
+            }
+
             const newIssue: IssueInForm = {
                 strategy,
                 dose,
