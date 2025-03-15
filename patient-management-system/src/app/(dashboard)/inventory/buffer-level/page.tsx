@@ -9,7 +9,7 @@ export default async function BufferLevelPage({
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     // Extract query parameters
-  const awaitedSearchParams = await searchParams;
+    const awaitedSearchParams = await searchParams;
 
     const query =
         typeof awaitedSearchParams.query === "string" ? awaitedSearchParams.query : undefined;
@@ -22,10 +22,10 @@ export default async function BufferLevelPage({
     const drugs = await getDrugModelsWithBufferLevel(query, selection);
 
     return (
-        <div className="container mx-auto">
+        <div className="flex flex-col overflow-hidden h-full">
             <BufferTopBar/>
-            <div className="p-4">
-                <h1 className="text-2xl font-bold mb-6 text-primary-500">
+            <div className="flex flex-col flex-1 h-full p-4 overflow-y-auto">
+                <h1 className="text-2xl font-bold mb-6 text-primary-700">
                     Drug Buffer Levels
                 </h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
