@@ -1,7 +1,6 @@
 import type {LucideIcon} from "lucide-react";
 import {Role} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
-import {getPendingPatientsCount} from "@/app/lib/actions/queue";
 
 export type SessionPayload = {
     id: number;
@@ -316,21 +315,21 @@ export type PrescriptionCard = {
         };
     }>;
 }
-
-export type QueueCountCacheType = {
-    dirty: boolean;
-    data: { doctorData: { total: number, pending: number }, nurseData: { total: number, pending: number } }
-    timestamp: number;
-    fetchPromise: Promise<Awaited<ReturnType<typeof getPendingPatientsCount>>> | null;
-}
-
-export const queueCountCache: QueueCountCacheType = {
-    dirty: true,
-    data: {doctorData: {total: 0, pending: 0}, nurseData: {total: 0, pending: 0}},
-    timestamp: 0,
-    fetchPromise: null
-};
-
-export const invalidateQueueCountCache = () => {
-    queueCountCache.dirty = true;
-}
+//
+// type QueueCountCacheType = {
+//     dirty: boolean;
+//     data: Awaited<ReturnType<typeof getPendingPatientsCount>>;
+//     timestamp: number;
+//     fetchPromise: Promise<Awaited<ReturnType<typeof getPendingPatientsCount>>> | null;
+// }
+//
+// export const queueCountCache: QueueCountCacheType = {
+//     dirty: true,
+//     data: {total: 0, pending: 0},
+//     timestamp: 0,
+//     fetchPromise: null
+// };
+//
+// export const invalidateQueueCountCache = () => {
+//     queueCountCache.dirty = true;
+// }

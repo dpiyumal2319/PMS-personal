@@ -6,8 +6,8 @@ import {cn} from "@/lib/utils";
 import {SheetTrigger, Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription} from "@/components/ui/sheet";
 import {
     getActiveQueuePatients,
-    getPendingPatientsCountCached,
-    queuePatients
+    queuePatients,
+    getPendingPatientsCount
 } from "@/app/lib/actions/queue";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import PatientsList from "@/app/(dashboard)/_components/topbar/CompactPatientsList";
@@ -24,7 +24,7 @@ const PendingPatients = () => {
 
     const fetchPendingPatients = async () => {
         try {
-            const count = await getPendingPatientsCountCached();
+            const count = await getPendingPatientsCount();
             setPending(count);
         } catch (error) {
             console.error("Failed to fetch pending patients count:", error);

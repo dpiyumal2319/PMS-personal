@@ -1,13 +1,10 @@
 'use server'
 
-import {invalidateQueueCountCache, myError} from "@/app/lib/definitions";
+import {myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
 import {revalidatePath} from "next/cache";
 import {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 import {verifySession} from "@/app/lib/sessions";
-import {queueCountCache} from "@/app/lib/definitions";
-
-const CACHE_TTL = 60 * 1000 * 15; // 15 minutes
 
 
 export async function stopQueue(id: string | null): Promise<myError> {
@@ -53,7 +50,6 @@ export async function stopQueue(id: string | null): Promise<myError> {
                 status: "COMPLETED",
             },
         });
-        invalidateQueueCountCache()
         return {success: true, message: "Queue stopped successfully"};
     } catch (e) {
         console.error(e);
@@ -183,7 +179,6 @@ export async function removePatientFromQueue(
         });
 
         revalidatePath(`/queue/${queueId}`);
-        invalidateQueueCountCache()
         return {success: true, message: "Patient removed successfully"};
     } catch (e) {
         console.error(e);
@@ -256,7 +251,6 @@ export async function addPatientToQueue(
         });
 
         revalidatePath(`/queue/${queueId}`);
-        invalidateQueueCountCache()
         return {
             success: true,
             message: "Patient added to queue successfully",
@@ -302,7 +296,6 @@ export async function addQueue(): Promise<myError> {
             data: {},
         });
         revalidatePath("/queues");
-        invalidateQueueCountCache()
         return {success: true, message: "Queue created successfully"};
     } catch (e) {
         console.error(e);
@@ -340,10 +333,8 @@ export async function getTotalQueueCount() {
     return prisma.queue.count();
 }
 
-export async function getPendingPatientsCount(): Promise<{
-    doctorData: { total: number, pending: number },
-    nurseData: { total: number, pending: number }
-}> {
+export async function getPendingPatientsCount() {
+    const session = await verifySession();
 
     const result = await prisma.queueEntry.findMany({
         where: {
@@ -353,48 +344,17 @@ export async function getPendingPatientsCount(): Promise<{
         },
     });
 
-    const counts: { doctorData: { total: number, pending: number }, nurseData: { total: number, pending: number } } = {
-        doctorData: {total: 0, pending: 0},
-        nurseData: {total: 0, pending: 0},
-    }
-
-    for (const entry of result) {
-        counts.doctorData.total++;
-        counts.nurseData.total++;
-        if (entry.status === 'PENDING') {
-            counts.doctorData.pending++;
-        } else if (entry.status === 'PRESCRIBED') {
-            counts.nurseData.pending++;
-        }
-    }
-    return counts;
+    return result.reduce(
+        (acc, {status}) => {
+            acc.total++;
+            if (
+                (session.role === 'DOCTOR' && status === 'PENDING') ||
+                (session.role === 'NURSE' && status === 'PRESCRIBED')
+            ) {
+                acc.pending++;
+            }
+            return acc;
+        },
+        {total: 0, pending: 0}
+    );
 }
-
-export const getPendingPatientsCountCached = async () => {
-    const now = Date.now();
-    const session = await verifySession();
-    // Check if cache is expired by time
-    if (now - queueCountCache.timestamp > CACHE_TTL) {
-        invalidateQueueCountCache()
-    }
-
-    if (queueCountCache.dirty) {
-        // If there's already a fetch in progress, reuse that promise
-        if (!queueCountCache.fetchPromise) {
-            queueCountCache.fetchPromise = getPendingPatientsCount();
-        }
-
-        try {
-            queueCountCache.data = await queueCountCache.fetchPromise;
-            queueCountCache.dirty = false;
-            queueCountCache.timestamp = now;
-        } catch (error) {
-            console.error("Error fetching pending patients count:", error);
-            // Don't update timestamp on error to force retry
-        } finally {
-            queueCountCache.fetchPromise = null;
-        }
-    }
-    console.log(queueCountCache);
-    return session.role === 'DOCTOR' ? queueCountCache.data.doctorData : queueCountCache.data.nurseData;
-};
