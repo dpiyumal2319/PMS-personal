@@ -35,7 +35,8 @@ const PrescriptionIssueCard = ({issue}: { issue: IssueWithDetails }) => {
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                            <h3 className="font-semibold">{issue.drug.name} - {issue.unitConcentration.concentration} mg/unit</h3>
+                            <h3 className="font-semibold">{issue.drug.name} ({issue.type.charAt(0).toUpperCase() + issue.type.slice(1).toLowerCase()})
+                                - {issue.unitConcentration.concentration} mg/unit</h3>
                             <CustomBadge
                                 text={issue.strategy}
                                 color={cardStyles.badgeColor}
