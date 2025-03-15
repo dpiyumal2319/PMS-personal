@@ -1,17 +1,15 @@
 "use client";
 
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import SearchPanel from "@/app/(dashboard)/_components/Search";
 import Dropdown from "@/app/(dashboard)/_components/Dropdown";
 
-interface StockTopbarProps {
-  defaultSelection?: string;
-}
+// interface StockTopbarProps {
+//   defaultSelection?: string;
+// }
 
-export default function BufferTopbar({
-  defaultSelection = "buffer-reached",
-}: StockTopbarProps) {
-  const searchParams = useSearchParams();
+// Commented out because it is not being used
+export default function BufferTopbar() {
+  // const searchParams = useSearchParams();
 
   //   const selection = searchParams.get("selection") || defaultSelection;
 
