@@ -1,7 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
-import {ChevronDown, Check, Pill, Milk} from "lucide-react";
+import React, {useState, useRef, useEffect} from "react";
+import {ChevronDown, Check} from "lucide-react";
+import {DrugType} from "@prisma/client";
+import {FaPills, FaCapsules, FaWineBottle, FaEyeDropper, FaAssistiveListeningSystems, FaSprayCan} from 'react-icons/fa';
+import {GiNoseFront, GiLiquidSoap, GiSyringe, GiMedicinePills, GiPowder} from 'react-icons/gi';
+import {CgPill, CgSmileMouthOpen} from 'react-icons/cg';
+import {BsPatchCheck, BsCupStraw} from 'react-icons/bs';
+import {BiSolidFlask} from 'react-icons/bi';
+import {TbBottle} from 'react-icons/tb';
 
-export type DrugType = "Tablet" | "Syrup";
 
 interface Option {
     value: DrugType;
@@ -25,15 +31,110 @@ const CustomDrugTypeSelect: React.FC<CustomDrugTypeSelectProps> = ({
 
     const options: Option[] = [
         {
-            value: "Tablet",
+            value: "TABLET",
             label: "Tablet",
-            icon: <Pill className="w-4 h-4 text-green-600" />,
+            icon: <FaPills className="w-4 h-4 text-green-600"/>,
         },
         {
-            value: "Syrup",
-            label: "Syrup",
-            icon: <Milk className="w-4 h-4 text-blue-600" />,
+            value: "CAPSULE",
+            label: "Capsule",
+            icon: <FaCapsules className="w-4 h-4 text-yellow-600"/>,
         },
+        {
+            value: "SYRUP",
+            label: "Syrup",
+            icon: <FaWineBottle className="w-4 h-4 text-blue-600"/>,
+        },
+        {
+            value: "EYE_DROP",
+            label: "Eye Drop",
+            icon: <FaEyeDropper className="w-4 h-4 text-cyan-600"/>,
+        },
+        {
+            value: "EAR_DROP",
+            label: "Ear Drop",
+            icon: <FaAssistiveListeningSystems className="w-4 h-4 text-purple-600"/>,
+        },
+        {
+            value: "NASAL_DROP",
+            label: "Nasal Drop",
+            icon: <GiNoseFront className="w-4 h-4 text-pink-600"/>,
+        },
+        {
+            value: "CREAM",
+            label: "Cream",
+            icon: <GiLiquidSoap className="w-4 h-4 text-orange-600"/>,
+        },
+        {
+            value: "OINTMENT",
+            label: "Ointment",
+            icon: <GiLiquidSoap className="w-4 h-4 text-amber-600"/>,
+        },
+        {
+            value: "GEL",
+            label: "Gel",
+            icon: <GiLiquidSoap className="w-4 h-4 text-blue-400"/>,
+        },
+        {
+            value: "LOTION",
+            label: "Lotion",
+            icon: <GiLiquidSoap className="w-4 h-4 text-teal-600"/>,
+        },
+        {
+            value: "INJECTION",
+            label: "Injection",
+            icon: <GiSyringe className="w-4 h-4 text-red-600"/>,
+        },
+        {
+            value: "INHALER",
+            label: "Inhaler",
+            icon: <GiNoseFront className="w-4 h-4 text-blue-500"/>,
+        },
+        {
+            value: "SPRAY",
+            label: "Spray",
+            icon: <FaSprayCan className="w-4 h-4 text-indigo-600"/>,
+        },
+        {
+            value: "LOZENGE",
+            label: "Lozenge",
+            icon: <GiMedicinePills className="w-4 h-4 text-pink-500"/>,
+        },
+        {
+            value: "SUPPOSITORY",
+            label: "Suppository",
+            icon: <CgPill className="w-4 h-4 text-gray-600"/>,
+        },
+        {
+            value: "PATCH",
+            label: "Patch",
+            icon: <BsPatchCheck className="w-4 h-4 text-emerald-600"/>,
+        },
+        {
+            value: "POWDER",
+            label: "Powder",
+            icon: <GiPowder className="w-4 h-4 text-gray-500"/>,
+        },
+        {
+            value: "SOLUTION",
+            label: "Solution",
+            icon: <BiSolidFlask className="w-4 h-4 text-blue-300"/>,
+        },
+        {
+            value: "SUSPENSION",
+            label: "Suspension",
+            icon: <TbBottle className="w-4 h-4 text-violet-500"/>,
+        },
+        {
+            value: "GARGLE",
+            label: "Gargle",
+            icon: <BsCupStraw className="w-4 h-4 text-cyan-500"/>,
+        },
+        {
+            value: "MOUTHWASH",
+            label: "Mouthwash",
+            icon: <CgSmileMouthOpen className="w-4 h-4 text-teal-500"/>,
+        }
     ];
 
     useEffect(() => {
@@ -73,11 +174,12 @@ const CustomDrugTypeSelect: React.FC<CustomDrugTypeSelectProps> = ({
                         <span className="text-gray-500">Select Drug Type</span>
                     )}
                 </span>
-                <ChevronDown className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? "rotate-180" : ""}`}/>
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 w-full mt-1 rounded-md border bg-popover shadow-md animate-in fade-in-0 zoom-in-95">
+                <div
+                    className="absolute z-50 w-full mt-1 rounded-md border bg-popover shadow-md animate-in fade-in-0 zoom-in-95 max-h-[15rem] overflow-y-auto">
                     <div className="p-1">
                         {options.map((option) => (
                             <button
@@ -93,7 +195,7 @@ const CustomDrugTypeSelect: React.FC<CustomDrugTypeSelectProps> = ({
                                 </div>
                                 {value === option.value && (
                                     <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
-                                        <Check className="h-4 w-4" />
+                                        <Check className="h-4 w-4"/>
                                     </span>
                                 )}
                             </button>

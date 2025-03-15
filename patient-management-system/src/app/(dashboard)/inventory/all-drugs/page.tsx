@@ -1,11 +1,11 @@
 // app/inventory/all-drugs/page.tsx
 import {Suspense} from 'react';
 import {Drugs} from './_components/Drugs';
-import {DashboardHeader} from './_components/ui/dashboard-header';
 import {SearchAndSort} from './_components/SearchAndSort';
 import {BatchStatus, DrugType} from '@prisma/client';
 import {TableBody, TableHead, TableHeader, TableRow, Table, TableCell} from "@/components/ui/table";
 import {Skeleton} from "@/components/ui/skeleton";
+import {DrugForm} from "@/app/(dashboard)/inventory/_components/DrugForm";
 
 interface SearchParams {
     page?: string;
@@ -17,7 +17,6 @@ interface SearchParams {
     supplier?: string;
     drugType?: string;
     batchStatus?: string;
-
     [key: string]: string | undefined;
 }
 
@@ -44,10 +43,11 @@ export default async function DrugsPage({
     };
 
     return (
-        <div className={'flex h-full w-full flex-col p-4 overflow-y-auto'}>
-            <DashboardHeader
-                heading="Drugs Inventory"
-            />
+        <div className={'flex h-full w-full flex-col p-4 overflow-y-auto gap-4'}>
+            <div className={'flex items-center justify-between'}>
+                <h1 className="text-2xl font-bold tracking-tight">Drugs Inventory</h1>
+                <DrugForm/>
+            </div>
             <div className="container gap-6">
                 <div className="flex flex-col space-y-4">
                     <SearchAndSort/>

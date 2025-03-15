@@ -319,7 +319,8 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
                                         <span className="text-sm text-slate-500">{issue.details}</span>
                                     </div>
                                     <div className="text-sm text-slate-500">
-                                        Drug: {issue.drugName} • Type: {issue.drugType.charAt(0).toUpperCase() + issue.drugType.slice(1).toLowerCase()}
+                                        Drug: {issue.drugName} •
+                                        Type: {issue.drugType.charAt(0).toUpperCase() + issue.drugType.slice(1).toLowerCase()}
                                         • Concentration: {issue.concentration} mg/unit •
                                         Brand: {issue.brandName} • Quantity: {issue.quantity}
                                     </div>
