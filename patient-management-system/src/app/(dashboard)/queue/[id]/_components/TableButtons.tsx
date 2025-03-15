@@ -19,9 +19,9 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { FaTrash, FaMedkit, FaTablets } from "react-icons/fa";
-import { removePatientFromQueue } from "@/app/lib/actions";
 import { handleServerAction } from "@/app/lib/utils";
 import { redirect } from "next/navigation";
+import {removePatientFromQueue} from "@/app/lib/actions/queue";
 
 // Remove from Queue Button
 const RemoveFromQueue = ({

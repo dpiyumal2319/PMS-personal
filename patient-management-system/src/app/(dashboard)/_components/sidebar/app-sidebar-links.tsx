@@ -44,11 +44,24 @@ export const DoctorLinks: SidebarItem[] = [
         isActive: false,
     },
     {
-        type: "link",
+        type: "expandable",
         title: "Queue",
-        url: "/queue",
+        initiallyExpanded: true,
         icon: Clock,
-        isActive: false,
+        items: [
+            {
+                type: "link",
+                title: "Active queue",
+                url: "/queue/active",
+                isActive: false,
+            },
+            {
+                type: "link",
+                title: "All queues",
+                url: "/queue",
+                isActive: false,
+            }
+        ]
     },
     {
         type: "expandable",
@@ -132,11 +145,24 @@ export const NurseLinks: SidebarItem[] = [
         isActive: false,
     },
     {
-        type: "link",
+        type: "expandable",
         title: "Queue",
-        url: "/queue",
+        initiallyExpanded: true,
         icon: Clock,
-        isActive: false,
+        items: [
+            {
+                type: "link",
+                title: "Active queue",
+                url: "/queue/active",
+                isActive: false,
+            },
+            {
+                type: "link",
+                title: "All queues",
+                url: "/queue",
+                isActive: false,
+            }
+        ]
     },
     {
         type: "link",

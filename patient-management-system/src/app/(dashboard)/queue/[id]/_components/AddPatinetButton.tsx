@@ -5,14 +5,14 @@ import {Button} from "@/components/ui/button";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {useDebounce} from "@/hooks/useDebounce";
-import {addPatientToQueue, searchPatients} from "@/app/lib/actions";
 import {QueueStatus, type Patient} from "@prisma/client";
 import {calcAge, handleServerAction} from "@/app/lib/utils";
 import {TableCell, Table, TableHead, TableHeader, TableRow, TableBody} from "@/components/ui/table";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import Link from "next/link";
-import {getQueueStatus} from "@/app/lib/actions";
 import CustomSearchSelect, {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
+import AddPatientForm from "@/app/(dashboard)/patients/_components/AddPatientForm";
+import {addPatientToQueue, getQueueStatus, searchPatients} from "@/app/lib/actions/queue";
 
 // Search by types
 const AddPatientButton = ({id, refetch}: { id: number; refetch: () => void }) => {
@@ -23,6 +23,7 @@ const AddPatientButton = ({id, refetch}: { id: number; refetch: () => void }) =>
     const [error, setError] = useState<string | null>(null);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
     const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
+    const [searching, setSearching] = useState(false);
 
     const isNumber = (value: string) => {
         return /^\d+$/.test(value);
@@ -38,41 +39,47 @@ const AddPatientButton = ({id, refetch}: { id: number; refetch: () => void }) =>
     }, [id]);
 
     useEffect(() => {
-        if (searchBy === "NIC") {
-            if (debouncedSearchTerm.length !== 10 && debouncedSearchTerm.length !== 12) {
-                setError("NIC should be 10 or 12 characters long");
-                return;
-            }
-        }
-
-        if (searchBy === "telephone") {
-            if (!isNumber(debouncedSearchTerm)) {
-                setError("Telephone should be a number");
-                return;
+        try {
+            if (searchBy === "NIC") {
+                if (debouncedSearchTerm.length !== 10 && debouncedSearchTerm.length !== 12) {
+                    setError("NIC should be 10 or 12 characters long");
+                    return;
+                }
             }
 
-            if (debouncedSearchTerm.length !== 10) {
-                setError("Telephone should be 10 characters long");
-                return;
+            if (searchBy === "telephone") {
+                if (!isNumber(debouncedSearchTerm)) {
+                    setError("Telephone should be a number");
+                    return;
+                }
+
+                if (debouncedSearchTerm.length !== 10) {
+                    setError("Telephone should be 10 characters long");
+                    return;
+                }
             }
-        }
 
-        if (searchBy === "name") {
-            if (debouncedSearchTerm.length < 3) {
-                setError("Name should be at least 3 characters long");
-                return;
+            if (searchBy === "name") {
+                if (debouncedSearchTerm.length < 3) {
+                    setError("Name should be at least 3 characters long");
+                    return;
+                }
             }
+
+            setError(null);
+            const fetchData = async () => {
+                const data = await searchPatients(debouncedSearchTerm, searchBy);
+                setResults(data);
+            }
+
+            fetchData().then(() => {
+                setSearching(false);
+            });
+        } catch (e) {
+            setError("An error occurred while searching");
+            console.error(e);
+            setSearching(false);
         }
-
-        setError(null);
-
-        const fetchData = async () => {
-            const data = await searchPatients(debouncedSearchTerm, searchBy);
-            setResults(data);
-        }
-
-        fetchData().then(() => {
-        });
     }, [debouncedSearchTerm, searchBy]);
 
     const getSex = (sex: string) => {
@@ -127,11 +134,22 @@ const AddPatientButton = ({id, refetch}: { id: number; refetch: () => void }) =>
                         />
 
                         {/* Search Input */}
-                        <Input
-                            placeholder={`Search by ${searchBy.charAt(0).toUpperCase() + searchBy.slice(1)}`}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                        <div className="relative w-full">
+                            <Input
+                                placeholder={`Search by ${searchBy.charAt(0).toUpperCase() + searchBy.slice(1)}`}
+                                value={searchTerm}
+                                className={'h-full'}
+                                onChange={(e) => {
+                                    setSearching(true);
+                                    setSearchTerm(e.target.value);
+                                }}
+                            />
+                            {searching && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <span className="text-blue-500 text-sm animate-pulse">Searching...</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/*Error message*/}
@@ -181,11 +199,7 @@ const AddPatientButton = ({id, refetch}: { id: number; refetch: () => void }) =>
                         </Link>
                     )}
                     <div className="flex justify-start mt-4">
-                        <Link href={`/patients?model=true`}>
-                            <Button>
-                                Add New Patient
-                            </Button>
-                        </Link>
+                        <AddPatientForm/>
                     </div>
                 </DialogContent>
             </Dialog>

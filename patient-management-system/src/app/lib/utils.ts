@@ -2,7 +2,8 @@ import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
 import {IssuingStrategy} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
-import { myError} from "@/app/lib/definitions";
+import {myError} from "@/app/lib/definitions";
+import {getPendingPatientsCount} from "@/app/lib/actions/queue";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();

@@ -2,7 +2,8 @@
 
 import React, {useEffect, useState} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {getTotalQueueCount} from "@/app/lib/actions";
+
+import {getTotalQueueCount} from "@/app/lib/actions/queue";
 
 interface PaginationProps {
     size: number;

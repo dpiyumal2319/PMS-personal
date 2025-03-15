@@ -9,25 +9,25 @@ import {
     TableBody,
     TableCell,
 } from "@/components/ui/table";
-import { useState, useEffect, useCallback } from "react";
-import { queuePatients } from "@/app/lib/actions";
-import { Button } from "@/components/ui/button";
+import {useState, useEffect, useCallback} from "react";
+import {Button} from "@/components/ui/button";
 import Link from "next/link";
-import { verifySession } from "@/app/lib/sessions";
-import { calcAge } from "@/app/lib/utils";
+import {verifySession} from "@/app/lib/sessions";
+import {calcAge} from "@/app/lib/utils";
 import {
     RemoveFromQueue,
     IssueMedicine,
     PrescribeMedicine,
 } from "@/app/(dashboard)/queue/[id]/_components/TableButtons";
-import { CustomBadge } from "@/app/(dashboard)/_components/CustomBadge";
+import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import AddPatientButton from "@/app/(dashboard)/queue/[id]/_components/AddPatinetButton";
 import {formatDistanceToNow} from "date-fns";
+import {queuePatients} from "@/app/lib/actions/queue";
 
 type Patients = Awaited<ReturnType<typeof queuePatients>>;
 
 // Main Table Component
-export default function AllPatientsTable({ id }: { id: number }) {
+export default function AllPatientsTable({id}: { id: number }) {
     const [patients, setPatients] = useState<Patients | []>([]);
     const [role, setRole] = useState("");
     const [loading, setLoading] = useState(true);
@@ -56,13 +56,13 @@ export default function AllPatientsTable({ id }: { id: number }) {
     const getStatus = (status: string) => {
         switch (status) {
             case "COMPLETED":
-                return <CustomBadge text="COMPLETED" color="green" />;
+                return <CustomBadge text="COMPLETED" color="green"/>;
             case "PENDING":
-                return <CustomBadge text="PENDING" color="yellow" />;
+                return <CustomBadge text="PENDING" color="yellow"/>;
             case "PRESCRIBED":
-                return <CustomBadge text="PRESCRIBED" color="blue" />;
+                return <CustomBadge text="PRESCRIBED" color="blue"/>;
             default:
-                return <CustomBadge text="UNKNOWN" color="gray" />;
+                return <CustomBadge text="UNKNOWN" color="gray"/>;
         }
     };
 
@@ -89,11 +89,11 @@ export default function AllPatientsTable({ id }: { id: number }) {
     const getSex = (sex: string) => {
         switch (sex) {
             case "MALE":
-                return <CustomBadge text="M" color="blue" />;
+                return <CustomBadge text="M" color="blue"/>;
             case "FEMALE":
-                return <CustomBadge text="F" color="pink" />;
+                return <CustomBadge text="F" color="pink"/>;
             default:
-                return <CustomBadge text="UNKNOWN" color="gray" />;
+                return <CustomBadge text="UNKNOWN" color="gray"/>;
         }
     };
 
@@ -131,7 +131,7 @@ export default function AllPatientsTable({ id }: { id: number }) {
                         </div>
                     )}
                 </div>
-                <AddPatientButton id={id} refetch={fetchData} />
+                <AddPatientButton id={id} refetch={fetchData}/>
             </div>
             <Table>
                 <TableHeader>
@@ -173,7 +173,7 @@ export default function AllPatientsTable({ id }: { id: number }) {
                                 <TableCell>Unknown</TableCell>
                             )}
                             <TableCell>
-                                {formatDistanceToNow(new Date(patient.time), { addSuffix: true })}
+                                {formatDistanceToNow(new Date(patient.time), {addSuffix: true})}
                             </TableCell>
                             <TableCell className="flex justify-start items-center gap-2">
                                 {role === "DOCTOR" &&
@@ -184,7 +184,7 @@ export default function AllPatientsTable({ id }: { id: number }) {
                                     )}
                                 {role === "NURSE" &&
                                     patient.status === "PRESCRIBED" && (
-                                        <IssueMedicine id={patient.patientId} />
+                                        <IssueMedicine id={patient.patientId}/>
                                     )}
                                 <RemoveFromQueue
                                     queueId={id}

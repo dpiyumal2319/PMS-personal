@@ -4,8 +4,8 @@ import { calcAge, getInitials } from "@/app/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Patient } from "@prisma/client";
 import AddToActiveQueueButton from "@/app/(dashboard)/patients/_components/AddToActiveQueueButton";
-import { getActiveQueue } from "@/app/lib/actions";
 import { Card } from "@/components/ui/card";
+import {getActiveQueue} from "@/app/lib/actions/queue";
 
 export default async function PatientsList({
   patients,

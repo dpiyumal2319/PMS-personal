@@ -1,6 +1,6 @@
 'use server'
 
-import {myConfirmation, myError} from "@/app/lib/definitions";
+import {invalidateQueueCountCache, myConfirmation, myError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
 import {DrugType, Prisma} from "@prisma/client";
 import {revalidatePath} from "next/cache";
@@ -88,6 +88,7 @@ export async function completePrescription(
         revalidatePath(`/patients/${prescription.patientId}/prescriptions`);
         if (result) {
             revalidatePath(`/queue/${result}`);
+            invalidateQueueCountCache();
         }
 
         return {
@@ -492,7 +493,7 @@ export async function addPrescription({
 
         // Handle path revalidation after successful transaction
         revalidatePath(`/patients/${patientID}/prescriptions`);
-
+        invalidateQueueCountCache();
         return {
             success: true,
             message: "Prescription created successfully",
