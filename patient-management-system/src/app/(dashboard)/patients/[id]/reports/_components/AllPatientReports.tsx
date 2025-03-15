@@ -4,6 +4,7 @@ import {formatDistanceToNow} from 'date-fns';
 import {getPatientReports} from "@/app/lib/actions/reports";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 import {DeleteReport} from "@/app/(dashboard)/patients/[id]/reports/_components/DeleteReporAlert";
+import {PatientParameterChartDialog} from "@/app/(dashboard)/patients/[id]/reports/_components/PatientParameterChart";
 
 const AllPatientReports = async ({currentPage, query, range, id}: {
     currentPage: number;
@@ -48,7 +49,7 @@ const AllPatientReports = async ({currentPage, query, range, id}: {
                                     {param.attention ?
                                         <CustomBadge text={param.value} color={'red'}/>
                                         : <span className="font-semibold text-sm">{param.value}</span>}
-
+                                    <PatientParameterChartDialog patientId={id} parameterId={param.reportParameter.id}/>
                                 </div>
                             ))}
                         </div>

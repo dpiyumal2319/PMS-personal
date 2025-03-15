@@ -5,6 +5,8 @@ import {ReportForm} from "@/app/(dashboard)/admin/reports/_components/EditReport
 import {myConfirmation, myError} from "@/app/lib/definitions";
 import {revalidatePath} from "next/cache";
 import {Prisma} from "@prisma/client";
+import {verifySession} from "@/app/lib/sessions";
+import {redirect} from "next/navigation";
 
 export async function getFilteredReports(query: string) {
     return prisma.reportType.findMany({
@@ -27,6 +29,7 @@ export async function getTotalReportTemplateCount() {
 
 export async function addReportType(reportForm: ReportForm): Promise<myError> {
     try {
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
         if (reportForm.parameters.length === 0) {
             return {
                 success: false,
@@ -77,6 +80,7 @@ export async function editReportType(
     reportId: number
 ): Promise<myError> {
     try {
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
         return await prisma.$transaction(async (tx) => {
             const report = await tx.reportType.findUnique({
                 where: {id: reportId},
@@ -175,6 +179,7 @@ export async function editReportType(
 
 export const safeDeleteReportType = async (reportId: number): Promise<myError | myConfirmation> => {
     try {
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
         const report = await prisma.patientReport.findMany({
             where: {
                 reportTypeId: reportId,
@@ -204,6 +209,7 @@ export const safeDeleteReportType = async (reportId: number): Promise<myError | 
 
 export async function deleteReportType(reportId: number): Promise<myError> {
     try {
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
         await prisma.reportType.delete({
             where: {
                 id: reportId,
@@ -253,6 +259,8 @@ export async function getPatientReports(
     page: number
 ) {
     try {
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
+
         let dateFilter = {};
 
         if (range !== "ALL") {
@@ -267,7 +275,7 @@ export async function getPatientReports(
             where: {
                 patientId: PatientId,
                 reportType: {
-                    name: {contains: query},
+                    name: {contains: query, mode: 'insensitive'},
                 },
                 ...dateFilter,
             },
@@ -284,6 +292,7 @@ export async function getPatientReports(
                             select: {
                                 name: true,
                                 units: true,
+                                id: true,
                             },
                         },
                     },
@@ -339,6 +348,8 @@ export async function addPatientReport({patientID, reportTypeID, params}: {
     params: Record<number, { value: string, attention: boolean }>
 }): Promise<myError> {
     try {
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
+
         const reportType = await prisma.reportType.findUnique({
             where: {id: reportTypeID}
         });
@@ -379,6 +390,9 @@ export async function deletePatientReport(
     patientID: number
 ): Promise<myError> {
     try {
+
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
+
         await prisma.patientReport.delete({
             where: {
                 id: reportId,
@@ -390,5 +404,69 @@ export async function deletePatientReport(
     } catch (e) {
         console.error(e);
         return {success: false, message: 'An error occurred while deleting report'};
+    }
+}
+
+
+export async function getPatientParameterData(patientId: number, parameterId: number) {
+    try {
+        if (((await verifySession()).role !== 'DOCTOR')) redirect('/unauthorized');
+        // First, get the parameter details to check if it exists
+        const parameter = await prisma.reportParameter.findUnique({
+            where: {
+                id: parameterId
+            },
+            select: {
+                name: true,
+                units: true
+            }
+        })
+
+        if (!parameter) {
+            throw new Error("Parameter not found")
+        }
+
+        // Then find all reports for this patient
+        const patientReports = await prisma.patientReport.findMany({
+            where: {
+                patientId,
+            },
+            include: {
+                parameters: {
+                    where: {
+                        reportParameterId: parameterId
+                    },
+                },
+                patient: {
+                    select: {
+                        name: true,
+                    },
+                }
+            },
+            orderBy: {
+                time: "asc",
+            },
+        })
+
+        // Extract parameter values with timestamps
+        const parameterData = patientReports.flatMap(report =>
+            report.parameters.map(param => ({
+                time: report.time,
+                value: param.value,
+                attention: param.attention
+            }))
+        )
+
+        const patientName = patientReports[0]?.patient.name || "Unknown Patient"
+
+        return {
+            data: parameterData,
+            parameterName: parameter.name,
+            patientName,
+            units: parameter.units || undefined
+        }
+    } catch (error) {
+        console.error("Error fetching patient parameter data:", error)
+        throw new Error("Failed to fetch patient parameter data")
     }
 }

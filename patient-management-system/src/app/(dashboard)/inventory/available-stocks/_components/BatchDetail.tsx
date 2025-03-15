@@ -5,6 +5,7 @@ import { MdEventAvailable, MdOutlineBrandingWatermark } from 'react-icons/md';
 import { FaCalendarAlt, FaCoins } from 'react-icons/fa';
 import { CustomBadge } from '@/app/(dashboard)/_components/CustomBadge';
 import { GiMedicines } from "react-icons/gi";
+import { FiShoppingCart } from 'react-icons/fi';
 import BatchStatusChangeButtonBar from '@/app/(dashboard)/inventory/available-stocks/_components/BatchStatusChangeButtonBar';
 
 export default async function BatchDetail({ batchId }: { batchId: string }) {
@@ -32,13 +33,15 @@ export default async function BatchDetail({ batchId }: { batchId: string }) {
                         color={
                             batchData.status === "AVAILABLE"
                                 ? "green"
-                                : batchData.status === "TRASHED"
+                                : batchData.status === "DISPOSED"
                                     ? "red"
                                     : batchData.status === "EXPIRED"
                                         ? "yellow"
-                                        : batchData.status === "COMPLETED"
-                                            ? "blue"
-                                            : "gray"
+                                        : batchData.status === "QUALITY_FAILED"
+                                            ? "violet"
+                                            : batchData.status === "COMPLETED"
+                                                ? "blue"
+                                                : "gray"
                         }
                         className="text-sm px-4 py-1"
                     />
@@ -49,15 +52,38 @@ export default async function BatchDetail({ batchId }: { batchId: string }) {
                     <div className="grid grid-cols-3 gap-6 text-center">
                         <div className="flex flex-col items-center">
                             <MdOutlineBrandingWatermark className="size-6 text-purple-500" />
-                            <span className="font-medium">Brand: {batchData.drugBrandName}</span>
+                            <span className="font-medium"><strong>Brand:</strong> {batchData.drugBrandName}</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <FiShoppingCart className="size-6 text-pink-500" />
+                            <span className="font-medium"><strong>Supplier:</strong> {batchData.supplier}</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <GiMedicines className="size-6 text-gray-500" />
-                            <span className="font-medium">Type: {batchData.drugType}</span>
+                            <span className="font-medium"><strong>Type:</strong> {batchData.drugType}</span>
                         </div>
-                        <div className="flex flex-col items-center text-xl font-semibold text-primary">
+                    </div>
+                    <div className="grid grid-cols-3 gap-6 text-center">
+                        <div className="flex flex-col items-center">
                             <FaCoins className="size-6 text-yellow-500" />
-                            <span>{batchData.wholesalePrice}</span>
+                            <span className="text-xl font-semibold text-primary">
+                                {Number(batchData.wholesalePrice).toFixed(2)}
+                            </span>
+                            <span className="font-medium">Wholesale price</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <FaCoins className="size-6 text-yellow-500" />
+                            <span className="text-xl font-semibold text-primary">
+                                {Number(batchData.retailPrice).toFixed(2)}
+                            </span>
+                            <span className="font-medium">Retail price</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <FaCoins className="size-6 text-yellow-500" />
+                            <span className="text-xl font-semibold text-primary">
+                                {(batchData.wholesalePrice * batchData.fullAmount).toFixed(2)}
+                            </span>
+                            <span className="font-medium">Batch cost</span>
                         </div>
                     </div>
 

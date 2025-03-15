@@ -1,6 +1,6 @@
-import { Suspense } from "react";
+import {Suspense} from "react";
 import CardWrapper from "@/app/(dashboard)/queue/[id]/_components/CardWrapper";
-import { CardSet } from "@/app/(dashboard)/queue/[id]/_components/Skeletons";
+import {CardSet} from "@/app/(dashboard)/queue/[id]/_components/Skeletons";
 import AllPatientsTable from "@/app/(dashboard)/queue/[id]/_components/AllPatientsTable";
 
 
@@ -10,8 +10,8 @@ export const metadata = {
 };
 
 export default async function page({
-    params,
-}: {
+                                       params,
+                                   }: {
     params: Promise<{ id: string }>;
 }) {
     const id = parseInt((await params).id);
@@ -28,12 +28,12 @@ export default async function page({
         >
             <div className={"w-4/5 pt-4"}>
                 <div>
-                    <Suspense fallback={<CardSet number={3} />}>
-                        <CardWrapper id={id} />
+                    <Suspense fallback={<CardSet number={3}/>}>
+                        <CardWrapper id={id}/>
                     </Suspense>
                 </div>
                 <div className={"mt-5"}>
-                    <AllPatientsTable id={id} />
+                    <AllPatientsTable id={id}/>
                 </div>
             </div>
         </div>

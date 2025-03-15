@@ -49,7 +49,7 @@ const SidebarHistoryList = async ({patientID, filter}: { patientID: number, filt
 
     if (history.length === 0) {
         return (
-            <div className={'flex flex-col items-center justify-center h-[800px]'}>
+            <div className={'flex flex-col items-center justify-center h-[400px]'}>
                 <Slice className="h-8 w-8 text-gray-400 mx-auto mb-2"/>
                 <p className="text-sm text-gray-500">No recent history</p>
             </div>

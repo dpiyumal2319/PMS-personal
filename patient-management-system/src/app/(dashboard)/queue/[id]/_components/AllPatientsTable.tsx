@@ -29,16 +29,24 @@ type Patients = Awaited<ReturnType<typeof queuePatients>>;
 export default function AllPatientsTable({ id }: { id: number }) {
     const [patients, setPatients] = useState<Patients | []>([]);
     const [role, setRole] = useState("");
+    const [loading, setLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
-        const session = await verifySession();
-        setRole(session.role);
-        const data = await queuePatients(id);
-        setPatients(data);
+        try {
+            setLoading(true);
+            const session = await verifySession();
+            setRole(session.role);
+            const data = await queuePatients(id);
+            setPatients(data);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+        }
     }, [id]); // Only recreates if `id` changes
 
     useEffect(() => {
-        fetchData().then(() => {}); // Fetch initial data
+        fetchData().then(); // Fetch initial data
 
         const interval = setInterval(fetchData, 45000); // Refetch every 45 seconds
         return () => clearInterval(interval); // Cleanup interval on unmount
@@ -90,7 +98,38 @@ export default function AllPatientsTable({ id }: { id: number }) {
 
     return (
         <div className="flex flex-col gap-5">
-            <div className={"flex justify-end mt-5 w-full"}>
+            <div className={"flex justify-between items-center mt-5 w-full"}>
+                <div>
+                    {loading ? (
+                        <div className="text-sm text-gray-500 flex items-center gap-2">
+                            <svg
+                                className="animate-spin h-4 w-4 text-primary"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                ></circle>
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                            Loading patient data...
+                        </div>
+                    ) : (
+                        <div className="text-sm text-gray-500">
+                            Last updated at {new Date().toLocaleTimeString()}
+                        </div>
+                    )}
+                </div>
                 <AddPatientButton id={id} refetch={fetchData} />
             </div>
             <Table>
@@ -154,11 +193,13 @@ export default function AllPatientsTable({ id }: { id: number }) {
                             </TableCell>
                         </TableRow>
                     ))}
-                    <TableRow className="bg-gray-100 text-gray-800 font-medium">
-                        <TableCell colSpan={7} className="text-center">
-                            Total Completed Patients: {completedPatients.length}
-                        </TableCell>
-                    </TableRow>
+                    {filteredPatients.length > 0 && (
+                        <TableRow className="bg-gray-100 text-gray-800 font-medium">
+                            <TableCell colSpan={7} className="text-center">
+                                Total Completed Patients: {completedPatients.length}
+                            </TableCell>
+                        </TableRow>
+                    )}
                     {completedPatients.map((patient) => (
                         <TableRow key={patient.id}>
                             <TableCell className="font-medium">
@@ -199,6 +240,13 @@ export default function AllPatientsTable({ id }: { id: number }) {
                             </TableCell>
                         </TableRow>
                     ))}
+                    {!loading && filteredPatients.length === 0 && completedPatients.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                                No patients in queue
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </div>

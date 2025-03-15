@@ -291,3 +291,27 @@ export interface DrugModelsWithBufferLevel {
   availableAmount: number;
   fullAmount?: number;
 }
+
+
+export type PrescriptionCard = {
+    id: number;
+    patientId: number;
+    time: Date;
+    status: string;
+    issues: Array<{
+        drug: {
+            name: string;
+        } | null;
+    }>;
+    OffRecordMeds: Array<{
+        name: string;
+    }>;
+    PrescriptionVitals?: Array<{
+        value: string;
+        vital: {
+            color: string;
+            icon: string;
+            name: string;
+        };
+    }>;
+}
