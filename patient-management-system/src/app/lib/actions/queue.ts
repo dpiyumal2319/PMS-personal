@@ -5,6 +5,7 @@ import {prisma} from "@/app/lib/prisma";
 import {revalidatePath} from "next/cache";
 import {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 import {verifySession} from "@/app/lib/sessions";
+import {pusher} from "@/app/lib/pusher";
 
 
 export async function stopQueue(id: string | null): Promise<myError> {
@@ -50,6 +51,7 @@ export async function stopQueue(id: string | null): Promise<myError> {
                 status: "COMPLETED",
             },
         });
+        await triggerQueueUpdate();
         return {success: true, message: "Queue stopped successfully"};
     } catch (e) {
         console.error(e);
@@ -179,6 +181,7 @@ export async function removePatientFromQueue(
         });
 
         revalidatePath(`/queue/${queueId}`);
+        await triggerQueueUpdate();
         return {success: true, message: "Patient removed successfully"};
     } catch (e) {
         console.error(e);
@@ -250,6 +253,7 @@ export async function addPatientToQueue(
             },
         });
 
+        await triggerQueueUpdate();
         revalidatePath(`/queue/${queueId}`);
         return {
             success: true,
@@ -295,6 +299,7 @@ export async function addQueue(): Promise<myError> {
         await prisma.queue.create({
             data: {},
         });
+        await triggerQueueUpdate();
         revalidatePath("/queues");
         return {success: true, message: "Queue created successfully"};
     } catch (e) {
@@ -334,8 +339,6 @@ export async function getTotalQueueCount() {
 }
 
 export async function getPendingPatientsCount() {
-    const session = await verifySession();
-
     const result = await prisma.queueEntry.findMany({
         where: {
             status: {
@@ -346,15 +349,38 @@ export async function getPendingPatientsCount() {
 
     return result.reduce(
         (acc, {status}) => {
-            acc.total++;
-            if (
-                (session.role === 'DOCTOR' && status === 'PENDING') ||
-                (session.role === 'NURSE' && status === 'PRESCRIBED')
-            ) {
+            if (status === 'PENDING') {
                 acc.pending++;
+            } else if (status === 'PRESCRIBED') {
+                acc.prescribed++;
             }
             return acc;
         },
-        {total: 0, pending: 0}
+        {prescribed: 0, pending: 0}
     );
+}
+
+
+export async function triggerQueueUpdate() {
+    const result = await prisma.queueEntry.findMany({
+        where: {
+            status: {
+                not: 'COMPLETED'
+            }
+        },
+    });
+
+    const countData = result.reduce(
+        (acc, {status}) => {
+            if (status === 'PENDING') {
+                acc.pending++;
+            } else if (status === 'PRESCRIBED') {
+                acc.prescribed++;
+            }
+            return acc;
+        },
+        {prescribed: 0, pending: 0}
+    );
+    // Trigger a Pusher event with the new counts
+    await pusher.trigger(`pending-patients`, 'queue-updated', countData);
 }
