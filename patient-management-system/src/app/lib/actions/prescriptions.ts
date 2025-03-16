@@ -458,7 +458,7 @@ export async function addPrescription({
                     doctorCharge,
                     dispensaryCharge,
                     medicinesCharge: 0,
-                    discount: prescriptionForm.discount,
+                    discount: Number(prescriptionForm.discount),
                 },
                 select: {
                     id: true,
@@ -504,7 +504,7 @@ export async function addPrescription({
             message: "Prescription created successfully",
         };
     } catch (e) {
-        console.error("Error adding prescription:", e);
+        console.error("Error adding prescription:");
         return {
             success: false,
             message: e instanceof Error
@@ -512,6 +512,22 @@ export async function addPrescription({
                 : "An error occurred while adding prescription",
         };
     }
+}
+
+export async function safeAddPrescription({
+                                              prescriptionForm,
+                                              patientID,
+                                          }: {
+    prescriptionForm: PrescriptionFormData;
+    patientID: number;
+}): Promise<myError | myConfirmation> {
+    if ((Number(prescriptionForm.discount) !== 0)) {
+        return {
+            confirmationRequired: true,
+            message: "There is a discount applied to this prescription. Are you sure you want to proceed?",
+        }
+    }
+    return addPrescription({prescriptionForm, patientID});
 }
 
 export async function getCachedStrategy(drugID: number) {

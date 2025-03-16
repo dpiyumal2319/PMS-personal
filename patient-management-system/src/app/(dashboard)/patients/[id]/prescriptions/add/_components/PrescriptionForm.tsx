@@ -10,8 +10,8 @@ import IssueFromInventory from "./IssueFromInventory";
 import {IssuingStrategy, MEAL, Vitals} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
 import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/AddOffRecordDrugs";
-import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
-import {addPrescription} from "@/app/lib/actions/prescriptions";
+import {getTextColorClass} from "@/app/lib/utils";
+import {addPrescription, safeAddPrescription} from "@/app/lib/actions/prescriptions";
 import {
     PrescriptionIssuesList,
     OffRecordMedsList
@@ -25,6 +25,7 @@ import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import {Separator} from "@/components/ui/separator";
 import {RiDiscountPercentFill} from "react-icons/ri";
 import {toast} from "react-toastify";
+import {handleServerActionWithConfirmation} from "@/app/lib/toast";
 
 export interface IssueInForm {
     drugId: number;
@@ -143,17 +144,20 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
         e.preventDefault();
         // Check for over 100 and below 0 discount
         if (formData.discount > 100 || formData.discount < 0) {
-            toast.error('Discount should be between 0 and 100', {position: 'bottom-left'});
+            toast.error('Discount should be between 0 and 100', {position: 'bottom-right'});
             return;
         }
 
         if (formData.issues.length === 0) {
-            toast.error('Please add at least one issue', {position: "bottom-left"});
+            toast.error('Please add at least one issue', {position: "bottom-right"});
             return;
         }
 
         try {
-            const result = await handleServerAction(() => addPrescription({
+            const result = await handleServerActionWithConfirmation(() => safeAddPrescription({
+                prescriptionForm: formData,
+                patientID: patientID
+            }), () => addPrescription({
                 prescriptionForm: formData,
                 patientID: patientID
             }), {
@@ -272,6 +276,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                 <Input
                                     type="number"
                                     name="extraDoctorCharges"
+                                    min={0}
                                     value={formData.extraDoctorCharges}
                                     onChange={handleChange}
                                     placeholder="Enter extra charges..."
@@ -287,7 +292,6 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                     <Input
                                         type="number"
                                         name="discount"
-                                        step={5}
                                         min={0}
                                         max={100}
                                         value={formData.discount}
@@ -309,7 +313,6 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                         100%
                                     </Button>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -359,7 +362,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         className="px-8 w-full"
                     >
                         Submit Prescription
-                    </Button>)
+                    </Button>
                 </div>
             </Card>
         </form>
