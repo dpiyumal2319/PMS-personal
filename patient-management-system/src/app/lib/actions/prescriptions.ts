@@ -12,6 +12,7 @@ import {
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/IssueFromInventory";
 import {VitalFormData} from "@/app/(dashboard)/admin/prescription/_components/AddVitalDialog";
 import {redirect} from "next/navigation";
+import {triggerQueueUpdate} from "@/app/lib/actions/queue";
 
 export async function completePrescription(
     prescriptionID: number
@@ -87,7 +88,7 @@ export async function completePrescription(
         // Handle revalidation after transaction
         revalidatePath(`/patients/${prescription.patientId}/prescriptions`);
         if (result) {
-            revalidatePath(`/queue/${result}`);
+            await triggerQueueUpdate();
         }
 
         return {
@@ -440,7 +441,7 @@ export async function addPrescription({
         }));
 
         // Execute all database operations in a transaction
-        await prisma.$transaction(async (tx) => {
+        const queue = await prisma.$transaction(async (tx) => {
             // Create prescription with all related data in one operation
             const prescription = await tx.prescription.create({
                 data: {
@@ -490,9 +491,11 @@ export async function addPrescription({
             return queueEntry?.id;
         });
 
+        if (queue) {
+            await triggerQueueUpdate();
+        }
         // Handle path revalidation after successful transaction
         revalidatePath(`/patients/${patientID}/prescriptions`);
-
         return {
             success: true,
             message: "Prescription created successfully",

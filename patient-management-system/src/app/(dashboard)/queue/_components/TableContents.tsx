@@ -1,8 +1,8 @@
-import {getQueues} from "@/app/lib/actions";
 import {TableBody, TableRow, TableCell,  } from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
+import {getQueues} from "@/app/lib/actions/queue";
 
 
 async function TableContents({ currentPage, size }: { currentPage: number, size: number }) {

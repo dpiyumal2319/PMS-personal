@@ -21,7 +21,6 @@ export default async function Page({
         query?: string;
         page?: string;
         filter?: string;
-        model?: string;
     }>;
 }) {
     // Await the searchParams
@@ -29,7 +28,6 @@ export default async function Page({
     const query = params?.query || "";
     const currentPage = Number(params?.page) || 1;
     const filter = params?.filter || "name";
-    const model = params?.model === "true";
     const totalPages = await getTotalPages(query, filter);
 
     return (
@@ -37,7 +35,7 @@ export default async function Page({
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-primary-700">All Patients</h1>
-                <AddPatientForm modal={model}/>
+                <AddPatientForm/>
             </div>
 
             {/* Search & Filters */}

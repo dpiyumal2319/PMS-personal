@@ -13,66 +13,8 @@ import {
     StockQueryParams,
 } from "@/app/lib/definitions";
 import {prisma} from "./prisma";
-import {verifySession} from "./sessions";
 import {$Enums, BatchStatus, DrugType} from "@prisma/client";
-import {SearchType} from "@/app/(dashboard)/queue/[id]/_components/CustomSearchSelect";
 import MedicalCertificateStatus = $Enums.MedicalCertificateStatus;
-
-export async function addQueue(): Promise<myError> {
-    try {
-        const activeQueuesCount = await prisma.queue.count({
-            where: {
-                status: "IN_PROGRESS",
-            },
-        });
-
-        if (activeQueuesCount !== 0) {
-            return {
-                success: false,
-                message: "There is already an active queue",
-            };
-        }
-
-        await prisma.queue.create({
-            data: {},
-        });
-        revalidatePath("/queues");
-        return {success: true, message: "Queue created successfully"};
-    } catch (e) {
-        console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while creating queue",
-        };
-    }
-}
-
-export async function getQueues(offset: number, limit: number) {
-    return prisma.queue.findMany({
-        skip: offset,
-        take: limit,
-        orderBy: {
-            id: "desc",
-        },
-        include: {
-            _count: {
-                select: {entries: true},
-            },
-        },
-    });
-}
-
-export async function getQueue(queueId: number) {
-    return prisma.queue.findUnique({
-        where: {
-            id: queueId,
-        },
-    });
-}
-
-export async function getTotalQueueCount() {
-    return prisma.queue.count();
-}
 
 export async function getTotalPages(query = "", filter = "name") {
     const whereClause = query
@@ -443,233 +385,6 @@ export async function getFilteredDrugsByBatch({
     );
 }
 
-export async function stopQueue(id: string | null): Promise<myError> {
-    try {
-        if (!id) {
-            return {success: false, message: "Queue ID not provided"};
-        }
-
-        const numberId = parseInt(id);
-
-        const queue = await prisma.queue.findUnique({
-            where: {
-                id: numberId,
-            },
-        });
-
-        if (!queue) {
-            return {success: false, message: "Queue not found"};
-        }
-
-        if (queue.status === "COMPLETED") {
-            return {success: false, message: "Queue is already stopped"};
-        }
-
-        const UncompletedQueueEntries = await prisma.queueEntry.findMany({
-            where: {
-                queueId: numberId,
-                status: {
-                    not: "COMPLETED",
-                },
-            },
-        });
-
-        if (UncompletedQueueEntries.length > 0) {
-            return {success: false, message: "Queue has uncompleted entries"};
-        }
-
-        await prisma.queue.update({
-            where: {
-                id: numberId,
-            },
-            data: {
-                status: "COMPLETED",
-            },
-        });
-        return {success: true, message: "Queue stopped successfully"};
-    } catch (e) {
-        console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while stopping queue",
-        };
-    }
-}
-
-export async function getQueueStatus(id: number) {
-    return prisma.queue.findUnique({
-        where: {
-            id,
-        },
-        select: {
-            status: true,
-        },
-    });
-}
-
-export async function getQueueStatusesCount(id: number) {
-    try {
-        const result = await prisma.queueEntry.groupBy({
-            by: ["status"],
-            where: {
-                queueId: id,
-            },
-            _count: {
-                status: true,
-            },
-        });
-
-        const statuses = {
-            PENDING: 0,
-            PRESCRIBED: 0,
-            COMPLETED: 0,
-        };
-
-        result.forEach((item) => {
-            statuses[item.status] = item._count.status;
-        });
-
-        return statuses;
-    } catch (e) {
-        console.error(e);
-        throw new Error("An error occurred while getting queue statuses count");
-    }
-}
-
-export async function queuePatients(id: number) {
-    try {
-        return await prisma.queueEntry.findMany({
-            where: {
-                queueId: id,
-            },
-            include: {
-                patient: true,
-                queue: true,
-            },
-            orderBy: {
-                token: "asc",
-            },
-        });
-    } catch (e) {
-        console.error(e);
-        throw new Error("An error occurred while getting queue patients");
-    }
-}
-
-export async function removePatientFromQueue(
-    queueId: number,
-    token: number
-): Promise<myError> {
-    try {
-        await prisma.queueEntry.delete({
-            where: {
-                queueId_token: {
-                    queueId,
-                    token,
-                },
-            },
-        });
-
-        revalidatePath(`/queue/${queueId}`);
-        return {success: true, message: "Patient removed successfully"};
-    } catch (e) {
-        console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while removing patient from queue",
-        };
-    }
-}
-
-export async function searchPatients(query: string, searchBy: SearchType) {
-    if (!query) return [];
-
-    return prisma.patient.findMany({
-        where: {
-            [searchBy]: {
-                contains: query,
-                mode: "insensitive",
-            },
-        },
-        take: 10, // Limit results
-    });
-}
-
-export async function addPatientToQueue(
-    queueId: number,
-    patientId: number
-): Promise<myError> {
-    try {
-        const queue = await prisma.queue.findUnique({
-            where: {
-                id: queueId,
-            },
-        });
-
-        if (!queue) {
-            return {success: false, message: "Queue not found"};
-        }
-
-        const patient = await prisma.patient.findUnique({
-            where: {
-                id: patientId,
-            },
-        });
-
-        if (!patient) {
-            return {success: false, message: "Patient not found"};
-        }
-
-        if (queue.status === "COMPLETED") {
-            return {success: false, message: "Queue is stopped"};
-        }
-
-        const lastToken = await prisma.queueEntry.findFirst({
-            where: {
-                queueId,
-            },
-            orderBy: {
-                token: "desc",
-            },
-        });
-
-        const token = lastToken ? lastToken.token + 1 : 1;
-
-        await prisma.queueEntry.create({
-            data: {
-                queueId,
-                patientId,
-                token,
-            },
-        });
-
-        revalidatePath(`/queue/${queueId}`);
-        return {
-            success: true,
-            message: "Patient added to queue successfully",
-        };
-    } catch (e) {
-        console.error(e);
-        return {
-            success: false,
-            message: "An error occurred while adding patient to queue",
-        };
-    }
-}
-
-export async function getActiveQueue() {
-    try {
-        return await prisma.queue.findFirst({
-            where: {
-                status: "IN_PROGRESS",
-            },
-        });
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
-}
-
 export async function getPatientDetails(id: number) {
     return prisma.patient.findUnique({
         where: {
@@ -840,7 +555,7 @@ export async function addNewItem({
             // 2. Create or connect drug
             const drug = await tx.drug.upsert({
                 where: {id: formData.drugId ?? 0},
-                update: {},
+                update: {Buffer: formData.Buffer},
                 create: {
                     name: formData.drugName,
                     Buffer: formData.Buffer,
@@ -1033,16 +748,6 @@ export async function getBatchNumber(id: number): Promise<string> {
         console.error("Error fetching batch number:", error);
         return `Batch-${id}`;
     }
-}
-
-export async function getPendingPatientsCount() {
-    const session = await verifySession();
-
-    return prisma.queueEntry.count({
-        where: {
-            status: session.role === "DOCTOR" ? "PENDING" : {not: "COMPLETED"},
-        },
-    });
 }
 
 const PAGE_SIZE = 10;
@@ -1833,6 +1538,7 @@ export async function searchDrugModels(query: string) {
         select: {
             id: true,
             name: true,
+            Buffer: true
         },
         take: 8,
     });

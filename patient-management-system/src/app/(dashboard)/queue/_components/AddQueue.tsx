@@ -4,7 +4,8 @@ import Button from "@/app/_components/PrimaryButton";
 import {redirect, usePathname, useSearchParams} from "next/navigation";
 import {useRouter} from "next/navigation";
 import {handleServerAction} from "@/app/lib/utils";
-import {addQueue} from "@/app/lib/actions";
+
+import {addQueue} from "@/app/lib/actions/queue";
 
 // Queue Button Component
 const QueueButton = () => {

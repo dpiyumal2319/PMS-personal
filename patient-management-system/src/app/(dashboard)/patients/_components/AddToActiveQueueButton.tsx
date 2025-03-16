@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import type { Queue } from "@prisma/client";
 import {handleServerAction} from "@/app/lib/utils";
-import {addPatientToQueue} from "@/app/lib/actions";
+
+import {addPatientToQueue} from "@/app/lib/actions/queue";
 
 const AddToActiveQueueButton = ({ patientID, queue }: { patientID: number, queue: Queue }) => {
     const handleAddToQueue = async () => {

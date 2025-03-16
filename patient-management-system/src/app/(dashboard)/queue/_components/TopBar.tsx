@@ -4,9 +4,7 @@ import React, { useEffect, useState } from "react";
 import { redirect, usePathname } from "next/navigation";
 import Link from "next/link";
 import { IoArrowBack } from "react-icons/io5";
-import { getQueue } from "@/app/lib/actions";
 import { FaStop } from "react-icons/fa";
-import { stopQueue } from "@/app/lib/actions";
 import { MdOutlineTimer } from "react-icons/md";
 import {
     AlertDialog,
@@ -26,6 +24,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { handleServerAction } from "@/app/lib/utils";
+import {getQueue, stopQueue} from "@/app/lib/actions/queue";
 
 const TopBar = () => {
     const pathname = usePathname();
