@@ -128,14 +128,16 @@ model Prescription {
   time               DateTime             @default(now())
   presentingSymptoms String
   status             PrescriptionStatus   @default(PENDING)
-  extraDoctorCharge  Float?
   details            String?
   patientId          Int
-  Bill               Bill?
   issues             Issue[]
   OffRecordMeds      OffRecordMeds[]
   patient            Patient              @relation(fields: [patientId], references: [id])
   PrescriptionVitals PrescriptionVitals[]
+  doctorCharge       Float
+  dispensaryCharge   Float
+  discount           Float
+  medicinesCharge    Float
 }
 
 model Vitals {
@@ -171,15 +173,6 @@ model MedicalCertificate {
   reccomendations      String
   time                 DateTime
   patient              Patient                  @relation(fields: [patientId], references: [id])
-}
-
-model Bill {
-  id               Int          @id @default(autoincrement())
-  doctorCharge     Float
-  dispensaryCharge Float
-  medicinesCharge  Float
-  prescriptionId   Int          @unique
-  Prescription     Prescription @relation(fields: [prescriptionId], references: [id])
 }
 
 model OffRecordMeds {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, {useEffect, useState} from 'react';
+import dynamic from "next/dynamic";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
@@ -13,8 +14,7 @@ import AddOffRecordDrugs from "@/app/(dashboard)/patients/[id]/prescriptions/add
 import {getTextColorClass, handleServerAction} from "@/app/lib/utils";
 import {addPrescription} from "@/app/lib/actions/prescriptions";
 import {
-    PrescriptionIssuesList,
-    OffRecordMedsList
+    OffRecordMedsListProps, PrescriptionIssuesListProps,
 } from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionIssuesList";
 import {FaHeadSideCough, FaMoneyBill} from "react-icons/fa";
 import {useRouter} from "next/navigation";
@@ -23,6 +23,26 @@ import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
 import {IconName} from "@/app/lib/iconMapping";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import {Separator} from "@/components/ui/separator";
+import {RiDiscountPercentFill} from "react-icons/ri";
+import {toast} from "react-toastify";
+import {
+    DiscountSubmitButtonProps
+} from "@/app/(dashboard)/patients/[id]/prescriptions/add/_components/DiscountSubmitButton";
+
+const DiscountSubmitButton = dynamic<DiscountSubmitButtonProps>(
+    () => import('@/app/(dashboard)/patients/[id]/prescriptions/add/_components/DiscountSubmitButton').then(mod => mod.DiscountSubmitButton),
+    {ssr: false}
+);
+
+const PrescriptionIssuesList = dynamic<PrescriptionIssuesListProps>(
+    () => import('@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionIssuesList').then(mod => mod.PrescriptionIssuesList),
+    {ssr: false}
+);
+
+const OffRecordMedsList = dynamic<OffRecordMedsListProps>(
+    () => import('@/app/(dashboard)/patients/[id]/prescriptions/add/_components/PrescriptionIssuesList').then(mod => mod.OffRecordMedsList),
+    {ssr: false}
+);
 
 export interface IssueInForm {
     drugId: number;
@@ -54,17 +74,19 @@ export interface PrescriptionFormData {
     presentingSymptoms: string;
     description: string;
     extraDoctorCharges: number;
+    discount: number;
     issues: IssueInForm[];
     offRecordMeds: OffRecordMeds[];
     vitals: VitalInForm[];
 }
 
 const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: VitalInForm[] }) => {
-    const [formData, setFormData] = useState<PrescriptionFormData>(() => {
+    console.log('Hi from PrescriptionForm');
+    const [formData, setFormData] = useState<PrescriptionFormData>((): PrescriptionFormData => {
         if (typeof window !== 'undefined') {
             const savedForm = localStorage.getItem(`prescription-form-${patientID}`);
             if (savedForm) {
-                return JSON.parse(savedForm);
+                return JSON.parse(savedForm) as PrescriptionFormData;
             }
         }
         return {
@@ -73,7 +95,8 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
             extraDoctorCharges: 0,
             issues: [],
             offRecordMeds: [],
-            vitals: vitals
+            vitals: vitals,
+            discount: 0
         };
     });
     const router = useRouter();
@@ -89,6 +112,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
             description: '',
             extraDoctorCharges: 0,
             issues: [],
+            discount: 0,
             offRecordMeds: [],
             vitals: vitals
         });
@@ -134,8 +158,18 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
+        // Check for over 100 and below 0 discount
+        if (formData.discount > 100 || formData.discount < 0) {
+            toast.error('Discount should be between 0 and 100', {position: 'bottom-right'});
+            return;
+        }
+
+        if (formData.issues.length === 0) {
+            toast.error('Please add at least one issue', {position: "bottom-right"});
+            return;
+        }
+
         try {
             const result = await handleServerAction(() => addPrescription({
                 prescriptionForm: formData,
@@ -144,6 +178,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                 loadingMessage: 'Submitting prescription...',
             });
 
+            console.log(result);
             if (result.success) {
                 formReset(); // This will also clear localStorage
             }
@@ -256,10 +291,43 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                 <Input
                                     type="number"
                                     name="extraDoctorCharges"
+                                    min={0}
                                     value={formData.extraDoctorCharges}
                                     onChange={handleChange}
                                     placeholder="Enter extra charges..."
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <RiDiscountPercentFill className="h-4 w-4 text-emerald-500"/>
+                                    <Label>Discount</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Input
+                                        type="number"
+                                        name="discount"
+                                        min={0}
+                                        max={100}
+                                        value={formData.discount}
+                                        onChange={handleChange}
+                                        placeholder="Enter discount..."
+                                    />
+                                    <h2>%</h2>
+                                    <Button
+                                        variant={"outline"}
+                                        size={'sm'}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setFormData((prevData) => ({
+                                                ...prevData,
+                                                discount: 100
+                                            }));
+                                        }}
+                                    >
+                                        100%
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -303,13 +371,12 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                 </Card>
 
                 <div className="flex items-end h-full">
-                    <Button
-                        type="submit"
-                        size="lg"
-                        className="px-8 w-full"
-                    >
-                        Submit Prescription
-                    </Button>
+                    <DiscountSubmitButton discount={formData.discount} onSubmit={handleSubmit} onDiscountRemove={() => {
+                        setFormData((prevData) => ({
+                            ...prevData,
+                            discount: 0
+                        }));
+                    }}/>
                 </div>
             </Card>
         </form>

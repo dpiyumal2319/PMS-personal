@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import { Bill } from "@/app/lib/definitions";
+import {Bill} from "@/app/lib/definitions";
 import jsPDF from "jspdf";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
-import { IoMdDownload } from "react-icons/io";
-import { Button } from "@/components/ui/button";
+import {Dialog, DialogTrigger, DialogContent} from "@/components/ui/dialog";
+import {IoMdDownload} from "react-icons/io";
+import {Button} from "@/components/ui/button";
 
-export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: React.ReactNode }) {
+export function BillExport({bill, trigger}: { bill: Bill | null; trigger: React.ReactNode }) {
     if (!bill) return null;
 
     const exportToPDF = () => {
@@ -47,7 +47,6 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
         pdf.text("Thoduwawa Medical Center", centerText("Thoduwawa Medical Center"), yPos);
 
 
-
         // Bill Information
         yPos += 10;
         pdf.setFontSize(12);
@@ -61,7 +60,7 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
         });
 
         pdf.setFontSize(10);
-        pdf.text(`Bill No: ${bill.billID}`, margin, yPos);
+        pdf.text(`Prescription No: ${bill.prescriptionID}`, margin, yPos);
         pdf.text(`Date: ${billDate}`, pageWidth - margin - pdf.getTextWidth(`Date: ${billDate}`), yPos);
 
         // Patient Information
@@ -116,9 +115,9 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
 
         // Summary Items
         const summaryItems = [
-            { label: "Subtotal", value: bill.cost.toFixed(2) },
-            { label: "Doctor Fee", value: bill.doctor_charge.toFixed(2) },
-            { label: "Dispensary Fee", value: bill.dispensary_charge.toFixed(2) }
+            {label: "Subtotal", value: bill.medicineCost.toFixed(2)},
+            {label: "Doctor Fee", value: bill.doctor_charge.toFixed(2)},
+            {label: "Dispensary Fee", value: bill.dispensary_charge.toFixed(2)}
         ];
 
         summaryItems.forEach((item) => {
@@ -134,7 +133,7 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
         pdf.line(pageWidth - margin - 60, yPos, pageWidth - margin, yPos);
         yPos += 5;
 
-        const total = bill.cost + bill.doctor_charge + bill.dispensary_charge;
+        const total = bill.medicineCost + bill.doctor_charge + bill.dispensary_charge;
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(11);
         pdf.setTextColor(colors.accent[0], colors.accent[1], colors.accent[2]);
@@ -149,7 +148,7 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
 
         // Save PDF
         const formattedDate = new Date().toISOString().split('T')[0];
-        pdf.save(`TMC-Bill-${bill.billID}-${formattedDate}.pdf`);
+        pdf.save(`TMC-Bill-PRESCRIPTION-${bill.prescriptionID}-${formattedDate}.pdf`);
     };
 
     return (
@@ -159,13 +158,13 @@ export function BillExport({ bill, trigger }: { bill: Bill | null; trigger: Reac
                 <div className="p-4 text-center">
                     <h3 className="text-lg font-semibold mb-2">Export Bill</h3>
                     <p className="text-sm text-gray-500 mb-4">
-                        Download a PDF copy of bill #{bill.billID}
+                        Download a PDF copy of bill for prescription #{bill.prescriptionID}
                     </p>
                     <Button
                         onClick={exportToPDF}
                         className="w-full bg-blue-500 hover:bg-blue-600 gap-2"
                     >
-                        <IoMdDownload className="w-5 h-5" />
+                        <IoMdDownload className="w-5 h-5"/>
                         Download PDF
                     </Button>
                 </div>
