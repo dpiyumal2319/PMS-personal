@@ -296,7 +296,7 @@ export interface PrescriptionIssuesListProps {
     onRemove: (index: number) => void;
 }
 
-const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, onRemove}) => {
+export function PrescriptionIssuesList({issues, onRemove}: PrescriptionIssuesListProps) {
     return (
         <div className="space-y-4">
             {issues.map((issue, index) => {
@@ -356,15 +356,15 @@ const PrescriptionIssuesList: React.FC<PrescriptionIssuesListProps> = ({issues, 
             })}
         </div>
     );
-};
+}
 
 
-interface OffRecordMedsListProps {
+export interface OffRecordMedsListProps {
     meds: OffRecordMeds[];
     onRemove: (index: number) => void;
 }
 
-const OffRecordMedsList: React.FC<OffRecordMedsListProps> = ({meds, onRemove}) => {
+export function OffRecordMedsList({meds, onRemove}: OffRecordMedsListProps) {
     return (
         <div className="space-y-3">
             {meds.map((med, index) => (
@@ -419,6 +419,4 @@ const OffRecordMedsList: React.FC<OffRecordMedsListProps> = ({meds, onRemove}) =
             ))}
         </div>
     );
-};
-
-export {PrescriptionIssuesList, OffRecordMedsList};
+}
