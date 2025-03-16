@@ -555,7 +555,7 @@ export async function addNewItem({
             // 2. Create or connect drug
             const drug = await tx.drug.upsert({
                 where: {id: formData.drugId ?? 0},
-                update: {},
+                update: {Buffer: formData.Buffer},
                 create: {
                     name: formData.drugName,
                     Buffer: formData.Buffer,
@@ -1538,6 +1538,7 @@ export async function searchDrugModels(query: string) {
         select: {
             id: true,
             name: true,
+            Buffer: true
         },
         take: 8,
     });
