@@ -115,7 +115,7 @@ export function BillExport({bill, trigger}: { bill: Bill | null; trigger: React.
 
         // Summary Items
         const summaryItems = [
-            {label: "Subtotal", value: bill.cost.toFixed(2)},
+            {label: "Subtotal", value: bill.medicineCost.toFixed(2)},
             {label: "Doctor Fee", value: bill.doctor_charge.toFixed(2)},
             {label: "Dispensary Fee", value: bill.dispensary_charge.toFixed(2)}
         ];
@@ -133,7 +133,7 @@ export function BillExport({bill, trigger}: { bill: Bill | null; trigger: React.
         pdf.line(pageWidth - margin - 60, yPos, pageWidth - margin, yPos);
         yPos += 5;
 
-        const total = bill.cost + bill.doctor_charge + bill.dispensary_charge;
+        const total = bill.medicineCost + bill.doctor_charge + bill.dispensary_charge;
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(11);
         pdf.setTextColor(colors.accent[0], colors.accent[1], colors.accent[2]);

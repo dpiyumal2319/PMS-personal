@@ -46,11 +46,12 @@ export async function calculateBill({prescriptionData}: {
             // 4. Initialize bill object
             const bill: Bill = {
                 prescriptionID,
+                discount: prescription.discount,
                 patientName: prescription.patient.name,
                 patientID: prescriptionData.patientID,
                 dispensary_charge: prescription.dispensaryCharge,
                 doctor_charge: prescription.doctorCharge,
-                cost: 0,
+                medicineCost: 0,
                 entries: [],
             };
 
@@ -144,7 +145,7 @@ export async function calculateBill({prescriptionData}: {
 
                 // Calculate cost and add entry to bill
                 const batchCost = issue.quantity * batch.retailPrice;
-                bill.cost += batchCost;
+                bill.medicineCost += batchCost;
 
                 bill.entries.push({
                     drugName: batch.drug.name,
@@ -163,10 +164,9 @@ export async function calculateBill({prescriptionData}: {
             // 8. Update final medicine charges
             await prisma.prescription.update({
                 where: {id: bill.prescriptionID},
-                data: {medicinesCharge: Number(bill.cost.toFixed(3))}
+                data: {medicinesCharge: Number(bill.medicineCost.toFixed(3))}
             });
 
-            bill.cost += bill.doctor_charge + bill.dispensary_charge;
             return {success: true, message: 'Bill calculated successfully', bill};
         }, {
             timeout: 10000 // Increase timeout to 10 seconds
@@ -209,10 +209,11 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
     return {
         patientName: prescription.patient.name,
         prescriptionID,
+        discount: prescription.discount,
         patientID: prescription.patientId,
         dispensary_charge: prescription.dispensaryCharge,
         doctor_charge: prescription.doctorCharge,
-        cost: (prescription.medicinesCharge + prescription.dispensaryCharge + prescription.doctorCharge),
+        medicineCost: (prescription.medicinesCharge + prescription.dispensaryCharge + prescription.doctorCharge),
         entries: prescription.issues.map(issue => ({
             drugName: issue.drug.name,
             brandName: issue.brand.name,

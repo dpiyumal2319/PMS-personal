@@ -5,7 +5,14 @@ import {Card} from "@/components/ui/card";
 export function BillComponent({bill}: { bill: Bill | null }) {
     if (!bill) return null;
 
-    const total = bill.cost + bill.dispensary_charge + bill.doctor_charge;
+    // Calculate subtotal of all costs before discount
+    const subtotal = bill.medicineCost + bill.dispensary_charge + bill.doctor_charge;
+
+    // Calculate discount amount
+    const discountAmount = (subtotal * bill.discount) / 100;
+
+    // Calculate final total after discount
+    const finalTotal = subtotal - discountAmount;
 
     return (
         <Card className="p-6">
@@ -33,9 +40,9 @@ export function BillComponent({bill}: { bill: Bill | null }) {
 
             <div className="mt-4 border-t pt-4 text-sm space-y-2">
                 <div className="flex justify-between">
-                    <span className="text-gray-600">🧾 Subtotal:</span>
+                    <span className="text-gray-600">🧾 Medicine Cost:</span>
                     <span className="font-medium text-gray-900">
-                        LKR {bill.cost.toFixed(2)}
+                        LKR {bill.medicineCost.toFixed(2)}
                     </span>
                 </div>
                 <div className="flex justify-between">
@@ -50,9 +57,19 @@ export function BillComponent({bill}: { bill: Bill | null }) {
                         LKR {bill.dispensary_charge.toFixed(2)}
                     </span>
                 </div>
-                <div className="flex justify-between text-lg font-bold text-green-600 mt-2">
+                <div className="flex justify-between font-semibold text-gray-900 border-t pt-2">
+                    <span>Subtotal:</span>
+                    <span>LKR {subtotal.toFixed(2)}</span>
+                </div>
+                {bill.discount > 0 && (
+                    <div className="flex justify-between text-pink-600">
+                        <span>🏷️ Discount ({bill.discount}%):</span>
+                        <span>- LKR {discountAmount.toFixed(2)}</span>
+                    </div>
+                )}
+                <div className="flex justify-between text-lg font-bold text-green-600 mt-2 border-t pt-2">
                     <span>💵 Total:</span>
-                    <span>LKR {total.toFixed(2)}</span>
+                    <span>LKR {finalTotal.toFixed(2)}</span>
                 </div>
             </div>
         </Card>
