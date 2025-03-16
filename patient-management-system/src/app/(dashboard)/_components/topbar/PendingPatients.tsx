@@ -110,7 +110,7 @@ const PendingPatients = () => {
                     <div className="flex items-center gap-1">
                         <span className="text-gray-500">Total:</span>
                         <span className="font-medium text-gray-900">{pending.total}</span>
-                        <span className="text-gray-500">in queue</span>
+                        <span className="text-gray-500">in outside</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <span className="text-gray-500">Assigned:</span>
