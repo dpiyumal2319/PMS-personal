@@ -23,6 +23,8 @@ import DynamicIcon from "@/app/(dashboard)/_components/DynamicIcon";
 import {IconName} from "@/app/lib/iconMapping";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import {Separator} from "@/components/ui/separator";
+import {RiDiscountPercentFill} from "react-icons/ri";
+import {toast} from "react-toastify";
 
 export interface IssueInForm {
     drugId: number;
@@ -54,17 +56,18 @@ export interface PrescriptionFormData {
     presentingSymptoms: string;
     description: string;
     extraDoctorCharges: number;
+    discount: number;
     issues: IssueInForm[];
     offRecordMeds: OffRecordMeds[];
     vitals: VitalInForm[];
 }
 
 const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: VitalInForm[] }) => {
-    const [formData, setFormData] = useState<PrescriptionFormData>(() => {
+    const [formData, setFormData] = useState<PrescriptionFormData>((): PrescriptionFormData => {
         if (typeof window !== 'undefined') {
             const savedForm = localStorage.getItem(`prescription-form-${patientID}`);
             if (savedForm) {
-                return JSON.parse(savedForm);
+                return JSON.parse(savedForm) as PrescriptionFormData;
             }
         }
         return {
@@ -73,7 +76,8 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
             extraDoctorCharges: 0,
             issues: [],
             offRecordMeds: [],
-            vitals: vitals
+            vitals: vitals,
+            discount: 0
         };
     });
     const router = useRouter();
@@ -89,6 +93,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
             description: '',
             extraDoctorCharges: 0,
             issues: [],
+            discount: 0,
             offRecordMeds: [],
             vitals: vitals
         });
@@ -136,6 +141,17 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        // Check for over 100 and below 0 discount
+        if (formData.discount > 100 || formData.discount < 0) {
+            toast.error('Discount should be between 0 and 100', {position: 'bottom-left'});
+            return;
+        }
+
+        if (formData.issues.length === 0) {
+            toast.error('Please add at least one issue', {position: "bottom-left"});
+            return;
+        }
+
         try {
             const result = await handleServerAction(() => addPrescription({
                 prescriptionForm: formData,
@@ -261,6 +277,40 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                     placeholder="Enter extra charges..."
                                 />
                             </div>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <RiDiscountPercentFill className="h-4 w-4 text-emerald-500"/>
+                                    <Label>Discount</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Input
+                                        type="number"
+                                        name="discount"
+                                        step={5}
+                                        min={0}
+                                        max={100}
+                                        value={formData.discount}
+                                        onChange={handleChange}
+                                        placeholder="Enter discount..."
+                                    />
+                                    <h2>%</h2>
+                                    <Button
+                                        variant={"outline"}
+                                        size={'sm'}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setFormData((prevData) => ({
+                                                ...prevData,
+                                                discount: 100
+                                            }));
+                                        }}
+                                    >
+                                        100%
+                                    </Button>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </Card>
@@ -309,7 +359,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                         className="px-8 w-full"
                     >
                         Submit Prescription
-                    </Button>
+                    </Button>)
                 </div>
             </Card>
         </form>

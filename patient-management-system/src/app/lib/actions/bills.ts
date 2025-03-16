@@ -5,7 +5,7 @@ import {
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
 import {Bill, myBillError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
-import {ChargeType, Prisma} from "@prisma/client";
+import {Prisma} from "@prisma/client";
 
 export async function calculateBill({prescriptionData}: {
     prescriptionData: BatchAssignPayload
@@ -17,7 +17,7 @@ export async function calculateBill({prescriptionData}: {
         // Increase the transaction timeout to 10000ms
         return await prisma.$transaction(async (prisma): Promise<myBillError> => {
             // 1. Fetch prescription and fees in parallel to save time
-            const [prescription, dispensaryFee, doctorFee, issues] = await Promise.all([
+            const [prescription, issues] = await Promise.all([
                 prisma.prescription.findUnique({
                     where: {id: prescriptionID},
                     include: {
@@ -27,12 +27,6 @@ export async function calculateBill({prescriptionData}: {
                             }
                         }
                     }
-                }),
-                prisma.charge.findUnique({
-                    where: {name: ChargeType.DISPENSARY}
-                }),
-                prisma.charge.findUnique({
-                    where: {name: ChargeType.DOCTOR}
                 }),
                 prisma.issue.findMany({
                     where: {
@@ -49,35 +43,13 @@ export async function calculateBill({prescriptionData}: {
                 return {success: false, message: 'Prescription already completed'};
             }
 
-            // 2. Calculate fees
-            const dspFees = dispensaryFee?.value || 0;
-            const dctFee = doctorFee?.value || 0;
-            const totalDoctorFee = dctFee + (prescription.extraDoctorCharge ?? 0);
-
-            // 3. Create bill first (with zero medicine charge initially)
-            const createdBill = await prisma.bill.upsert({
-                where: {prescriptionId: prescriptionID},
-                create: {
-                    prescriptionId: prescriptionID,
-                    doctorCharge: totalDoctorFee,
-                    dispensaryCharge: dspFees,
-                    medicinesCharge: 0
-                },
-                update: {
-                    doctorCharge: totalDoctorFee,
-                    dispensaryCharge: dspFees,
-                    medicinesCharge: 0
-                }
-            });
-
             // 4. Initialize bill object
             const bill: Bill = {
-                billID: createdBill.id,
                 prescriptionID,
                 patientName: prescription.patient.name,
                 patientID: prescriptionData.patientID,
-                dispensary_charge: dspFees,
-                doctor_charge: totalDoctorFee,
+                dispensary_charge: prescription.dispensaryCharge,
+                doctor_charge: prescription.doctorCharge,
                 cost: 0,
                 entries: [],
             };
@@ -189,13 +161,12 @@ export async function calculateBill({prescriptionData}: {
             ]);
 
             // 8. Update final medicine charges
-            await prisma.bill.update({
-                where: {id: createdBill.id},
-                data: {medicinesCharge: bill.cost}
+            await prisma.prescription.update({
+                where: {id: bill.prescriptionID},
+                data: {medicinesCharge: Number(bill.cost.toFixed(3))}
             });
 
             bill.cost += bill.doctor_charge + bill.dispensary_charge;
-
             return {success: true, message: 'Bill calculated successfully', bill};
         }, {
             timeout: 10000 // Increase timeout to 10 seconds
@@ -224,7 +195,6 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
                     brand: true,
                 }
             },
-            Bill: true
         }
     });
 
@@ -232,18 +202,17 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
         throw new Error('Prescription not found');
     }
 
-    if (prescription.status === 'PENDING' || !prescription.Bill || !prescription.issues.every(issue => issue.batch)) {
+    if (prescription.status === 'PENDING' || !prescription.issues.every(issue => issue.batch)) {
         throw new Error('Prescription not completed');
     }
 
     return {
-        billID: prescription.Bill.id,
         patientName: prescription.patient.name,
         prescriptionID,
         patientID: prescription.patientId,
-        dispensary_charge: prescription.Bill.dispensaryCharge,
-        doctor_charge: prescription.Bill.doctorCharge,
-        cost: (prescription.Bill.medicinesCharge + prescription.Bill.dispensaryCharge + prescription.Bill.doctorCharge),
+        dispensary_charge: prescription.dispensaryCharge,
+        doctor_charge: prescription.doctorCharge,
+        cost: (prescription.medicinesCharge + prescription.dispensaryCharge + prescription.doctorCharge),
         entries: prescription.issues.map(issue => ({
             drugName: issue.drug.name,
             brandName: issue.brand.name,

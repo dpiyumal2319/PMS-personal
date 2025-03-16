@@ -385,11 +385,14 @@ export async function addPrescription({
     patientID: number;
 }): Promise<myError> {
     try {
+        // Session verification moved to the beginning to fail fast
+        const session = await verifySession();
+        if (session.role !== "DOCTOR") {
+            redirect('/unauthorized');
+        }
+
         // Early validation checks
-        if (
-            prescriptionForm.issues.length === 0 &&
-            prescriptionForm.offRecordMeds.length === 0
-        ) {
+        if (!prescriptionForm.issues.length && !prescriptionForm.offRecordMeds.length) {
             return {
                 success: false,
                 message: "At least one prescription is required",
@@ -397,28 +400,17 @@ export async function addPrescription({
         }
 
         // Check for repeated drugs more efficiently
-        const drugIds = prescriptionForm.issues.map((issue) => issue.drugId);
-        const uniqueDrugIds = new Set(drugIds);
-        if (drugIds.length !== uniqueDrugIds.size) {
+        const drugIds = prescriptionForm.issues.map(issue => issue.drugId);
+        const uniqueDrugs = new Set(drugIds);
+        if (uniqueDrugs.size < drugIds.length) {
             return {
                 success: false,
                 message: "Repeated drugs are not allowed in a single prescription",
             };
         }
 
-        // Session verification (consider moving this check earlier in the request flow)
-        const session = await verifySession();
-        if (session.role !== "DOCTOR") {
-            redirect('/unauthorized');
-        }
-
-        // Clean data before database operations
-        const filteredVitals = prescriptionForm.vitals.filter(
-            (vital) => vital.value !== ""
-        );
-
-        // Prepare data structures for transaction
-        const issuesData = prescriptionForm.issues.map((issue) => ({
+        // Pre-process data outside of transaction to minimize transaction time
+        const issuesData = prescriptionForm.issues.map(issue => ({
             drugId: issue.drugId,
             details: issue.details,
             brandId: issue.brandId,
@@ -430,18 +422,29 @@ export async function addPrescription({
             unitConcentrationId: issue.concentrationID,
         }));
 
-        const offRecordMedsData = prescriptionForm.offRecordMeds.map((med) => ({
+        const offRecordMedsData = prescriptionForm.offRecordMeds.map(med => ({
             name: med.name,
             description: med.description,
         }));
 
-        const vitalsData = filteredVitals.map((vital) => ({
-            vitalId: vital.id,
-            value: vital.value,
-        }));
+        const vitalsData = prescriptionForm.vitals
+            .filter(vital => vital.value !== "")
+            .map(vital => ({
+                vitalId: vital.id,
+                value: vital.value,
+            }));
 
-        // Execute all database operations in a transaction
-        const queue = await prisma.$transaction(async (tx) => {
+        // Execute database operations in a transaction with optimized queries
+        const queueId = await prisma.$transaction(async (tx) => {
+            // Fetch charges in parallel
+            const [dispCharge, docCharge] = await Promise.all([
+                tx.charge.findUnique({where: {name: 'DISPENSARY'}}),
+                tx.charge.findUnique({where: {name: 'DOCTOR'}})
+            ]);
+
+            const dispensaryCharge = dispCharge?.value || 0;
+            const doctorCharge = Number(prescriptionForm.extraDoctorCharges) + (docCharge?.value || 0);
+
             // Create prescription with all related data in one operation
             const prescription = await tx.prescription.create({
                 data: {
@@ -449,20 +452,27 @@ export async function addPrescription({
                     presentingSymptoms: prescriptionForm.presentingSymptoms,
                     details: prescriptionForm.description,
                     status: "PENDING",
-                    extraDoctorCharge: Number(prescriptionForm.extraDoctorCharges),
                     issues: {create: issuesData},
                     OffRecordMeds: {create: offRecordMedsData},
                     PrescriptionVitals: {create: vitalsData},
+                    doctorCharge,
+                    dispensaryCharge,
+                    medicinesCharge: 0,
+                    discount: prescriptionForm.discount,
                 },
-                include: {issues: true},
+                select: {
+                    id: true,
+                    issues: {select: {id: true, drugId: true}}
+                },
             });
 
-            // Update queue status if needed
+            // Update queue status if needed - using findFirst with select for minimum data
             const queueEntry = await tx.queueEntry.findFirst({
                 where: {
                     patientId: patientID,
                     status: "PENDING",
                 },
+                select: {id: true}
             });
 
             if (queueEntry) {
@@ -472,29 +482,22 @@ export async function addPrescription({
                 });
             }
 
-            // Batch strategy history updates
-            const strategyUpdates = prescription.issues.map((createdIssue, index) => {
-                const originalIssue = prescriptionForm.issues[index];
-                return tx.stratergyHistory.upsert({
-                    where: {drugId: originalIssue.drugId},
-                    update: {issueId: createdIssue.id},
-                    create: {
-                        drugId: originalIssue.drugId,
-                        issueId: createdIssue.id,
-                    },
-                });
+            // Batch strategy history updates with more efficient operation
+            await tx.stratergyHistory.createMany({
+                data: prescription.issues.map(issue => ({
+                    drugId: issue.drugId,
+                    issueId: issue.id,
+                })),
+                skipDuplicates: true, // This replaces the upsert operation
             });
 
-            await Promise.all(strategyUpdates);
-
-            // Store queue ID for revalidation after transaction
             return queueEntry?.id;
         });
 
-        if (queue) {
+        // Handle path revalidation and queue updates after successful transaction
+        if (queueId) {
             await triggerQueueUpdate();
         }
-        // Handle path revalidation after successful transaction
         revalidatePath(`/patients/${patientID}/prescriptions`);
         return {
             success: true,

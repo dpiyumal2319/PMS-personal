@@ -18,28 +18,25 @@ export async function getDailyIncomes(dateRange: DateRange) {
         startDate.setDate(today.getDate() - 4);
     }
 
-    const bills = await prisma.bill.findMany({
+    const prescriptions = await prisma.prescription.findMany({
         where: {
-            Prescription: {
-                time: {
-                    gte: startDate,
-                    lte: endDate,
-                }
+            time: {
+                gte: startDate,
+                lte: endDate,
             }
         },
-        include: {
-            Prescription: {
-                select: {
-                    time: true,
-                }
-            }
+        select: {
+            time: true,
+            doctorCharge: true,
+            dispensaryCharge: true,
+            medicinesCharge: true,
         }
     });
 
-    // Group bills by date and calculate totals
-    const groupedByDate = bills.reduce((acc, bill) => {
+// Group bills by date and calculate totals
+    const groupedByDate = prescriptions.reduce((acc, prescription) => {
         // Convert to Date object right away instead of string
-        const date = new Date(bill.Prescription.time);
+        const date = new Date(prescription.time);
         // Use midnight of the day for consistent grouping
         const dateKey = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
@@ -53,9 +50,9 @@ export async function getDailyIncomes(dateRange: DateRange) {
         }
 
         const totalBillAmount =
-            (bill.doctorCharge || 0) +
-            (bill.dispensaryCharge || 0) +
-            (bill.medicinesCharge || 0);
+            (prescription.doctorCharge || 0) +
+            (prescription.dispensaryCharge || 0) +
+            (prescription.medicinesCharge || 0);
 
         acc[dateKeyString].totalIncome += totalBillAmount;
         acc[dateKeyString].patientCount += 1;
@@ -63,14 +60,14 @@ export async function getDailyIncomes(dateRange: DateRange) {
         return acc;
     }, {} as Record<string, { date: Date; totalIncome: number; patientCount: number }>);
 
-    // Convert to array and sort by date
+// Convert to array and sort by date
     const dailyIncomes = Object.values(groupedByDate).map(data => ({
         date: data.date,
         totalIncome: data.totalIncome,
         patientCount: data.patientCount,
     }));
 
-    // Sort by date in descending order using timestamp comparison
+// Sort by date in descending order using timestamp comparison
     return dailyIncomes.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
