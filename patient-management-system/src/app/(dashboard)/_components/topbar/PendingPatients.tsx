@@ -161,7 +161,7 @@ const PendingPatients = ({session}: { session: SessionPayload }) => {
                         <PatientsList patients={patients} closeSheet={() => setOpen(false)}/>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-32 text-gray-500">
-                            <p>No patients found in the queue</p>
+                            <p>No patients assigned</p>
                         </div>
                     )}
                 </ScrollArea>
