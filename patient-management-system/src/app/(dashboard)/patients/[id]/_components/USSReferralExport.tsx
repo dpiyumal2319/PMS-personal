@@ -311,17 +311,6 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
                                     </div>
                                 </div>
 
-                                <div className="mb-4">
-                                    <label className="text-sm font-medium text-gray-700">Address</label>
-                                    <Input
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                        placeholder="Full address"
-                                        className="border-gray-300 focus:ring-blue-500"
-                                    />
-                                </div>
-
                             </div>
 
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">

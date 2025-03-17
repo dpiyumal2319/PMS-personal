@@ -15,6 +15,8 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
         patientName: "",
         age: "",
         address: "",
+        consultant: "Physician",
+        consultant_title: "Sir",
         conditions: ["", "", ""], // Three conditions
         investigations: "",
         reportDate: new Date().toISOString().split('T')[0],
@@ -57,7 +59,7 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
@@ -115,26 +117,41 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
             pdf.setFont("helvetica", "normal");
             let yPos = 10;
 
-            // Add doctor information
+            // Add doctor information - INCREASED FONT SIZE
             pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(10);
+            pdf.setFontSize(10);  // Increased from 9
             pdf.text("Dr. Dinej Chandrasiri", marginLeft, yPos);
             yPos += 6;
 
-            pdf.text("Registered Medical Officer", marginLeft, yPos);
-            yPos += 6;
-
-            pdf.text("SLMC No. 3002", marginLeft, yPos);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(10);  // Increased from 7
+            pdf.text("Registered Medical Officer. SLMC No. 3002", marginLeft, yPos);
             yPos += 6;
 
             pdf.text("Thoduwawa Medical Center, Church Rd, Thoduwawa", marginLeft, yPos);
-            yPos += 13;
+            yPos += 5;
 
-            // Add referral title
-            pdf.setFontSize(14);
+            // Draw a full-width horizontal line
+            pdf.setDrawColor(0); // Set line color to black
+            pdf.setLineWidth(0.2); // Set line thickness
+            pdf.line(marginLeft, yPos, marginLeft + contentWidth, yPos); // Draw line from left to right
+            yPos += 7; // Adjust yPos for spacing after the line
+
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(10);  // Increased from 7
+            pdf.text("Consultant consultant,", marginLeft, yPos);
+            yPos += 6;
+
+            pdf.text(`${formData.consultant},`, marginLeft, yPos);
+            yPos += 6;
+
+            pdf.text(`Dear ${formData.consultant_title},`, marginLeft, yPos);
+            yPos += 6;
+
+            pdf.setFontSize(12);  // Increased from 9
             pdf.setFont("helvetica", "bold");
-            pdf.text("Referral Letter", centerX, yPos, { align: "center" });
-            yPos += 13;
+            pdf.text("Request for an Ultra sound scan", centerX, yPos, { align: "center" });
+            yPos += 10;
 
             // Patient details
             pdf.setFont("helvetica", "normal");
@@ -257,6 +274,72 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                                 <h3 className="text-blue-700 font-medium mb-3 flex items-center">
                                     <span
                                         className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">2</span>
+                                    consultant Information
+                                </h3>
+
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700">Title</label>
+                                        <select
+                                            name="consultant_title"
+                                            value={formData.consultant_title}
+                                            onChange={handleChange}
+                                            className=" text-sm w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                        >
+                                            <option value="Sir" className="text-sm">Sir</option>
+                                            <option value="Madam" className="text-sm">Madam</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700">Consultant</label>
+                                        <select
+                                            name="consultant"
+                                            value={["Physician", "Surgeon", "Pediatrician", "Gynecologist & Obstetrician"].includes(formData.consultant) ? formData.consultant : "Other"}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    consultant: value === "Other" ? "" : value,
+                                                }));
+                                            }}
+                                            className="text-sm w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                        >
+                                            <option value="Physician">Physician</option>
+                                            <option value="Surgeon">Surgeon</option>
+                                            <option value="Pediatrician">Pediatrician</option>
+                                            <option value="Gynecologist & Obstetrician">Gynecologist & Obstetrician</option>
+                                            <option value="Other">Other</option>
+
+                                        </select>
+                                        {/* Show text input when consultant is empty or not one of the predefined options */}
+                                        {(formData.consultant === "" ||
+                                            (formData.consultant !== "Physician" &&
+                                                formData.consultant !== "Surgeon" &&
+                                                formData.consultant !== "Pediatrician" &&
+                                                formData.consultant !== "Gynecologist & Obstetrician" &&
+                                                formData.consultant !== "Other")) && (
+                                                <input
+                                                    type="text"
+                                                    name="consultant"
+                                                    value={formData.consultant}
+                                                    onChange={(e) => {
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            consultant: e.target.value
+                                                        }));
+                                                    }}
+                                                    placeholder="Enter custom consultant name"
+                                                    className="mt-2 text-sm w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                                    autoFocus
+                                                />
+                                            )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                                <h3 className="text-blue-700 font-medium mb-3 flex items-center">
+                                    <span
+                                        className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">3</span>
                                     Medical Details
                                 </h3>
 
@@ -287,7 +370,7 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                                 <h3 className="text-blue-700 font-medium mb-3 flex items-center">
                                     <span
-                                        className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">3</span>
+                                        className="bg-blue-100 text-blue-700 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-sm">4</span>
                                     Report Details
                                 </h3>
 
@@ -303,18 +386,19 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                                 </div>
                             </div>
                         </div>
-                    )}
-                </div>
 
-                {/* Submit button */}
-                <div className="  ">
-                    <Button
-                        onClick={exportToPDF}
-                        className="w-full"
-                        disabled={isLoading}
-                    >
-                        <FileText className="w-5 h-5 mr-2" /> Generate Referral Letter
-                    </Button>
+                    )}
+
+                    {/* Submit button */}
+                    <div className="  ">
+                        <Button
+                            onClick={exportToPDF}
+                            className="w-full"
+                            disabled={isLoading}
+                        >
+                            <FileText className="w-5 h-5 mr-2" /> Generate Referral Letter
+                        </Button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
