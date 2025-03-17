@@ -62,11 +62,11 @@ const FeeForm = ({
     };
 
     return (
-        <Card className="w-full max-w-md shadow-lg">
+        <Card className="w-full shadow-lg">
             <CardHeader>
-                <CardTitle className="text-xl font-semibold">Update Charges</CardTitle>
+                <CardTitle className="text-xl font-semibold">Update Fixed Charges</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Doctor Charge Section */}
                 <div className="border rounded-lg p-4 bg-slate-50">
                     <div className="mb-4">
