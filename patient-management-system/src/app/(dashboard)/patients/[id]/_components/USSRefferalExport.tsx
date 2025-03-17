@@ -106,7 +106,7 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
             //     USS_type: formData.USS_type,
             //     radiologist: formData.radiologist,
             //     radiologist_title: formData.radiologist_title,
-        
+
             // });
 
             // Then generate the PDF as before
@@ -139,7 +139,13 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
             yPos += 6;
 
             pdf.text("Thoduwawa Medical Center, Church Rd, Thoduwawa", marginLeft, yPos);
-            yPos += 13;
+            yPos += 5;
+
+            // Draw a full-width horizontal line
+            pdf.setDrawColor(0); // Set line color to black
+            pdf.setLineWidth(0.2); // Set line thickness
+            pdf.line(marginLeft, yPos, marginLeft + contentWidth, yPos); // Draw line from left to right
+            yPos += 7; // Adjust yPos for spacing after the line
 
             pdf.setFont("helvetica", "normal");
             pdf.setFontSize(10);  // Increased from 7
