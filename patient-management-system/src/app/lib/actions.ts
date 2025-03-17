@@ -1660,6 +1660,7 @@ interface PatientData {
     name: string;
     birthDate?: Date | null;
     address?: string | null;
+    gender?: string | null;
 }
 
 /**
@@ -1681,6 +1682,7 @@ export async function fetchPatientData(
                 name: true,
                 birthDate: true,
                 address: true,
+                gender: true,
             },
         });
     } catch (error) {
