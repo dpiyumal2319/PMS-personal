@@ -2,7 +2,8 @@
 import {MedicalCertificateExport} from '../_components/MedicalCertificateExport';
 import {MedicalCertificateList} from '../_components/MedicalCertificateList';
 import {Metadata} from "next";
-import { USSReferralExport } from '../_components/USSRefferalExport';
+import { USSReferralExport } from '../_components/USSReferralExport';
+import { ReferralLetterExport } from '../_components/ReferralLetterExport';
 
 export const metadata: Metadata = {
     title: "PMS - Medical Certificates",
@@ -17,6 +18,7 @@ export default async function PatientPage({params}: { params: Promise<{ id: stri
                 <h1 className="text-2xl font-bold">Medical Certificates</h1>
                 <MedicalCertificateExport patientId={parseInt(awaitedParams.id)}/>
                 <USSReferralExport patientId={parseInt(awaitedParams.id)}/>
+                <ReferralLetterExport patientId={parseInt(awaitedParams.id)}/>
             </div>
             <MedicalCertificateList patientId={parseInt(awaitedParams.id)}/>
         </div>
