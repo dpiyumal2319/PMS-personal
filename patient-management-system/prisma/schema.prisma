@@ -139,20 +139,27 @@ model UnitConcentration {
 }
 
 model Prescription {
-  id                 Int                  @id @default(autoincrement())
-  time               DateTime             @default(now())
-  presentingSymptoms String
-  status             PrescriptionStatus   @default(PENDING)
-  details            String?
-  patientId          Int
-  issues             Issue[]
-  OffRecordMeds      OffRecordMeds[]
-  patient            Patient              @relation(fields: [patientId], references: [id])
-  PrescriptionVitals PrescriptionVitals[]
-  doctorCharge       Float
-  dispensaryCharge   Float
-  discount           Float
-  medicinesCharge    Float
+  id                      Int                   @id @default(autoincrement())
+  time                    DateTime              @default(now())
+  presentingSymptoms      String
+  status                  PrescriptionStatus    @default(PENDING)
+  details                 String?
+  patientId               Int
+  issues                  Issue[]
+  OffRecordMeds           OffRecordMeds[]
+  patient                 Patient               @relation(fields: [patientId], references: [id])
+  PrescriptionVitals      PrescriptionVitals[]
+  medicinesCharge         Float
+  charges                 PrescriptionCharges[]
+  additionalServiceCharge Float
+}
+
+model PrescriptionCharges {
+  id             Int           @id @default(autoincrement())
+  charge         Charge        @relation(fields: [chargeId], references: [id])
+  chargeId       Int
+  Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int?
 }
 
 model Vitals {
@@ -280,9 +287,12 @@ model BatchHistory {
 }
 
 model Charge {
-  name      ChargeType @id
-  value     Float
-  updatedAt DateTime   @updatedAt
+  id                  Int                   @id @default(autoincrement())
+  name                String                @unique
+  type                ChargeType
+  value               Float
+  updatedAt           DateTime              @updatedAt
+  PrescriptionCharges PrescriptionCharges[]
 }
 
 enum Gender {
@@ -383,6 +393,8 @@ enum VitalType {
 }
 
 enum ChargeType {
-  DOCTOR
-  DISPENSARY
+  FIXED
+  PERCENTAGE
+  PROCEDURE
+  DISCOUNT
 }

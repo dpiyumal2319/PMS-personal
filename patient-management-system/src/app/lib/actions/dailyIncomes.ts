@@ -33,7 +33,7 @@ export async function getDailyIncomes(dateRange: DateRange) {
         }
     });
 
-// Group bills by date and calculate totals
+    // Group bills by date and calculate totals
     const groupedByDate = prescriptions.reduce((acc, prescription) => {
         // Convert to Date object right away instead of string
         const date = new Date(prescription.time);
