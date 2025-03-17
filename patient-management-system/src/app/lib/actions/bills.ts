@@ -213,7 +213,7 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
         patientID: prescription.patientId,
         dispensary_charge: prescription.dispensaryCharge,
         doctor_charge: prescription.doctorCharge,
-        medicineCost: (prescription.medicinesCharge + prescription.dispensaryCharge + prescription.doctorCharge),
+        medicineCost: prescription.medicinesCharge,
         entries: prescription.issues.map(issue => ({
             drugName: issue.drug.name,
             brandName: issue.brand.name,
