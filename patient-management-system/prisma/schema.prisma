@@ -139,19 +139,17 @@ model UnitConcentration {
 }
 
 model Prescription {
-  id                      Int                   @id @default(autoincrement())
-  time                    DateTime              @default(now())
-  presentingSymptoms      String
-  status                  PrescriptionStatus    @default(PENDING)
-  details                 String?
-  patientId               Int
-  issues                  Issue[]
-  OffRecordMeds           OffRecordMeds[]
-  patient                 Patient               @relation(fields: [patientId], references: [id])
-  PrescriptionVitals      PrescriptionVitals[]
-  medicinesCharge         Float
-  charges                 PrescriptionCharges[]
-  additionalServiceCharge Float
+  id                 Int                   @id @default(autoincrement())
+  time               DateTime              @default(now())
+  presentingSymptoms String
+  status             PrescriptionStatus    @default(PENDING)
+  details            String?
+  patientId          Int
+  issues             Issue[]
+  OffRecordMeds      OffRecordMeds[]
+  patient            Patient               @relation(fields: [patientId], references: [id])
+  PrescriptionVitals PrescriptionVitals[]
+  charges            PrescriptionCharges[]
 }
 
 model PrescriptionCharges {
@@ -160,6 +158,8 @@ model PrescriptionCharges {
   chargeId       Int
   Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
   prescriptionId Int?
+  value          Float
+  description    String?
 }
 
 model Vitals {

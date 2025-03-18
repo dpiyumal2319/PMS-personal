@@ -6,6 +6,7 @@ import {ChargeType, Prisma} from "@prisma/client";
 import {verifySession} from "@/app/lib/sessions";
 import {redirect} from "next/navigation";
 import {FeeInForm} from "@/app/(dashboard)/admin/fees/_components/FeeForm";
+
 export async function updateCharges({
                                         charges,
                                     }: {
@@ -51,7 +52,6 @@ export async function updateCharges({
         };
     } catch (e) {
         console.error("Charge update error:", e);
-
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
             // Handle specific Prisma errors with more detailed messages
             if (e.code === 'P2002') {
