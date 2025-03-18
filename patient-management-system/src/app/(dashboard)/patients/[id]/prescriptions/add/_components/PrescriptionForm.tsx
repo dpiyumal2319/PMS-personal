@@ -114,16 +114,28 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
 
     const router = useRouter();
 
-// Function to fetch charges and update state
+    // Function to fetch charges and update state
     const loadFixedCharges = async () => {
         const charges = await getChargesOnType({type: ChargeType.FIXED});
         return charges.map(charge => ({...charge, description: ''}));
     };
 
     // Load charges on mount
+    // Load charges on mount
     useEffect(() => {
-        loadFixedCharges().then(charges => {
-            setFormData(prev => ({...prev, charges}));
+        loadFixedCharges().then(fixedCharges => {
+            setFormData(prev => {
+                // Filter out existing FIXED charges (if any) from the previous state
+                const nonFixedCharges = prev.charges.filter(
+                    charge => charge.type !== ChargeType.FIXED
+                );
+
+                // Combine the new fixed charges with any non-fixed charges
+                return {
+                    ...prev,
+                    charges: [...nonFixedCharges, ...fixedCharges]
+                };
+            });
         });
     }, []);
 
@@ -213,6 +225,9 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
             toast.error('Please add at least one issue', {position: "bottom-right"});
             return;
         }
+
+        console.log(formData);
+        return;
 
         try {
             const result = await handleServerAction(() => addPrescription({
