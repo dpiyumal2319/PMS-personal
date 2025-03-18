@@ -31,21 +31,21 @@ import CustomDrugTypeSelect from "@/app/(dashboard)/inventory/available-stocks/_
 import { SupplierSuggestionBox } from "@/app/(dashboard)/inventory/_components/SupplierSuggestionBox";
 
 export function DrugForm() {
-    const [isOpen, setIsOpen] = useState(false);
-    const [formData, setFormData] = useState<InventoryFormData>({
-        brandName: "",
-        drugName: "",
-        batchNumber: "",
-        drugType: "TABLET",
-        quantity: "",
-        expiry: "",
-        retailPrice: "",
-        wholesalePrice: "",
-        concentration: 0,
-        Buffer: 0,
-        supplierName: "",
-        supplierContact: "",
-    });
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState<InventoryFormData>({
+    brandName: "",
+    drugName: "",
+    batchNumber: "",
+    drugType: "TABLET",
+    quantity: "",
+    expiry: "",
+    retailPrice: "",
+    wholesalePrice: "",
+    concentration: 0,
+    Buffer: 0,
+    supplierName: "",
+    supplierContact: "",
+  });
 
   const [brandSuggestions, setBrandSuggestions] = useState<
     DrugBrandSuggestion[]
@@ -219,7 +219,14 @@ export function DrugForm() {
   const handleDrugSearch = async (query: string) => {
     try {
       const results = await searchDrugModels(query);
-      setDrugSuggestions(results);
+      // Transform results to match DrugModelSuggestion type
+      const transformedResults = results.map((result) => ({
+        id: result.id,
+        name: result.name,
+        bufferLevels: result.bufferLevels, // Include bufferLevels if needed
+      }));
+
+      setDrugSuggestions(transformedResults);
     } catch (error) {
       console.error("Error searching drugs:", error);
       setDrugSuggestions([]);
@@ -240,7 +247,7 @@ export function DrugForm() {
       ...prev,
       drugId: suggestion.id,
       drugName: suggestion.name,
-      Buffer: suggestion.Buffer ?? 0,
+      Buffer: suggestion.bufferLevels?.[0]?.bufferAmount ?? 0, // Use bufferLevels if needed
     }));
     setShowDrugSuggestions(false);
   };
@@ -253,27 +260,27 @@ export function DrugForm() {
         loadingMessage: "Adding new item...",
       });
 
-            if (result.success) {
-                setIsOpen(false);
-                setFormData({
-                    brandName: "",
-                    drugName: "",
-                    batchNumber: "",
-                    drugType: "TABLET",
-                    quantity: "",
-                    expiry: "",
-                    wholesalePrice: "",
-                    retailPrice: "",
-                    concentration: 0,
-                    Buffer: 0,
-                    supplierName: "",
-                    supplierContact: "",
-                });
-            }
-        } catch (error) {
-            console.error("Error submitting form:", error);
-        }
-    };
+      if (result.success) {
+        setIsOpen(false);
+        setFormData({
+          brandName: "",
+          drugName: "",
+          batchNumber: "",
+          drugType: "TABLET",
+          quantity: "",
+          expiry: "",
+          wholesalePrice: "",
+          retailPrice: "",
+          concentration: 0,
+          Buffer: 0,
+          supplierName: "",
+          supplierContact: "",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

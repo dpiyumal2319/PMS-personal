@@ -4,6 +4,10 @@ import {
   BatchStatus,
   Gender,
   Role,
+  QueueStatus,
+  VisitStatus,
+  MedicalCertificateStatus,
+  ChargeType,
 } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 
@@ -302,12 +306,9 @@ async function createDrugsAndBatches() {
     const drug = await prisma.drug.create({
       data: {
         name: drugName,
-        Buffer: faker.number.int({ min: 10, max: 100 }), // Random buffer value
       },
     });
-    console.log(
-      `Created drug: ${drug.name} (ID: ${drug.id}, Buffer: ${drug.Buffer})`
-    );
+    console.log(`Created drug: ${drug.name} (ID: ${drug.id})`);
 
     // Randomly select 2-4 brands that will manufacture this drug
     const brandCount = faker.number.int({ min: 2, max: 4 });
@@ -501,6 +502,94 @@ async function createReportTypes() {
   }
 }
 
+async function createQueuesAndEntries() {
+  console.log("\n--- Creating Queues and Queue Entries ---");
+
+  // Create 10 queues
+  for (let i = 0; i < 10; i++) {
+    const queue = await prisma.queue.create({
+      data: {
+        start: faker.date.recent(),
+        status: faker.helpers.arrayElement([
+          QueueStatus.IN_PROGRESS,
+          QueueStatus.COMPLETED,
+        ]),
+      },
+    });
+
+    // Create 5-10 entries for each queue
+    const entryCount = faker.number.int({ min: 5, max: 10 });
+    for (let j = 0; j < entryCount; j++) {
+      const patient = await prisma.patient.findFirst({
+        skip: faker.number.int({ min: 0, max: 49 }),
+      });
+
+      if (patient) {
+        await prisma.queueEntry.create({
+          data: {
+            token: j + 1,
+            status: faker.helpers.arrayElement([
+              VisitStatus.PENDING,
+              VisitStatus.PRESCRIBED,
+              VisitStatus.COMPLETED,
+            ]),
+            queueId: queue.id,
+            patientId: patient.id,
+          },
+        });
+      }
+    }
+
+    console.log(`Created queue with ${entryCount} entries`);
+  }
+}
+
+async function createMedicalCertificates() {
+  console.log("\n--- Creating Medical Certificates ---");
+
+  // Create medical certificates for 20 random patients
+  for (let i = 0; i < 20; i++) {
+    const patient = await prisma.patient.findFirst({
+      skip: faker.number.int({ min: 0, max: 49 }),
+    });
+
+    if (patient) {
+      await prisma.medicalCertificate.create({
+        data: {
+          patientId: patient.id,
+          nameOfThePatient: patient.name,
+          addressOfThePatient: patient.address || "Unknown",
+          fitForDuty: faker.helpers.arrayElement([
+            MedicalCertificateStatus.FIT,
+            MedicalCertificateStatus.UNFIT,
+          ]),
+          dateOfSickness: faker.date.past(),
+          recommendedLeaveDays: faker.number.int({ min: 1, max: 14 }),
+          natureOfTheDisease: faker.lorem.sentence(),
+          ageOfThePatient: faker.number.int({ min: 18, max: 80 }),
+          reccomendations: faker.lorem.paragraph(),
+          time: faker.date.recent(),
+        },
+      });
+    }
+  }
+
+  console.log("Created 20 medical certificates");
+}
+
+async function createCharges() {
+  console.log("\n--- Creating Charges ---");
+
+  await prisma.charge.createMany({
+    data: [
+      { name: ChargeType.DOCTOR, value: 1000 },
+      { name: ChargeType.DISPENSARY, value: 500 },
+    ],
+  });
+
+  console.log("Created charges");
+}
+
 async function main() {
   console.log("\nStarting database seeding...");
 
@@ -509,6 +598,9 @@ async function main() {
   await createUsersAndPatients();
   await createDrugsAndBatches();
   await createReportTypes();
+  await createQueuesAndEntries();
+  await createMedicalCertificates();
+  await createCharges();
 
   console.log("\nDatabase seeding completed successfully!");
 }

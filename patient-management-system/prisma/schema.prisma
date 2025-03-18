@@ -78,7 +78,6 @@ model DrugBrand {
 model Drug {
   id               Int               @id @default(autoincrement())
   name             String
-  Buffer           Int
   batch            Batch[]
   BatchHistory     BatchHistory[]
   Issue            Issue[]
