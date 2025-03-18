@@ -379,11 +379,11 @@ enum MedicalCertificateStatus {
 }
 
 enum PatientHistoryType {
+  ALLERGY
   MEDICAL
   SURGICAL
   FAMILY
   SOCIAL
-  ALLERGY
 }
 
 enum VitalType {

@@ -10,12 +10,11 @@ export const metadata: Metadata = {
 
 
 const Page = async () => {
-    const fees = await getCharges();
 
     return (
         <div className={'flex flex-col h-full w-full p-4 gap-6 overflow-y-auto'}>
             {/*Heading*/}
-            <FeeForm fees={fees}/>
+            <FeeForm/>
         </div>
     );
 };

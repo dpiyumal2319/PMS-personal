@@ -103,3 +103,15 @@ export async function getCharges() {
     }
     return prisma.charge.findMany();
 }
+
+export async function getChargesOnType({type}: { type: ChargeType }) {
+    const session = await verifySession();
+    if (session.role !== 'DOCTOR') {
+        redirect('/unauthorized');
+    }
+    return prisma.charge.findMany({
+        where: {
+            type,
+        },
+    });
+}

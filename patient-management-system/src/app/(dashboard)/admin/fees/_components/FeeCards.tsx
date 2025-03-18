@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, CardHeader, CardContent} from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
-import {CreditCard, Percent, Tag, FileText, LucideIcon, HelpCircle, Trash2} from 'lucide-react';
+import {CreditCard, Percent, Tag, FileText, LucideIcon, HelpCircle, Trash2, ClipboardList} from 'lucide-react';
 import {format} from "date-fns";
 import {FeeInForm} from "@/app/(dashboard)/admin/fees/_components/FeeForm";
 import {ChargeType} from "@prisma/client";
@@ -39,14 +39,14 @@ const feeTypes: Record<ChargeType, {
     },
     DISCOUNT: {
         icon: Tag,
-        color: "purple",
+        color: "amber",
         suffix: '%',
         description: "Discount percentage will subtract from each patient's bill, you can selectively apply this to each patient",
         type: 'selective'
     },
     PROCEDURE: {
-        icon: FileText,
-        color: "amber",
+        icon: ClipboardList,
+        color: "purple",
         description: "Procedure fees will be added to each patient's bill based on the procedure performed, you can selectively apply this to each patient",
         suffix: 'LKR',
         type: 'selective'
@@ -87,7 +87,8 @@ const FeesCard = ({feeValues, handleInputChange, type, handleDeleteFee}: {
             <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
                 {fees.length > 0 ? (
                     fees.map(fee => (
-                        <div key={fee.name} className={`border rounded-lg p-4 bg-${color}-50 mb-3 last:mb-0 h-fit`}>
+                        <Card key={fee.name}
+                              className={`p-4 cursor-pointer hover:shadow-md transition h-full overflow-hidden border-l-4 border-l-${color}-500`}>
                             <div className="mb-4">
                                 <div className={'flex items-center justify-between mb-4'}>
                                     <label
@@ -138,7 +139,7 @@ const FeesCard = ({feeValues, handleInputChange, type, handleDeleteFee}: {
                             ) : (
                                 <div className="text-xs text-red-500 italic">Unsaved</div>
                             )}
-                        </div>
+                        </Card>
                     ))
                 ) : (
                     <p className="text-sm text-gray-500">No {type.toLowerCase()} fees available</p>
