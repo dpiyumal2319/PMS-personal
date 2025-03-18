@@ -14,8 +14,8 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
     const [formData, setFormData] = useState({
         patientName: "",
         age: "",
-        address: "",
-        consultant: "Physician",
+        consultant_speciality: "Physician",
+        consultant_name: "",
         consultant_title: "Sir",
         conditions: ["", "", ""], // Three conditions
         investigations: "",
@@ -48,7 +48,6 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                 setFormData(prev => ({
                     ...prev,
                     patientName: patientData.name || "",
-                    address: patientData.address || "",
                     age: age
                 }));
             }
@@ -139,56 +138,86 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
 
             pdf.setFont("helvetica", "normal");
             pdf.setFontSize(10);  // Increased from 7
-            pdf.text("Consultant consultant,", marginLeft, yPos);
+            pdf.text(`Consultant ${formData.consultant_speciality},`, marginLeft, yPos);
             yPos += 6;
 
-            pdf.text(`${formData.consultant},`, marginLeft, yPos);
+            pdf.text(`${formData.consultant_name},`, marginLeft, yPos);
             yPos += 6;
 
             pdf.text(`Dear ${formData.consultant_title},`, marginLeft, yPos);
             yPos += 6;
 
-            pdf.setFontSize(12);  // Increased from 9
+            pdf.setFontSize(11);  // Increased from 9
             pdf.setFont("helvetica", "bold");
-            pdf.text("Request for an Ultra sound scan", centerX, yPos, { align: "center" });
-            yPos += 10;
+            pdf.text(`Re - ${formData.patientName || "[Not Provided]"}`, centerX, yPos, { align: "center" });
+            yPos += 8;
 
-            // Patient details
             pdf.setFont("helvetica", "normal");
             pdf.setFontSize(10);
-            pdf.text(`Re: ${formData.patientName || "[Not Provided]"}`, marginLeft, yPos);
-            yPos += 6;
 
             // Conditions
-            pdf.text("Please be kind enough to see this patient with the following conditions and do the needful:", marginLeft, yPos);
-            yPos += 6;
+            // Split the instruction text into multiple lines if it exceeds the content width
+            const instructionText = "Please be kind enough to see this patient with the following conditions and do the needful.";
+            const instructionLines = pdf.splitTextToSize(instructionText, contentWidth);
+
+            // Add the instruction lines to the PDF
+            pdf.text(instructionLines, marginLeft, yPos);
+            yPos += (instructionLines.length * 5) + 1; // Adjust line spacing
 
             formData.conditions.forEach((condition, index) => {
                 if (condition) {
-                    pdf.text(`${index + 1}. ${condition}`, marginLeft, yPos);
-                    yPos += 6;
+                    // Split condition text into multiple lines if it exceeds the content width
+                    const conditionLines = pdf.splitTextToSize(`${index + 1}. ${condition}`, contentWidth);
+
+                    // Add the first line (with the number)
+                    pdf.text(conditionLines[0], marginLeft, yPos);
+                    yPos += 5; // Adjust line spacing
+
+                    // Add subsequent lines with padding to align with the text after the number
+                    if (conditionLines.length > 1) {
+                        for (let i = 1; i < conditionLines.length; i++) {
+                            // Add padding to align with the text after the number
+                            pdf.text(conditionLines[i], marginLeft + 4, yPos); // Adjust padding (10) as needed
+                            yPos += 5; // Adjust line spacing
+                        }
+                    }
                 }
             });
 
+            yPos += 3;
+
             // Investigations
             if (formData.investigations) {
-                pdf.text(`Investigations: ${formData.investigations}`, marginLeft, yPos);
-                yPos += 6;
+                // Split investigations text into multiple lines if it exceeds the content width
+                const investigationsLines = pdf.splitTextToSize(`Ix: ${formData.investigations}`, contentWidth);
+
+                // Add the first line (with "Ix:")
+                pdf.text(investigationsLines[0], marginLeft, yPos);
+                yPos += 5; // Adjust line spacing
+
+                // Add subsequent lines with padding to align with the text after "Ix:"
+                if (investigationsLines.length > 1) {
+                    for (let i = 1; i < investigationsLines.length; i++) {
+                        // Add padding to align with the text after "Ix:"
+                        pdf.text(investigationsLines[i], marginLeft + 5, yPos); // Adjust padding (10) as needed
+                        yPos += 5; // Adjust line spacing
+                    }
+                }
             }
-
             // Signature and date
-            const signatureY = 170;
+            // Signature and date
+            const signatureY = 185; // Vertical position for signature and date
             pdf.setFontSize(10);
-            pdf.text(`Date: ${formatDate(formData.reportDate)}`, marginLeft, signatureY);
 
-            // Signature line
-            pdf.line(pageWidth - 65, signatureY, pageWidth - marginRight, signatureY);
-            pdf.setFontSize(9);
-            pdf.text("Signature", pageWidth - 38, signatureY + 5, { align: "center" });
+            // Signature line on the left
+            pdf.line(marginLeft, signatureY, marginLeft + 50, signatureY); // Adjust line length (50) as needed
+
+            // Signature on the left
+            pdf.text("Signature", marginLeft + 18, signatureY + 6);
 
             // Footer with referral ID
             pdf.setFontSize(8);
-            pdf.text(`Referral ID: REF-${nextReferralId}`, centerX, 190, { align: "center" });
+            pdf.text(`Referral ID: REF-${nextReferralId}`, centerX, 200, { align: "center" });
 
             // Save the PDF with a dynamic filename
             const filename = formData.patientName
@@ -258,16 +287,6 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                                     </div>
                                 </div>
 
-                                <div className="mb-4">
-                                    <label className="text-sm font-medium text-gray-700">Address</label>
-                                    <Input
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                        placeholder="Full address"
-                                        className="border-gray-300 focus:ring-blue-500"
-                                    />
-                                </div>
                             </div>
 
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
@@ -291,15 +310,15 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-sm font-medium text-gray-700">Consultant</label>
+                                        <label className="text-sm font-medium text-gray-700">Specialty</label>
                                         <select
-                                            name="consultant"
-                                            value={["Physician", "Surgeon", "Pediatrician", "Gynecologist & Obstetrician"].includes(formData.consultant) ? formData.consultant : "Other"}
+                                            name="consultant_speciality"
+                                            value={["Physician", "Surgeon", "Pediatrician", "Gynecologist & Obstetrician"].includes(formData.consultant_speciality) ? formData.consultant_speciality : "Other"}
                                             onChange={(e) => {
                                                 const value = e.target.value;
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    consultant: value === "Other" ? "" : value,
+                                                    consultant_speciality: value === "Other" ? "" : value,
                                                 }));
                                             }}
                                             className="text-sm w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -312,16 +331,16 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
 
                                         </select>
                                         {/* Show text input when consultant is empty or not one of the predefined options */}
-                                        {(formData.consultant === "" ||
-                                            (formData.consultant !== "Physician" &&
-                                                formData.consultant !== "Surgeon" &&
-                                                formData.consultant !== "Pediatrician" &&
-                                                formData.consultant !== "Gynecologist & Obstetrician" &&
-                                                formData.consultant !== "Other")) && (
+                                        {(formData.consultant_speciality === "" ||
+                                            (formData.consultant_speciality !== "Physician" &&
+                                                formData.consultant_speciality !== "Surgeon" &&
+                                                formData.consultant_speciality !== "Pediatrician" &&
+                                                formData.consultant_speciality !== "Gynecologist & Obstetrician" &&
+                                                formData.consultant_speciality !== "Other")) && (
                                                 <input
                                                     type="text"
                                                     name="consultant"
-                                                    value={formData.consultant}
+                                                    value={formData.consultant_speciality}
                                                     onChange={(e) => {
                                                         setFormData((prev) => ({
                                                             ...prev,
@@ -334,6 +353,16 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                                                 />
                                             )}
                                     </div>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="text-sm font-medium text-gray-700">Name</label>
+                                    <Input
+                                        name="consultant_name"
+                                        value={formData.consultant_name}
+                                        onChange={handleChange}
+                                        placeholder="Consultant name"
+                                        className="border-gray-300 focus:ring-blue-500"
+                                    />
                                 </div>
                             </div>
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">

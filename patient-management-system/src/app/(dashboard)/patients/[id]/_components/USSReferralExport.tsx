@@ -17,7 +17,6 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
         radiologist: "GH Chilaw",
         radiologist_title: "Sir",
         age: "",
-        address: "",
         presentingComplaint: "",
         duration: "",
         onExamination: "",
@@ -59,7 +58,6 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
                 setFormData(prev => ({
                     ...prev,
                     patientName: patientData.name || "",
-                    address: patientData.address || "",
                     age: age,
                     patient_title: defaultTitle,
                 }));
@@ -211,20 +209,19 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
             // Add the paragraph to the PDF
             pdf.text(USStDetailsLines, marginLeft, yPos);
             yPos += (USStDetailsLines.length * 5) + 1; // Adjust line spacing
+            // Signature and date
+            const signatureY = 185; // Vertical position for signature and date
+            pdf.setFontSize(10);
 
-            // Certificate issue date and signature - positioned near bottom
-            const signatureY = 170;
-            pdf.setFontSize(10);  // Increased from 8
-            pdf.text(`Date: ${formatDate(formData.reportDate)}`, marginLeft, signatureY);
+            // Signature line on the left
+            pdf.line(marginLeft, signatureY, marginLeft + 50, signatureY); // Adjust line length (50) as needed
 
-            // Signature line
-            pdf.line(pageWidth - 65, signatureY, pageWidth - marginRight, signatureY);
-            pdf.setFontSize(9);  // Increased from 7
-            pdf.text("Signature", pageWidth - 38, signatureY + 5, { align: "center" });
+            // Signature on the left
+            pdf.text("Signature", marginLeft + 18, signatureY + 6);
 
             // Footer with referral ID
             pdf.setFontSize(8);  // Increased from 6
-            pdf.text(`Referral ID: REF-${nextReferralId}`, centerX, 190, { align: "center" });
+            pdf.text(`Referral ID: REF-${nextReferralId}`, centerX, 200, { align: "center" });
 
             // Save the PDF with a dynamic filename
             const filename = formData.patientName
