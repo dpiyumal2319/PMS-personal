@@ -407,11 +407,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
 
                 <Card className="bg-slate-100 p-4 transition-shadow duration-300">
                     <div className="space-y-6">
-                        <div className="flex items-center text-lg font-semibold gap-2">Charges & Discounts
-                            <span className={'text-sm text-gray-500'}>
-                                (Additional to medicines cost)
-                            </span>
-                        </div>
+                        <h2 className="flex items-center text-lg font-semibold gap-2">Charges & Discounts</h2>
                         <Card
                             className={`p-4 cursor-pointer hover:shadow-md transition h-full overflow-hidden border-l-4 border-l-gray-800`}
                         >
