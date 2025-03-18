@@ -47,6 +47,17 @@ export function DrugForm() {
     supplierContact: "",
   });
 
+  // Add state to store complete buffer levels data
+  const [drugBufferLevels, setDrugBufferLevels] = useState<
+    Array<{
+      id: number;
+      drugId: number;
+      drugType: string;
+      concentrationId: number;
+      bufferAmount: number;
+    }>
+  >([]);
+
   const [brandSuggestions, setBrandSuggestions] = useState<
     DrugBrandSuggestion[]
   >([]);
@@ -62,6 +73,45 @@ export function DrugForm() {
   const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
   const [showDrugSuggestions, setShowDrugSuggestions] = useState(false);
   const [showSupplierSuggestions, setShowSupplierSuggestions] = useState(false);
+
+  // Function to update buffer based on selected criteria
+  const updateBufferBasedOnSelection = useCallback(() => {
+    const { drugId, drugType, concentrationId } = formData;
+
+    // Only proceed if all three criteria are selected
+    if (!drugId || !drugType || !concentrationId) return;
+
+    // Find the matching buffer level
+    const matchingBufferLevel = drugBufferLevels.find(
+      (buffer) =>
+        buffer.drugId === drugId &&
+        buffer.drugType === drugType &&
+        buffer.concentrationId === concentrationId
+    );
+
+    // Update the buffer amount if a match is found
+    if (matchingBufferLevel) {
+      setFormData((prev) => ({
+        ...prev,
+        Buffer: matchingBufferLevel.bufferAmount,
+      }));
+    }
+  }, [
+    formData.drugId,
+    formData.drugType,
+    formData.concentrationId,
+    drugBufferLevels,
+  ]);
+
+  // Call updateBuffer whenever any of the criteria changes
+  useEffect(() => {
+    updateBufferBasedOnSelection();
+  }, [
+    formData.drugId,
+    formData.drugType,
+    formData.concentrationId,
+    updateBufferBasedOnSelection,
+  ]);
 
   const handleConcentrationAdded = (
     newWeight: DrugConcentrationDataSuggestion
@@ -87,6 +137,7 @@ export function DrugForm() {
       concentration: newWeight.concentration,
     }));
   };
+
   const handleConcentrationDeleted = (
     deleteWeight: DrugConcentrationDataSuggestion
   ) => {
@@ -99,8 +150,8 @@ export function DrugForm() {
     if (formData.concentrationId === deleteWeight.id) {
       setFormData((prev) => ({
         ...prev,
-        weightId: undefined,
-        weight: 0,
+        concentrationId: undefined,
+        concentration: 0,
       }));
     }
   };
@@ -116,6 +167,7 @@ export function DrugForm() {
         concentration: selectedWeight ? selectedWeight.concentration : 0,
       };
     });
+    // Buffer will be updated by the useEffect when all criteria are met
   };
 
   const handleChange = (
@@ -176,6 +228,7 @@ export function DrugForm() {
       setSupplierSuggestions([]);
     }
   };
+
   const handleSupplierSelect = (suggestion: SupplierSuggestion) => {
     setFormData((prev) => ({
       ...prev,
@@ -247,8 +300,20 @@ export function DrugForm() {
       ...prev,
       drugId: suggestion.id,
       drugName: suggestion.name,
-      Buffer: suggestion.bufferLevels?.[0]?.bufferAmount ?? 0, // Use bufferLevels if needed
+      // Don't set Buffer immediately here
     }));
+
+    // Store the complete bufferLevels data for later use
+    setDrugBufferLevels(
+      (suggestion.bufferLevels || []).map((buffer) => ({
+        id: buffer.id,
+        drugId: suggestion.id,
+        drugType: buffer.type,
+        concentrationId: buffer.unitConcentration.id,
+        bufferAmount: buffer.bufferAmount,
+      }))
+    );
+
     setShowDrugSuggestions(false);
   };
 
