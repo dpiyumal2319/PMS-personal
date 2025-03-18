@@ -111,12 +111,15 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
 
         return defaultFormData();
     });
+    const [feesFetching, setFeesFetching] = useState(false);
 
     const router = useRouter();
 
     // Function to fetch charges and update state
     const loadFixedCharges = async () => {
-        const charges = await getChargesOnType({type: ChargeType.FIXED});
+        setFeesFetching(true);
+        const charges = await getChargesOnType({types: [ChargeType.FIXED, ChargeType.PERCENTAGE]});
+        setFeesFetching(false);
         return charges.map(charge => ({...charge, description: ''}));
     };
 
@@ -127,7 +130,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
             setFormData(prev => {
                 // Filter out existing FIXED charges (if any) from the previous state
                 const nonFixedCharges = prev.charges.filter(
-                    charge => charge.type !== ChargeType.FIXED
+                    charge => charge.type !== ChargeType.FIXED && charge.type !== ChargeType.PERCENTAGE
                 );
 
                 // Combine the new fixed charges with any non-fixed charges
@@ -425,7 +428,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                                         <div className="flex items-center space-x-2 text-sm text-slate-600">
                                             <FileText size={'20'}/>
                                             <span>
-                                                This charge is automatically calculated based on the medicines issued at the bill. This charge is not editable.
+                                                This charge is automatically calculated based on the medicines issued at the bill. This charge is not removable.
                                             </span>
                                         </div>
                                     </div>
@@ -467,7 +470,7 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
                 </Card>
 
                 <div className="flex items-end h-full">
-                    <DiscountSubmitButton charges={formData.charges} onSubmit={handleSubmit}/>
+                    <DiscountSubmitButton charges={formData.charges} onSubmit={handleSubmit} disabled={feesFetching}/>
                 </div>
             </Card>
         </form>

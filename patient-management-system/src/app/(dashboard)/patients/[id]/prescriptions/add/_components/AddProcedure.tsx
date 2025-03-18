@@ -32,7 +32,7 @@ const AddProcedureCharge = ({addCharge}: AddProcedureChargeProps) => {
             if (isDialogOpen) {
                 setIsLoading(true);
                 try {
-                    const response = await getChargesOnType({type: 'PROCEDURE' as ChargeType});
+                    const response = await getChargesOnType({types: ['PROCEDURE']});
                     setChargeOptions(response.map(charge => ({...charge, description: ''})));
                 } catch (err) {
                     setError('Failed to load procedures');

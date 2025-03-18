@@ -17,9 +17,10 @@ import {FeeInPrescriptionForm} from './PrescriptionForm';
 export interface DiscountSubmitButtonProps {
     charges: FeeInPrescriptionForm[];
     onSubmit: () => void;
+    disabled?: boolean;
 }
 
-export function DiscountSubmitButton({charges, onSubmit}: DiscountSubmitButtonProps) {
+export function DiscountSubmitButton({charges, onSubmit, disabled}: DiscountSubmitButtonProps) {
     const [open, setOpen] = useState(false);
 
     // Get discount charges
@@ -42,6 +43,7 @@ export function DiscountSubmitButton({charges, onSubmit}: DiscountSubmitButtonPr
                         e.preventDefault();
                         onSubmit();
                     }}
+                    disabled={disabled}
                 >
                     Submit Prescription
                 </Button>
@@ -52,6 +54,7 @@ export function DiscountSubmitButton({charges, onSubmit}: DiscountSubmitButtonPr
                             variant="destructive"
                             size="lg"
                             className="px-8 w-full"
+                            disabled={disabled}
                         >
                             Submit Prescription with {totalDiscount}% discount
                         </Button>

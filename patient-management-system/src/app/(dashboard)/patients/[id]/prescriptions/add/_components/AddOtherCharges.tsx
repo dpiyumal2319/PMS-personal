@@ -85,7 +85,7 @@ const AddOtherCharge = ({addCharge, chargeType}: AddOtherChargeProps) => {
             if (isDialogOpen) {
                 setIsLoading(true);
                 try {
-                    const response = await getChargesOnType({type: chargeType});
+                    const response = await getChargesOnType({types: [chargeType]});
                     setChargeOptions(response.map(charge => ({...charge, description: ''})));
                 } catch (err) {
                     setError(`Failed to load ${chargeType.toLowerCase()} charges`);

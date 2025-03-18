@@ -180,7 +180,7 @@ const FeeForm = () => {
                 </>
             )}
 
-            <div className={`flex gap-2 ${unSavedChanges ? 'sticky bottom-0 bg-white py-4 shadow-lg z-10' : ''}`}>
+            <div className={`flex gap-2 ${unSavedChanges ? 'sticky bottom-0 bg-white py-4 shadow-lg z-10 rounded-lg p-2' : ''}`}>
                 <Button onClick={() => fetchCharges()}
                         className={`w-full`}
                         disabled={!unSavedChanges || isLoading}>
