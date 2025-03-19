@@ -5,7 +5,7 @@ import {
 } from "@/app/(dashboard)/patients/[id]/prescriptions/[prescriptionID]/_components/BatchAssign";
 import {Bill, myBillError} from "@/app/lib/definitions";
 import {prisma} from "@/app/lib/prisma";
-import {Prisma} from "@prisma/client";
+import {ChargeType, Prisma} from "@prisma/client";
 
 export async function calculateBill({prescriptionData}: {
     prescriptionData: BatchAssignPayload
@@ -25,7 +25,8 @@ export async function calculateBill({prescriptionData}: {
                             select: {
                                 name: true
                             }
-                        }
+                        },
+                        Charges: true
                     }
                 }),
                 prisma.issue.findMany({
@@ -46,13 +47,23 @@ export async function calculateBill({prescriptionData}: {
             // 4. Initialize bill object
             const bill: Bill = {
                 prescriptionID,
-                discount: prescription.discount,
                 patientName: prescription.patient.name,
                 patientID: prescriptionData.patientID,
-                dispensary_charge: prescription.dispensaryCharge,
-                doctor_charge: prescription.doctorCharge,
-                medicineCost: 0,
                 entries: [],
+                charges: prescription.Charges.map(item => ({
+                    name: item.name,
+                    value: item.value,
+                    description: item.description ? item.description : '',
+                    type: item.type,
+                }))
+            };
+
+            const medicineCost = {
+                name: "Medicines Cost",
+                value: 0,
+                type: ChargeType.MEDICINE,
+                description: "Cost for the medicines",
+                prescriptionId: prescription.id
             };
 
             // 5. Fetch all batches at once instead of in loop
@@ -145,7 +156,7 @@ export async function calculateBill({prescriptionData}: {
 
                 // Calculate cost and add entry to bill
                 const batchCost = issue.quantity * batch.retailPrice;
-                bill.medicineCost += batchCost;
+                medicineCost.value += Number(batchCost.toFixed(2));
 
                 bill.entries.push({
                     drugName: batch.drug.name,
@@ -162,11 +173,45 @@ export async function calculateBill({prescriptionData}: {
             ]);
 
             // 8. Update final medicine charges
-            await prisma.prescription.update({
-                where: {id: bill.prescriptionID},
-                data: {medicinesCharge: Number(bill.medicineCost.toFixed(3))}
-            });
+            // First, find any existing MEDICINE charges
+            const existingMedicineCharges = prescription.Charges.filter(charge => charge.type === 'MEDICINE');
 
+            // Remove any existing MEDICINE charges from the bill object
+            bill.charges = bill.charges.filter(charge => charge.type !== 'MEDICINE');
+
+            // Update database
+            if (existingMedicineCharges.length === 1) {
+                // If there's exactly one medicine charge, update it
+                await prisma.prescriptionCharges.update({
+                    where: {
+                        id: existingMedicineCharges[0].id
+                    },
+                    data: medicineCost
+                });
+            } else {
+                // If there are zero or multiple medicine charges, delete them all and create a new one
+                // First delete any existing medicine charges
+                if (existingMedicineCharges.length > 0) {
+                    await prisma.prescriptionCharges.deleteMany({
+                        where: {
+                            id: {
+                                in: existingMedicineCharges.map(charge => charge.id)
+                            }
+                        }
+                    });
+                }
+
+                // Then create a new medicine charge
+                await prisma.prescriptionCharges.create({
+                    data: {
+                        ...medicineCost,
+                        prescriptionId: prescription.id // Make sure to include the prescription ID
+                    }
+                });
+            }
+
+            // Now push the updated medicine cost to bill
+            bill.charges.push(medicineCost);
             return {success: true, message: 'Bill calculated successfully', bill};
         }, {
             timeout: 10000 // Increase timeout to 10 seconds
@@ -195,6 +240,7 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
                     brand: true,
                 }
             },
+            Charges: true
         }
     });
 
@@ -209,16 +255,16 @@ export async function getBill(prescriptionID: number): Promise<Bill> {
     return {
         patientName: prescription.patient.name,
         prescriptionID,
-        discount: prescription.discount,
         patientID: prescription.patientId,
-        dispensary_charge: prescription.dispensaryCharge,
-        doctor_charge: prescription.doctorCharge,
-        medicineCost: prescription.medicinesCharge,
         entries: prescription.issues.map(issue => ({
             drugName: issue.drug.name,
             brandName: issue.brand.name,
             quantity: issue.quantity,
             unitPrice: issue.batch?.retailPrice ?? 0,
+        })),
+        charges: prescription.Charges.map(charge => ({
+            ...charge,
+            description: charge.description ? charge.description : '',
         }))
     };
 }

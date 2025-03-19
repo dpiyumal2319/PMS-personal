@@ -17,7 +17,7 @@ import {Button} from "@/components/ui/button";
 import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomBadge";
 
 // Icons and styles mapping
-export const feeTypes: Record<ChargeType | 'MEDICINE', {
+export const feeTypes: Record<ChargeType, {
     icon: LucideIcon,
     color: keyof BasicColorType,
     suffix?: string,

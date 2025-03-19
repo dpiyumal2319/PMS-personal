@@ -305,7 +305,7 @@ export function PrescriptionIssuesList({issues, onRemove}: PrescriptionIssuesLis
                 const {borderColor, badgeColor} = getStrategyStyles(issue.strategy);
                 return (
                     <Card key={index}
-                          className={`p-4 cursor-pointer hover:shadow-md transition h-full overflow-hidden border-l-4 ${borderColor}`}>
+                          className={`p-4 cursor-default hover:shadow-md transition h-full overflow-hidden border-l-4 ${borderColor}`}>
                         <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-4">
                                 <div className="mt-1">
@@ -371,7 +371,7 @@ export function OffRecordMedsList({meds, onRemove}: OffRecordMedsListProps) {
         <div className="space-y-3">
             {meds.map((med, index) => (
                 <Card key={index}
-                      className="p-4 cursor-pointer hover:shadow-md transition h-full overflow-hidden border-l-4 border-l-slate-500">
+                      className="p-4 cursor-default hover:shadow-md transition h-full overflow-hidden border-l-4 border-l-slate-500">
                     <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
                             <div className="mt-1">
@@ -435,7 +435,7 @@ export function ProcedureChargesList({charges, onRemove}: ProcedureChargesListPr
                 charges.map((charge, index) => (
                     <Card
                         key={index}
-                        className="p-4 cursor-pointer hover:shadow-md transition h-full overflow-hidden border-l-4 border-l-purple-500"
+                        className="p-4 cursor-default hover:shadow-md transition h-full overflow-hidden border-l-4 border-l-purple-500"
                     >
                         <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-4">
@@ -580,7 +580,7 @@ export function OtherChargesList({charges, onRemove}: OtherChargesListProps) {
                     return (
                         <Card
                             key={index}
-                            className={`p-4 cursor-pointer hover:shadow-md transition h-full overflow-hidden border-l-4 ${borderColor}`}
+                            className={`p-4 cursor-default hover:shadow-md transition h-full overflow-hidden border-l-4 ${borderColor}`}
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start space-x-4">

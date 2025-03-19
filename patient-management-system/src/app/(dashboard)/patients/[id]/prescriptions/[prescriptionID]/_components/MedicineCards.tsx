@@ -36,7 +36,7 @@ const PrescriptionIssueCard = ({issue}: { issue: IssueWithDetails }) => {
 
     return (
         <Card
-            className={`p-4 flex-grow overflow-hidden border-l-4 ${cardStyles.borderColor}`}>
+            className={`p-4 flex-grow overflow-hidden border-l-4 cursor-default ${cardStyles.borderColor}`}>
             <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
                     <div className="mt-1">
@@ -107,7 +107,7 @@ const OffRecordMedCard = ({med}: { med: OffRecordMeds }) => {
     }
 
     return (
-        <Card className="p-4 flex-grow overflow-hidden border-l-4 border-l-slate-500">
+        <Card className="p-4 flex-grow overflow-hidden border-l-4 border-l-slate-500 cursor-default">
             <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4">
                     <div className="mt-1">
@@ -130,12 +130,8 @@ const OffRecordMedCard = ({med}: { med: OffRecordMeds }) => {
     );
 };
 
-interface ChargeWithDetails extends PrescriptionCharges {
-    Charge: Charge
-}
-
 export interface OtherChargesListProps {
-    charges: ChargeWithDetails[];
+    charges: PrescriptionCharges[];
 }
 
 const getChargeIcon = (type: ChargeType) => {
@@ -200,35 +196,35 @@ function ChargesList({charges}: OtherChargesListProps) {
     // Sort using the custom order
     charges.sort((a, b) => {
         // Get the order values for each charge type
-        return compareChargeTypes(a.Charge.type, b.Charge.type);
+        return compareChargeTypes(a.type, b.type);
     });
 
     return (
         <div className="space-y-3">
 
             {charges.map((charge, index) => {
-                    const borderColor = getCardBorderColor(charge.Charge.type);
-                    const badgeColor = getBadgeColor(charge.Charge.type);
-                    const valueSuffix = getValueSuffix(charge.Charge.type);
+                    const borderColor = getCardBorderColor(charge.type);
+                    const badgeColor = getBadgeColor(charge.type);
+                    const valueSuffix = getValueSuffix(charge.type);
 
                     return (
                         <Card
                             key={index}
-                            className={`p-4 cursor-pointer hover:shadow-md transition h-full overflow-hidden border-l-4 ${borderColor}`}
+                            className={`p-4 cursor-default h-full overflow-hidden border-l-4 ${borderColor}`}
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start space-x-4">
                                     <div className="mt-1">
-                                        {getChargeIcon(charge.Charge.type)}
+                                        {getChargeIcon(charge.type)}
                                     </div>
                                     <div className="space-y-1">
                                         <div className="flex items-center space-x-2">
-                                            <h3 className="font-medium">{charge.Charge.name}</h3>
-                                            <CustomBadge text={charge.Charge.name} color={badgeColor}/>
+                                            <h3 className="font-medium">{charge.name}</h3>
+                                            <CustomBadge text={charge.name} color={badgeColor}/>
                                         </div>
 
                                         <div className="flex items-center space-x-2 text-sm text-slate-600">
-                                            {charge.Charge.type === 'FIXED' ? (
+                                            {charge.type === 'FIXED' ? (
                                                 <span
                                                     className="font-semibold">{valueSuffix} {charge.value.toFixed(2)}</span>
                                             ) : (

@@ -1,6 +1,5 @@
 JWT_SECRET=mock-secret
 DATABASE_URL=mock-database-url
-DATABASE_URL_LOCAL=mock-database-url-local(postgres://postgres:password@localhost:5432/dbname?schema=schema)
 PUSHER_APP_ID=mock-pusher-app-id
 PUSHER_APP_KEY=mock-pusher-app-key
 PUSHER_APP_SECRET=mock-pusher-app-secret

@@ -25,6 +25,11 @@ export async function completePrescription(
                 issues: {
                     include: {batch: true},
                 },
+                Charges: {
+                    where: {
+                        type: "MEDICINE"
+                    }
+                }
             },
         });
 
@@ -41,6 +46,14 @@ export async function completePrescription(
         const missingBatchIssue = prescription.issues.find(issue => !issue.batch || !issue.batchId);
         if (missingBatchIssue) {
             return {success: false, message: "Batch not found for a drug"};
+        }
+
+        // Check if final medicine cost is not calculated
+        if (prescription.Charges.length === 0) {
+            return {
+                success: false,
+                message: "You have to generate bill at least once"
+            }
         }
 
         // Perform all database operations in a transaction
@@ -182,12 +195,7 @@ export async function getPrescription(
             OffRecordMeds: true,
             Charges: {
                 where: {
-                    Charge: {
-                        type: 'PROCEDURE',
-                    }
-                },
-                include: {
-                    Charge: true,
+                    type: 'PROCEDURE',
                 },
             },
             ...(session.role === "DOCTOR"
@@ -324,11 +332,7 @@ export async function searchPrescriptions({
                     name: true,
                 },
             },
-            Charges: {
-                select: {
-                    Charge: true,
-                }
-            },
+            Charges: true,
             ...select,
         },
     });
@@ -451,7 +455,8 @@ export async function addPrescription({
 
         const chargesData = prescriptionForm.charges.map(charge => ({
             value: charge.value,
-            chargeId: charge.id,
+            type: charge.type,
+            name: charge.name,
             description: charge.description,
         }));
 
@@ -468,8 +473,7 @@ export async function addPrescription({
                     OffRecordMeds: {create: offRecordMedsData},
                     PrescriptionVitals: {create: vitalsData},
                     Charges: {create: chargesData},
-                    medicineCost: 0,
-                },
+                },//
                 select: {
                     id: true,
                     issues: {select: {id: true, drugId: true}}
@@ -514,12 +518,12 @@ export async function addPrescription({
             message: "Prescription created successfully",
         };
     } catch (e) {
-        console.error("Error adding prescription:");
+        if (e instanceof Error) {
+            console.error(e.message);
+        }
         return {
             success: false,
-            message: e instanceof Error
-                ? e.message
-                : "An error occurred while adding prescription",
+            message: "An error occurred while adding prescription",
         };
     }
 }

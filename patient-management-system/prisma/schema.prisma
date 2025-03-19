@@ -1,23 +1,10 @@
-// For remote database
-
-// generator client {
-//   provider = "prisma-client-js"
-// }
-
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-// }
-
-// For local database
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_LOCAL")
+  url      = env("DATABASE_URL")
 }
 
 //Models
@@ -146,7 +133,6 @@ model Prescription {
   details            String?
   patientId          Int
   issues             Issue[]
-  medicineCost       Float                 @default(0)
   OffRecordMeds      OffRecordMeds[]
   patient            Patient               @relation(fields: [patientId], references: [id])
   PrescriptionVitals PrescriptionVitals[]
@@ -154,11 +140,11 @@ model Prescription {
 }
 
 model PrescriptionCharges {
-  id             Int           @id @default(autoincrement())
-  Charge         Charge        @relation(fields: [chargeId], references: [id])
-  chargeId       Int
-  Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
-  prescriptionId Int?
+  id             Int          @id @default(autoincrement())
+  Prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  prescriptionId Int
+  name           String
+  type           ChargeType
   value          Float
   description    String?
 }
@@ -288,12 +274,11 @@ model BatchHistory {
 }
 
 model Charge {
-  id                  Int                   @id @default(autoincrement())
-  name                String                @unique
-  type                ChargeType
-  value               Float
-  updatedAt           DateTime              @updatedAt
-  PrescriptionCharges PrescriptionCharges[]
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  type      ChargeType
+  value     Float
+  updatedAt DateTime   @updatedAt
 }
 
 enum Gender {
@@ -394,6 +379,7 @@ enum VitalType {
 }
 
 enum ChargeType {
+  MEDICINE
   FIXED
   PERCENTAGE
   PROCEDURE

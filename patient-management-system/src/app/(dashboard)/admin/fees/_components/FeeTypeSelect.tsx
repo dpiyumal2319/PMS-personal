@@ -34,9 +34,9 @@ const CustomSelect = ({value, onChange}: { value: ChargeType, onChange: (vale: C
             case 'PERCENTAGE':
                 return {text: 'Percentage', icon: <Percent size={16} className="text-green-600"/>};
             case 'DISCOUNT':
-                return {text: 'Discount', icon: <Tag size={16} className="text-purple-600"/>};
+                return {text: 'Discount', icon: <Tag size={16} className="text-amber-600"/>};
             case 'PROCEDURE':
-                return {text: 'Procedure', icon: <FileText size={16} className="text-amber-600"/>};
+                return {text: 'Procedure', icon: <FileText size={16} className="text-purple-600"/>};
             default:
                 return {text: 'Select type', icon: null};
         }

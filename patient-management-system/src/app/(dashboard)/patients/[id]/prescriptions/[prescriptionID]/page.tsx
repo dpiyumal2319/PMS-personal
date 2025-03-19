@@ -44,7 +44,7 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
         bill = await getBill(prescriptionID);
     }
 
-    const procedures = prescription.Charges.filter((chm) => chm.Charge.type === "PROCEDURE");
+    const procedures = prescription.Charges.filter((chm) => chm.type === "PROCEDURE");
 
     return (
         <Card className="p-4">
@@ -68,11 +68,12 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
             </CardHeader>
             <CardContent className="space-y-3">
                 {prescription.details && (
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
-                        <span className="font-semibold">{prescription.details}</span>
+                    <>
+                        <div className="flex items-center gap-2 text-gray-500 text-sm">
+                            <span className="font-semibold">{prescription.details}</span>
+                        </div>
                         <Separator/>
-                    </div>
-
+                    </>
                 )}
 
                 {/* Prescription Vitals */}

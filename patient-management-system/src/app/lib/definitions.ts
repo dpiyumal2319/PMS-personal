@@ -1,5 +1,5 @@
 import type {LucideIcon} from "lucide-react";
-import {Role} from "@prisma/client";
+import {ChargeType, Role} from "@prisma/client";
 import type {DrugType} from "@prisma/client";
 
 export type SessionPayload = {
@@ -239,15 +239,19 @@ export type BillEntry = {
     unitPrice: number;
 };
 
+export type ChargeEntry = {
+    name: string;
+    value: number;
+    description?: string;
+    type: ChargeType;
+}
+
 export type Bill = {
     prescriptionID: number;
-    discount: number;
     patientName: string;
     entries: BillEntry[];
-    medicineCost: number;
+    charges: ChargeEntry[];
     patientID: number;
-    dispensary_charge: number;
-    doctor_charge: number;
 };
 
 export type MedicalCertificate = {
