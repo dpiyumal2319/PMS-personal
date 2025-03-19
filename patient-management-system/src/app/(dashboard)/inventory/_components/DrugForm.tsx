@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import CustomDrugTypeSelect from "@/app/(dashboard)/inventory/available-stocks/_components/CustomDrugTypeSelect";
 import { SupplierSuggestionBox } from "@/app/(dashboard)/inventory/_components/SupplierSuggestionBox";
+import { DrugType } from "@prisma/client";
 
 export function DrugForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,7 +53,7 @@ export function DrugForm() {
     Array<{
       id: number;
       drugId: number;
-      drugType: string;
+      drugType: DrugType;
       concentrationId: number;
       bufferAmount: number;
     }>
