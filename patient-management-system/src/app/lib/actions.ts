@@ -524,6 +524,7 @@ export async function addNewItem({
   formData: InventoryFormData;
 }): Promise<myError> {
   try {
+    console.log;
     // Check all the required fields
     if (
       !formData.concentrationId ||
@@ -647,7 +648,11 @@ export async function addNewItem({
       return { success: true, message: "Item added successfully" };
     });
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(e.message);
+    } else {
+      console.error(e);
+    }
     return { success: false, message: "Failed to add item" };
   }
 }
