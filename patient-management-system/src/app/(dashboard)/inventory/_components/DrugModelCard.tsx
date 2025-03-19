@@ -19,7 +19,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { DrugModelsWithBufferLevel } from "@/app/lib/definitions";
 import { updateDrugBufferLevel } from "@/app/lib/actions";
 import { handleServerAction } from "@/app/lib/utils";
 import {
@@ -30,56 +29,42 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { DrugType } from "@prisma/client";
 
-interface DrugModelCardProps {
-  drug: DrugModelsWithBufferLevel;
-  onBufferLevelChange?: (
-    drugId: number,
-    type: DrugType,
-    concentration: number,
-    newBufferLevel: number
-  ) => void;
-}
-
-export function DrugModelCard({
-  drug,
-  onBufferLevelChange,
-}: DrugModelCardProps) {
-  const [selectedBufferLevel, setSelectedBufferLevel] = useState<{
+interface SingleDrugBufferCardProps {
+  drugCard: {
+    id: number;
+    name: string;
+    fullAmount: number;
+    availableAmount: number;
     type: DrugType;
     concentration: number;
     bufferAmount: number;
-  } | null>(null);
-  const [newBufferLevel, setNewBufferLevel] = useState("");
+    uniqueKey: string;
+  };
+}
+
+export function SingleDrugBufferCard({ drugCard }: SingleDrugBufferCardProps) {
+  const [newBufferLevel, setNewBufferLevel] = useState(
+    drugCard.bufferAmount.toString()
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Calculate total buffer level
-  const totalBufferLevel = drug.bufferLevels.reduce(
-    (sum, bufferLevel) => sum + bufferLevel.bufferAmount,
-    0
-  );
+  // Use the buffer amount directly from the drugCard
+  const bufferAmount = drugCard.bufferAmount;
 
   const handleSubmit = async () => {
-    if (!selectedBufferLevel) return;
-
     const parsedLevel = parseInt(newBufferLevel);
-    if (!isNaN(parsedLevel) && parsedLevel >= 0 && onBufferLevelChange) {
-      onBufferLevelChange(
-        drug.id,
-        selectedBufferLevel.type,
-        selectedBufferLevel.concentration,
-        parsedLevel
-      );
-    }
+    if (isNaN(parsedLevel) || parsedLevel < 0) return;
+
     setIsLoading(true);
 
     try {
       const result = await handleServerAction(
         () =>
           updateDrugBufferLevel(
-            drug.id,
-            selectedBufferLevel.type,
-            selectedBufferLevel.concentration,
+            drugCard.id,
+            drugCard.type,
+            drugCard.concentration,
             parsedLevel
           ),
         {
@@ -89,14 +74,8 @@ export function DrugModelCard({
       );
 
       if (result && result.success) {
-        if (onBufferLevelChange) {
-          onBufferLevelChange(
-            drug.id,
-            selectedBufferLevel.type,
-            selectedBufferLevel.concentration,
-            parsedLevel
-          );
-        }
+        // Update the component state
+        drugCard.bufferAmount = parsedLevel;
         setIsOpen(false);
       }
     } catch (error) {
@@ -108,13 +87,13 @@ export function DrugModelCard({
 
   // Determine status and styles
   const getStyles = () => {
-    if (drug.availableAmount === 0) {
+    if (drugCard.availableAmount === 0) {
       return {
         headerBg: "bg-gray-300",
         statusText: "Out of Stock",
         badgeColor: "gray" as keyof BasicColorType,
       };
-    } else if (drug.availableAmount <= totalBufferLevel) {
+    } else if (drugCard.availableAmount <= bufferAmount) {
       return {
         headerBg: "bg-red-100",
         statusText: "Low Stock",
@@ -131,15 +110,17 @@ export function DrugModelCard({
 
   const styles = getStyles();
 
-  const maxRef = Math.max(drug.fullAmount, totalBufferLevel);
-  const stockPercentage = ((drug.availableAmount / maxRef) * 100).toFixed(2);
+  const maxRef = Math.max(drugCard.fullAmount, bufferAmount);
+  const stockPercentage = ((drugCard.availableAmount / maxRef) * 100).toFixed(
+    2
+  );
 
   return (
     <Card className="border border-gray-200 shadow-sm rounded-lg overflow-hidden">
       <CardHeader className={`px-4 py-3 ${styles.headerBg}`}>
         <div className="flex justify-between items-center">
           <CardTitle className="text-base font-semibold text-gray-800">
-            {drug.name}
+            {drugCard.name} - {drugCard.type} ({drugCard.concentration}mg)
           </CardTitle>
           <CustomBadge
             text={styles.statusText}
@@ -156,24 +137,14 @@ export function DrugModelCard({
             Available / Stocked
           </span>
           <p className="text-lg font-semibold">
-            {drug.availableAmount} / {drug.fullAmount}
+            {drugCard.availableAmount} / {drugCard.fullAmount}
           </p>
         </div>
         <div>
           <span className="text-sm font-medium uppercase text-gray-500">
-            Buffer Levels
+            Buffer Level
           </span>
-          <div className="space-y-2">
-            {drug.bufferLevels.map((bufferLevel, index) => (
-              <div key={index} className="text-sm">
-                <span className="font-medium">{bufferLevel.type}</span> (
-                {bufferLevel.unitConcentration.concentration}mg):{" "}
-                <span className="font-semibold">
-                  {bufferLevel.bufferAmount}
-                </span>
-              </div>
-            ))}
-          </div>
+          <p className="text-lg font-semibold">{bufferAmount}</p>
         </div>
 
         {/* Enhanced Stock Level Bar */}
@@ -188,23 +159,20 @@ export function DrugModelCard({
             {/* Progress bar */}
             <div
               className={`h-4 rounded-full transition-all duration-300 ${
-                drug.availableAmount === 0
+                drugCard.availableAmount === 0
                   ? "bg-gray-400"
-                  : drug.availableAmount < totalBufferLevel
+                  : drugCard.availableAmount < bufferAmount
                   ? "bg-red-500"
                   : "bg-emerald-500"
               }`}
               style={{ width: `${stockPercentage}%` }}
             >
               {/* Buffer level indicator inside the progress bar */}
-              {totalBufferLevel > 0 && drug.fullAmount > 0 && (
+              {bufferAmount > 0 && drugCard.fullAmount > 0 && (
                 <div
                   className="absolute top-0 bottom-0 w-1 bg-black"
                   style={{
-                    left: `${Math.min(
-                      100,
-                      (totalBufferLevel / maxRef) * 100
-                    )}%`,
+                    left: `${Math.min(100, (bufferAmount / maxRef) * 100)}%`,
                     height: "100%",
                   }}
                 ></div>
@@ -214,18 +182,18 @@ export function DrugModelCard({
 
           {/* Buffer status indicator */}
           <div className="flex items-center mt-2">
-            {drug.availableAmount < totalBufferLevel ? (
+            {drugCard.availableAmount < bufferAmount ? (
               <div className="flex items-center text-red-600">
                 <ChevronDown />
                 <span className="text-xs">
-                  {totalBufferLevel - drug.availableAmount} units below buffer
+                  {bufferAmount - drugCard.availableAmount} units below buffer
                 </span>
               </div>
             ) : (
               <div className="flex items-center text-green-600">
                 <ChevronUp />
                 <span className="text-xs">
-                  {drug.availableAmount - totalBufferLevel} units above buffer
+                  {drugCard.availableAmount - bufferAmount} units above buffer
                 </span>
               </div>
             )}
@@ -239,15 +207,7 @@ export function DrugModelCard({
             <Button
               className="w-full"
               onClick={() => {
-                setSelectedBufferLevel({
-                  type: drug.bufferLevels[0].type,
-                  concentration:
-                    drug.bufferLevels[0].unitConcentration.concentration,
-                  bufferAmount: drug.bufferLevels[0].bufferAmount,
-                }); // Default to the first buffer level
-                setNewBufferLevel(
-                  drug.bufferLevels[0]?.bufferAmount.toString() || ""
-                );
+                setNewBufferLevel(bufferAmount.toString());
               }}
             >
               Adjust Buffer
@@ -257,8 +217,9 @@ export function DrugModelCard({
             <AlertDialogHeader>
               <AlertDialogTitle>Adjust Buffer Level</AlertDialogTitle>
               <AlertDialogDescription>
-                Set the minimum stock threshold for {drug.name}. You will
-                receive alerts when available amount falls below this level.
+                Set the minimum stock threshold for {drugCard.name} -{" "}
+                {drugCard.type} ({drugCard.concentration}mg). You will receive
+                alerts when available amount falls below this level.
               </AlertDialogDescription>
             </AlertDialogHeader>
 
