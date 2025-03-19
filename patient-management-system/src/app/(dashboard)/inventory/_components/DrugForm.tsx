@@ -37,7 +37,7 @@ export function DrugForm() {
     brandName: "",
     drugName: "",
     batchNumber: "",
-    drugType: "TABLET",
+    drugType: DrugType.TABLET,
     quantity: "",
     expiry: "",
     retailPrice: "",
