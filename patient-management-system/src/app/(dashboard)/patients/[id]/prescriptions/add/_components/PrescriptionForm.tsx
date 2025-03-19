@@ -206,6 +206,13 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
     };
 
     const handleAddCharge = (charge: FeeInPrescriptionForm) => {
+        // Check if already exists
+        const exists = formData.charges.find((c) => c.id === charge.id);
+        if (exists) {
+            toast.error('This charge already exists remove it and add again with preferred values', {position: "bottom-right"});
+            return;
+        }
+
         setFormData((prevData) => ({
             ...prevData,
             charges: [...prevData.charges, charge]
@@ -228,9 +235,6 @@ const PrescriptionForm = ({patientID, vitals}: { patientID: number, vitals: Vita
             toast.error('Please add at least one issue', {position: "bottom-right"});
             return;
         }
-
-        console.log(formData);
-        return;
 
         try {
             const result = await handleServerAction(() => addPrescription({

@@ -146,15 +146,16 @@ model Prescription {
   details            String?
   patientId          Int
   issues             Issue[]
+  medicineCost       Float                 @default(0)
   OffRecordMeds      OffRecordMeds[]
   patient            Patient               @relation(fields: [patientId], references: [id])
   PrescriptionVitals PrescriptionVitals[]
-  charges            PrescriptionCharges[]
+  Charges            PrescriptionCharges[]
 }
 
 model PrescriptionCharges {
   id             Int           @id @default(autoincrement())
-  charge         Charge        @relation(fields: [chargeId], references: [id])
+  Charge         Charge        @relation(fields: [chargeId], references: [id])
   chargeId       Int
   Prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
   prescriptionId Int?

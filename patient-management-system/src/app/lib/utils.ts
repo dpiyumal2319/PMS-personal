@@ -1,6 +1,6 @@
 import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
-import {IssuingStrategy} from "@prisma/client";
+import {ChargeType, IssuingStrategy} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import {myError} from "@/app/lib/definitions";
 
@@ -256,4 +256,19 @@ export const validateEmail = (email: string) => {
 export const validateMobile = (mobile: string) => {
     const result = mobileSchema.safeParse(mobile);
     return result.success ? null : result.error.errors[0].message;
+};
+
+
+// Define the custom order for ChargeType
+const chargeTypeOrder: Record<ChargeType, number> = {
+    'FIXED': 1,
+    'PERCENTAGE': 2,
+    'PROCEDURE': 3,
+    'DISCOUNT': 4
+};
+
+export const compareChargeTypes = (typeA: ChargeType, typeB: ChargeType) => {
+    const orderA = chargeTypeOrder[typeA] || 999;
+    const orderB = chargeTypeOrder[typeB] || 999;
+    return orderA - orderB;
 };

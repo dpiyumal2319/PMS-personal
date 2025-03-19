@@ -8,7 +8,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogF
 import {Label} from "@/components/ui/label";
 import {
     DiscountFeesCard,
-    FixedFeesCard,
+    FixedFeesCard, MedicineFeesInfoCard,
     PercentageFeesCard,
     ProcedureFeesCard
 } from "@/app/(dashboard)/admin/fees/_components/FeeCards";
@@ -16,6 +16,7 @@ import FeeTypeSelect from "@/app/(dashboard)/admin/fees/_components/FeeTypeSelec
 import {Loader2, Plus, Save, SaveOff} from "lucide-react";
 import {handleServerAction} from "@/app/lib/utils";
 import {deleteCharge, getCharges, updateCharges} from "@/app/lib/actions/charges";
+import {FeeSystemHelpDialog} from "@/app/(dashboard)/admin/fees/_components/FeeSystemHelpDialog";
 
 export interface FeeInForm extends Charge {
     updated: boolean;
@@ -116,6 +117,7 @@ const FeeForm = () => {
                         <h3 className={'text-gray-500'}>Manage all additional fees and discounts</h3>
                     </div>
                     <div className={'flex gap-4'}>
+                        <FeeSystemHelpDialog/>
                         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                             <DialogTrigger asChild>
                                 <Button disabled={isLoading}><Plus/>Add New Fee</Button>
@@ -169,18 +171,20 @@ const FeeForm = () => {
                 </div>
             ) : (
                 <>
+                    <MedicineFeesInfoCard/>
+                    <ProcedureFeesCard feeValues={feeValues} handleInputChange={handleInputChange}
+                                       handleDeleteFee={handleDeleteFee}/>
                     <FixedFeesCard feeValues={feeValues} handleInputChange={handleInputChange}
                                    handleDeleteFee={handleDeleteFee}/>
                     <PercentageFeesCard feeValues={feeValues} handleInputChange={handleInputChange}
                                         handleDeleteFee={handleDeleteFee}/>
                     <DiscountFeesCard feeValues={feeValues} handleInputChange={handleInputChange}
                                       handleDeleteFee={handleDeleteFee}/>
-                    <ProcedureFeesCard feeValues={feeValues} handleInputChange={handleInputChange}
-                                       handleDeleteFee={handleDeleteFee}/>
                 </>
             )}
 
-            <div className={`flex gap-2 ${unSavedChanges ? 'sticky bottom-0 bg-white py-4 shadow-lg z-10 rounded-lg p-2' : ''}`}>
+            <div
+                className={`flex gap-2 ${unSavedChanges ? 'sticky bottom-0 bg-white py-4 shadow-lg z-10 rounded-lg p-2' : ''}`}>
                 <Button onClick={() => fetchCharges()}
                         className={`w-full`}
                         disabled={!unSavedChanges || isLoading}>

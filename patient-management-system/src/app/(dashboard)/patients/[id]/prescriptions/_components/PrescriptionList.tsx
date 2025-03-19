@@ -7,7 +7,8 @@ import {BasicColorType, CustomBadge} from "@/app/(dashboard)/_components/CustomB
 import {IconName} from "@/app/lib/iconMapping";
 import DynamicIcon from "@/app/(dashboard)/_components/LazyDynamicIcon";
 import {getTextColorClass} from "@/app/lib/utils";
-import {Issue, PrescriptionVitals} from "@prisma/client";
+import {ChargeType, Issue, PrescriptionCharges, PrescriptionVitals} from "@prisma/client";
+import {feeTypes} from "@/app/(dashboard)/admin/fees/_components/FeeCards";
 
 export interface PrescriptionVitalWithRelation extends PrescriptionVitals {
     vital: {
@@ -20,6 +21,13 @@ export interface PrescriptionVitalWithRelation extends PrescriptionVitals {
 export interface PrescriptionIssueWithRelation extends Issue {
     drug: {
         name: string;
+    };
+}
+
+export interface PrescriptionChargeWithRelation extends PrescriptionCharges {
+    Charge: {
+        name: string;
+        type: ChargeType;
     };
 }
 
@@ -101,12 +109,32 @@ const PrescriptionList = async ({currentPage, query, patientID, perPage, filter}
                                     <div className="flex items-center flex-wrap gap-2">
                                         <span className="text-sm">Off Record Meds:</span>
                                         {prescription.OffRecordMeds.map((med) => (
-                                            <CustomBadge key={med.name} text={med.name} color="slate"
-                                                         className="text-sm"/>
+                                            <CustomBadge key={med.name} text={med.name} color="slate"/>
                                         ))}
                                     </div>
                                 )}
-
+                                {prescription.Charges.length > 0 && (
+                                    <div className="flex items-center flex-wrap gap-2">
+                                        <span className="text-sm">Procedures:</span>
+                                        {(prescription.Charges as PrescriptionChargeWithRelation[]).filter((charge) => charge.Charge.type === 'PROCEDURE').map((charge) => (
+                                            <CustomBadge key={charge.chargeId} text={charge.Charge.name}
+                                                         color="purple"/>
+                                        ))}
+                                    </div>
+                                )}
+                                {prescription.Charges.length > 0 && (
+                                    <div className="flex items-center flex-wrap gap-2">
+                                        <span className="text-sm">Charges:</span>
+                                        <CustomBadge text={'Medicines'} color={feeTypes['MEDICINE'].color}/>
+                                        {(prescription.Charges as PrescriptionChargeWithRelation[]).filter((charge) => charge.Charge.type !== 'PROCEDURE').map((charge) => (
+                                            <CustomBadge
+                                                key={charge.chargeId}
+                                                text={charge.Charge.name}
+                                                color={feeTypes[charge.Charge.type].color}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </Link>

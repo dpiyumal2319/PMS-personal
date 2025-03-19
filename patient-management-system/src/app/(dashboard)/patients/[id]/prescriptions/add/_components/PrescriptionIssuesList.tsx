@@ -5,7 +5,7 @@ import {
     Calendar,
     AlertCircle,
     Info,
-    X, FileText, Moon, Sun, Sunset, Tally3, Tally4, Tally2, Tally1, ClipboardList, DollarSign, CreditCard, Percent, Tag,
+    X, FileText, Moon, Sun, Sunset, Tally3, Tally4, Tally2, Tally1, ClipboardList, CreditCard, Percent, Tag,
 } from "lucide-react";
 import {FaPills, FaCapsules, FaWineBottle, FaEyeDropper, FaAssistiveListeningSystems} from 'react-icons/fa';
 import {MdOutlineHealing} from 'react-icons/md';
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {AlertDialogTitle} from "@radix-ui/react-alert-dialog";
 import {FaSprayCan} from "react-icons/fa6";
+import {compareChargeTypes} from "@/app/lib/utils";
 
 
 export interface StrategyIconProps {
@@ -448,13 +449,12 @@ export function ProcedureChargesList({charges, onRemove}: ProcedureChargesListPr
                                     </div>
 
                                     <div className="flex items-center space-x-2 text-sm text-slate-600">
-                                        <DollarSign className="h-4 w-4"/>
-                                        <span className="font-semibold">${charge.value.toFixed(2)}</span>
+                                        <span className="font-semibold">{charge.value.toFixed(2)} LKR</span>
                                     </div>
 
                                     {charge.description && (
                                         <div className="flex items-center space-x-2 text-sm text-slate-600">
-                                            <FileText size={20}/>
+                                            <FileText size={18}/>
                                             <span>{charge.description}</span>
                                         </div>
                                     )}
@@ -559,6 +559,12 @@ export function OtherChargesList({charges, onRemove}: OtherChargesListProps) {
     // Filter out PROCEDURE charges
     const filteredCharges = charges.filter(charge => charge.type !== 'PROCEDURE');
 
+    // Sort using the custom order
+    filteredCharges.sort((a, b) => {
+        // Get the order values for each charge type
+        return compareChargeTypes(a.type, b.type);
+    });
+
     return (
         <div className="space-y-3">
             {filteredCharges.length === 0 ? (
@@ -599,7 +605,7 @@ export function OtherChargesList({charges, onRemove}: OtherChargesListProps) {
 
                                         {charge.description && (
                                             <div className="flex items-center space-x-2 text-sm text-slate-600">
-                                                <FileText size={20}/>
+                                                <FileText size={18} className="flex-shrink-0"/>
                                                 <span>{charge.description}</span>
                                             </div>
                                         )}
