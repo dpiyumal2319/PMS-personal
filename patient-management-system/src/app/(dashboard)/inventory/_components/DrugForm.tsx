@@ -335,7 +335,7 @@ export function DrugForm() {
           brandName: "",
           drugName: "",
           batchNumber: "",
-          drugType: "TABLET",
+          drugType: DrugType.TABLET,
           quantity: "",
           expiry: "",
           wholesalePrice: "",
@@ -457,7 +457,7 @@ export function DrugForm() {
             <CustomDrugTypeSelect
               value={formData.drugType}
               onValueChange={(value) =>
-                setFormData({ ...formData, drugType: value })
+                setFormData({ ...formData, drugType: value as DrugType })
               }
             />
           </div>
