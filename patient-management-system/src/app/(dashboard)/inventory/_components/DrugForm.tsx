@@ -240,10 +240,13 @@ export function DrugForm() {
   };
 
   const fetchDrugWeights = useCallback(async () => {
-    if (!formData.drugId) return;
+    if (!formData.drugId || !formData.drugType) return;
 
     try {
-      const weights = await getDrugConcentrations(formData.drugId);
+      const weights = await getDrugConcentrations(
+        formData.drugId,
+        formData.drugType
+      );
       const uniqueWeights = Array.from(
         new Map(weights.map((weight) => [weight.id, weight])).values()
       );
@@ -252,7 +255,7 @@ export function DrugForm() {
       console.error("Error fetching drug weights:", error);
       setDrugConcentrations([]);
     }
-  }, [formData.drugId]); // Dependencies ensure this function updates when drugId changes
+  }, [formData.drugId, formData.drugType]); // Dependencies ensure this function updates when drugId changes
 
   // Fetch when drugId changes
   useEffect(() => {

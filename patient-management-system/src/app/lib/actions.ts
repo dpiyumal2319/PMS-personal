@@ -1584,12 +1584,14 @@ export async function searchDrugModels(query: string) {
 }
 
 export async function getDrugConcentrations(
-  drugId: number
+  drugId: number,
+  drugType: DrugType
 ): Promise<DrugConcentrationDataSuggestion[]> {
   try {
     const weights = await prisma.batch.findMany({
       where: {
         drugId: drugId,
+        type: drugType,
       },
       include: {
         unitConcentration: true,
