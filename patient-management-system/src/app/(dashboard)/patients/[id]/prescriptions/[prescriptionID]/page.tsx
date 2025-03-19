@@ -45,7 +45,6 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
     }
 
     const procedures = prescription.Charges.filter((chm) => chm.Charge.type === "PROCEDURE");
-    const otherCharges = prescription.Charges.filter((chm) => chm.Charge.type !== "PROCEDURE");
 
     return (
         <Card className="p-4">
@@ -131,14 +130,6 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                             </div>
                         )}
 
-                        {otherCharges.length > 0 && (
-                            <div className="space-y-4">
-                                <span className="text font-semibold">Other charges</span>
-                                <ChargesList charges={otherCharges}/>
-                                <Separator/>
-                            </div>
-                        )}
-
                         <BillComponent bill={bill}/>
                         <div className="flex justify-end">
                             <BillExport
@@ -157,14 +148,6 @@ const Page = async ({params}: { params: Promise<{ id: string; prescriptionID: st
                             <div className="space-y-4">
                                 <span className="text font-semibold">Procedures</span>
                                 <ChargesList charges={procedures}/>
-                                <Separator/>
-                            </div>
-                        )}
-
-                        {otherCharges.length > 0 && (
-                            <div className="space-y-4">
-                                <span className="text font-semibold">Other charges</span>
-                                <ChargesList charges={otherCharges}/>
                                 <Separator/>
                             </div>
                         )}

@@ -181,6 +181,11 @@ export async function getPrescription(
             },
             OffRecordMeds: true,
             Charges: {
+                where: {
+                    Charge: {
+                        type: 'PROCEDURE',
+                    }
+                },
                 include: {
                     Charge: true,
                 },
