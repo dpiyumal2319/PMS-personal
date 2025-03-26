@@ -216,15 +216,31 @@ export interface PieChartData {
 }
 
 export interface DrugBrandSuggestion {
+  id: number;
+  name: string;
+  bufferLevels?: {
     id: number;
-    name: string;
-    Buffer?: number;
+    type: DrugType;
+    bufferAmount: number;
+    unitConcentration: {
+      id: number;
+      concentration: number;
+    };
+  }[];
 }
 
 export interface DrugModelSuggestion {
+  id: number;
+  name: string;
+  bufferLevels?: {
     id: number;
-    name: string;
-    Buffer?: number;
+    type: DrugType;
+    bufferAmount: number;
+    unitConcentration: {
+      id: number;
+      concentration: number;
+    };
+  }[];
 }
 
 export interface DrugConcentrationDataSuggestion {
@@ -289,13 +305,18 @@ export interface SupplierSuggestion {
 }
 
 export interface DrugModelsWithBufferLevel {
-    id: number;
-    name: string;
-    bufferLevel: number;
-    availableAmount: number;
-    fullAmount: number;
+  id: number;
+  name: string;
+  availableAmount: number;
+  fullAmount: number;
+  bufferLevels: {
+    type: DrugType;
+    unitConcentration: {
+      concentration: number;
+    };
+    bufferAmount: number;
+  }[];
 }
-
 
 export type PrescriptionCard = {
     id: number;

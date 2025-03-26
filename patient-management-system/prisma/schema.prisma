@@ -80,11 +80,23 @@ model DrugBrand {
 model Drug {
   id               Int               @id @default(autoincrement())
   name             String
-  Buffer           Int
   batch            Batch[]
   BatchHistory     BatchHistory[]
   Issue            Issue[]
   stratergyHistory StratergyHistory?
+  bufferLevels     BufferLevel[]
+}
+
+model BufferLevel {
+  id                  Int               @id @default(autoincrement())
+  drugId              Int
+  type                DrugType
+  unitConcentrationId Int
+  bufferAmount        Int
+  drug                Drug              @relation(fields: [drugId], references: [id])
+  unitConcentration   UnitConcentration @relation(fields: [unitConcentrationId], references: [id])
+
+  @@unique([drugId, type, unitConcentrationId])
 }
 
 model Supplier {
@@ -123,6 +135,7 @@ model UnitConcentration {
   Batch         Batch[]
   BatchHistory  BatchHistory[]
   Issue         Issue[]
+  BufferLevel   BufferLevel[]
 }
 
 model Prescription {
