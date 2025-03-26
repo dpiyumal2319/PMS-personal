@@ -34,6 +34,7 @@ export async function completePrescription(
         });
 
         // Validation checks before transaction
+
         if (!prescription) {
             return {success: false, message: "Prescription not found"};
         }
@@ -49,7 +50,7 @@ export async function completePrescription(
         }
 
         // Check if final medicine cost is not calculated
-        if (prescription.Charges.length === 0) {
+        if (prescription.Charges.length === 0 || prescription.finalPrice === null) {
             return {
                 success: false,
                 message: "You have to generate bill at least once"

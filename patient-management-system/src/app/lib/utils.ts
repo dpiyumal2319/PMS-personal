@@ -2,7 +2,7 @@ import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
 import {ChargeType, IssuingStrategy} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
-import {myError} from "@/app/lib/definitions";
+import {Bill, ChargeEntry, myError} from "@/app/lib/definitions";
 
 export function calcAge(birthDate: Date): number {
     const diff_ms = Date.now() - birthDate.getTime();
@@ -261,6 +261,7 @@ export const validateMobile = (mobile: string) => {
 
 // Define the custom order for ChargeType
 const chargeTypeOrder: Record<ChargeType, number> = {
+    'MEDICINE': 0,
     'FIXED': 1,
     'PERCENTAGE': 2,
     'PROCEDURE': 3,
@@ -272,3 +273,45 @@ export const compareChargeTypes = (typeA: ChargeType, typeB: ChargeType) => {
     const orderB = chargeTypeOrder[typeB] || 999;
     return orderA - orderB;
 };
+
+
+export function getFinalBillSummary(bill: Bill) {
+    // Group charges by type using a more efficient approach
+    const chargesByType = bill.charges.reduce<Record<ChargeType, ChargeEntry[]>>((acc, charge) => {
+        (acc[charge.type] ??= []).push(charge);
+        return acc;
+    }, {} as Record<ChargeType, ChargeEntry[]>);
+
+    // Calculate medicine charge more concisely
+    const medicineCharge = chargesByType['MEDICINE']?.[0]?.value ??
+        bill.entries.reduce((sum, entry) => sum + entry.unitPrice * entry.quantity, 0);
+
+    // Consolidated charge calculation function
+    const calculateChargeTotal = (type: ChargeType) => chargesByType[type]?.reduce((sum, charge) => sum + charge.value, 0) ?? 0;
+
+    // Calculate subtotal components
+    const fixedCharges = calculateChargeTotal('FIXED');
+    const procedureCharges = calculateChargeTotal('PROCEDURE');
+    const subtotal = medicineCharge + fixedCharges + procedureCharges;
+
+    // Calculate percentage and discount charges with a shared helper function
+    const calculatePercentageBasedCharges = (type: ChargeType, baseValue: number) => (chargesByType[type] ?? []).map(charge => ({
+        ...charge,
+        calculatedValue: (baseValue * charge.value) / 100
+    }));
+
+    const percentageCharges = calculatePercentageBasedCharges('PERCENTAGE', subtotal);
+    const percentageTotal = percentageCharges.reduce((sum, charge) => sum + charge.calculatedValue, 0);
+
+    const discountCharges = calculatePercentageBasedCharges('DISCOUNT', subtotal + percentageTotal);
+    const discountTotal = discountCharges.reduce((sum, charge) => sum + charge.calculatedValue, 0);
+
+    // Return final calculation results
+    return {
+        subtotal,
+        total: subtotal + percentageTotal - discountTotal,
+        chargesByType,
+        percentageCharges,
+        discountCharges
+    };
+}

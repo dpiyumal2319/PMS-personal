@@ -187,6 +187,7 @@ const FeeForm = () => {
                 className={`flex gap-2 ${unSavedChanges ? 'sticky bottom-0 bg-white py-4 shadow-lg z-10 rounded-lg p-2' : ''}`}>
                 <Button onClick={() => fetchCharges()}
                         className={`w-full`}
+                        variant={'secondary'}
                         disabled={!unSavedChanges || isLoading}>
                     <SaveOff/> Discard changes {unSavedChanges && `(${feeValues.filter(fee => fee.updated).length})`}
                 </Button>

@@ -150,6 +150,7 @@ model Prescription {
   patient            Patient               @relation(fields: [patientId], references: [id])
   PrescriptionVitals PrescriptionVitals[]
   Charges            PrescriptionCharges[]
+  finalPrice         Float?
 }
 
 model PrescriptionCharges {
