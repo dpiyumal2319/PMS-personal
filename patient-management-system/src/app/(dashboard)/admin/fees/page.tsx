@@ -1,6 +1,5 @@
 import React from 'react';
 import FeeForm from "@/app/(dashboard)/admin/fees/_components/FeeForm";
-import {getCharges} from "@/app/lib/actions/charges";
 import {Metadata} from "next";
 
 export const metadata: Metadata = {

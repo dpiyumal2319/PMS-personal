@@ -5,7 +5,7 @@ import {
     FileText, Percent, Tag
 } from "lucide-react";
 import {
-    Batch, Charge,
+    Batch,
     ChargeType,
     Drug,
     DrugBrand,
