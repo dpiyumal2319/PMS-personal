@@ -568,23 +568,12 @@ export async function searchAvailableDrugs(term: string): Promise<DrugOption[]> 
             select: {
                 id: true,
                 name: true,
-                Buffer: true,
-                batch: {
-                    where: {
-                        status: "AVAILABLE",
-                    },
-                    select: {
-                        remainingQuantity: true,
-                    },
-                },
             },
         })
         .then((drugs) =>
             drugs.map((drug) => ({
                 id: drug.id,
                 name: drug.name,
-                buffer: drug.Buffer,
-                remaining: drug.batch.reduce((acc, batch) => acc + batch.remainingQuantity, 0),
             }))
         );
 }
