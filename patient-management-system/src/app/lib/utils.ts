@@ -1,6 +1,6 @@
 import {toast, ToastPosition} from "react-toastify";
 import {z} from "zod";
-import {ChargeType, IssuingStrategy} from "@prisma/client";
+import {ChargeType, IssuingStrategy, PatientHistoryType} from "@prisma/client";
 import {BasicColorType} from "@/app/(dashboard)/_components/CustomBadge";
 import {Bill, ChargeEntry, myError} from "@/app/lib/definitions";
 
@@ -271,6 +271,20 @@ const chargeTypeOrder: Record<ChargeType, number> = {
 export const compareChargeTypes = (typeA: ChargeType, typeB: ChargeType) => {
     const orderA = chargeTypeOrder[typeA] || 999;
     const orderB = chargeTypeOrder[typeB] || 999;
+    return orderA - orderB;
+};
+
+const histyTypeOrder: Record<PatientHistoryType, number> = {
+    'ALLERGY': 0,
+    'MEDICAL': 1,
+    'SURGICAL': 2,
+    'FAMILY': 3,
+    'SOCIAL': 4,
+};
+
+export const compareHistoryTypes = (typeA: PatientHistoryType, typeB: PatientHistoryType) => {
+    const orderA = histyTypeOrder[typeA] || 999;
+    const orderB = histyTypeOrder[typeB] || 999;
     return orderA - orderB;
 };
 
