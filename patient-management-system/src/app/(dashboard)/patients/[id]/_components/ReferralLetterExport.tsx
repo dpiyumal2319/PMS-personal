@@ -209,15 +209,15 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
                 }
             }
             // Signature and date
-            // Signature and date
-            const signatureY = 185; // Vertical position for signature and date
+            const signatureY = 165; // Vertical position for signature and date
             pdf.setFontSize(10);
+            pdf.text("Thank you,", marginLeft , signatureY + 5);
 
             // Signature line on the left
-            pdf.line(marginLeft, signatureY, marginLeft + 50, signatureY); // Adjust line length (50) as needed
+            pdf.line(marginLeft, signatureY +20, marginLeft + 50, signatureY + 20); // Adjust line length (50) as needed
 
             // Signature on the left
-            pdf.text("Signature", marginLeft + 18, signatureY + 6);
+            pdf.text("Dr. Dinej Chandrasiri", marginLeft , signatureY + 26);
 
             // Footer with referral ID
             pdf.setFontSize(8);
