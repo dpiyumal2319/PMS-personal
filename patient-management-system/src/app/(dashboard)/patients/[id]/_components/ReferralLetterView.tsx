@@ -53,15 +53,6 @@ export function ReferralLetterView({
           limit={previewMode ? 3 : undefined} 
         />
         
-        {previewMode && (
-          <div className="mt-4 text-center">
-            <Link href={`/patients/${patientId}/documents/referral-letters`}>
-              <Button variant="ghost" size="sm" className="text-primary">
-                View all referral letters
-              </Button>
-            </Link>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

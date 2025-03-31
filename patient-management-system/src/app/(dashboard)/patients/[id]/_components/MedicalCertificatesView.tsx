@@ -53,15 +53,6 @@ export function MedicalCertificatesView({
           limit={previewMode ? 3 : undefined} 
         />
         
-        {previewMode && (
-          <div className="mt-4 text-center">
-            <Link href={`/patients/${patientId}/documents/medical-certificates`}>
-              <Button variant="ghost" size="sm" className="text-primary">
-                View all medical certificates
-              </Button>
-            </Link>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

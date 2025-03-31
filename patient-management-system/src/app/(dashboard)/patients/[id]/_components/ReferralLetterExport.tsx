@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileText } from "lucide-react";
-import getNextReferralId, { fetchPatientData } from "@/app/lib/actions";
+import { fetchPatientData } from "../documents/lib/actions";
+import { storeReferralLetter,getNextReferralLetterId } from "../documents/lib/actions";
 
 export function ReferralLetterExport({ patientId }: { patientId?: number }) {
     const [open, setOpen] = useState(false);
@@ -87,16 +88,19 @@ export function ReferralLetterExport({ patientId }: { patientId?: number }) {
 
     const exportToPDF = async () => {
         try {
-            const nextReferralId = await getNextReferralId();
-            // await storeReferral({
-            //     patientId: patientId!, // This is now required
-            //     nameOfThePatient: formData.patientName,
-            //     addressOfThePatient: formData.address,
-            //     conditions: formData.conditions,
-            //     investigations: formData.investigations,
-            //     ageOfThePatient: formData.age,
-            //     reportDate: formData.reportDate,
-            // });
+            const nextReferralId = await getNextReferralLetterId();
+            await storeReferralLetter({
+                patientId: patientId!, // This is now required
+                nameOfThePatient: formData.patientName,
+                consultant_speciality: formData.consultant_speciality,
+                consultant_name: formData.consultant_name,
+                condition1: formData.conditions[0],
+                condition2: formData.conditions[1],
+                condition3: formData.conditions[2],
+                investigations: formData.investigations,
+                ageOfThePatient: formData.age,
+                reportDate: formData.reportDate,
+            });
 
             // Generate the PDF
             const pdf = new jsPDF({

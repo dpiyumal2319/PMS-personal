@@ -53,15 +53,6 @@ export function USSReferralView({
           limit={previewMode ? 3 : undefined} 
         />
         
-        {previewMode && (
-          <div className="mt-4 text-center">
-            <Link href={`/patients/${patientId}/documents/uss-referrals`}>
-              <Button variant="ghost" size="sm" className="text-primary">
-                View all USS referrals
-              </Button>
-            </Link>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

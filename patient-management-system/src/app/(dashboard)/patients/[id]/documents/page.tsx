@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { MedicalCertificatesView } from "../_components/MedicalCertificatesView";
-// import { USSReferralView } from "../_components/USSReferralView";
-// import { ReferralLetterView } from "../_components/ReferralLetterView";
+import { USSReferralView } from "../_components/USSReferralView";
+import { ReferralLetterView } from "../_components/ReferralLetterView";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, FileHeart, FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
@@ -95,8 +95,8 @@ export default async function DocumentsPage({
       {/* Document Lists - Optional for homepage preview */}
       <div className="space-y-12">
         <MedicalCertificatesView patientId={patientId} previewMode={true} />
-        {/* <USSReferralView patientId={patientId} previewMode={true} /> */}
-        {/* <ReferralLetterView patientId={patientId} previewMode={true} /> */}
+        <USSReferralView patientId={patientId} previewMode={true} />
+        <ReferralLetterView patientId={patientId} previewMode={true} />
       </div>
     </div>
   );

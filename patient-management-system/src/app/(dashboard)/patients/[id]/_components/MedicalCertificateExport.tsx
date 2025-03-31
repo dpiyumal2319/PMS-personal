@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileText } from "lucide-react";
-import getNextMedicalCertificateId, { fetchPatientData, storeMedicalCertificate } from "@/app/lib/actions";
+import {getNextMedicalCertificateId, fetchPatientData, storeMedicalCertificate } from "../documents/lib/actions";
 
 export function MedicalCertificateExport({ patientId }: { patientId?: number }) {
     const [open, setOpen] = useState(false);

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FileText } from "lucide-react";
-import getNextReferralId, { fetchPatientData } from "@/app/lib/actions";
+import {getNextUSSReferralId, fetchPatientData } from "../documents/lib/actions";
+import { storeUSSReferral } from "../documents/lib/actions";
 
 export function USSReferralExport({ patientId }: { patientId?: number }) {
     const [open, setOpen] = useState(false);
@@ -90,22 +91,21 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
 
     const exportToPDF = async () => {
         try {
-            const nextReferralId = await getNextReferralId();
-            // await storeReferral({
-            //     patientId: patientId!, // This is now required
-            //     nameOfThePatient: formData.patientName,
-            //     addressOfThePatient: formData.address,
-            //     presentingComplaint: formData.presentingComplaint,
-            //     duration: formData.duration,
-            //     onExamination: formData.onExamination,
-            //     pshx_pmhx: formData.pshx_pmhx,
-            //     ageOfThePatient: formData.age,
-            //     reportDate: formData.reportDate,
-            //     USS_type: formData.USS_type,
-            //     radiologist: formData.radiologist,
-            //     radiologist_title: formData.radiologist_title,
+            const nextReferralId = await getNextUSSReferralId();
+            await storeUSSReferral({
+                patientId: patientId!, // This is now required
+                nameOfThePatient: formData.patientName,
+                presentingComplaint: formData.presentingComplaint,
+                duration: formData.duration,
+                onExamination: formData.onExamination,
+                pshx_pmhx: formData.pshx_pmhx,
+                ageOfThePatient: formData.age,
+                reportDate: formData.reportDate,
+                USS_type: formData.USS_type,
+                radiologist: formData.radiologist,
+                radiologist_title: formData.radiologist_title,
 
-            // });
+            });
 
             // Then generate the PDF as before
             const pdf = new jsPDF({
@@ -221,7 +221,7 @@ export function USSReferralExport({ patientId }: { patientId?: number }) {
 
             // Footer with referral ID
             pdf.setFontSize(8);  // Increased from 6
-            pdf.text(`Referral ID: REF-${nextReferralId}`, centerX, 200, { align: "center" });
+            pdf.text(`Referral ID: USS-${nextReferralId}`, centerX, 200, { align: "center" });
 
             // Save the PDF with a dynamic filename
             const filename = formData.patientName
