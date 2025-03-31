@@ -97,12 +97,7 @@ export function DrugForm() {
         Buffer: matchingBufferLevel.bufferAmount,
       }));
     }
-  }, [
-    formData.drugId,
-    formData.drugType,
-    formData.concentrationId,
-    drugBufferLevels,
-  ]);
+  }, [formData, drugBufferLevels]);
 
   // Call updateBuffer whenever any of the criteria changes
   useEffect(() => {

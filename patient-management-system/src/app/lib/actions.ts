@@ -524,7 +524,6 @@ export async function addNewItem({
   formData: InventoryFormData;
 }): Promise<myError> {
   try {
-    console.log;
     // Check all the required fields
     if (
       !formData.concentrationId ||
