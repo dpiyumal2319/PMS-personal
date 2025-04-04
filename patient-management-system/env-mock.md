@@ -1,5 +1,6 @@
 JWT_SECRET=mock-secret
 DATABASE_URL=mock-database-url
+DIRECT_URL=mock-direct-url
 PUSHER_APP_ID=mock-pusher-app-id
 PUSHER_APP_KEY=mock-pusher-app-key
 PUSHER_APP_SECRET=mock-pusher-app-secret

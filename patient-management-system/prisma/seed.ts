@@ -80,8 +80,8 @@ async function createSuppliers() {
     return suppliers;
 }
 
-async function createUsersAndPatients() {
-    console.log("\n--- Creating Users and Patients ---");
+async function createPatients() {
+    console.log("\n--- Creating Patients ---");
 
     // Generate 50 random patients
     const patients = Array.from({ length: 50 }).map(() => ({
@@ -98,6 +98,10 @@ async function createUsersAndPatients() {
     // Insert the random patients into the database
     await prisma.patient.createMany({ data: patients });
     console.log(`Created ${patients.length} patients`);
+}
+
+async function createUsers() {
+    console.log("\n--- Creating Users ---");
 
     // Create staff users
     const staffUsers = [
@@ -558,12 +562,13 @@ async function createCharges() {
 async function main() {
     console.log("\nStarting database seeding...");
 
-    // Create all data in sequence
-    await createUnitConcentrations();
-    await createUsersAndPatients();
-    await createDrugsAndBatches();
-    await createReportTypes();
-    await createCharges();
+    await createUsers();
+
+    // await createUnitConcentrations();
+    // await createPatients();
+    // await createDrugsAndBatches();
+    // await createReportTypes();
+    // await createCharges();
     // await createQueuesAndEntries();
     // await createMedicalCertificates();
 
