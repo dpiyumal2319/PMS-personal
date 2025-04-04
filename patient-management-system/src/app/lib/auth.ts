@@ -10,6 +10,8 @@ export async function login(message: string, formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
+    console.log('got email and password', email, password);
+
     if (!email || !password) {
         return "Please fill in all fields";
     }
@@ -20,9 +22,13 @@ export async function login(message: string, formData: FormData) {
         }
     });
 
+   
+
     if (!user) {
         return "Invalid credentials";
     }
+    
+    console.log('got user', user?.name);
 
     const valid = await bcrypt.compare(password, user.password);
 
