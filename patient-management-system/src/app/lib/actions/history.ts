@@ -173,9 +173,6 @@ export async function deleteHistory({ id }: { id: number }) {
                 id,
             },
         });
-
-        revalidatePath(`/patients/[id]/history`);
-        revalidatePath(`/patients/[id]/prescriptions/add`);
         return { success: true, message: "History deleted successfully" };
     } catch (error) {
         console.log(error);
