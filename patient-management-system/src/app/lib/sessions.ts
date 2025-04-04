@@ -48,14 +48,9 @@ export const deleteSession = async () => {
 }
 
 export async function verifySession() {
-    console.log('verifying session');
     const cookieStore = await cookies();
-    
     const sessionCookie = cookieStore.get('session')?.value;
-    console.log('sessionCookie', sessionCookie);
     const session = await decrypt(sessionCookie);
-
-    console.log('session', session?.id, session?.role);
 
     if (!session?.id) {
         redirect("/login");
