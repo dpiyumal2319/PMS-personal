@@ -40,6 +40,8 @@ export async function login(message: string, formData: FormData) {
         role: user.role,
         id: user.id,
     });
+
+    console.log('created session', user.role, user.id);
     redirect("/dashboard"); // Redirect only if valid
 }
 
